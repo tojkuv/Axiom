@@ -1,21 +1,39 @@
-# Documentation Directory
+# AxiomFramework Documentation
 
-This directory contains all documentation for the AI agent developing the Axiom framework.
+## 🎯 Purpose
+Technical foundation documentation for framework developers working on core capabilities, protocols, architecture, and technical implementation details.
 
-## Structure
+## 📁 Contents
 
-- **AgentReference/** - Setup guides and workspace documentation
-- **Archive/** - Historical planning and strategy documents
-- **Technical/** - API specifications and design patterns
-- **DEVELOPMENT_GUIDELINES.md** - Code standards
-- **IMPLEMENTATION_INDEX.md** - Quick reference guide
-- **IMPLEMENTATION_ROADMAP.md** - Task list with 150+ development tasks
-- **TESTING_STRATEGY.md** - Testing framework and examples
+### **Technical/** - Core Technical Specifications
+- **API_DESIGN_SPECIFICATION.md** → Framework API design and protocols
+- **INTELLIGENCE_SYSTEM_SPECIFICATION.md** → AI and intelligence capabilities
+- **CAPABILITY_SYSTEM_SPECIFICATION.md** → Runtime capability validation
+- **DOMAIN_MODEL_DESIGN_PATTERNS.md** → Domain modeling patterns
+- **MACRO_SYSTEM_SPECIFICATION.md** → Swift macro system design
 
-## Note
+### **Implementation/** - Implementation Guides
+- **IMPLEMENTATION_ROADMAP.md** → Development progress and roadmap
+- **DEVELOPMENT_GUIDELINES.md** → Framework development standards
+- **IMPLEMENTATION_INDEX.md** → Implementation tracking and index
 
-These documents are for the AI agent only. Human users should refer to:
-- `/README.md` - Main project overview
-- `/STATUS.md` - Current implementation status
-- `/PROMPT.md` - Agent instructions
-- `/CLAUDE.md` - Agent notes
+### **Testing/** - Framework Testing Strategy
+- **TESTING_STRATEGY.md** → Framework testing approach and methodologies
+
+### **Performance/** - Framework Performance Specifications
+*Performance targets and optimization documentation - to be created*
+
+
+## 🔗 Related Documentation
+
+- **[App Integration Guides](../../AxiomTestApp/Documentation/Integration/)** → Real-world usage patterns
+- **[App Testing Methodologies](../../AxiomTestApp/Documentation/Testing/)** → Integration testing
+- **[App Performance Measurement](../../AxiomTestApp/Documentation/Performance/)** → Real-world metrics
+
+## 📊 Quick Navigation
+
+- **For Framework Development** → Use Technical/ and Implementation/ directories
+- **For Integration Testing** → Use ../../AxiomTestApp/Documentation/Integration/
+- **For API Validation** → Use ../../AxiomTestApp/Documentation/Usage/
+- **For Performance Analysis** → Use ../../AxiomTestApp/Documentation/Performance/
+- **For Troubleshooting** → Use ../../AxiomTestApp/Documentation/Troubleshooting/

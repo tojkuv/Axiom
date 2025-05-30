@@ -6,8 +6,9 @@ import SwiftUI
 import Axiom
 #endif
 
-/// Real iOS app using the actual Axiom Framework
-/// Demonstrates all core framework features with real implementations
+/// Real iOS app using the STREAMLINED Axiom Framework APIs
+/// Demonstrates AxiomApplicationBuilder and ContextStateBinder improvements
+/// See StreamlinedContentView.swift for implementation details
 @main
 struct ExampleAppApp: App {
     
@@ -26,30 +27,5 @@ struct ExampleAppApp: App {
                     }
             }
         }
-    }
-}
-
-// MARK: - Loading View
-
-struct LoadingView: View {
-    var body: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "brain")
-                .font(.system(size: 60))
-                .foregroundColor(.blue)
-            
-            Text("🧠 Axiom Framework")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-            
-            Text("World's First Intelligent iOS Framework")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-            
-            ProgressView("Initializing Demo...")
-                .padding(.top)
-        }
-        .padding()
     }
 }

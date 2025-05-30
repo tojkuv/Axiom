@@ -10,6 +10,12 @@
 		1A1234561234567890ABCDEF /* ExampleAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1234551234567890ABCDEF /* ExampleAppApp.swift */; };
 		1A1234581234567890ABCDEF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1234571234567890ABCDEF /* ContentView.swift */; };
 		1A12345A1234567890ABCDEF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A1234591234567890ABCDEF /* Assets.xcassets */; };
+		2C2345671234567890ABCDEF /* CounterState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2345671234567890ABCDEF /* CounterState.swift */; };
+		2C2345681234567890ABCDEF /* CounterClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2345681234567890ABCDEF /* CounterClient.swift */; };
+		2C2345691234567890ABCDEF /* CounterContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2345691234567890ABCDEF /* CounterContext.swift */; };
+		2C234567A1234567890ABCDEF /* CounterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B234567A1234567890ABCDEF /* CounterView.swift */; };
+		2C234567B1234567890ABCDEF /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B234567B1234567890ABCDEF /* LoadingView.swift */; };
+		2C234567C1234567890ABCDEF /* ApplicationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B234567C1234567890ABCDEF /* ApplicationCoordinator.swift */; };
 		985E09942DEA35A7002EB05A /* Axiom in Frameworks */ = {isa = PBXBuildFile; productRef = 985E09932DEA35A7002EB05A /* Axiom */; };
 /* End PBXBuildFile section */
 
@@ -18,6 +24,12 @@
 		1A1234551234567890ABCDEF /* ExampleAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleAppApp.swift; sourceTree = "<group>"; };
 		1A1234571234567890ABCDEF /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		1A1234591234567890ABCDEF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		2B2345671234567890ABCDEF /* CounterState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterState.swift; sourceTree = "<group>"; };
+		2B2345681234567890ABCDEF /* CounterClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterClient.swift; sourceTree = "<group>"; };
+		2B2345691234567890ABCDEF /* CounterContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterContext.swift; sourceTree = "<group>"; };
+		2B234567A1234567890ABCDEF /* CounterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterView.swift; sourceTree = "<group>"; };
+		2B234567B1234567890ABCDEF /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
+		2B234567C1234567890ABCDEF /* ApplicationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationCoordinator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,9 +65,47 @@
 			children = (
 				1A1234551234567890ABCDEF /* ExampleAppApp.swift */,
 				1A1234571234567890ABCDEF /* ContentView.swift */,
+				3D3456781234567890ABCDEF /* Models */,
+				3D3456791234567890ABCDEF /* Contexts */,
+				3D345679A1234567890ABCDEF /* Views */,
+				3D345679B1234567890ABCDEF /* Utils */,
 				1A1234591234567890ABCDEF /* Assets.xcassets */,
 			);
 			path = ExampleApp;
+			sourceTree = "<group>";
+		};
+		3D3456781234567890ABCDEF /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				2B2345671234567890ABCDEF /* CounterState.swift */,
+				2B2345681234567890ABCDEF /* CounterClient.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		3D3456791234567890ABCDEF /* Contexts */ = {
+			isa = PBXGroup;
+			children = (
+				2B2345691234567890ABCDEF /* CounterContext.swift */,
+			);
+			path = Contexts;
+			sourceTree = "<group>";
+		};
+		3D345679A1234567890ABCDEF /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				2B234567A1234567890ABCDEF /* CounterView.swift */,
+				2B234567B1234567890ABCDEF /* LoadingView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		3D345679B1234567890ABCDEF /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				2B234567C1234567890ABCDEF /* ApplicationCoordinator.swift */,
+			);
+			path = Utils;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -135,6 +185,12 @@
 			files = (
 				1A1234581234567890ABCDEF /* ContentView.swift in Sources */,
 				1A1234561234567890ABCDEF /* ExampleAppApp.swift in Sources */,
+				2C2345671234567890ABCDEF /* CounterState.swift in Sources */,
+				2C2345681234567890ABCDEF /* CounterClient.swift in Sources */,
+				2C2345691234567890ABCDEF /* CounterContext.swift in Sources */,
+				2C234567A1234567890ABCDEF /* CounterView.swift in Sources */,
+				2C234567B1234567890ABCDEF /* LoadingView.swift in Sources */,
+				2C234567C1234567890ABCDEF /* ApplicationCoordinator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
