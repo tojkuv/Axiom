@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: macos-13
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v1
+      with:
+        swift-version: "5.9"
+        
+    - name: Build
+      run: swift build -v
+      
+    - name: Run Tests
+      run: swift test -v
+      
+    - name: Build for Release
+      run: swift build -c release
+      
+  performance-test:
+    name: Performance Tests
+    runs-on: macos-13
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v1
+      with:
+        swift-version: "5.9"
+        
+    - name: Run Performance Tests
+      run: swift test --filter PerformanceTests
+      continue-on-error: true
+      
+  documentation:
+    name: Documentation Check
+    runs-on: macos-13
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v1
+      with:
+        swift-version: "5.9"
+        
+    - name: Build Documentation
+      run: swift package generate-documentation
+      continue-on-error: true
