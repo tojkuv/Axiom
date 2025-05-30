@@ -16,9 +16,9 @@ public struct AxiomMacrosPlugin: CompilerPlugin {
         ClientMacro.self,
         CapabilitiesMacro.self,
         DomainModelMacro.self,
+        CrossCuttingMacro.self,
         
         // Additional macros (to be implemented)
-        // CrossCuttingMacro.self,
         // ObservableStateMacro.self,
         // IntelligenceMacro.self
     ]
@@ -37,7 +37,7 @@ public extension AxiomMacrosPlugin {
             "@Client": "Automatically inject and manage client dependencies",
             "@Capabilities": "Declare and validate capability requirements",
             "@DomainModel": "Generate domain model boilerplate including validation and immutable updates",
-            "@CrossCutting": "Inject cross-cutting concerns (to be implemented)",
+            "@CrossCutting": "Inject supervised cross-cutting concerns like analytics, logging, and error reporting",
             "@ObservableState": "Make state observable with automatic updates (to be implemented)",
             "@Intelligence": "Enable intelligence features for a component (to be implemented)"
         ]
