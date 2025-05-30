@@ -175,6 +175,23 @@ public actor CapabilityManager {
         availableCapabilities.contains(capability)
     }
     
+    /// Checks if a capability is available (async version for consistency)
+    public func hasCapability(_ capability: Capability) async -> Bool {
+        isAvailable(capability)
+    }
+    
+    /// Validates that all capabilities are available
+    public func validateCapabilities(_ capabilities: [Capability]) async throws -> Bool {
+        var allAvailable = true
+        for capability in capabilities {
+            if !isAvailable(capability) {
+                allAvailable = false
+                break
+            }
+        }
+        return allAvailable
+    }
+    
     /// Returns performance metrics
     public func metrics() -> ValidationMetrics {
         validationMetrics
@@ -225,6 +242,10 @@ private actor CapabilityCache {
     }
     
     func invalidateAll() {
+        cache.removeAll()
+    }
+    
+    func clear() {
         cache.removeAll()
     }
     
@@ -323,9 +344,9 @@ extension CapabilityManager {
     
     /// Initializes the capability manager
     public func initialize() async throws {
-        // Initialize caches and validation systems
+        // Initialize caches
         await cache.clear()
-        await validationEngine.initialize()
+        // Validation engine doesn't need explicit initialization
     }
     
     /// Refreshes capabilities (checks if new capabilities are available)

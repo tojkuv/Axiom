@@ -235,6 +235,12 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
             recommendations.append(contentsOf: generateSecurityRecommendations(integrityReport))
         case .general:
             recommendations.append(contentsOf: generateGeneralRecommendations(metrics, patterns, antiPatterns, integrityReport))
+        case .testing:
+            recommendations.append(contentsOf: generateTestingRecommendations(metrics, integrityReport))
+        case .documentation:
+            recommendations.append(contentsOf: generateDocumentationRecommendations(metrics))
+        case .architecture:
+            recommendations.append(contentsOf: generateArchitectureRecommendations(patterns, antiPatterns, integrityReport))
         }
         
         // Sort by priority and confidence
@@ -524,6 +530,262 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
         )
     }
     
+    private func processFindDependentsQuery(_ parsedQuery: ParsedQuery) async throws -> QueryResponse {
+        guard let componentName = parsedQuery.parameters["componentName"] as? String else {
+            throw QueryEngineError.missingParameter("componentName")
+        }
+        
+        let components = await introspectionEngine.discoverComponents()
+        guard let component = components.first(where: { $0.name.lowercased() == componentName.lowercased() }) else {
+            throw QueryEngineError.componentNotFound(componentName)
+        }
+        
+        let relationshipMap = await introspectionEngine.mapComponentRelationships()
+        let dependencies = relationshipMap.getDependenciesOf(component.id)
+        
+        let dependencyComponents = components.filter { dependencies.contains($0.id) }
+        
+        let answer = generateDependentsAnswer(component, dependencies: dependencyComponents)
+        
+        return QueryResponse(
+            query: parsedQuery.originalQuery,
+            intent: parsedQuery.intent,
+            answer: answer,
+            data: [
+                "sourceComponent": component,
+                "dependencyComponents": dependencyComponents
+            ],
+            confidence: parsedQuery.confidence,
+            executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
+            suggestions: generateDependentsSuggestions(component),
+            respondedAt: Date()
+        )
+    }
+    
+    private func processMapRelationshipsQuery(_ parsedQuery: ParsedQuery) async throws -> QueryResponse {
+        let componentName = parsedQuery.parameters["componentName"] as? String
+        
+        let components = await introspectionEngine.discoverComponents()
+        let relationshipMap = await introspectionEngine.mapComponentRelationships()
+        
+        if let componentName = componentName {
+            // Map relationships for specific component
+            guard let component = components.first(where: { $0.name.lowercased() == componentName.lowercased() }) else {
+                throw QueryEngineError.componentNotFound(componentName)
+            }
+            
+            let relationships = relationshipMap.getRelationshipInfoFor(component.id)
+            let answer = generateComponentRelationshipAnswer(component, relationships: relationships, allComponents: components)
+            
+            return QueryResponse(
+                query: parsedQuery.originalQuery,
+                intent: parsedQuery.intent,
+                answer: answer,
+                data: [
+                    "component": component,
+                    "relationships": relationships,
+                    "relationshipMap": relationshipMap
+                ],
+                confidence: parsedQuery.confidence,
+                executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
+                suggestions: [
+                    "What are the direct dependencies of \(component.name)?",
+                    "Which components depend on \(component.name)?",
+                    "Show me the coupling metrics for \(component.name)"
+                ],
+                respondedAt: Date()
+            )
+        } else {
+            // Map all relationships
+            let answer = generateSystemRelationshipAnswer(relationshipMap, components: components)
+            
+            return QueryResponse(
+                query: parsedQuery.originalQuery,
+                intent: parsedQuery.intent,
+                answer: answer,
+                data: [
+                    "relationshipMap": relationshipMap,
+                    "components": components
+                ],
+                confidence: parsedQuery.confidence,
+                executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
+                suggestions: [
+                    "Show me the most connected components",
+                    "Find components with circular dependencies",
+                    "Analyze relationship complexity"
+                ],
+                respondedAt: Date()
+            )
+        }
+    }
+    
+    private func processCheckPatternQuery(_ parsedQuery: ParsedQuery) async throws -> QueryResponse {
+        guard let patternName = parsedQuery.parameters["patternName"] as? String else {
+            throw QueryEngineError.missingParameter("patternName")
+        }
+        
+        let patterns = await patternDetectionEngine.detectPatterns()
+        let matchingPatterns = patterns.filter { $0.name.lowercased().contains(patternName.lowercased()) }
+        
+        let answer = generatePatternCheckAnswer(patternName, patterns: matchingPatterns)
+        
+        return QueryResponse(
+            query: parsedQuery.originalQuery,
+            intent: parsedQuery.intent,
+            answer: answer,
+            data: ["patterns": matchingPatterns],
+            confidence: parsedQuery.confidence,
+            executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
+            suggestions: [
+                "Show me components implementing \(patternName)",
+                "Check \(patternName) pattern compliance",
+                "Suggest improvements for \(patternName) implementation"
+            ],
+            respondedAt: Date()
+        )
+    }
+    
+    private func processDetectAntiPatternsQuery(_ parsedQuery: ParsedQuery) async throws -> QueryResponse {
+        let antiPatterns = await patternDetectionEngine.detectAntiPatterns()
+        
+        let answer = generateAntiPatternAnswer(antiPatterns)
+        
+        return QueryResponse(
+            query: parsedQuery.originalQuery,
+            intent: parsedQuery.intent,
+            answer: answer,
+            data: ["antiPatterns": antiPatterns],
+            confidence: parsedQuery.confidence,
+            executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
+            suggestions: [
+                "How can I fix these anti-patterns?",
+                "What's the impact of these anti-patterns?",
+                "Show me the most critical issues"
+            ],
+            respondedAt: Date()
+        )
+    }
+    
+    private func processGetPerformanceQuery(_ parsedQuery: ParsedQuery) async throws -> QueryResponse {
+        let componentName = parsedQuery.parameters["componentName"] as? String
+        let performanceReport = await performanceMonitor.getPerformanceReport()
+        
+        let answer: String
+        let data: [String: Any]
+        
+        if let componentName = componentName {
+            // Get performance for specific component
+            let componentMetrics = performanceReport.operationMetrics.filter { 
+                $0.category.rawValue.lowercased().contains(componentName.lowercased()) ||
+                $0.operation.lowercased().contains(componentName.lowercased())
+            }
+            answer = generateComponentPerformanceAnswer(componentName, metrics: componentMetrics)
+            data = ["componentMetrics": componentMetrics]
+        } else {
+            // Get overall performance
+            answer = generateSystemPerformanceAnswer(performanceReport)
+            data = ["performanceReport": performanceReport]
+        }
+        
+        return QueryResponse(
+            query: parsedQuery.originalQuery,
+            intent: parsedQuery.intent,
+            answer: answer,
+            data: data,
+            confidence: parsedQuery.confidence,
+            executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
+            suggestions: [
+                "Show me performance bottlenecks",
+                "Analyze performance trends",
+                "Suggest performance optimizations"
+            ],
+            respondedAt: Date()
+        )
+    }
+    
+    private func processAnalyzePerformanceQuery(_ parsedQuery: ParsedQuery) async throws -> QueryResponse {
+        let performanceReport = await performanceMonitor.getPerformanceReport()
+        let metrics = await introspectionEngine.getComponentMetrics()
+        
+        let bottlenecks = identifyPerformanceBottlenecks(performanceReport)
+        let trends = analyzePerformanceTrends(performanceReport)
+        let recommendations = generatePerformanceOptimizations(performanceReport, metrics: metrics)
+        
+        let answer = generatePerformanceAnalysisAnswer(bottlenecks: bottlenecks, trends: trends, recommendations: recommendations)
+        
+        return QueryResponse(
+            query: parsedQuery.originalQuery,
+            intent: parsedQuery.intent,
+            answer: answer,
+            data: [
+                "performanceReport": performanceReport,
+                "bottlenecks": bottlenecks,
+                "trends": trends,
+                "recommendations": recommendations
+            ],
+            confidence: parsedQuery.confidence,
+            executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
+            suggestions: [
+                "How can I fix the bottlenecks?",
+                "Show me detailed metrics",
+                "Compare performance over time"
+            ],
+            respondedAt: Date()
+        )
+    }
+    
+    private func processFindIssuesQuery(_ parsedQuery: ParsedQuery) async throws -> QueryResponse {
+        let integrityReport = await introspectionEngine.validateArchitecturalIntegrity()
+        let antiPatterns = await patternDetectionEngine.detectAntiPatterns()
+        let performanceReport = await performanceMonitor.getPerformanceReport()
+        
+        let issues = consolidateIssues(integrityReport: integrityReport, antiPatterns: antiPatterns, performanceReport: performanceReport)
+        let answer = generateIssuesAnswer(issues)
+        
+        return QueryResponse(
+            query: parsedQuery.originalQuery,
+            intent: parsedQuery.intent,
+            answer: answer,
+            data: ["issues": issues],
+            confidence: parsedQuery.confidence,
+            executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
+            suggestions: [
+                "How can I fix these issues?",
+                "What's the priority of these issues?",
+                "Show me issue impact analysis"
+            ],
+            respondedAt: Date()
+        )
+    }
+    
+    private func processSuggestImprovementsQuery(_ parsedQuery: ParsedQuery) async throws -> QueryResponse {
+        let domain = parsedQuery.parameters["domain"] as? String
+        
+        let context = RecommendationContext(
+            type: .general,
+            scope: domain != nil ? .module : .system,
+            priority: .high
+        )
+        
+        let recommendations = try await generateRecommendations(for: context)
+        let answer = generateImprovementSuggestionsAnswer(recommendations, domain: domain)
+        
+        return QueryResponse(
+            query: parsedQuery.originalQuery,
+            intent: parsedQuery.intent,
+            answer: answer,
+            data: ["recommendations": recommendations],
+            confidence: parsedQuery.confidence,
+            executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
+            suggestions: [
+                "Show me implementation details",
+                "What's the effort for these improvements?",
+                "Prioritize improvements by impact"
+            ],
+            respondedAt: Date()
+        )
+    }
+    
     // Additional processing methods for other intents would go here...
     
     // MARK: Private Helper Methods
@@ -542,10 +804,10 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
         **Purpose**: \(documentation?.purpose?.description ?? "No specific purpose documented")
         
         ### Architecture
-        \(documentation?.architecture?.description ?? "No architectural details available")
+        \(formatArchitectureDocumentation(documentation?.architecture))
         
         ### Relationships
-        \(analysis.relationships.isEmpty ? "No relationships found" : analysis.relationships.map { "• \($0.type.description) with \($0.target)" }.joined(separator: "\n"))
+        \(analysis.relationships.isEmpty ? "No relationships found" : analysis.relationships.map { "• \($0.type.rawValue.replacingOccurrences(of: "_", with: " ").capitalized) with \($0.target)" }.joined(separator: "\n"))
         
         ### Patterns
         \(patterns.isEmpty ? "No patterns detected" : patterns.map { "• \($0.name) (\(String(format: "%.0f", $0.confidence * 100))% confidence)" }.joined(separator: "\n"))
@@ -955,7 +1217,7 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
             let domainLower = domain.lowercased()
             
             return componentName.contains(domainLower) ||
-                   component.architecturalDNA?.purpose.domain.description.lowercased().contains(domainLower) ?? false
+                   (component.architecturalDNA?.purpose.domain?.lowercased().contains(domainLower) ?? false)
         }
     }
     
@@ -1013,6 +1275,36 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
         case 0.8..<1.0: return "Very Complex"
         default: return "Extremely Complex"
         }
+    }
+    
+    private func formatArchitectureDocumentation(_ architecture: ArchitectureDocumentation?) -> String {
+        guard let architecture = architecture else {
+            return "No architectural details available"
+        }
+        
+        var details: [String] = []
+        
+        if !architecture.patterns.isEmpty {
+            let patternList = architecture.patterns.map { "• \($0.name): \($0.description)" }.joined(separator: "\n")
+            details.append("**Patterns:**\n\(patternList)")
+        }
+        
+        if !architecture.principles.isEmpty {
+            let principleList = architecture.principles.map { "• \($0.name): \($0.description)" }.joined(separator: "\n")
+            details.append("**Principles:**\n\(principleList)")
+        }
+        
+        if !architecture.tradeoffs.isEmpty {
+            let tradeoffList = architecture.tradeoffs.map { "• \($0.decision): \($0.rationale)" }.joined(separator: "\n")
+            details.append("**Tradeoffs:**\n\(tradeoffList)")
+        }
+        
+        if !architecture.constraints.isEmpty {
+            let constraintList = architecture.constraints.map { "• \($0.type.rawValue.replacingOccurrences(of: "_", with: " ").capitalized): \($0.description)" }.joined(separator: "\n")
+            details.append("**Constraints:**\n\(constraintList)")
+        }
+        
+        return details.isEmpty ? "No architectural details documented" : details.joined(separator: "\n\n")
     }
     
     private func calculateCohesionScore(_ analysis: ComponentAnalysis) -> Double {
@@ -1091,8 +1383,8 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
     private func calculateRiskScore(_ systemImpact: SystemImpactAnalysis) -> Double {
         var score = 0.0
         
-        score += Double(systemImpact.overallRisk.rawValue) * 0.4
-        score += Double(systemImpact.estimatedEffort.rawValue) * 0.3
+        score += getRiskNumericValue(systemImpact.overallRisk) * 0.4
+        score += getEffortNumericValue(systemImpact.estimatedEffort) * 0.3
         score += min(1.0, Double(systemImpact.impacts.count) / 10.0) * 0.3
         
         return min(1.0, score)
@@ -1104,6 +1396,7 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
         case .low: return 8.0
         case .medium: return 24.0
         case .high: return 48.0
+        case .extensive: return 80.0
         }
     }
     
@@ -1114,6 +1407,26 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
         case .medium: return 1.5
         case .high: return 2.0
         case .critical: return 3.0
+        }
+    }
+    
+    private func getRiskNumericValue(_ risk: RiskLevel) -> Double {
+        switch risk {
+        case .minimal: return 0.1
+        case .low: return 0.3
+        case .medium: return 0.5
+        case .high: return 0.7
+        case .critical: return 1.0
+        }
+    }
+    
+    private func getEffortNumericValue(_ effort: EffortLevel) -> Double {
+        switch effort {
+        case .minimal: return 0.1
+        case .low: return 0.3
+        case .medium: return 0.5
+        case .high: return 0.7
+        case .extensive: return 1.0
         }
     }
     
@@ -1458,6 +1771,658 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
         
         return recommendations
     }
+    
+    private func generateTestingRecommendations(_ metrics: ComponentMetricsReport, _ integrityReport: SystemIntegrityReport) -> [ArchitecturalRecommendation] {
+        var recommendations: [ArchitecturalRecommendation] = []
+        
+        // Low test coverage recommendation
+        if metrics.testCoverageMetrics?.averageCoverage ?? 0 < 0.8 {
+            recommendations.append(ArchitecturalRecommendation(
+                id: "testing-increase-coverage",
+                type: .testing,
+                title: "Increase Test Coverage",
+                description: "Test coverage is below recommended threshold",
+                rationale: "Higher test coverage reduces bugs and enables confident refactoring",
+                priority: .high,
+                confidence: 0.9,
+                effort: .medium,
+                benefits: ["Fewer bugs in production", "Safer refactoring", "Better documentation"],
+                risks: ["Initial time investment", "Test maintenance overhead"],
+                implementation: ImplementationGuidance(
+                    steps: [
+                        "Identify uncovered code paths",
+                        "Prioritize critical components",
+                        "Write unit and integration tests",
+                        "Set up coverage monitoring"
+                    ],
+                    testingStrategy: "Focus on critical paths and edge cases",
+                    rollbackPlan: "Tests can be added incrementally"
+                )
+            ))
+        }
+        
+        // Complex components without tests
+        let complexUntested = metrics.componentComplexity.filter { 
+            $0.value > 0.7 && (metrics.testCoverageMetrics?.componentCoverage[$0.key] ?? 0) < 0.5 
+        }
+        if !complexUntested.isEmpty {
+            recommendations.append(ArchitecturalRecommendation(
+                id: "testing-complex-components",
+                type: .testing,
+                title: "Test Complex Components",
+                description: "High complexity components lack adequate testing",
+                rationale: "Complex components are more likely to contain bugs and need thorough testing",
+                priority: .high,
+                confidence: 0.95,
+                effort: .high,
+                benefits: ["Reduced bug risk", "Better understanding of complex logic", "Regression prevention"],
+                risks: ["Complex tests may be brittle", "Higher maintenance"],
+                implementation: ImplementationGuidance(
+                    steps: [
+                        "Map complex component behaviors",
+                        "Design comprehensive test scenarios",
+                        "Implement property-based tests",
+                        "Add integration test coverage"
+                    ],
+                    testingStrategy: "Use property-based testing for complex logic",
+                    rollbackPlan: "Tests are additive and safe to implement"
+                )
+            ))
+        }
+        
+        return recommendations
+    }
+    
+    private func generateDocumentationRecommendations(_ metrics: ComponentMetricsReport) -> [ArchitecturalRecommendation] {
+        var recommendations: [ArchitecturalRecommendation] = []
+        
+        // Missing documentation
+        let undocumentedComponents = metrics.documentationMetrics?.undocumentedComponents ?? []
+        if !undocumentedComponents.isEmpty {
+            recommendations.append(ArchitecturalRecommendation(
+                id: "documentation-add-missing",
+                type: .documentation,
+                title: "Document Components",
+                description: "\(undocumentedComponents.count) components lack documentation",
+                rationale: "Documentation improves maintainability and onboarding",
+                priority: .medium,
+                confidence: 0.85,
+                effort: .low,
+                benefits: ["Better maintainability", "Faster onboarding", "Clearer intent"],
+                risks: ["Documentation can become outdated"],
+                implementation: ImplementationGuidance(
+                    steps: [
+                        "Prioritize public interfaces",
+                        "Document component purposes",
+                        "Add usage examples",
+                        "Set up documentation generation"
+                    ],
+                    testingStrategy: "Validate documentation accuracy",
+                    rollbackPlan: "Documentation is non-breaking"
+                )
+            ))
+        }
+        
+        // Architectural documentation
+        if metrics.documentationMetrics?.architecturalDocumentation == false {
+            recommendations.append(ArchitecturalRecommendation(
+                id: "documentation-architecture",
+                type: .documentation,
+                title: "Create Architecture Documentation",
+                description: "System lacks architectural documentation",
+                rationale: "Architecture documentation helps maintain system coherence",
+                priority: .medium,
+                confidence: 0.8,
+                effort: .medium,
+                benefits: ["Clear architectural vision", "Better decision making", "Easier evolution"],
+                risks: ["Must be kept up to date"],
+                implementation: ImplementationGuidance(
+                    steps: [
+                        "Document core architectural principles",
+                        "Create component interaction diagrams",
+                        "Document key decisions and rationale",
+                        "Establish documentation update process"
+                    ],
+                    testingStrategy: "Review documentation with team",
+                    rollbackPlan: "Documentation is supplementary"
+                )
+            ))
+        }
+        
+        return recommendations
+    }
+    
+    private func generateArchitectureRecommendations(
+        _ patterns: [DetectedPattern],
+        _ antiPatterns: [AntiPatternDetection],
+        _ integrityReport: SystemIntegrityReport
+    ) -> [ArchitecturalRecommendation] {
+        var recommendations: [ArchitecturalRecommendation] = []
+        
+        // Architectural violations
+        let criticalViolations = integrityReport.violations.filter { $0.severity == .error }
+        if !criticalViolations.isEmpty {
+            recommendations.append(ArchitecturalRecommendation(
+                id: "architecture-fix-violations",
+                type: .architecture,
+                title: "Resolve Architectural Violations",
+                description: "\(criticalViolations.count) critical architectural violations detected",
+                rationale: "Violations compromise system integrity and evolution",
+                priority: .high,
+                confidence: 0.95,
+                effort: .medium,
+                benefits: ["Restored architectural integrity", "Predictable behavior", "Easier evolution"],
+                risks: ["May require interface changes", "Potential breaking changes"],
+                implementation: ImplementationGuidance(
+                    steps: [
+                        "Analyze each violation impact",
+                        "Plan remediation approach",
+                        "Implement fixes incrementally",
+                        "Add architectural tests"
+                    ],
+                    testingStrategy: "Validate fixes don't introduce new violations",
+                    rollbackPlan: "Fix violations one at a time for safety"
+                )
+            ))
+        }
+        
+        // Pattern opportunities
+        let patternCoverage = Double(patterns.count) / Double(max(integrityReport.componentCount, 1))
+        if patternCoverage < 0.3 {
+            recommendations.append(ArchitecturalRecommendation(
+                id: "architecture-apply-patterns",
+                type: .architecture,
+                title: "Apply Architectural Patterns",
+                description: "Low pattern adoption detected",
+                rationale: "Patterns provide proven solutions and consistency",
+                priority: .medium,
+                confidence: 0.7,
+                effort: .high,
+                benefits: ["Improved consistency", "Proven solutions", "Better maintainability"],
+                risks: ["Over-engineering risk", "Learning curve"],
+                implementation: ImplementationGuidance(
+                    steps: [
+                        "Identify pattern opportunities",
+                        "Select appropriate patterns",
+                        "Implement incrementally",
+                        "Document pattern usage"
+                    ],
+                    testingStrategy: "Validate pattern implementation correctness",
+                    rollbackPlan: "Patterns can be adopted gradually"
+                )
+            ))
+        }
+        
+        // Modularization recommendation
+        if integrityReport.layerViolations.count > 3 {
+            recommendations.append(ArchitecturalRecommendation(
+                id: "architecture-improve-modularity",
+                type: .architecture,
+                title: "Improve System Modularity",
+                description: "Layer violations indicate poor modularity",
+                rationale: "Better modularity enables independent evolution and testing",
+                priority: .medium,
+                confidence: 0.8,
+                effort: .high,
+                benefits: ["Independent deployment", "Better testability", "Clearer boundaries"],
+                risks: ["Significant refactoring", "Temporary complexity"],
+                implementation: ImplementationGuidance(
+                    steps: [
+                        "Define clear module boundaries",
+                        "Extract shared interfaces",
+                        "Enforce dependency rules",
+                        "Refactor violations"
+                    ],
+                    testingStrategy: "Test module isolation and contracts",
+                    rollbackPlan: "Modularize incrementally by domain"
+                )
+            ))
+        }
+        
+        return recommendations
+    }
+    
+    // MARK: Additional Helper Methods
+    
+    private func generateDependentsAnswer(_ component: IntrospectedComponent, dependencies: [IntrospectedComponent]) -> String {
+        if dependencies.isEmpty {
+            return "**\(component.name)** does not depend on any other components. It appears to be a foundation component."
+        }
+        
+        let answer = """
+        **\(component.name)** depends on **\(dependencies.count) component\(dependencies.count == 1 ? "" : "s")**:
+        
+        \(dependencies.map { "• **\($0.name)** (\($0.category.rawValue))" }.joined(separator: "\n"))
+        
+        This indicates that \(component.name) requires these components to function properly.
+        """
+        
+        return answer
+    }
+    
+    private func generateDependentsSuggestions(_ component: IntrospectedComponent) -> [String] {
+        return [
+            "Which components depend on \(component.name)?",
+            "Show me the full dependency graph for \(component.name)",
+            "What would happen if I modify \(component.name)?",
+            "How can I reduce \(component.name)'s dependencies?"
+        ]
+    }
+    
+    private func generateComponentRelationshipAnswer(_ component: IntrospectedComponent, relationships: [RelationshipInfo], allComponents: [IntrospectedComponent]) -> String {
+        let answer = """
+        ## Relationship Map for \(component.name)
+        
+        ### Direct Dependencies (\(relationships.filter { $0.direction == .outgoing }.count))
+        \(relationships.filter { $0.direction == .outgoing }.map { rel in
+            let targetName = allComponents.first { $0.id == rel.targetId }?.name ?? rel.targetId.description
+            return "• → **\(targetName)** (\(rel.type.rawValue))"
+        }.joined(separator: "\n"))
+        
+        ### Direct Dependents (\(relationships.filter { $0.direction == .incoming }.count))
+        \(relationships.filter { $0.direction == .incoming }.map { rel in
+            let sourceName = allComponents.first { $0.id == rel.sourceId }?.name ?? rel.sourceId.description
+            return "• ← **\(sourceName)** (\(rel.type.rawValue))"
+        }.joined(separator: "\n"))
+        
+        ### Relationship Summary
+        • **Total Relationships**: \(relationships.count)
+        • **Coupling Score**: \(String(format: "%.2f", Double(relationships.count) / 10.0))
+        • **Role**: \(relationships.filter { $0.direction == .incoming }.count > relationships.filter { $0.direction == .outgoing }.count ? "Provider (more dependents)" : "Consumer (more dependencies)")
+        """
+        
+        return answer
+    }
+    
+    private func generateSystemRelationshipAnswer(_ relationshipMap: ComponentRelationshipMap, components: [IntrospectedComponent]) -> String {
+        let mostConnected = relationshipMap.getMostConnectedComponents(limit: 5)
+        let circularDeps = relationshipMap.findCircularDependencies()
+        
+        let answer = """
+        ## System Relationship Overview
+        
+        ### Statistics
+        • **Total Components**: \(components.count)
+        • **Total Relationships**: \(relationshipMap.totalRelationships)
+        • **Average Relationships per Component**: \(String(format: "%.1f", Double(relationshipMap.totalRelationships) / Double(max(components.count, 1))))
+        
+        ### Most Connected Components
+        \(mostConnected.map { comp in
+            let name = components.first { $0.id == comp.componentId }?.name ?? comp.componentId.description
+            return "• **\(name)**: \(comp.connectionCount) connections"
+        }.joined(separator: "\n"))
+        
+        ### Circular Dependencies
+        \(circularDeps.isEmpty ? "✅ No circular dependencies detected!" : circularDeps.map { cycle in
+            let names = cycle.map { id in components.first { $0.id == id }?.name ?? id.description }
+            return "⚠️ \(names.joined(separator: " → ")) → \(names.first ?? "")"
+        }.joined(separator: "\n"))
+        
+        ### Health Assessment
+        \(circularDeps.isEmpty && Double(relationshipMap.totalRelationships) / Double(max(components.count, 1)) < 5 ? "✅ Healthy relationship density" : "⚠️ Consider reducing coupling")
+        """
+        
+        return answer
+    }
+    
+    private func generatePatternCheckAnswer(_ patternName: String, patterns: [DetectedPattern]) -> String {
+        if patterns.isEmpty {
+            return "No patterns matching '\(patternName)' were found in the system."
+        }
+        
+        let answer = """
+        ## Pattern Analysis: \(patternName)
+        
+        Found **\(patterns.count) pattern\(patterns.count == 1 ? "" : "s")** matching your query:
+        
+        \(patterns.map { pattern in
+            """
+            ### \(pattern.name)
+            • **Type**: \(pattern.type.rawValue)
+            • **Confidence**: \(String(format: "%.0f", pattern.confidence * 100))%
+            • **Components**: \(pattern.components.count)
+            • **Description**: \(pattern.description)
+            """
+        }.joined(separator: "\n\n"))
+        
+        ### Implementation Quality
+        Average confidence: \(String(format: "%.0f", patterns.map { $0.confidence }.reduce(0, +) / Double(max(patterns.count, 1)) * 100))%
+        """
+        
+        return answer
+    }
+    
+    private func generateAntiPatternAnswer(_ antiPatterns: [AntiPatternDetection]) -> String {
+        if antiPatterns.isEmpty {
+            return "✅ **Excellent!** No anti-patterns detected in the system."
+        }
+        
+        let grouped = Dictionary(grouping: antiPatterns) { $0.severity }
+        
+        let answer = """
+        ## Anti-Pattern Detection Results
+        
+        ⚠️ Found **\(antiPatterns.count) anti-pattern\(antiPatterns.count == 1 ? "" : "s")** in the system:
+        
+        \(grouped.sorted { $0.key.rawValue > $1.key.rawValue }.map { severity, patterns in
+            """
+            ### \(severity.rawValue.capitalized) Severity (\(patterns.count))
+            \(patterns.map { ap in
+                "• **\(ap.name)** - \(ap.description)"
+            }.joined(separator: "\n"))
+            """
+        }.joined(separator: "\n\n"))
+        
+        ### Impact Summary
+        • **Critical Issues**: \(grouped[.high]?.count ?? 0)
+        • **Moderate Issues**: \(grouped[.medium]?.count ?? 0)
+        • **Minor Issues**: \(grouped[.low]?.count ?? 0)
+        
+        ### Recommended Action
+        \(grouped[.high]?.count ?? 0 > 0 ? "🚨 Address critical issues immediately" : "📋 Plan refactoring for moderate issues")
+        """
+        
+        return answer
+    }
+    
+    private func generateComponentPerformanceAnswer(_ componentName: String, metrics: [OperationMetrics]) -> String {
+        if metrics.isEmpty {
+            return "No performance metrics found for '\(componentName)'."
+        }
+        
+        let avgDuration = metrics.map { $0.averageDuration }.reduce(0, +) / Double(max(metrics.count, 1))
+        let totalCalls = metrics.map { $0.callCount }.reduce(0, +)
+        
+        let answer = """
+        ## Performance Metrics: \(componentName)
+        
+        ### Overview
+        • **Operations Tracked**: \(metrics.count)
+        • **Total Calls**: \(totalCalls)
+        • **Average Duration**: \(String(format: "%.2f", avgDuration * 1000))ms
+        
+        ### Top Operations by Duration
+        \(metrics.sorted { $0.averageDuration > $1.averageDuration }.prefix(5).map { metric in
+            "• **\(metric.operation)**: \(String(format: "%.2f", metric.averageDuration * 1000))ms (×\(metric.callCount) calls)"
+        }.joined(separator: "\n"))
+        
+        ### Performance Assessment
+        \(avgDuration < 0.1 ? "✅ Excellent performance" : avgDuration < 0.5 ? "⚠️ Moderate performance" : "🚨 Performance needs optimization")
+        """
+        
+        return answer
+    }
+    
+    private func generateSystemPerformanceAnswer(_ report: PerformanceReport) -> String {
+        let answer = """
+        ## System Performance Overview
+        
+        ### Global Metrics
+        • **Total Operations**: \(report.totalOperations)
+        • **Average Response Time**: \(String(format: "%.2f", report.averageResponseTime * 1000))ms
+        • **95th Percentile**: \(String(format: "%.2f", report.percentile95ResponseTime * 1000))ms
+        • **Error Rate**: \(String(format: "%.2f", report.errorRate * 100))%
+        
+        ### Performance by Category
+        \(report.categoryMetrics.map { category, metrics in
+            "• **\(category.rawValue)**: \(String(format: "%.2f", metrics.averageDuration * 1000))ms avg"
+        }.joined(separator: "\n"))
+        
+        ### Bottlenecks
+        \(report.bottlenecks.prefix(3).map { bottleneck in
+            "• **\(bottleneck.operation)**: \(String(format: "%.2f", bottleneck.averageDuration * 1000))ms - \(bottleneck.impact)"
+        }.joined(separator: "\n"))
+        
+        ### Health Status
+        \(report.averageResponseTime < 0.1 ? "🟢 Healthy" : report.averageResponseTime < 0.5 ? "🟡 Moderate" : "🔴 Needs Attention")
+        """
+        
+        return answer
+    }
+    
+    private func identifyPerformanceBottlenecks(_ report: PerformanceReport) -> [PerformanceBottleneck] {
+        return report.operationMetrics
+            .filter { $0.averageDuration > report.averageResponseTime * 2 }
+            .sorted { $0.averageDuration > $1.averageDuration }
+            .prefix(5)
+            .map { metric in
+                PerformanceBottleneck(
+                    operation: metric.operation,
+                    averageDuration: metric.averageDuration,
+                    impact: metric.callCount > 1000 ? "High frequency operation" : "Long running operation",
+                    severity: metric.averageDuration > 1.0 ? .high : .medium
+                )
+            }
+    }
+    
+    private func analyzePerformanceTrends(_ report: PerformanceReport) -> [PerformanceTrend] {
+        // Simple trend analysis - in real implementation would analyze historical data
+        var trends: [PerformanceTrend] = []
+        
+        if report.errorRate > 0.05 {
+            trends.append(PerformanceTrend(
+                metric: "Error Rate",
+                direction: .increasing,
+                severity: .high,
+                description: "Error rate above 5% threshold"
+            ))
+        }
+        
+        if report.percentile95ResponseTime > report.averageResponseTime * 3 {
+            trends.append(PerformanceTrend(
+                metric: "Response Time Variance",
+                direction: .increasing,
+                severity: .medium,
+                description: "High variance in response times"
+            ))
+        }
+        
+        return trends
+    }
+    
+    private func generatePerformanceOptimizations(_ report: PerformanceReport, metrics: ComponentMetricsReport) -> [String] {
+        var optimizations: [String] = []
+        
+        if report.averageResponseTime > 0.5 {
+            optimizations.append("Implement caching for frequently accessed data")
+        }
+        
+        if !report.bottlenecks.isEmpty {
+            optimizations.append("Optimize the top \(min(3, report.bottlenecks.count)) bottleneck operations")
+        }
+        
+        if metrics.averageRelationshipsPerComponent > 5 {
+            optimizations.append("Reduce component coupling to improve parallelization")
+        }
+        
+        return optimizations
+    }
+    
+    private func generatePerformanceAnalysisAnswer(bottlenecks: [PerformanceBottleneck], trends: [PerformanceTrend], recommendations: [String]) -> String {
+        let answer = """
+        ## Performance Analysis
+        
+        ### Identified Bottlenecks
+        \(bottlenecks.isEmpty ? "✅ No significant bottlenecks detected" : bottlenecks.map { bottleneck in
+            "• **\(bottleneck.operation)**: \(String(format: "%.2f", bottleneck.averageDuration * 1000))ms - \(bottleneck.impact)"
+        }.joined(separator: "\n"))
+        
+        ### Performance Trends
+        \(trends.isEmpty ? "📊 Performance is stable" : trends.map { trend in
+            "\(trend.direction == .increasing ? "📈" : "📉") **\(trend.metric)**: \(trend.description)"
+        }.joined(separator: "\n"))
+        
+        ### Optimization Recommendations
+        \(recommendations.isEmpty ? "System is well-optimized" : recommendations.enumerated().map { index, rec in
+            "\(index + 1). \(rec)"
+        }.joined(separator: "\n"))
+        
+        ### Next Steps
+        Focus on the highest impact optimizations first, and monitor performance after each change.
+        """
+        
+        return answer
+    }
+    
+    /// Converts ImpactLevel to ImpactSeverity for compatibility
+    private func convertImpactLevelToSeverity(_ level: ImpactLevel) -> ImpactSeverity {
+        switch level {
+        case .low:
+            return .low
+        case .medium:
+            return .medium
+        case .high:
+            return .high
+        case .critical:
+            return .critical
+        }
+    }
+    
+    private func consolidateIssues(integrityReport: SystemIntegrityReport, antiPatterns: [AntiPatternDetection], performanceReport: PerformanceReport) -> [SystemIssue] {
+        var issues: [SystemIssue] = []
+        
+        // Add integrity violations as issues
+        issues.append(contentsOf: integrityReport.violations.map { violation in
+            SystemIssue(
+                type: .architectural,
+                severity: violation.severity == .error ? .high : .medium,
+                title: "Architectural Violation",
+                description: violation.violation.description,
+                component: violation.component,
+                impact: "Compromises system integrity",
+                suggestedFix: violation.violation.suggestedFix ?? "Review and fix the architectural constraint violation"
+            )
+        })
+        
+        // Add anti-patterns as issues
+        issues.append(contentsOf: antiPatterns.map { antiPattern in
+            SystemIssue(
+                type: .pattern,
+                severity: convertImpactLevelToSeverity(antiPattern.severity),
+                title: antiPattern.name,
+                description: antiPattern.description,
+                component: antiPattern.components.first,
+                impact: antiPattern.impact,
+                suggestedFix: antiPattern.recommendation
+            )
+        })
+        
+        // Add performance issues
+        if performanceReport.errorRate > 0.05 {
+            issues.append(SystemIssue(
+                type: .performance,
+                severity: .high,
+                title: "High Error Rate",
+                description: "System error rate is \(String(format: "%.1f", performanceReport.errorRate * 100))%",
+                component: nil,
+                impact: "User experience degradation",
+                suggestedFix: "Investigate and fix error sources"
+            ))
+        }
+        
+        return issues.sorted { $0.severity.rawValue > $1.severity.rawValue }
+    }
+    
+    private func generateIssuesAnswer(_ issues: [SystemIssue]) -> String {
+        if issues.isEmpty {
+            return "✅ **Great news!** No significant issues detected in the system."
+        }
+        
+        let grouped = Dictionary(grouping: issues) { $0.type }
+        
+        let answer = """
+        ## System Issues Report
+        
+        Found **\(issues.count) issue\(issues.count == 1 ? "" : "s")** requiring attention:
+        
+        \(grouped.sorted { $0.key.rawValue < $1.key.rawValue }.map { type, typeIssues in
+            """
+            ### \(type.rawValue.capitalized) Issues (\(typeIssues.count))
+            \(typeIssues.prefix(5).map { issue in
+                "\(issue.severity == .high ? "🚨" : issue.severity == .medium ? "⚠️" : "💡") **\(issue.title)**: \(issue.description)"
+            }.joined(separator: "\n"))
+            """
+        }.joined(separator: "\n\n"))
+        
+        ### Priority Summary
+        • **Critical**: \(issues.filter { $0.severity == .high }.count)
+        • **Warning**: \(issues.filter { $0.severity == .medium }.count)
+        • **Info**: \(issues.filter { $0.severity == .low }.count)
+        
+        ### Recommended Action Plan
+        1. Address critical issues first
+        2. Plan fixes for warnings during next sprint
+        3. Consider info items for future improvements
+        """
+        
+        return answer
+    }
+    
+    private func generateImprovementSuggestionsAnswer(_ recommendations: [ArchitecturalRecommendation], domain: String?) -> String {
+        let domainContext = domain != nil ? " for \(domain!)" : " for the system"
+        
+        let answer = """
+        ## Improvement Recommendations\(domainContext)
+        
+        Generated **\(recommendations.count) recommendation\(recommendations.count == 1 ? "" : "s")**:
+        
+        \(recommendations.prefix(5).enumerated().map { index, rec in
+            """
+            ### \(index + 1). \(rec.title)
+            **Priority**: \(rec.priority.rawValue.capitalized) | **Effort**: \(rec.effort.rawValue.capitalized) | **Confidence**: \(String(format: "%.0f", rec.confidence * 100))%
+            
+            **Description**: \(rec.description)
+            
+            **Benefits**:
+            \(rec.benefits.map { "• \($0)" }.joined(separator: "\n"))
+            
+            **Implementation**:
+            \(rec.implementation.steps.prefix(3).enumerated().map { i, step in "\(i + 1). \(step)" }.joined(separator: "\n"))
+            """
+        }.joined(separator: "\n\n"))
+        
+        ### Implementation Strategy
+        • Start with high-priority, low-effort items for quick wins
+        • Address architectural improvements systematically
+        • Monitor impact after each change
+        """
+        
+        return answer
+    }
+    
+    // MARK: Supporting Types for Helper Methods
+    
+    private struct PerformanceBottleneck {
+        let operation: String
+        let averageDuration: TimeInterval
+        let impact: String
+        let severity: ImpactSeverity
+    }
+    
+    private struct PerformanceTrend {
+        let metric: String
+        let direction: TrendDirection
+        let severity: ImpactSeverity
+        let description: String
+    }
+    
+    private enum TrendDirection {
+        case increasing, decreasing, stable
+    }
+    
+    private struct SystemIssue {
+        let type: IssueType
+        let severity: ImpactSeverity
+        let title: String
+        let description: String
+        let component: ComponentID?
+        let impact: String
+        let suggestedFix: String
+    }
+    
+    private enum IssueType: String {
+        case architectural, pattern, performance, security, maintainability
+    }
 }
 
 // MARK: - Supporting Types
@@ -1486,7 +2451,8 @@ public struct QueryEngineConfiguration: Sendable {
 }
 
 /// Response from query processing
-public struct QueryResponse: Sendable {
+public struct QueryResponse: Sendable, Identifiable {
+    public let id = UUID()
     public let query: String
     public let intent: QueryIntent
     public let answer: String

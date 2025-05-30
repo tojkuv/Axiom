@@ -16,6 +16,14 @@ public protocol AxiomContext: ObservableObject {
     /// The intelligence system for this context
     var intelligence: AxiomIntelligence { get }
     
+    // MARK: Resource Access
+    
+    /// Gets the capability manager for this context
+    func capabilityManager() async throws -> CapabilityManager
+    
+    /// Gets the performance monitor for this context
+    func performanceMonitor() async throws -> PerformanceMonitor
+    
     // MARK: Lifecycle
     
     /// Called when the associated view appears
@@ -31,6 +39,11 @@ public protocol AxiomContext: ObservableObject {
     
     /// Handles errors that occur within the context
     func handleError(_ error: any AxiomError) async
+    
+    // MARK: Analytics
+    
+    /// Tracks an analytics event
+    func trackAnalyticsEvent(_ event: String, parameters: [String: Any]) async
 }
 
 // MARK: - Default Context State

@@ -20,6 +20,11 @@ let package = Package(
         .library(
             name: "AxiomTesting",
             targets: ["AxiomTesting"]
+        ),
+        // Foundation Example Application
+        .library(
+            name: "AxiomFoundationExample",
+            targets: ["AxiomFoundationExample"]
         )
     ],
     dependencies: [
@@ -51,6 +56,14 @@ let package = Package(
             path: "Sources/AxiomTesting"
         ),
         
+        // Foundation Example target
+        .target(
+            name: "AxiomFoundationExample",
+            dependencies: ["Axiom", "AxiomTesting"],
+            path: "AxiomFoundationExample",
+            exclude: ["README.md"]
+        ),
+        
         // Test targets
         .testTarget(
             name: "AxiomTests",
@@ -65,6 +78,13 @@ let package = Package(
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax")
             ],
             path: "Tests/AxiomMacrosTests"
+        ),
+        
+        // Foundation Example Tests
+        .testTarget(
+            name: "AxiomFoundationExampleTests",
+            dependencies: ["AxiomFoundationExample", "Axiom", "AxiomTesting"],
+            path: "AxiomFoundationExampleTests"
         )
     ]
 )

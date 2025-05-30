@@ -1390,6 +1390,8 @@ public enum AntiPatternType: String, CaseIterable, Sendable {
 public struct AntiPatternDetection: Sendable {
     public let type: AntiPatternType
     public let componentID: ComponentID
+    public let name: String
+    public let components: [ComponentID]
     public let description: String
     public let severity: ImpactLevel
     public let impact: String
@@ -1398,6 +1400,8 @@ public struct AntiPatternDetection: Sendable {
     public init(
         type: AntiPatternType,
         componentID: ComponentID,
+        name: String? = nil,
+        components: [ComponentID]? = nil,
         description: String,
         severity: ImpactLevel,
         impact: String,
@@ -1405,6 +1409,8 @@ public struct AntiPatternDetection: Sendable {
     ) {
         self.type = type
         self.componentID = componentID
+        self.name = name ?? type.rawValue.replacingOccurrences(of: "_", with: " ").capitalized
+        self.components = components ?? [componentID]
         self.description = description
         self.severity = severity
         self.impact = impact

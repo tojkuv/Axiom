@@ -227,8 +227,8 @@ public struct AutoBindContext<Context: AxiomContext>: DynamicProperty {
         )
     }
     
-    public init(_ contextType: Context.Type) {
-        let manager = ContextManager<Context>()
+    public init(_ context: Context) {
+        let manager = ContextManager<Context>(context: context)
         self._contextManager = StateObject(wrappedValue: manager)
     }
 }
@@ -238,9 +238,8 @@ private class ContextManager<Context: AxiomContext>: ObservableObject {
     @Published var context: Context
     private var cancellables = Set<AnyCancellable>()
     
-    init() {
-        // Create default context instance
-        self.context = Context()
+    init(context: Context) {
+        self.context = context
         setupBindings()
     }
     
@@ -421,6 +420,7 @@ public struct LifecycleModifier<Context: AxiomContext>: ViewModifier {
                     await onDisappear?(context)
                 }
             }
+            #if os(iOS)
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
                 Task {
                     await onBackground?(context)
@@ -431,6 +431,18 @@ public struct LifecycleModifier<Context: AxiomContext>: ViewModifier {
                     await onForeground?(context)
                 }
             }
+            #elseif os(macOS)
+            .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in
+                Task {
+                    await onBackground?(context)
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSApplication.willBecomeActiveNotification)) { _ in
+                Task {
+                    await onForeground?(context)
+                }
+            }
+            #endif
     }
 }
 

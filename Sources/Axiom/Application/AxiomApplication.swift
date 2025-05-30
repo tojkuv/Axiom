@@ -449,6 +449,10 @@ public enum AxiomApplicationError: Error, AxiomError {
     case dependencyResolutionFailed(String)
     case configurationError(String)
     
+    public var id: UUID {
+        UUID()
+    }
+    
     public var category: ErrorCategory {
         switch self {
         case .applicationNotLaunched, .configurationError:
@@ -494,16 +498,29 @@ public enum AxiomApplicationError: Error, AxiomError {
         }
     }
     
+    public var userMessage: String {
+        switch self {
+        case .applicationNotLaunched:
+            return "The application is still starting up. Please wait a moment and try again."
+        case .invalidViewContextBinding:
+            return "There's a critical configuration issue. Please restart the application."
+        case .dependencyResolutionFailed:
+            return "A required component could not be loaded. Please restart the application."
+        case .configurationError(let message):
+            return "Configuration issue: \(message). Please check your settings."
+        }
+    }
+    
     public var errorDescription: String? {
         switch self {
         case .applicationNotLaunched:
             return "Application must be launched before creating contexts"
         case .invalidViewContextBinding(let contextType, let viewType):
-            return "Invalid view-context binding: \\(viewType) does not match \\(contextType)"
+            return "Invalid view-context binding: \(viewType) does not match \(contextType)"
         case .dependencyResolutionFailed(let dependency):
-            return "Failed to resolve dependency: \\(dependency)"
+            return "Failed to resolve dependency: \(dependency)"
         case .configurationError(let message):
-            return "Configuration error: \\(message)"
+            return "Configuration error: \(message)"
         }
     }
 }

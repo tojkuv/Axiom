@@ -3,11 +3,13 @@ import Foundation
 // MARK: - Core Error Protocol
 
 /// The base protocol for all errors in the Axiom framework
-public protocol AxiomError: Error, LocalizedError, Sendable {
+public protocol AxiomError: Error, LocalizedError, Sendable, Identifiable {
+    var id: UUID { get }
     var category: ErrorCategory { get }
     var severity: ErrorSeverity { get }
     var context: ErrorContext { get }
     var recoveryActions: [RecoveryAction] { get }
+    var userMessage: String { get }
 }
 
 // MARK: - Error Categories
@@ -96,6 +98,10 @@ public enum CapabilityError: AxiomError {
     case unavailable(Capability)
     case configurationInvalid(String)
     
+    public var id: UUID {
+        UUID()
+    }
+    
     public var category: ErrorCategory { .capability }
     
     public var severity: ErrorSeverity {
@@ -128,6 +134,19 @@ public enum CapabilityError: AxiomError {
         }
     }
     
+    public var userMessage: String {
+        switch self {
+        case .denied(let capability):
+            return "You don't have permission to use \(capability). Please contact your administrator for access."
+        case .expired(let lease):
+            return "Your access has expired. Please refresh to continue."
+        case .unavailable(let capability):
+            return "The \(capability) feature is currently unavailable. Please try again later."
+        case .configurationInvalid:
+            return "There's a configuration issue. Please contact support for assistance."
+        }
+    }
+    
     public var errorDescription: String? {
         switch self {
         case .denied(let capability):
@@ -150,6 +169,10 @@ public enum DomainError: AxiomError {
     case businessRuleViolation(BusinessRule)
     case stateInconsistent(String)
     case aggregateNotFound(String)
+    
+    public var id: UUID {
+        UUID()
+    }
     
     public var category: ErrorCategory { .domain }
     
@@ -183,6 +206,21 @@ public enum DomainError: AxiomError {
         }
     }
     
+    public var userMessage: String {
+        switch self {
+        case .validationFailed(let result):
+            let errorList = result.errors.prefix(3).joined(separator: ", ")
+            let suffix = result.errors.count > 3 ? " and \(result.errors.count - 3) more..." : ""
+            return "Please correct the following: \(errorList)\(suffix)"
+        case .businessRuleViolation(let rule):
+            return "This action violates a business rule: \(rule.description)"
+        case .stateInconsistent:
+            return "An inconsistency was detected. Please refresh and try again."
+        case .aggregateNotFound:
+            return "The requested item could not be found. It may have been deleted or moved."
+        }
+    }
+    
     public var errorDescription: String? {
         switch self {
         case .validationFailed(let result):
@@ -207,6 +245,10 @@ public struct GenericError: AxiomError {
         self.underlyingError = underlyingError
     }
     
+    public var id: UUID {
+        UUID()
+    }
+    
     public var category: ErrorCategory { .validation }
     
     public var severity: ErrorSeverity { .error }
@@ -217,6 +259,10 @@ public struct GenericError: AxiomError {
     
     public var recoveryActions: [RecoveryAction] {
         [.retry(after: 1.0), .escalate]
+    }
+    
+    public var userMessage: String {
+        "An unexpected error occurred. Please try again or contact support if the problem persists."
     }
     
     public var errorDescription: String? {

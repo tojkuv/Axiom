@@ -898,6 +898,28 @@ public struct ComponentRelationshipMap: Sendable {
         return componentIndex[componentID] ?? []
     }
     
+    public func getRelationshipInfoFor(_ componentID: ComponentID) -> [RelationshipInfo] {
+        let outgoing = relationships.filter { $0.source == componentID }.map { rel in
+            RelationshipInfo(
+                sourceId: rel.source,
+                targetId: rel.target,
+                type: rel.type,
+                direction: .outgoing
+            )
+        }
+        
+        let incoming = relationships.filter { $0.target == componentID }.map { rel in
+            RelationshipInfo(
+                sourceId: rel.source,
+                targetId: rel.target,
+                type: rel.type,
+                direction: .incoming
+            )
+        }
+        
+        return outgoing + incoming
+    }
+    
     public func getRelationshipCount(for componentID: ComponentID) -> Int {
         return getRelationshipsFor(componentID).count
     }
@@ -908,6 +930,61 @@ public struct ComponentRelationshipMap: Sendable {
     
     public func getAllRelationships() -> [AnalyzedRelationship] {
         return relationships
+    }
+    
+    public func getDependenciesOf(_ componentID: ComponentID) -> [ComponentID] {
+        return relationships.filter { $0.source == componentID }.map { $0.target }
+    }
+    
+    public func getMostConnectedComponents(limit: Int = 10) -> [(componentId: ComponentID, connectionCount: Int)] {
+        var connectionCounts: [ComponentID: Int] = [:]
+        
+        for relationship in relationships {
+            connectionCounts[relationship.source, default: 0] += 1
+            connectionCounts[relationship.target, default: 0] += 1
+        }
+        
+        return connectionCounts
+            .sorted { $0.value > $1.value }
+            .prefix(limit)
+            .map { (componentId: $0.key, connectionCount: $0.value) }
+    }
+    
+    public func findCircularDependencies() -> [[ComponentID]] {
+        var cycles: [[ComponentID]] = []
+        var visited: Set<ComponentID> = []
+        var recursionStack: Set<ComponentID> = []
+        
+        func dfs(_ node: ComponentID, path: [ComponentID]) {
+            visited.insert(node)
+            recursionStack.insert(node)
+            
+            let dependencies = getDependenciesOf(node)
+            for dependency in dependencies {
+                if recursionStack.contains(dependency) {
+                    // Found a cycle
+                    if let startIndex = path.firstIndex(of: dependency) {
+                        let cycle = Array(path[startIndex...] + [dependency])
+                        cycles.append(cycle)
+                    }
+                } else if !visited.contains(dependency) {
+                    dfs(dependency, path: path + [dependency])
+                }
+            }
+            
+            recursionStack.remove(node)
+        }
+        
+        // Get all unique component IDs
+        let allComponents = Set(relationships.flatMap { [$0.source, $0.target] })
+        
+        for component in allComponents {
+            if !visited.contains(component) {
+                dfs(component, path: [component])
+            }
+        }
+        
+        return cycles
     }
 }
 
@@ -1032,6 +1109,7 @@ public struct SystemIntegrityReport: Sendable {
     public let violations: [SystemIntegrityViolation]
     public let warnings: [SystemIntegrityWarning]
     public let componentCount: Int
+    public let layerViolations: [LayerViolation]
     public let validatedAt: Date
     
     public init(
@@ -1040,6 +1118,7 @@ public struct SystemIntegrityReport: Sendable {
         violations: [SystemIntegrityViolation],
         warnings: [SystemIntegrityWarning],
         componentCount: Int,
+        layerViolations: [LayerViolation] = [],
         validatedAt: Date
     ) {
         self.isValid = isValid
@@ -1047,7 +1126,31 @@ public struct SystemIntegrityReport: Sendable {
         self.violations = violations
         self.warnings = warnings
         self.componentCount = componentCount
+        self.layerViolations = layerViolations
         self.validatedAt = validatedAt
+    }
+}
+
+/// Layer violation
+public struct LayerViolation: Sendable {
+    public let sourceComponent: ComponentID
+    public let targetComponent: ComponentID
+    public let sourceLayer: ArchitecturalLayer
+    public let targetLayer: ArchitecturalLayer
+    public let description: String
+    
+    public init(
+        sourceComponent: ComponentID,
+        targetComponent: ComponentID,
+        sourceLayer: ArchitecturalLayer,
+        targetLayer: ArchitecturalLayer,
+        description: String
+    ) {
+        self.sourceComponent = sourceComponent
+        self.targetComponent = targetComponent
+        self.sourceLayer = sourceLayer
+        self.targetLayer = targetLayer
+        self.description = description
     }
 }
 
@@ -1159,6 +1262,9 @@ public struct ComponentMetricsReport: Sendable {
     public let layerDistribution: [ArchitecturalLayer: Int]
     public let highlyCoupledComponents: [ComponentID]
     public let complexityMetrics: ComplexityMetrics
+    public let componentComplexity: [ComponentID: Double]
+    public let testCoverageMetrics: TestCoverageMetrics?
+    public let documentationMetrics: DocumentationMetrics?
     public let generatedAt: Date
     
     public init(
@@ -1169,6 +1275,9 @@ public struct ComponentMetricsReport: Sendable {
         layerDistribution: [ArchitecturalLayer: Int],
         highlyCoupledComponents: [ComponentID],
         complexityMetrics: ComplexityMetrics,
+        componentComplexity: [ComponentID: Double] = [:],
+        testCoverageMetrics: TestCoverageMetrics? = nil,
+        documentationMetrics: DocumentationMetrics? = nil,
         generatedAt: Date
     ) {
         self.totalComponents = totalComponents
@@ -1178,7 +1287,32 @@ public struct ComponentMetricsReport: Sendable {
         self.layerDistribution = layerDistribution
         self.highlyCoupledComponents = highlyCoupledComponents
         self.complexityMetrics = complexityMetrics
+        self.componentComplexity = componentComplexity
+        self.testCoverageMetrics = testCoverageMetrics
+        self.documentationMetrics = documentationMetrics
         self.generatedAt = generatedAt
+    }
+}
+
+/// Test coverage metrics
+public struct TestCoverageMetrics: Sendable {
+    public let averageCoverage: Double
+    public let componentCoverage: [ComponentID: Double]
+    
+    public init(averageCoverage: Double, componentCoverage: [ComponentID: Double]) {
+        self.averageCoverage = averageCoverage
+        self.componentCoverage = componentCoverage
+    }
+}
+
+/// Documentation metrics
+public struct DocumentationMetrics: Sendable {
+    public let undocumentedComponents: [ComponentID]
+    public let architecturalDocumentation: Bool
+    
+    public init(undocumentedComponents: [ComponentID], architecturalDocumentation: Bool) {
+        self.undocumentedComponents = undocumentedComponents
+        self.architecturalDocumentation = architecturalDocumentation
     }
 }
 

@@ -34,7 +34,7 @@ public struct TypeSafeContextBinding<Context: AxiomContext, ViewType: AxiomView>
 public class ContextStateSynchronizer<Context: AxiomContext>: ObservableObject {
     private let context: Context
     private var cancellables = Set<AnyCancellable>()
-    @Published private var updateToken = UUID()
+    @Published var updateToken = UUID()
     
     public init(context: Context) {
         self.context = context
@@ -57,13 +57,34 @@ public class ContextStateSynchronizer<Context: AxiomContext>: ObservableObject {
     }
 }
 
+// MARK: - Type Erasure Helper
+
+/// Type-erased ObservableObject wrapper
+private class AnyObservableObject: ObservableObject {
+    let wrapped: any ObservableObject
+    private var cancellable: AnyCancellable?
+    
+    init(_ wrapped: any ObservableObject) {
+        self.wrapped = wrapped
+        
+        // Forward objectWillChange notifications
+        // We need to cast to the concrete publisher type
+        if let publisher = wrapped.objectWillChange as? ObservableObjectPublisher {
+            cancellable = publisher
+                .sink { [weak self] _ in
+                    self?.objectWillChange.send()
+                }
+        }
+    }
+}
+
 // MARK: - Bidirectional Binding
 
 /// Provides bidirectional data binding between context state and view
 @propertyWrapper
-public struct ContextState<Value>: DynamicProperty where Value: Equatable {
-    @ObservedObject private var context: AnyObject
-    private let keyPath: ReferenceWritableKeyPath<AnyObject, Value>
+public struct ContextState<Context: AxiomContext, Value>: DynamicProperty where Value: Equatable {
+    @ObservedObject private var context: Context
+    private let keyPath: ReferenceWritableKeyPath<Context, Value>
     private let animation: Animation?
     
     public var wrappedValue: Value {
@@ -86,13 +107,13 @@ public struct ContextState<Value>: DynamicProperty where Value: Equatable {
         )
     }
     
-    public init<Context: AxiomContext>(
+    public init(
         _ keyPath: ReferenceWritableKeyPath<Context, Value>,
         context: Context,
         animation: Animation? = nil
     ) {
-        self.context = context as AnyObject
-        self.keyPath = keyPath as! ReferenceWritableKeyPath<AnyObject, Value>
+        self.context = context
+        self.keyPath = keyPath
         self.animation = animation
     }
 }
@@ -204,7 +225,13 @@ public class ContextHierarchy<Parent: AxiomContext, Child: AxiomContext>: Observ
     }
     
     private func notifyChildren() {
-        children.forEach { _ = $0.objectWillChange.send() }
+        // Force update by triggering objectWillChange
+        children.forEach { child in
+            // If the child is an ObservableObject, trigger its update
+            if let publisher = child.objectWillChange as? ObservableObjectPublisher {
+                publisher.send()
+            }
+        }
     }
 }
 
@@ -390,7 +417,7 @@ public extension View {
         self.overlay(alignment: .topLeading) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Context: \(String(describing: type(of: context)))")
-                Text("ID: \(String(describing: context.id).prefix(8))")
+                Text("ID: \(ObjectIdentifier(context).debugDescription.prefix(8))")
             }
             .font(.caption2)
             .padding(4)

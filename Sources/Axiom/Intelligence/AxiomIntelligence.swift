@@ -37,6 +37,9 @@ public protocol AxiomIntelligence: Actor {
     
     /// Reset intelligence state and learning
     func reset() async
+    
+    /// Process a natural language query
+    func processQuery(_ query: String) async throws -> QueryResponse
 }
 
 // MARK: - Intelligence Feature Types
@@ -325,7 +328,7 @@ public actor DefaultAxiomIntelligence: AxiomIntelligence {
             introspectionEngine: introspectionEngine,
             performanceMonitor: performanceMonitor
         )
-        self.queryParser = NaturalLanguageQueryParser()
+        self.queryParser = NaturalLanguageQueryParser(performanceMonitor: performanceMonitor)
         self.queryEngine = ArchitecturalQueryEngine(
             introspectionEngine: introspectionEngine,
             patternDetectionEngine: patternDetectionEngine,
@@ -421,7 +424,7 @@ public actor DefaultAxiomIntelligence: AxiomIntelligence {
         successfulPredictions = 0
         featureUsage = [:]
         
-        await performanceMonitor.resetMetrics()
+        await performanceMonitor.clearMetrics()
     }
     
     // MARK: Intelligence Operations

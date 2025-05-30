@@ -13,6 +13,9 @@ public protocol PerformanceMonitoring: Actor {
     /// Records the completion of an operation with additional metadata
     func endOperation(_ token: PerformanceToken, metadata: [String: Any]) async
     
+    /// Records a custom performance metric
+    func recordMetric(_ metric: PerformanceMetric) async
+    
     /// Gets performance metrics for a specific category
     func getMetrics(for category: PerformanceCategory) async -> PerformanceCategoryMetrics
     
@@ -224,6 +227,25 @@ public actor PerformanceMonitor: PerformanceMonitoring {
         }
     }
     
+    public func recordMetric(_ metric: PerformanceMetric) async {
+        // Create a completed operation from the metric
+        let completedOp = CompletedOperation(
+            name: metric.name,
+            category: metric.category,
+            duration: 0.0, // Custom metrics don't have duration
+            startTime: metric.timestamp.timeIntervalSinceReferenceDate,
+            endTime: metric.timestamp.timeIntervalSinceReferenceDate,
+            metadata: [
+                "value": metric.value,
+                "unit": metric.unit.rawValue,
+                "type": "custom_metric"
+            ]
+        )
+        
+        // Add to metrics
+        await addCompletedOperation(completedOp)
+    }
+    
     // MARK: Private Methods
     
     private func addCompletedOperation(_ operation: CompletedOperation) async {
@@ -347,6 +369,39 @@ public actor PerformanceMonitor: PerformanceMonitoring {
 
 // MARK: - Supporting Types
 
+/// Units for performance metrics
+public enum MetricUnit: String, CaseIterable, Sendable {
+    case count = "count"
+    case bytes = "bytes"
+    case milliseconds = "ms"
+    case seconds = "s"
+    case percentage = "percent"
+    case custom = "custom"
+}
+
+/// A custom performance metric
+public struct PerformanceMetric: Sendable {
+    public let name: String
+    public let value: Double
+    public let unit: MetricUnit
+    public let category: PerformanceCategory
+    public let timestamp: Date
+    
+    public init(
+        name: String,
+        value: Double,
+        unit: MetricUnit,
+        category: PerformanceCategory,
+        timestamp: Date = Date()
+    ) {
+        self.name = name
+        self.value = value
+        self.unit = unit
+        self.category = category
+        self.timestamp = timestamp
+    }
+}
+
 /// Categories for performance monitoring
 public enum PerformanceCategory: String, CaseIterable, Sendable {
     case stateAccess = "state_access"
@@ -360,6 +415,7 @@ public enum PerformanceCategory: String, CaseIterable, Sendable {
     case domainValidation = "domain_validation"
     case contextCreation = "context_creation"
     case viewRendering = "view_rendering"
+    case viewOperation = "view_operation"
     case networkRequest = "network_request"
     case databaseOperation = "database_operation"
     case cacheOperation = "cache_operation"
@@ -684,6 +740,79 @@ extension PerformanceCategoryMetrics: CustomStringConvertible {
     }
 }
 
+// MARK: - Performance Report
+
+/// Comprehensive performance report
+public struct PerformanceReport: Sendable {
+    public let totalOperations: Int
+    public let averageResponseTime: TimeInterval
+    public let percentile95ResponseTime: TimeInterval
+    public let errorRate: Double
+    public let categoryMetrics: [PerformanceCategory: PerformanceCategoryMetrics]
+    public let operationMetrics: [OperationMetrics]
+    public let bottlenecks: [BottleneckInfo]
+    public let generatedAt: Date
+    
+    public init(
+        totalOperations: Int,
+        averageResponseTime: TimeInterval,
+        percentile95ResponseTime: TimeInterval,
+        errorRate: Double,
+        categoryMetrics: [PerformanceCategory: PerformanceCategoryMetrics],
+        operationMetrics: [OperationMetrics],
+        bottlenecks: [BottleneckInfo],
+        generatedAt: Date
+    ) {
+        self.totalOperations = totalOperations
+        self.averageResponseTime = averageResponseTime
+        self.percentile95ResponseTime = percentile95ResponseTime
+        self.errorRate = errorRate
+        self.categoryMetrics = categoryMetrics
+        self.operationMetrics = operationMetrics
+        self.bottlenecks = bottlenecks
+        self.generatedAt = generatedAt
+    }
+}
+
+/// Metrics for a specific operation
+public struct OperationMetrics: Sendable {
+    public let operation: String
+    public let category: PerformanceCategory
+    public let callCount: Int
+    public let averageDuration: TimeInterval
+    public let minDuration: TimeInterval
+    public let maxDuration: TimeInterval
+    
+    public init(
+        operation: String,
+        category: PerformanceCategory,
+        callCount: Int,
+        averageDuration: TimeInterval,
+        minDuration: TimeInterval,
+        maxDuration: TimeInterval
+    ) {
+        self.operation = operation
+        self.category = category
+        self.callCount = callCount
+        self.averageDuration = averageDuration
+        self.minDuration = minDuration
+        self.maxDuration = maxDuration
+    }
+}
+
+/// Information about a performance bottleneck
+public struct BottleneckInfo: Sendable {
+    public let operation: String
+    public let averageDuration: TimeInterval
+    public let impact: String
+    
+    public init(operation: String, averageDuration: TimeInterval, impact: String) {
+        self.operation = operation
+        self.averageDuration = averageDuration
+        self.impact = impact
+    }
+}
+
 extension PerformanceAlert: CustomStringConvertible {
     public var description: String {
         "\(type.rawValue) in \(category.rawValue): \(message)"
@@ -716,5 +845,65 @@ extension PerformanceMonitor {
     /// Monitors a context for performance tracking
     public func monitorContext<T: AxiomContext>(_ context: T) async {
         // Set up performance monitoring for a context
+    }
+    
+    /// Gets a comprehensive performance report
+    public func getPerformanceReport() async -> PerformanceReport {
+        let overall = await getOverallMetrics()
+        
+        // Calculate total operations and average response time
+        let totalOps = overall.totalOperations
+        var totalDuration: TimeInterval = 0
+        var operationMetrics: [OperationMetrics] = []
+        
+        // Gather operation metrics from each category
+        for (category, categoryMetrics) in overall.categoryMetrics {
+            totalDuration += categoryMetrics.averageDuration * Double(categoryMetrics.totalOperations)
+            
+            // Create operation metrics for each category
+            if categoryMetrics.totalOperations > 0 {
+                operationMetrics.append(OperationMetrics(
+                    operation: category.rawValue,
+                    category: category,
+                    callCount: categoryMetrics.totalOperations,
+                    averageDuration: categoryMetrics.averageDuration,
+                    minDuration: categoryMetrics.minDuration,
+                    maxDuration: categoryMetrics.maxDuration
+                ))
+            }
+        }
+        
+        let avgResponseTime = totalOps > 0 ? totalDuration / Double(totalOps) : 0
+        
+        // Get p95 across all categories
+        let allP95s = overall.categoryMetrics.values.compactMap { $0.totalOperations > 0 ? $0.percentile95 : nil }
+        let p95ResponseTime = allP95s.isEmpty ? 0 : allP95s.max() ?? 0
+        
+        // Estimate error rate (would be tracked in real implementation)
+        let errorRate = 0.0 // Placeholder
+        
+        // Identify bottlenecks
+        let bottlenecks = operationMetrics
+            .filter { $0.averageDuration > avgResponseTime * 2 }
+            .sorted { $0.averageDuration > $1.averageDuration }
+            .prefix(5)
+            .map { metric in
+                BottleneckInfo(
+                    operation: metric.operation,
+                    averageDuration: metric.averageDuration,
+                    impact: metric.callCount > 100 ? "High frequency operation" : "Long running operation"
+                )
+            }
+        
+        return PerformanceReport(
+            totalOperations: totalOps,
+            averageResponseTime: avgResponseTime,
+            percentile95ResponseTime: p95ResponseTime,
+            errorRate: errorRate,
+            categoryMetrics: overall.categoryMetrics,
+            operationMetrics: operationMetrics,
+            bottlenecks: Array(bottlenecks),
+            generatedAt: Date()
+        )
     }
 }

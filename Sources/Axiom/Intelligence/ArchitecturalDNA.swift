@@ -103,6 +103,7 @@ public enum ComponentCategory: String, CaseIterable, Sendable {
     case validation = "validation"            // Validation and rule engines
     case transformation = "transformation"    // Data transformation components
     case orchestration = "orchestration"      // Workflow orchestration
+    case unknown = "unknown"                  // Unknown or unclassified components
 }
 
 /// Specific behaviors exhibited by components
@@ -1100,6 +1101,8 @@ public actor ArchitecturalDNAGenerator {
         case .intelligence:
             return .intelligence
         case .integration, .validation, .transformation, .orchestration:
+            return .application
+        case .unknown:
             return .application
         }
     }

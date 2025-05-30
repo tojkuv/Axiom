@@ -149,3 +149,27 @@ public typealias StateTransform<State, T> = @Sendable (inout State) throws -> T
 
 /// A closure that validates state
 public typealias StateValidator<State> = @Sendable (State) throws -> Void
+
+// MARK: - Relationship Types
+
+/// Information about a relationship between components
+public struct RelationshipInfo: Sendable {
+    public let sourceId: ComponentID
+    public let targetId: ComponentID
+    public let type: RelationshipType
+    public let direction: RelationshipDirection
+    
+    public init(sourceId: ComponentID, targetId: ComponentID, type: RelationshipType, direction: RelationshipDirection) {
+        self.sourceId = sourceId
+        self.targetId = targetId
+        self.type = type
+        self.direction = direction
+    }
+}
+
+/// Direction of a relationship
+public enum RelationshipDirection: String, CaseIterable, Sendable {
+    case incoming = "incoming"
+    case outgoing = "outgoing"
+    case bidirectional = "bidirectional"
+}

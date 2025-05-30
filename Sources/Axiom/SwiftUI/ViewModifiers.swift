@@ -72,7 +72,7 @@ public struct RequiresCapabilitiesModifier: ViewModifier {
             case .partial:
                 var anyAvailable = false
                 for capability in capabilities {
-                    if try await manager.hasCapability(capability) {
+                    if await manager.hasCapability(capability) {
                         anyAvailable = true
                         break
                     }
@@ -345,9 +345,19 @@ struct IntelligenceQueryButton: View {
                     Spacer()
                 }
                 .padding()
+                #if os(iOS)
                 .navigationBarItems(trailing: Button("Cancel") {
                     showingQueryInput = false
                 })
+                #else
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
+                            showingQueryInput = false
+                        }
+                    }
+                }
+                #endif
             }
         }
     }
@@ -381,7 +391,9 @@ struct QueryResponseView: View, Identifiable {
                 .padding()
             }
             .navigationTitle("Intelligence Response")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
         }
     }
 }
@@ -458,23 +470,33 @@ public struct AnalyticsModifier: ViewModifier {
 
 // MARK: - Error Handling Integration
 
+/// Wrapper for AxiomError to make it Identifiable
+private struct IdentifiableError: Identifiable {
+    let id = UUID()
+    let error: any AxiomError
+}
+
 /// Enhanced error handling with recovery actions
 public struct ErrorHandlingModifier: ViewModifier {
-    @Binding var error: AxiomError?
-    let recoveryHandler: ((AxiomError) async -> Bool)?
+    @Binding var error: (any AxiomError)?
+    let recoveryHandler: ((any AxiomError) async -> Bool)?
+    
+    @State private var identifiableError: IdentifiableError?
     
     public func body(content: Content) -> some View {
         content
-            .alert(item: $error) { error in
+            .alert(isPresented: .constant(error != nil)) {
                 Alert(
                     title: Text("Error"),
-                    message: Text(error.userMessage),
+                    message: Text(error?.userMessage ?? "An error occurred"),
                     primaryButton: .default(Text("Retry")) {
-                        Task {
-                            if let handler = recoveryHandler {
-                                let recovered = await handler(error)
-                                if recovered {
-                                    self.error = nil
+                        if let currentError = error {
+                            Task {
+                                if let handler = recoveryHandler {
+                                    let recovered = await handler(currentError)
+                                    if recovered {
+                                        self.error = nil
+                                    }
                                 }
                             }
                         }
@@ -540,7 +562,11 @@ struct LoadingOverlay: View {
                 }
             }
             .padding(24)
+            #if os(iOS)
             .background(Color(.systemBackground))
+            #else
+            .background(Color(NSColor.windowBackgroundColor))
+            #endif
             .cornerRadius(12)
             .shadow(radius: 8)
         }
@@ -562,7 +588,11 @@ struct LoadingFullScreen: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        #if os(iOS)
         .background(Color(.systemBackground))
+        #else
+        .background(Color(NSColor.windowBackgroundColor))
+        #endif
         .ignoresSafeArea()
     }
 }
@@ -593,8 +623,8 @@ public extension View {
     
     /// Adds error handling with recovery
     func errorHandled(
-        _ error: Binding<AxiomError?>,
-        recover: ((AxiomError) async -> Bool)? = nil
+        _ error: Binding<(any AxiomError)?>,
+        recover: ((any AxiomError) async -> Bool)? = nil
     ) -> some View {
         self.modifier(ErrorHandlingModifier(error: error, recoveryHandler: recover))
     }
@@ -717,7 +747,11 @@ private struct CardStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
             .padding(AxiomStyle.padding)
+            #if os(iOS)
             .background(Color(.secondarySystemBackground))
+            #else
+            .background(Color(NSColor.controlBackgroundColor))
+            #endif
             .cornerRadius(AxiomStyle.cornerRadius)
             .shadow(radius: AxiomStyle.shadowRadius)
     }
