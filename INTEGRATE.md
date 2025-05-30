@@ -58,7 +58,8 @@ AxiomTestApp/ExampleApp/
 ### **Phase 4: Document Patterns**
 1. **Capture Learnings** → Update context guides and documentation
 2. **Create Examples** → Working code serves as integration guide
-3. **Update STATUS.md** → Document progress and next priorities
+3. **Update ROADMAP.md** → Document progress and advance task priorities
+4. **Plan DEVELOP Tasks** → Identify framework improvements needed from integration discoveries
 
 ## ⚠️ Critical Integration Rules
 
@@ -156,11 +157,16 @@ cd Examples/ComparisonExample/
 
 ## 🎯 Integration Priorities
 
-### **Current Focus**
+### **Current Focus (from ROADMAP.md Priority Matrix)**
 1. **API Ergonomics** → Make common patterns more concise and error-proof
 2. **Error Messages** → Clear, actionable guidance when things go wrong
 3. **Performance Measurement** → Real metrics from actual usage scenarios
 4. **Documentation** → Capture real-world patterns and best practices
+
+### **Three-Cycle Integration**
+- **INTEGRATE → DEVELOP** → Discoveries from test app drive framework enhancements
+- **DEVELOP → INTEGRATE** → Validate new framework features in real iOS context
+- **INTEGRATE → REFACTOR** → Organize learnings and prepare for next cycle
 
 ### **Success Indicators**
 - ✅ AxiomTestApp builds and runs without issues
@@ -209,6 +215,7 @@ xcodebuild clean build
 3. **Measure improvements** → Concrete metrics prove API benefits
 4. **Maintain compatibility** → No breaking changes to working patterns
 5. **Error prevention first** → Eliminate entire classes of mistakes
+6. **Roadmap integration** → Feed discoveries back into unified development planning
 
 ## 🎯 Integration Goals
 
@@ -219,4 +226,25 @@ xcodebuild clean build
 - Real-world usage validates design decisions
 - Integration with existing iOS patterns is seamless
 
-**Next Actions**: Use AxiomTestApp → Identify verbose patterns → Prototype improvements → Integrate refinements → Measure benefits
+## 🚀 Automated Integration Process
+
+**INTEGRATE mode automatically follows unified roadmap priorities:**
+
+1. **Check ROADMAP.md** → Identify 🔄 (active) INTEGRATE tasks or highest priority ⏳ (queued) tasks
+2. **Validate Mode Selection** → Confirm task requires real-world testing and API refinement
+3. **Execute Test App Workflow** → Use AxiomTestApp to discover issues and validate improvements
+4. **Document Discoveries** → Capture pain points, API improvements, and new framework requirements
+5. **Update Progress** → Mark task complete (✅) in `/ROADMAP.md` and create new DEVELOP tasks
+
+**Current INTEGRATE Priority Order (from ROADMAP.md):**
+- **Priority 1**: Real-world validation of streamlined APIs and error handling
+- **Priority 2**: Performance measurement and developer experience metrics
+- **Priority 3**: Advanced feature validation and usage pattern discovery
+- **Priority 4**: Community readiness testing and migration pattern validation
+
+**Three-Cycle Flow:**
+- **Use INTEGRATE** → Discover framework limitations through real usage
+- **Create DEVELOP** → Plan framework improvements based on discoveries
+- **Trigger REFACTOR** → Organize learnings when cycles complete
+
+**Ready to automatically execute next INTEGRATE task from unified roadmap.**

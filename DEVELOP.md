@@ -40,19 +40,22 @@ You are Claude Code developing the Axiom framework core - the world's first inte
 
 ## 🔄 Development Workflow
 
-### **Core Development Process**
-1. **Check STATUS.md** → Understand current state and priorities
-2. **Reference Technical Specs** → Use `/Documentation/Technical/` for implementation details
-3. **Implement Features** → Build new protocols, capabilities, intelligence systems
-4. **Validate Architecture** → Ensure zero constraint violations
-5. **Write Tests** → >95% coverage required for all new functionality
-6. **Update Documentation** → 100% API documentation required
+### **Automated Development Process**
+1. **Check Unified Roadmap** → Automatically identify next task from `/ROADMAP.md` Priority Matrix
+2. **Select Active Task** → Pick highest priority 🔄 (active) or ⏳ (queued) task  
+3. **Confirm DEVELOP Mode** → Validate task requires framework core development
+4. **Reference Technical Specs** → Use `/Documentation/Technical/` for implementation details
+5. **Implement Features** → Build new protocols, capabilities, intelligence systems
+6. **Validate Architecture** → Ensure zero constraint violations
+7. **Write Tests** → >95% coverage required for all new functionality
+8. **Update Documentation** → 100% API documentation required
+9. **Mark Complete** → Update roadmap task status from 🔄 to ✅ in `/ROADMAP.md`
 
 ### **Critical Locations**
-- **Framework Code**: `/AxiomFramework/Sources/Axiom/`
-- **Technical Specs**: `/AxiomFramework/Documentation/Technical/`
-- **Implementation Guide**: `/AxiomFramework/Documentation/Implementation/IMPLEMENTATION_ROADMAP.md`
-- **API Reference**: `/AxiomFramework/Documentation/Technical/API_DESIGN_SPECIFICATION.md`
+- **Framework Code**: `/Sources/Axiom/`
+- **Unified Roadmap**: `/ROADMAP.md` (central planning and task selection)
+- **Technical Specs**: `/Documentation/Technical/`
+- **API Reference**: `/Documentation/Technical/API_DESIGN_SPECIFICATION.md`
 
 ## 🛠️ Development Standards
 
@@ -135,9 +138,9 @@ extension AxiomIntelligence {
 - **Macro System**: `/Documentation/Technical/MACRO_SYSTEM_SPECIFICATION.md`
 
 ### **Implementation Guides**
-- **Roadmap**: `/AxiomFramework/Documentation/Implementation/IMPLEMENTATION_ROADMAP.md` (150+ tasks)
-- **Guidelines**: `/AxiomFramework/Documentation/Implementation/DEVELOPMENT_GUIDELINES.md`
-- **Testing**: `/AxiomFramework/Documentation/Testing/TESTING_STRATEGY.md`
+- **Unified Roadmap**: `/ROADMAP.md` (central planning with 150+ tasks and three-cycle integration)
+- **Development Guidelines**: `/AxiomFramework/Documentation/Implementation/DEVELOPMENT_GUIDELINES.md`
+- **Testing Strategy**: `/Documentation/Technical/TESTING_STRATEGY.md`
 
 ## ✅ Definition of Done
 
@@ -165,4 +168,25 @@ extension AxiomIntelligence {
 - Optimizes performance automatically
 - Enables perfect human-AI collaboration
 
-**Next Actions**: Check STATUS.md priorities → Implement next framework feature → Validate and test → Update progress
+## 🚀 Automated Task Selection
+
+**Development process automatically follows unified roadmap priorities:**
+
+1. **Check Unified Roadmap** → Read `/ROADMAP.md` Priority Matrix for current tasks
+2. **Identify DEVELOP Tasks** → Find tasks marked 🔄 (active) requiring framework core development
+3. **Validate Mode Selection** → Confirm task needs protocol/capability/intelligence implementation
+4. **Execute Next Task** → Implement the selected task following development standards
+5. **Update Progress** → Mark task complete (✅) in `/ROADMAP.md` and advance to next priority
+
+**Current DEVELOP Priority Order (from ROADMAP.md):**
+- **Priority 1**: Framework fixes discovered through integration testing
+- **Priority 2**: Enhanced error handling and developer guidance systems
+- **Priority 3**: Advanced intelligence features and capability expansion
+- **Priority 4**: Performance optimization and self-optimizing capabilities
+
+**Three-Cycle Integration:**
+- **DEVELOP** → Implement framework enhancements
+- **INTEGRATE** → Validate in real applications  
+- **REFACTOR** → Organize for next development phase
+
+**Ready to automatically execute next DEVELOP task from unified roadmap.**

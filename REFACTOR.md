@@ -95,10 +95,10 @@ Current State:
 ## 🔄 Refactor Workflow
 
 ### **Phase 1: Assessment**
-1. **Review Current State** → Read STATUS.md and identify completed phases
+1. **Review Current State** → Read ROADMAP.md and identify completed phases
 2. **Analyze Documentation** → Find outdated, redundant, or missing content
 3. **Identify Patterns** → Look for recurring organizational needs
-4. **Plan Restructuring** → Design improved organization
+4. **Plan Restructuring** → Design improved organization for next development cycle
 
 ### **Phase 2: Reorganization** 
 1. **Archive Completed** → Move finished phase documentation to Archive/
@@ -110,7 +110,7 @@ Current State:
 1. **Prepare New Guides** → Create documentation for upcoming work
 2. **Update References** → Ensure all links and references are correct
 3. **Validate Structure** → Confirm organization supports efficient development
-4. **Document Changes** → Update STATUS.md with new organization
+4. **Document Changes** → Update ROADMAP.md with new organization and next phase planning
 
 ### **Phase 4: Maintenance**
 1. **Monitor Usage** → Track which documentation is actively used
@@ -141,7 +141,7 @@ Current State:
 ## 🎯 Current Refactor Needs
 
 ### **Immediate Opportunities**
-1. **Consolidate Status Files** → Single global STATUS.md ✅ COMPLETED
+1. **Unified Planning Document** → Create ROADMAP.md combining status and roadmap ✅ COMPLETED
 2. **Organize Prompts** → Split PROMPT.md into focused guides ✅ COMPLETED
 3. **AxiomTestApp Documentation** → Comprehensive app-specific documentation ✅ COMPLETED
 4. **Clean Archive** → Move completed phase docs to proper archive structure
@@ -403,7 +403,7 @@ swift test --enable-code-coverage | # Check coverage metrics
 2. **App Discoveries** → Update both app usage patterns AND framework enhancement backlog
 3. **Performance Updates** → Update both framework targets AND app measurement guides
 4. **New Features** → Document in framework specs AND create app integration examples
-5. **Major Updates** → Update top-level README.md to reflect current project state
+5. **Major Updates** → Update top-level README.md AND ROADMAP.md to reflect current project state
 
 ### **Context Management Principles** 🧠
 
@@ -460,4 +460,31 @@ docs_health_check() {
 - **Maintained Cross-References** → Links between systems work and provide value
 - **Unified Development Flow** → Documentation supports seamless framework → app → framework iteration
 
-**Next Actions**: Execute AxiomFramework/Documentation reorganization → Validate cross-system consistency → Establish unified maintenance workflow → Monitor context management effectiveness
+## 🚀 Automated Refactor Process
+
+**REFACTOR mode automatically follows unified roadmap priorities:**
+
+1. **Check ROADMAP.md** → Identify phase completion triggers or organizational needs
+2. **Assess Current State** → Review documentation health and development environment
+3. **Execute Reorganization** → Archive completed work, organize active content, prepare next phase
+4. **Validate Structure** → Ensure documentation supports efficient development workflows
+5. **Update Planning** → Mark tasks complete (✅) in `/ROADMAP.md` and prepare for next cycle
+
+**Current REFACTOR Priority Order (from ROADMAP.md):**
+- **Priority 1**: Archive completed development phase documentation
+- **Priority 2**: Organize framework documentation for efficiency
+- **Priority 3**: Cross-system consistency validation and maintenance
+- **Priority 4**: Prepare structure for advanced features and community expansion
+
+**Three-Cycle Integration:**
+- **DEVELOP/INTEGRATE → REFACTOR** → Organize learnings from development cycles
+- **REFACTOR → DEVELOP** → Clean structure enables efficient framework development
+- **REFACTOR → INTEGRATE** → Well-organized documentation supports testing workflows
+
+**Refactor Triggers:**
+- **Phase Completion** → Major development phases finished, need organization
+- **Documentation Drift** → Content becomes outdated or poorly organized
+- **Development Inefficiency** → Structure is hindering development velocity
+- **Cross-System Issues** → Framework and app documentation inconsistencies
+
+**Ready to automatically execute next REFACTOR task from unified roadmap.**
