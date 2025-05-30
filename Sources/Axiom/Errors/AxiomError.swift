@@ -197,61 +197,6 @@ public enum DomainError: AxiomError {
     }
 }
 
-// MARK: - Intelligence Errors
-
-/// Errors related to the intelligence system
-public enum IntelligenceError: AxiomError {
-    case predictionFailed(String)
-    case analysisTimeout(TimeInterval)
-    case configurationInvalid(IntelligenceConfiguration)
-    case featureUnavailable(IntelligenceFeature)
-    
-    public var category: ErrorCategory { .intelligence }
-    
-    public var severity: ErrorSeverity {
-        switch self {
-        case .predictionFailed:
-            return .warning
-        case .analysisTimeout:
-            return .warning
-        case .configurationInvalid:
-            return .error
-        case .featureUnavailable:
-            return .info
-        }
-    }
-    
-    public var context: ErrorContext {
-        ErrorContext(component: ComponentID("IntelligenceSystem"))
-    }
-    
-    public var recoveryActions: [RecoveryAction] {
-        switch self {
-        case .predictionFailed:
-            return [.retry(after: 5.0), .ignore]
-        case .analysisTimeout:
-            return [.retry(after: 3.0), .fallback("Use cached results")]
-        case .configurationInvalid:
-            return [.reconfigure("Fix intelligence configuration")]
-        case .featureUnavailable:
-            return [.ignore, .fallback("Use basic functionality")]
-        }
-    }
-    
-    public var errorDescription: String? {
-        switch self {
-        case .predictionFailed(let reason):
-            return "Prediction failed: \(reason)"
-        case .analysisTimeout(let duration):
-            return "Analysis timed out after \(duration) seconds"
-        case .configurationInvalid:
-            return "Invalid intelligence configuration"
-        case .featureUnavailable(let feature):
-            return "Intelligence feature '\(feature.rawValue)' is not available"
-        }
-    }
-}
-
 // MARK: - Generic Error
 
 /// A generic error wrapper for non-AxiomError types
@@ -283,18 +228,6 @@ public struct GenericError: AxiomError {
 
 // These will be properly implemented in their respective modules
 
-
-
-
 public struct BusinessRule: Sendable {
     let description: String
-}
-
-public struct IntelligenceConfiguration: Sendable {}
-
-public enum IntelligenceFeature: String, Sendable {
-    case prediction
-    case analysis
-    case optimization
-    case naturalLanguage
 }

@@ -31,7 +31,7 @@ public extension View {
     }
     
     /// Adds error handling overlay for context state
-    func axiomErrorOverlay<T: ContextState>(_ state: T) -> some View {
+    func axiomErrorOverlay(_ state: DefaultContextState) -> some View {
         self.overlay(alignment: .top) {
             if let error = state.lastError {
                 ErrorBanner(error: error) {
@@ -44,7 +44,7 @@ public extension View {
     }
     
     /// Adds loading overlay for context state
-    func axiomLoadingOverlay<T: ContextState>(_ state: T) -> some View {
+    func axiomLoadingOverlay(_ state: DefaultContextState) -> some View {
         self.overlay {
             if state.isLoading {
                 ZStack {

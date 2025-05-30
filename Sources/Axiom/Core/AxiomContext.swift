@@ -33,41 +33,13 @@ public protocol AxiomContext: ObservableObject {
     func handleError(_ error: any AxiomError) async
 }
 
-// MARK: - Context State
-
-/// Common state properties for contexts
-@MainActor
-public protocol ContextState: ObservableObject {
-    var isLoading: Bool { get }
-    var lastError: (any AxiomError)? { get set }
-}
-
 // MARK: - Default Context State
 
 /// Default implementation of context state
 @MainActor
-public class DefaultContextState: ObservableObject, ContextState {
+public class DefaultContextState: ObservableObject {
     @Published public var isLoading: Bool = false
     @Published public var lastError: (any AxiomError)?
-    
-    public init() {}
-}
-
-
-// MARK: - AxiomIntelligence Protocol (Placeholder)
-
-/// Placeholder for the intelligence system - will be fully implemented later
-public protocol AxiomIntelligence: Actor {
-    var configuration: IntelligenceConfiguration { get set }
-    var enabledFeatures: Set<IntelligenceFeature> { get set }
-}
-
-// MARK: - Default Intelligence Implementation
-
-/// A default implementation of AxiomIntelligence for initial development
-public actor DefaultAxiomIntelligence: AxiomIntelligence {
-    public var configuration = IntelligenceConfiguration()
-    public var enabledFeatures = Set<IntelligenceFeature>()
     
     public init() {}
 }

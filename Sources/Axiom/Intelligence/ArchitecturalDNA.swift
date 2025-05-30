@@ -757,32 +757,7 @@ public enum WarningType: String, CaseIterable, Sendable {
     case cohesion = "cohesion"
 }
 
-/// Architectural recommendation
-public struct ArchitecturalRecommendation: Sendable {
-    public let type: RecommendationType
-    public let title: String
-    public let description: String
-    public let impact: ImpactLevel
-    public let effort: EffortLevel
-    
-    public init(type: RecommendationType, title: String, description: String, impact: ImpactLevel, effort: EffortLevel) {
-        self.type = type
-        self.title = title
-        self.description = description
-        self.impact = impact
-        self.effort = effort
-    }
-}
-
-public enum RecommendationType: String, CaseIterable, Sendable {
-    case optimization = "optimization"
-    case refactoring = "refactoring"
-    case enhancement = "enhancement"
-    case migration = "migration"
-    case security = "security"
-    case performance = "performance"
-    case maintainability = "maintainability"
-}
+// Note: ArchitecturalRecommendation is defined in QueryEngine.swift with full implementation
 
 public enum ImpactLevel: String, CaseIterable, Sendable {
     case low = "low"
