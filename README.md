@@ -49,16 +49,22 @@ Complete architecture and specifications finalized. Development documentation st
 - **Zero surprise development** - no unexpected architectural problems
 - **120x faster** state access with full optimization
 
-## 📚 Implementation Documentation
+## 🚀 Getting Started
 
-### Essential References
-- **[Documentation/IMPLEMENTATION_INDEX.md](Documentation/IMPLEMENTATION_INDEX.md)** - Quick reference guide
-- **[Documentation/IMPLEMENTATION_ROADMAP.md](Documentation/IMPLEMENTATION_ROADMAP.md)** - 150+ development tasks
-- **[Documentation/Technical/API_DESIGN_SPECIFICATION.md](Documentation/Technical/API_DESIGN_SPECIFICATION.md)** - Complete API definitions
+```bash
+# Open in Xcode
+open Axiom.xcworkspace
 
-### Development Standards
-- **[Documentation/DEVELOPMENT_GUIDELINES.md](Documentation/DEVELOPMENT_GUIDELINES.md)** - Code standards
-- **[Documentation/TESTING_STRATEGY.md](Documentation/TESTING_STRATEGY.md)** - Testing framework
+# Or use the setup script
+./setup_xcode_project.sh
+```
+
+## 📦 What's Included
+
+- **Axiom Framework** - The core intelligent framework
+- **Example Applications** - See `Examples/` directory
+- **Complete Test Suite** - Comprehensive testing infrastructure
+- **Swift Macros** - Boilerplate elimination with @Client, @Capabilities, etc.
 
 ## 🔄 Development Status
 

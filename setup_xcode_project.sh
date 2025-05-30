@@ -16,16 +16,22 @@ if ! command -v xed &> /dev/null; then
     exit 1
 fi
 
-# Open the package in Xcode
-echo "📦 Opening Package.swift in Xcode..."
-xed .
+# Open the workspace in Xcode
+echo "📦 Opening Axiom.xcworkspace in Xcode..."
+open Axiom.xcworkspace
 
 echo ""
-echo "✅ Xcode should now be opening with the Axiom package"
+echo "✅ Xcode should now be opening with the complete Axiom workspace"
 echo ""
 echo "Quick tips:"
-echo "  • Press Cmd+B to build the framework"
-echo "  • Press Cmd+U to run all tests"
-echo "  • Select 'AxiomFoundationExample' scheme to run the example app"
+echo "  • Select 'Axiom-Framework' scheme and press Cmd+B to build"
+echo "  • Select 'All-Tests' scheme and press Cmd+U to run all tests"
+echo "  • Select 'AxiomFoundationExample' scheme and press Cmd+R to run the example"
 echo ""
-echo "For more details, see CREATE_XCODE_PROJECT.md"
+echo "Available schemes:"
+echo "  • Axiom-Framework - Build and test the framework"
+echo "  • AxiomFoundationExample - Run the complete example app"
+echo "  • All-Tests - Run all test suites at once"
+echo "  • ExampleApp - Simple iOS app template"
+echo ""
+echo "For more details, see README.md and STATUS.md"

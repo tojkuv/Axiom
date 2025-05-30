@@ -2,6 +2,15 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:">
+      location = "group:Package.swift">
+   </FileRef>
+   <FileRef
+      location = "group:ExampleApp/ExampleApp.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:README.md">
+   </FileRef>
+   <FileRef
+      location = "group:XCODE_SETUP.md">
    </FileRef>
 </Workspace>
