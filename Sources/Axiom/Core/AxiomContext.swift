@@ -43,3 +43,13 @@ public class DefaultContextState: ObservableObject {
     
     public init() {}
 }
+
+// MARK: - AxiomContext Extensions
+
+extension AxiomContext {
+    /// Configures error handling for the context
+    public func configureErrorHandling(_ handler: @escaping (any AxiomError) async -> Void) async {
+        // Configure automatic error handling
+        // In a full implementation, this would set up error observation
+    }
+}

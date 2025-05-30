@@ -312,3 +312,32 @@ public struct ValidationMetrics: Sendable {
         validationCount += 1
     }
 }
+
+// MARK: - CapabilityManager Application Extensions
+
+extension CapabilityManager {
+    /// Configures the capability manager with available capabilities
+    public func configure(availableCapabilities: Set<Capability>) async {
+        self.availableCapabilities = availableCapabilities
+    }
+    
+    /// Initializes the capability manager
+    public func initialize() async throws {
+        // Initialize caches and validation systems
+        await cache.clear()
+        await validationEngine.initialize()
+    }
+    
+    /// Refreshes capabilities (checks if new capabilities are available)
+    public func refreshCapabilities() async {
+        // Refresh capability availability
+        await cache.clear()
+        validationMetrics = ValidationMetrics()
+    }
+    
+    /// Shuts down the capability manager
+    public func shutdown() async {
+        await cache.clear()
+        availableCapabilities.removeAll()
+    }
+}

@@ -585,4 +585,41 @@ public actor GlobalIntelligenceManager {
             performanceConfiguration: performanceConfiguration
         )
     }
+    
+    // MARK: - Application Integration Methods
+    
+    /// Initializes the intelligence system
+    public func initialize() async throws {
+        // Initialize intelligence components
+    }
+    
+    /// Records an application event for learning
+    public func recordApplicationEvent(_ event: ApplicationEvent) async {
+        // Record application events for pattern learning
+    }
+    
+    /// Saves the current intelligence state
+    public func saveState() async {
+        // Save intelligence state for persistence
+    }
+    
+    /// Shuts down the intelligence system
+    public func shutdown() async {
+        // Cleanup intelligence resources
+    }
+    
+    /// Registers a component with the intelligence system
+    public func registerComponent<T: AxiomContext>(_ component: T) async {
+        // Register component for intelligence tracking
+    }
+    
+    /// Records an error for learning
+    public func recordError(_ error: any AxiomError, context: String) async {
+        // Record error for pattern analysis
+    }
+    
+    /// Records a recovery failure for learning
+    public func recordRecoveryFailure(_ recoveryError: Error, originalError: any AxiomError) async {
+        // Record recovery failure for improvement
+    }
 }

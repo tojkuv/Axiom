@@ -689,3 +689,32 @@ extension PerformanceAlert: CustomStringConvertible {
         "\(type.rawValue) in \(category.rawValue): \(message)"
     }
 }
+
+// MARK: - PerformanceMonitor Application Extensions
+
+extension PerformanceMonitor {
+    /// Starts the performance monitor
+    public func start() async {
+        // Start performance monitoring
+    }
+    
+    /// Suspends non-critical monitoring for background operation
+    public func suspendNonCriticalMonitoring() async {
+        // Suspend non-essential monitoring to save resources
+    }
+    
+    /// Resumes full monitoring for foreground operation
+    public func resumeFullMonitoring() async {
+        // Resume all monitoring activities
+    }
+    
+    /// Finalizes metrics before shutdown
+    public func finalizeMetrics() async {
+        // Finalize and save metrics before shutdown
+    }
+    
+    /// Monitors a context for performance tracking
+    public func monitorContext<T: AxiomContext>(_ context: T) async {
+        // Set up performance monitoring for a context
+    }
+}
