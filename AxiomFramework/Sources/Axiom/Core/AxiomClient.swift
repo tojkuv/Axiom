@@ -8,6 +8,120 @@ public protocol ClientDependencies: Sendable {
     init()
 }
 
+// MARK: - Generic Client Container (Eliminates Boilerplate)
+
+/// ENHANCED: Generic client container that eliminates the need for manual client container types
+/// Replaces verbose manual container structs with a simple generic solution
+public struct ClientContainer<Client1: AxiomClient>: ClientDependencies {
+    public let client1: Client1
+    
+    public init() {
+        fatalError("ClientContainer should be initialized with actual clients")
+    }
+    
+    public init(_ client1: Client1) {
+        self.client1 = client1
+    }
+}
+
+/// Two-client container for contexts that manage multiple clients
+public struct ClientContainer2<Client1: AxiomClient, Client2: AxiomClient>: ClientDependencies {
+    public let client1: Client1
+    public let client2: Client2
+    
+    public init() {
+        fatalError("ClientContainer2 should be initialized with actual clients")
+    }
+    
+    public init(_ client1: Client1, _ client2: Client2) {
+        self.client1 = client1
+        self.client2 = client2
+    }
+}
+
+/// Three-client container for contexts that manage multiple clients
+public struct ClientContainer3<Client1: AxiomClient, Client2: AxiomClient, Client3: AxiomClient>: ClientDependencies {
+    public let client1: Client1
+    public let client2: Client2
+    public let client3: Client3
+    
+    public init() {
+        fatalError("ClientContainer3 should be initialized with actual clients")
+    }
+    
+    public init(_ client1: Client1, _ client2: Client2, _ client3: Client3) {
+        self.client1 = client1
+        self.client2 = client2
+        self.client3 = client3
+    }
+}
+
+/// Named client container that provides property access by name instead of position
+/// Use this when you want meaningful property names instead of client1, client2, etc.
+public struct NamedClientContainer: ClientDependencies {
+    private var clients: [String: any AxiomClient] = [:]
+    
+    public init() {}
+    
+    public init(_ clients: [String: any AxiomClient]) {
+        self.clients = clients
+    }
+    
+    /// Add a client with a specific name
+    public mutating func add<T: AxiomClient>(_ client: T, named name: String) {
+        clients[name] = client
+    }
+    
+    /// Get a client by name with type safety
+    public func get<T: AxiomClient>(_ name: String, as type: T.Type) -> T? {
+        return clients[name] as? T
+    }
+    
+    /// Get a client by name (unsafe - use with caution)
+    public func get(_ name: String) -> (any AxiomClient)? {
+        return clients[name]
+    }
+}
+
+// MARK: - Client Container Convenience Extensions
+
+/// Convenience methods for easier access to clients in containers
+extension ClientContainer {
+    /// Direct access to the single client with a more natural name
+    public var client: Client1 {
+        client1
+    }
+}
+
+extension ClientContainer2 {
+    /// Access first client with meaningful name
+    public var firstClient: Client1 {
+        client1
+    }
+    
+    /// Access second client with meaningful name
+    public var secondClient: Client2 {
+        client2
+    }
+}
+
+extension ClientContainer3 {
+    /// Access first client with meaningful name
+    public var firstClient: Client1 {
+        client1
+    }
+    
+    /// Access second client with meaningful name
+    public var secondClient: Client2 {
+        client2
+    }
+    
+    /// Access third client with meaningful name
+    public var thirdClient: Client3 {
+        client3
+    }
+}
+
 // MARK: - AxiomClient Protocol
 
 /// The core protocol for all state-managing clients in the Axiom framework

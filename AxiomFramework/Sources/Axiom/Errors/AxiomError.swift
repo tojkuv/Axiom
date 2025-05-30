@@ -270,6 +270,140 @@ public struct GenericError: AxiomError {
     }
 }
 
+// MARK: - Context Error (Simplified Wrapper)
+
+/// ENHANCED: A context-aware error wrapper that eliminates boilerplate
+/// Automatically infers component information and provides sensible defaults
+public struct ContextError: AxiomError {
+    public let id = UUID()
+    public let underlyingError: Error
+    public let componentName: String
+    public let category: ErrorCategory
+    public let severity: ErrorSeverity
+    public let customUserMessage: String?
+    public let customRecoveryActions: [RecoveryAction]?
+    
+    /// Simple initializer for contexts - minimal boilerplate
+    public init(
+        _ error: Error,
+        in componentName: String,
+        category: ErrorCategory = .architectural,
+        severity: ErrorSeverity = .error,
+        userMessage: String? = nil,
+        recoveryActions: [RecoveryAction]? = nil
+    ) {
+        self.underlyingError = error
+        self.componentName = componentName
+        self.category = category
+        self.severity = severity
+        self.customUserMessage = userMessage
+        self.customRecoveryActions = recoveryActions
+    }
+    
+    /// Automatic initializer that infers component name from context type
+    public init<T: AxiomContext>(
+        _ error: Error,
+        in contextType: T.Type,
+        category: ErrorCategory = .architectural,
+        severity: ErrorSeverity = .error,
+        userMessage: String? = nil,
+        recoveryActions: [RecoveryAction]? = nil
+    ) {
+        let typeName = String(describing: contextType)
+        self.init(
+            error,
+            in: typeName,
+            category: category,
+            severity: severity,
+            userMessage: userMessage,
+            recoveryActions: recoveryActions
+        )
+    }
+    
+    public var context: ErrorContext {
+        ErrorContext(
+            component: ComponentID(componentName),
+            timestamp: Date(),
+            additionalInfo: [
+                "underlying_error": String(describing: underlyingError),
+                "error_type": String(describing: type(of: underlyingError))
+            ]
+        )
+    }
+    
+    public var recoveryActions: [RecoveryAction] {
+        customRecoveryActions ?? defaultRecoveryActions
+    }
+    
+    private var defaultRecoveryActions: [RecoveryAction] {
+        switch severity {
+        case .info, .warning:
+            return [.ignore, .retry(after: 1.0)]
+        case .error:
+            return [.retry(after: 2.0), .escalate]
+        case .critical, .fatal:
+            return [.escalate, .fallback("Use safe mode")]
+        }
+    }
+    
+    public var userMessage: String {
+        customUserMessage ?? generateUserMessage()
+    }
+    
+    private func generateUserMessage() -> String {
+        switch category {
+        case .architectural:
+            return "A system error occurred. Please try again or contact support if the issue persists."
+        case .capability:
+            return "You don't have the required permissions for this action. Please contact your administrator."
+        case .domain:
+            return "The action couldn't be completed due to business rules. Please check your input and try again."
+        case .intelligence:
+            return "The AI assistant encountered an issue. Please try rephrasing your request."
+        case .performance:
+            return "The system is running slowly. Please wait a moment and try again."
+        case .validation:
+            return "Please check your input and correct any errors before continuing."
+        case .state:
+            return "A synchronization issue occurred. Please refresh and try again."
+        case .configuration:
+            return "There's a configuration issue. Please contact support for assistance."
+        }
+    }
+    
+    public var errorDescription: String? {
+        "[\(componentName)] \(category.rawValue.capitalized) error: \(underlyingError.localizedDescription)"
+    }
+}
+
+// MARK: - Context Error Helper Extension
+
+/// Extension to AxiomContext for easy error creation
+extension AxiomContext {
+    /// Creates a context error with automatic component name inference
+    public func createError(
+        _ error: Error,
+        category: ErrorCategory = .architectural,
+        severity: ErrorSeverity = .error,
+        userMessage: String? = nil,
+        recoveryActions: [RecoveryAction]? = nil
+    ) -> ContextError {
+        return ContextError(
+            error,
+            in: Self.self,
+            category: category,
+            severity: severity,
+            userMessage: userMessage,
+            recoveryActions: recoveryActions
+        )
+    }
+    
+    /// Quick error creation for common cases
+    public func wrapError(_ error: Error) -> ContextError {
+        return createError(error)
+    }
+}
+
 // MARK: - Supporting Types (Placeholder implementations)
 
 // These will be properly implemented in their respective modules

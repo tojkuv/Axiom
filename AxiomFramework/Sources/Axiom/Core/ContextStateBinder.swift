@@ -122,6 +122,74 @@ extension AxiomContext {
         
         await binder.updateAllBindings()
     }
+    
+    /// ENHANCED: Complete client setup with automatic observer registration and state binding
+    /// Eliminates the need for manual addObserver() calls
+    public func setupClient<ClientType: AxiomClient, Value: Sendable>(
+        _ client: ClientType,
+        bindingProperty property: KeyPath<ClientType.State, Value>,
+        to contextProperty: ReferenceWritableKeyPath<Self, Value>,
+        using binder: ContextStateBinder
+    ) async {
+        
+        // 1. Auto-register as observer (eliminates manual addObserver call)
+        await client.addObserver(self)
+        
+        // 2. Set up automatic state binding
+        binder.bind(
+            client: client,
+            clientPath: property,
+            context: self,
+            contextPath: contextProperty
+        )
+        
+        // 3. Perform initial state synchronization
+        await binder.updateAllBindings()
+    }
+    
+    /// Multiple property binding setup for complex client-context relationships
+    public func setupClientWithMultipleBindings<ClientType: AxiomClient>(
+        _ client: ClientType,
+        using binder: ContextStateBinder,
+        bindings: [ClientStateBinding<ClientType, Self>]
+    ) async {
+        
+        // Auto-register as observer
+        await client.addObserver(self)
+        
+        // Set up all state bindings
+        for binding in bindings {
+            await binding.setupBinding(client, self, binder)
+        }
+        
+        // Perform initial state synchronization
+        await binder.updateAllBindings()
+    }
+}
+
+// MARK: - Client State Binding Helper
+
+/// Helper type for declaring multiple state bindings in a type-safe way
+public struct ClientStateBinding<ClientType: AxiomClient, ContextType: AxiomContext> {
+    let clientPath: PartialKeyPath<ClientType.State>
+    let contextPath: PartialKeyPath<ContextType>
+    let setupBinding: (ClientType, ContextType, ContextStateBinder) async -> Void
+    
+    public init<Value: Sendable>(
+        clientProperty: KeyPath<ClientType.State, Value>,
+        contextProperty: ReferenceWritableKeyPath<ContextType, Value>
+    ) {
+        self.clientPath = clientProperty
+        self.contextPath = contextProperty
+        self.setupBinding = { client, context, binder in
+            await binder.bind(
+                client: client,
+                clientPath: clientProperty,
+                context: context,
+                contextPath: contextProperty
+            )
+        }
+    }
 }
 
 // MARK: - Usage Examples in Comments
@@ -181,5 +249,56 @@ extension AxiomContext {
      }
      
      // All other AxiomContext methods...
+ }
+ 
+ USAGE EXAMPLE - NEW ENHANCED API (Complete Auto-Setup):
+ 
+ @MainActor
+ final class MyContext: AxiomContext {
+     @Published var currentCount: Int = 0  // Automatically synced!
+     
+     let counterClient: CounterClient
+     let intelligence: AxiomIntelligence
+     let stateBinder = ContextStateBinder()
+     
+     var clients: MyClients {
+         MyClients(counterClient: counterClient)
+     }
+     
+     init(counterClient: CounterClient, intelligence: AxiomIntelligence) {
+         self.counterClient = counterClient
+         self.intelligence = intelligence
+         
+         Task {
+             // NEW: Single method does observer + binding + sync!
+             await setupClient(
+                 counterClient,
+                 bindingProperty: \.count,
+                 to: \.currentCount,
+                 using: stateBinder
+             )
+         }
+     }
+     
+     func onClientStateChange<T: AxiomClient>(_ client: T) async {
+         // Automatic binding handles state sync!
+         await stateBinder.updateAllBindings()
+     }
+     
+     // All other AxiomContext methods...
+ }
+ 
+ MULTIPLE PROPERTIES EXAMPLE:
+ 
+ Task {
+     await setupClientWithMultipleBindings(
+         counterClient,
+         using: stateBinder,
+         bindings: [
+             ClientStateBinding(clientProperty: \.count, contextProperty: \.currentCount),
+             ClientStateBinding(clientProperty: \.isProcessing, contextProperty: \.isLoading),
+             ClientStateBinding(clientProperty: \.lastError, contextProperty: \.lastError)
+         ]
+     )
  }
 */

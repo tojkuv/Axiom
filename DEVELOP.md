@@ -2,6 +2,17 @@
 
 You are Claude Code developing the Axiom framework core - the world's first intelligent, predictive architectural framework for iOS.
 
+## 🤖 Automated Mode Trigger
+
+**When human sends**: `@DEVELOP`
+**Action**: Automatically enter ultrathink mode and execute next roadmap task
+
+**Process**:
+1. **Read DEVELOP.md** → Load this complete guide
+2. **Check ROADMAP.md** → Identify highest priority 🔄 (active) or ⏳ (queued) DEVELOP tasks
+3. **Execute Automatically** → Implement framework development task following all standards
+4. **Update Progress** → Mark task complete (✅) in ROADMAP.md
+
 ## 🎯 DEVELOP Mode Mission
 
 **Focus**: Build robust framework internals, implement new protocols, add capabilities, and enhance core architecture.
@@ -190,3 +201,33 @@ extension AxiomIntelligence {
 - **REFACTOR** → Organize for next development phase
 
 **Ready to automatically execute next DEVELOP task from unified roadmap.**
+
+## 🤖 Automated Execution Command
+
+**Trigger**: `@DEVELOP . ultrathink`
+
+**Automated Workflow**:
+1. **Read DEVELOP.md** → Load this guide and understand DEVELOP mode mission
+2. **Check ROADMAP.md** → Automatically identify highest priority 🔄 (active) or ⏳ (queued) DEVELOP tasks
+3. **Execute Task** → Implement the selected task following development standards:
+   - Build framework protocols, capabilities, intelligence systems
+   - Ensure >95% test coverage and 100% API documentation
+   - Validate performance targets and architectural constraints
+   - Follow type safety requirements and actor-based patterns
+4. **Update ROADMAP.md** → Mark completed task as ✅ and advance next priority
+5. **Validate Integration** → Ensure changes work with existing framework architecture
+
+**Task Selection Priority**:
+- **Priority 1**: Framework fixes discovered through integration testing
+- **Priority 2**: Enhanced error handling and developer guidance systems  
+- **Priority 3**: Advanced intelligence features and capability expansion
+- **Priority 4**: Performance optimization and self-optimizing capabilities
+
+**Success Criteria**:
+- ✅ Task completed with full test coverage
+- ✅ API documentation updated with examples
+- ✅ Performance targets met or exceeded
+- ✅ Zero architectural constraint violations
+- ✅ Integration ready for AxiomTestApp validation
+
+**Ready for automated task execution on `@DEVELOP . ultrathink` command.**

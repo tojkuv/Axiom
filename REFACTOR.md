@@ -2,6 +2,17 @@
 
 You are Claude Code organizing and preparing the Axiom framework for new development cycles through documentation restructuring and code organization.
 
+## 🤖 Automated Mode Trigger
+
+**When human sends**: `@REFACTOR`
+**Action**: Automatically enter ultrathink mode and execute next roadmap task
+
+**Process**:
+1. **Read REFACTOR.md** → Load this complete guide
+2. **Check ROADMAP.md** → Identify organizational needs or phase completion triggers
+3. **Execute Reorganization** → Archive, organize, and prepare documentation structure
+4. **Update Progress** → Mark task complete (✅) in ROADMAP.md
+
 ## 🎯 REFACTOR Mode Mission
 
 **Focus**: Organize documentation, restructure for development efficiency, prepare for new phases, and maintain clean development environment.
@@ -488,3 +499,50 @@ docs_health_check() {
 - **Cross-System Issues** → Framework and app documentation inconsistencies
 
 **Ready to automatically execute next REFACTOR task from unified roadmap.**
+
+## 🤖 Automated Execution Command
+
+**Trigger**: `@REFACTOR . ultrathink`
+
+**Automated Workflow**:
+1. **Read REFACTOR.md** → Load this guide and understand REFACTOR mode mission
+2. **Check ROADMAP.md** → Identify phase completion triggers or organizational needs
+3. **Assess Current State** → Review documentation health and development environment:
+   - Check for completed development phases needing archival
+   - Identify outdated, redundant, or poorly organized content
+   - Validate dual documentation system consistency
+   - Analyze development workflow efficiency
+4. **Execute Reorganization** → Archive, organize, and prepare:
+   - Move completed phase docs to Archive/ directories
+   - Reorganize scattered files into standard categories
+   - Validate cross-system consistency and fix broken references
+   - Update documentation templates and navigation
+5. **Update ROADMAP.md** → Mark completed tasks as ✅ and prepare for next cycle
+6. **Validate Structure** → Ensure documentation supports efficient development
+
+**Task Selection Priority**:
+- **Priority 1**: Archive completed development phase documentation
+- **Priority 2**: Organize framework documentation for efficiency  
+- **Priority 3**: Cross-system consistency validation and maintenance
+- **Priority 4**: Prepare structure for advanced features and community expansion
+
+**Refactor Operations**:
+- **Documentation Consolidation**: Merge duplicates, update currency, improve navigation
+- **Code Organization**: Clean dependencies, optimize patterns, align structure
+- **Development Environment**: Optimize workspace, improve build performance
+- **Cross-System Maintenance**: Validate consistency between framework and app docs
+
+**Success Criteria**:
+- ✅ All completed work properly archived and organized
+- ✅ Documentation structure supports efficient development workflows
+- ✅ Cross-references between framework and app docs work correctly
+- ✅ No redundant or outdated content remains
+- ✅ Next development phase has clean, prepared structure
+
+**Refactor Triggers**:
+- **Phase Completion**: Major development phases finished, need organization
+- **Documentation Drift**: Content becomes outdated or poorly organized  
+- **Development Inefficiency**: Structure is hindering development velocity
+- **Cross-System Issues**: Framework and app documentation inconsistencies
+
+**Ready for automated organization and cleanup on `@REFACTOR . ultrathink` command.**

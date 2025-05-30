@@ -66,9 +66,11 @@ Axiom/ (this directory)
 │   ├── ExampleApp/               ← SwiftUI app using framework
 │   └── Documentation/            ← Integration guides
 ├── STATUS.md                     ← Current development status
+├── ROADMAP.md                    ← Unified development planning and progress
 ├── DEVELOP.md                    ← Framework development guide
 ├── INTEGRATE.md                  ← Integration testing guide
-└── REFACTOR.md                   ← Organization guide
+├── REFACTOR.md                   ← Organization guide
+└── PLAN.md                       ← Three-cycle planning coordination
 ```
 
 ## 🚀 Getting Started
@@ -181,6 +183,24 @@ open Axiom.xcworkspace
 - ✅ **No Path Issues**: Standard workspace dependency resolution
 - ✅ **Industry Standard**: Same approach used by Apple frameworks
 - ✅ **Modular Testing**: Isolated feature testing in organized structure
+
+### **Three-Cycle Development System** 🔄
+**Strategic development coordination with automated planning**
+
+- **DEVELOP Cycle** → Framework core enhancement (`@DEVELOP.md`)
+- **INTEGRATE Cycle** → Real-world validation (`@INTEGRATE.md`)
+- **REFACTOR Cycle** → Organization & preparation (`@REFACTOR.md`)
+- **PLAN Coordination** → Automated cycle planning (`@PLAN d|i|r`)
+
+```bash
+# Example strategic workflow
+@DEVELOP.md      # Implement new framework features
+@PLAN i          # Plan integration testing  
+@INTEGRATE.md    # Validate in real iOS app
+@PLAN r          # Plan documentation organization
+@REFACTOR.md     # Archive and prepare next phase
+@PLAN d          # Plan next development cycle
+```
 
 ### **Live Development Cycle**
 1. **Edit Framework Code**: Modify `AxiomFramework/Sources/Axiom/`
