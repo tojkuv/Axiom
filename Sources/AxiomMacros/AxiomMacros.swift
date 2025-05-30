@@ -15,9 +15,9 @@ public struct AxiomMacrosPlugin: CompilerPlugin {
         // Core Axiom macros
         ClientMacro.self,
         CapabilitiesMacro.self,
+        DomainModelMacro.self,
         
         // Additional macros (to be implemented)
-        // DomainModelMacro.self,
         // CrossCuttingMacro.self,
         // ObservableStateMacro.self,
         // IntelligenceMacro.self
@@ -36,7 +36,7 @@ public extension AxiomMacrosPlugin {
             "@Greeting": "Adds a greeting property to a struct (example macro)",
             "@Client": "Automatically inject and manage client dependencies",
             "@Capabilities": "Declare and validate capability requirements",
-            "@DomainModel": "Generate domain model boilerplate (to be implemented)",
+            "@DomainModel": "Generate domain model boilerplate including validation and immutable updates",
             "@CrossCutting": "Inject cross-cutting concerns (to be implemented)",
             "@ObservableState": "Make state observable with automatic updates (to be implemented)",
             "@Intelligence": "Enable intelligence features for a component (to be implemented)"
