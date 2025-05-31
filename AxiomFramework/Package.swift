@@ -51,20 +51,19 @@ let package = Package(
             path: "Sources/AxiomTesting"
         ),
         
-        // Test targets (temporarily disabled for stability)
-        // TODO: Fix and re-enable comprehensive test suite
-        // .testTarget(
-        //     name: "AxiomTests", 
-        //     dependencies: ["Axiom", "AxiomTesting"],
-        //     path: "Tests/AxiomTests"
-        // ),
-        // .testTarget(
-        //     name: "AxiomMacrosTests",
-        //     dependencies: [
-        //         "AxiomMacros",
-        //         .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax")
-        //     ],
-        //     path: "Tests/AxiomMacrosTests"
-        // ),
+        // Test targets (re-enabled for comprehensive testing framework implementation)
+        .testTarget(
+            name: "AxiomTests", 
+            dependencies: ["Axiom", "AxiomTesting"],
+            path: "Tests/AxiomTests"
+        ),
+        .testTarget(
+            name: "AxiomMacrosTests",
+            dependencies: [
+                "AxiomMacros",
+                .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax")
+            ],
+            path: "Tests/AxiomMacrosTests"
+        ),
     ]
 )
