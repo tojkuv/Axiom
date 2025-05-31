@@ -5,28 +5,28 @@
 This command provides intelligent checkpoint management that adapts to your current branch context:
 
 ### 🛡️ Safety Features
-- **No Automatic Rebasing**: Prevents data loss from conflicts
+- **Safe Merge Operations**: Uses --no-ff for clean merge history
 - **Uncommitted Change Detection**: Only commits when there are actual changes
-- **Safe Update Mode**: Fetches and reports status without dangerous operations
-- **User Control**: Provides manual options for updating branches
+- **Branch Cleanup**: Automatically removes old branches after successful merge
+- **Fresh Branch Creation**: Creates clean branches for next development cycle
 ### 🔍 Branch Detection & Smart Actions
 
 **Development Branch (`development`):**
 - ✅ Commit all changes with intelligent commit message
-- 🔄 Update from latest `main` via rebase
-- 🚀 Create pull request to `main`
-- 📊 Performance validation
+- 🔄 Merge completed work into `main`
+- 🌱 Create fresh `development` branch for next cycle
+- 📊 Performance validation complete
 
 **Integration Branch (`integration`):**  
 - ✅ Commit integration validation results
-- 🔄 Update from latest `main` via rebase
-- 🚀 Create pull request to `main`
-- 🧪 Integration test verification
+- 🔄 Merge validated work into `main`
+- 🌱 Create fresh `integration` branch for next cycle
+- 🧪 Integration test verification complete
 
 **Main Branch (`main`):**
 - ✅ Commit current progress
 - 📋 Update project status
-- 🎯 No PR needed (already on main)
+- 🎯 No branching needed (already on main)
 
 ---
 
@@ -48,7 +48,7 @@ git status --short
 # 3. Branch-specific checkpoint logic
 case "$CURRENT_BRANCH" in
   "development")
-    echo "🔧 DEVELOPMENT BRANCH CHECKPOINT"
+    echo "🔧 DEVELOPMENT BRANCH CHECKPOINT - MERGE & RESTART"
     
     # Check for uncommitted changes first
     if [ -n "$(git status --porcelain)" ]; then
@@ -58,7 +58,7 @@ case "$CURRENT_BRANCH" in
         git commit -m "🔧 Development checkpoint: $(date '+%Y-%m-%d %H:%M')
 
     📦 Framework enhancements and feature development
-    🎯 Preparing for integration validation
+    🎯 Ready for main branch merge
     
     🤖 Generated with Claude Code
     
@@ -67,49 +67,46 @@ case "$CURRENT_BRANCH" in
         echo "✅ No uncommitted changes to commit"
     fi
     
-    # Update from main (SAFE MODE)
-    echo "🔄 Fetching latest from main..."
+    # Fetch latest main
+    echo "🔄 Fetching latest main..."
     git fetch origin main
     
-    # Check if rebase is needed and safe
-    BEHIND_COUNT=$(git rev-list --count HEAD..origin/main)
-    if [ "$BEHIND_COUNT" -eq 0 ]; then
-        echo "✅ Development branch is up to date with main"
-    else
-        echo "⚠️  Development branch is $BEHIND_COUNT commits behind main"
-        echo "🛑 SAFETY: Skipping automatic rebase to prevent conflicts"
-        echo "💡 To update manually: git rebase origin/main"
-        echo "💡 Or merge instead: git merge origin/main"
-    fi
+    # Switch to main and merge development
+    echo "🔄 Switching to main..."
+    git checkout main
+    git pull origin main
     
-    # Push and create PR
-    echo "🚀 Creating pull request..."
-    git push origin development -u
-    gh pr create --title "🔧 Development Progress: $(date '+%Y-%m-%d')" --body "$(cat <<'EOF'
-## 🔧 Development Progress Summary
+    echo "🚀 Merging development into main..."
+    git merge development --no-ff -m "🔧 Merge development cycle: $(date '+%Y-%m-%d')
 
-### ✅ Completed Development Work
-- Framework feature enhancements
-- Core functionality improvements
-- Developer experience optimizations
-
-### 🎯 Ready for Integration
-- All development targets met
-- Framework builds cleanly
-- Ready for real-world validation
-
-### 🧪 Next Steps
-- Integration testing in AxiomTestApp
-- Performance validation
-- Real-world usage verification
+✅ Development work completed and validated
+📦 Framework enhancements integrated
+🎯 Ready for next development cycle
 
 🤖 Generated with Claude Code
-EOF
-)"
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+    
+    # Push updated main
+    echo "📤 Pushing updated main..."
+    git push origin main
+    
+    # Delete old development branch
+    echo "🗑️ Cleaning up old development branch..."
+    git branch -D development
+    git push origin --delete development
+    
+    # Create fresh development branch
+    echo "🌱 Creating fresh development branch..."
+    git checkout -b development
+    git push origin development -u
+    
+    echo "✅ Development cycle complete!"
+    echo "🎯 Fresh development branch ready for next cycle"
     ;;
     
   "integration")
-    echo "🧪 INTEGRATION BRANCH CHECKPOINT"
+    echo "🧪 INTEGRATION BRANCH CHECKPOINT - MERGE & RESTART"
     
     # Check for uncommitted changes first
     if [ -n "$(git status --porcelain)" ]; then
@@ -129,45 +126,42 @@ EOF
         echo "✅ No uncommitted changes to commit"
     fi
     
-    # Update from main (SAFE MODE)
-    echo "🔄 Fetching latest from main..."
+    # Fetch latest main
+    echo "🔄 Fetching latest main..."
     git fetch origin main
     
-    # Check if rebase is needed and safe
-    BEHIND_COUNT=$(git rev-list --count HEAD..origin/main)
-    if [ "$BEHIND_COUNT" -eq 0 ]; then
-        echo "✅ Integration branch is up to date with main"
-    else
-        echo "⚠️  Integration branch is $BEHIND_COUNT commits behind main"
-        echo "🛑 SAFETY: Skipping automatic rebase to prevent conflicts"
-        echo "💡 To update manually: git rebase origin/main"
-        echo "💡 Or merge instead: git merge origin/main"
-    fi
+    # Switch to main and merge integration
+    echo "🔄 Switching to main..."
+    git checkout main
+    git pull origin main
     
-    # Push and create PR
-    echo "🚀 Creating pull request..."
-    git push origin integration -u
-    gh pr create --title "🧪 Integration Validation: $(date '+%Y-%m-%d')" --body "$(cat <<'EOF'
-## 🧪 Integration Validation Complete
+    echo "🚀 Merging integration into main..."
+    git merge integration --no-ff -m "🧪 Merge integration cycle: $(date '+%Y-%m-%d')
 
-### ✅ Validation Results
-- Real-world iOS app testing
-- Performance benchmarking
-- Feature integration verification
-
-### 📊 Metrics & Performance
-- All performance targets met
-- Clean integration with AxiomTestApp
-- Zero integration issues
-
-### 🎯 Production Readiness
-- Framework validated in real application
-- All tests passing
-- Ready for production merge
+✅ Integration validation completed
+📊 Performance metrics validated
+🎯 Ready for next integration cycle
 
 🤖 Generated with Claude Code
-EOF
-)"
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+    
+    # Push updated main
+    echo "📤 Pushing updated main..."
+    git push origin main
+    
+    # Delete old integration branch
+    echo "🗑️ Cleaning up old integration branch..."
+    git branch -D integration
+    git push origin --delete integration
+    
+    # Create fresh integration branch
+    echo "🌱 Creating fresh integration branch..."
+    git checkout -b integration
+    git push origin integration -u
+    
+    echo "✅ Integration cycle complete!"
+    echo "🎯 Fresh integration branch ready for next cycle"
     ;;
     
   "main")
@@ -226,14 +220,14 @@ echo "🕐 Time: $(date)"
 ```bash
 # While working on framework features
 @CHECKPOINT.md  # Auto-detects development branch
-                # → Commits, updates, creates PR
+                # → Commits, merges to main, creates fresh development branch
 ```
 
 ### **Integration Workflow**  
 ```bash
 # After validation testing
 @CHECKPOINT.md  # Auto-detects integration branch
-                # → Commits results, updates, creates PR
+                # → Commits results, merges to main, creates fresh integration branch
 ```
 
 ### **Main Branch Coordination**
@@ -249,8 +243,8 @@ echo "🕐 Time: $(date)"
 
 - **🤖 Branch Auto-Detection**: Automatically adapts to current context
 - **📝 Intelligent Commit Messages**: Context-aware commit descriptions  
-- **🔄 Smart Updates**: Rebase from main to keep history clean
-- **🚀 Automated PRs**: Creates appropriate pull requests with detailed descriptions
+- **🔄 Smart Merge & Restart**: Merges completed work to main and creates fresh branches
+- **🌱 Automated Branch Cycling**: Complete cycle automation for development and integration
 - **📊 Status Tracking**: Maintains project coordination across branches
 
 **Perfect for the Axiom development workflow with seamless human-AI collaboration!**
