@@ -26,8 +26,10 @@ This command provides intelligent checkpoint management that adapts to your curr
 
 **Main Branch (`main`):**
 - ✅ Commit current progress
-- 📋 Update project status
-- 🎯 No branching needed (already on main)
+- 📤 Push changes to main
+- 🔧 Update development branch with latest main
+- 🧪 Update integration branch with latest main
+- 🔄 Synchronize all branches with main changes
 
 ---
 
@@ -288,12 +290,14 @@ Co-Authored-By: Claude <noreply@anthropic.com>"; then
     ;;
     
   "main")
-    echo "🎯 MAIN BRANCH CHECKPOINT"
+    echo "🎯 MAIN BRANCH CHECKPOINT - UPDATE ALL BRANCHES"
     
-    # Commit progress on main
-    echo "✅ Committing main branch progress..."
-    git add .
-    git commit -m "🎯 Main branch checkpoint: $(date '+%Y-%m-%d %H:%M')
+    # Check for uncommitted changes first
+    if [ -n "$(git status --porcelain)" ]; then
+        # Commit progress on main
+        echo "✅ Committing main branch progress..."
+        git add .
+        git commit -m "🎯 Main branch checkpoint: $(date '+%Y-%m-%d %H:%M')
 
     📋 Project status update and coordination
     🚀 Strategic planning and documentation
@@ -301,12 +305,86 @@ Co-Authored-By: Claude <noreply@anthropic.com>"; then
     🤖 Generated with Claude Code
     
     Co-Authored-By: Claude <noreply@anthropic.com>"
+    else
+        echo "✅ No uncommitted changes to commit"
+    fi
     
     # Push to main
     echo "🚀 Pushing to main..."
     git push origin main
     
+    # Update development branch with latest main
+    echo "🔧 Updating development branch with latest main..."
+    if git show-ref --verify --quiet refs/remotes/origin/development; then
+        git fetch origin development
+        git checkout development
+        if ! git pull origin main; then
+            echo ""
+            echo "🚨 CONFLICT UPDATING DEVELOPMENT BRANCH!"
+            echo "❌ Cross-branch update failed - manual resolution required"
+            echo ""
+            echo "🆘 HUMAN CONSULTATION REQUIRED"
+            echo "📋 Current status:"
+            echo "   • Main branch changes have been committed and pushed"
+            echo "   • Development branch is checked out"
+            echo "   • Conflict exists when pulling main into development"
+            echo ""
+            echo "💡 Manual resolution steps:"
+            echo "   1. Run: git status (to see conflicted files)"
+            echo "   2. Edit conflicted files to resolve conflicts"
+            echo "   3. Run: git add <resolved-files>"
+            echo "   4. Run: git commit (to complete the merge)"
+            echo "   5. Run: git push origin development"
+            echo "   6. Then re-run: @CHECKPOINT.md (to continue automation)"
+            echo ""
+            echo "🛑 Checkpoint process stopped. Please resolve conflicts and retry."
+            exit 1
+        fi
+        git push origin development
+        echo "✅ Development branch updated with latest main"
+    else
+        echo "🌱 Development branch doesn't exist remotely"
+    fi
+    
+    # Update integration branch with latest main  
+    echo "🧪 Updating integration branch with latest main..."
+    if git show-ref --verify --quiet refs/remotes/origin/integration; then
+        git fetch origin integration
+        git checkout integration
+        if ! git pull origin main; then
+            echo ""
+            echo "🚨 CONFLICT UPDATING INTEGRATION BRANCH!"
+            echo "❌ Cross-branch update failed - manual resolution required"
+            echo ""
+            echo "🆘 HUMAN CONSULTATION REQUIRED"
+            echo "📋 Current status:"
+            echo "   • Main branch changes have been committed and pushed"
+            echo "   • Integration branch is checked out"
+            echo "   • Conflict exists when pulling main into integration"
+            echo ""
+            echo "💡 Manual resolution steps:"
+            echo "   1. Run: git status (to see conflicted files)"
+            echo "   2. Edit conflicted files to resolve conflicts"
+            echo "   3. Run: git add <resolved-files>"
+            echo "   4. Run: git commit (to complete the merge)"
+            echo "   5. Run: git push origin integration"
+            echo "   6. Then re-run: @CHECKPOINT.md (to continue automation)"
+            echo ""
+            echo "🛑 Checkpoint process stopped. Please resolve conflicts and retry."
+            exit 1
+        fi
+        git push origin integration
+        echo "✅ Integration branch updated with latest main"
+    else
+        echo "🌱 Integration branch doesn't exist remotely"
+    fi
+    
+    # Switch back to main
+    echo "🔄 Returning to main..."
+    git checkout main
+    
     echo "✅ Main branch checkpoint complete"
+    echo "🔄 All branches synchronized with latest main changes"
     echo "📋 No PR needed (already on main)"
     ;;
     
@@ -357,7 +435,7 @@ echo "🕐 Time: $(date)"
 ```bash
 # Strategic planning and coordination
 @CHECKPOINT.md  # Auto-detects main branch
-                # → Commits status, pushes to main
+                # → Commits status, pushes to main, updates all branches with latest main
 ```
 
 ---
@@ -367,7 +445,7 @@ echo "🕐 Time: $(date)"
 - **🤖 Branch Auto-Detection**: Automatically adapts to current context
 - **📝 Intelligent Commit Messages**: Context-aware commit descriptions  
 - **🔄 Smart Merge & Restart**: Merges completed work to main and creates fresh branches
-- **🔄 Cross-Branch Updates**: Each branch updates the other with latest main changes
+- **🔄 Cross-Branch Synchronization**: All branches automatically synchronize with latest main changes
 - **🚨 Conflict Detection & Human Consultation**: Halts automation and provides guidance for conflicts
 - **🌱 Automated Branch Cycling**: Complete cycle automation for development and integration
 - **📊 Status Tracking**: Maintains project coordination across branches
