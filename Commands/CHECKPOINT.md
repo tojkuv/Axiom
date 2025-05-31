@@ -14,6 +14,7 @@ This command provides intelligent checkpoint management that adapts to your curr
 **Auto-Detection Mode** (no flags): Detects current git branch and executes appropriate workflow
 **Forced Mode** (with flags): Executes specific branch workflow regardless of current branch context
 **Safety Override**: Forced mode useful for cross-branch operations and explicit workflow control
+**ROADMAP.md Updates**: Only handled on main branch - development/integration branches don't update ROADMAP.md
 
 ### 🛡️ Safety Features
 - **Safe Merge Operations**: Uses --no-ff for clean merge history
@@ -24,19 +25,19 @@ This command provides intelligent checkpoint management that adapts to your curr
 ### 🔍 Branch Detection & Smart Actions
 
 **Development Branch (`development`):**
-- ✅ Commit all changes with intelligent commit message
+- ✅ Commit all changes with intelligent commit message (framework work only, no ROADMAP.md)
 - 🔄 Merge completed work into `main`
 - 🧪 Update integration branch with latest main
 - 🌱 Create fresh `development` branch for next cycle
 
 **Integration Branch (`integration`):**  
-- ✅ Commit integration validation results
+- ✅ Commit integration validation results (test app work only, no ROADMAP.md)
 - 🔄 Merge validated work into `main`
 - 🔧 Update development branch with latest main
 - 🌱 Create fresh `integration` branch for next cycle
 
 **Main Branch (`main`):**
-- ✅ Commit current progress
+- ✅ Commit current progress (including ROADMAP.md updates from @PLAN.md)
 - 📤 Push changes to main
 - 🔧 Update development branch with latest main
 - 🧪 Update integration branch with latest main

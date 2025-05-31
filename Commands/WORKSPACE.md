@@ -52,6 +52,7 @@
 **Purpose**: Strategic coordination, documentation organization, proposal management
 **Focus**: Cross-scope planning, strategic proposals, coordination dashboard maintenance
 **Operations**: Planning coordination, proposal approval, documentation organization
+**ROADMAP.md**: Only main branch can update ROADMAP.md - development/integration branches use @CHECKPOINT.md
 
 ### **Development Branch (d)**
 **Purpose**: Framework development, core feature implementation, architecture evolution  
@@ -108,7 +109,7 @@
 2. **Repository Analysis** → Comprehensive analysis of current state and needs
 3. **Proposal Generation** → Create structured proposals with quality assurance
 4. **User Approval** → Present proposals and obtain user approval before implementation
-5. **Documentation Update** → Update ROADMAP.md and maintain documentation consistency
+5. **Documentation Update** → Update ROADMAP.md (main branch only) and maintain documentation consistency
 
 ### **Development Workflow**
 1. **Methodology Reference** → Follow @DEVELOP.md procedures and standards
@@ -179,7 +180,7 @@
 - **Progress Coordination**: Coordinated progress tracking and status reporting
 
 ### **Documentation Integration**
-- **ROADMAP Coordination**: All operations coordinate with ROADMAP.md updates
+- **ROADMAP Coordination**: Main branch operations coordinate with ROADMAP.md updates
 - **Archive Management**: Consistent archive management and organization
 - **Version Control**: Proper version control integration and commit procedures
 - **Cross-Reference**: Effective cross-referencing between related documents

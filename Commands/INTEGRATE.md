@@ -151,7 +151,7 @@
 **Planning**: Integrates with @PLAN for integration task planning and validation coordination
 **Execution**: Complete validation → demonstration → performance measurement → documentation cycle
 **Critical Rule**: Any validation failure immediately blocks all integration work until resolved
-**Documentation**: Work details tracked in `/AxiomTestApp/Documentation/` and progress reported to ROADMAP
+**Documentation**: Work details tracked in `/AxiomTestApp/Documentation/` only
 **Coordination**: Seamless integration with @CHECKPOINT for integration cycle completion
 
 ## 📚 Integration Resources
@@ -163,7 +163,7 @@
 ## 🤖 Integration Coordination
 
 **Branch Focus**: Dedicated integration testing and test application development in integration branch
-**Work Storage**: Integration work tracked in `/AxiomTestApp/Documentation/` and `ROADMAP.md`
+**Work Storage**: Integration work tracked in `/AxiomTestApp/Documentation/` only
 **Planning Integration**: @PLAN command provides contextual integration planning
 **Coordination**: Independent integration operation with cross-branch progress sharing
 

@@ -66,7 +66,7 @@ public struct StateSnapshot<State: Sendable>: Sendable {
     
     /// Creates a diff between this snapshot and another
     public func diff(against other: StateSnapshot<State>) -> StateDiff<State> {
-        StateDiff<State>.calculateBasic(from: other, to: self)
+        StateDiff<State>.calculateBasic(from: self, to: other)
     }
     
     /// Validates the integrity of this snapshot

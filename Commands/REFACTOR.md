@@ -137,7 +137,7 @@
 
 **Automated Execution Process**:
 1. **Environment Validation** → Verify clean working tree, backup current state, validate dependencies
-2. **Planning Integration** → Reference current ROADMAP refactoring priorities and @PLAN outputs
+2. **Planning Integration** → Reference current refactoring priorities and @PLAN outputs
 3. **Methodology Enforcement** → Apply refactoring principles and structural integrity requirements
 4. **Organization and Cleanup Cycle** → Execute structural improvements, cleanup, and optimization
 5. **Quality Validation** → Ensure 100% functionality preservation, structural improvement verification
@@ -155,7 +155,8 @@
 **Planning**: Integrates with @PLAN for refactoring task planning and priority coordination
 **Execution**: Complete analysis → organization → cleanup → validation → documentation cycle
 **Critical Rule**: Any functionality change immediately blocks all refactoring work until corrected
-**Documentation**: Work details tracked in `/Documentation/Refactoring/` and progress reported to ROADMAP
+**Documentation**: Work details tracked in `/Documentation/Refactoring/` only
+**ROADMAP Updates**: ROADMAP.md updates handled by @CHECKPOINT.md when merging to main
 **Coordination**: Seamless integration with @CHECKPOINT for refactoring cycle completion
 
 ## 📚 Refactoring Resources
@@ -167,7 +168,8 @@
 ## 🤖 Refactoring Coordination
 
 **Branch Focus**: Intelligent branch-aware refactoring with context-specific optimization
-**Work Storage**: Refactoring work tracked in `/Documentation/Refactoring/` and `ROADMAP.md`
+**Work Storage**: Refactoring work tracked in `/Documentation/Refactoring/` only
+**ROADMAP Updates**: NO - ROADMAP.md updates handled by @CHECKPOINT.md when merging to main
 **Planning Integration**: @PLAN command provides contextual refactoring planning
 **Coordination**: Independent refactoring operation with cross-branch progress sharing
 

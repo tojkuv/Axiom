@@ -88,35 +88,46 @@ class TestSnapshotClient: StateSnapshotting {
     
     private var currentState = TestUserState()
     private var version = StateVersion()
+    private let queue = DispatchQueue(label: "TestSnapshotClient.queue", qos: .userInitiated)
     
     func updateState(_ update: (inout TestUserState) -> Void) {
-        update(&currentState)
-        version = version.incrementMinor()
+        queue.sync {
+            update(&currentState)
+            version = version.incrementMinor()
+        }
     }
     
     func getCurrentState() -> TestUserState {
-        currentState
+        queue.sync {
+            currentState
+        }
     }
     
     func getCurrentVersion() -> StateVersion {
-        version
+        queue.sync {
+            version
+        }
     }
     
     // MARK: StateSnapshotting Implementation
     
     func createSnapshot() -> StateSnapshot<TestUserState> {
-        StateSnapshot(
-            state: currentState,
-            version: version
-        )
+        queue.sync {
+            StateSnapshot(
+                state: currentState,
+                version: version
+            )
+        }
     }
     
     func createSnapshot(metadata: SnapshotMetadata) -> StateSnapshot<TestUserState> {
-        StateSnapshot(
-            state: currentState,
-            version: version,
-            metadata: metadata
-        )
+        queue.sync {
+            StateSnapshot(
+                state: currentState,
+                version: version,
+                metadata: metadata
+            )
+        }
     }
 }
 

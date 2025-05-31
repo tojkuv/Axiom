@@ -157,7 +157,7 @@
 **Planning**: Integrates with @PLAN for development task planning and priority coordination
 **Execution**: Complete implementation → testing → optimization → documentation cycle
 **Critical Rule**: Any test failure immediately blocks all development work until resolved
-**Documentation**: Work details tracked in `/AxiomFramework/Documentation/` and progress reported to ROADMAP
+**Documentation**: Work details tracked in `/AxiomFramework/Documentation/` only
 **Coordination**: Seamless integration with @CHECKPOINT for development cycle completion
 
 ## 📚 Development Resources
@@ -169,7 +169,7 @@
 ## 🤖 Development Coordination
 
 **Branch Focus**: Dedicated framework core development and enhancement in development branch
-**Work Storage**: Development work tracked in `/AxiomFramework/Documentation/` and `ROADMAP.md`
+**Work Storage**: Development work tracked in `/AxiomFramework/Documentation/` only
 **Planning Integration**: @PLAN command provides contextual development planning
 **Coordination**: Independent development operation with cross-branch progress sharing
 

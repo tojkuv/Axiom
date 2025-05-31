@@ -46,16 +46,19 @@
 ### **Development Branch Context (d)**
 **Planning Focus**: Framework development and enhancement proposals
 **Work Storage**: Plans and proposals in `/AxiomFramework/Documentation/` and `/AxiomFramework/Proposals/`
+**ROADMAP Updates**: NO - ROADMAP.md updates handled by @CHECKPOINT.md when merging to main
 **Methodology**: References @DEVELOP.md for development approaches and testing standards
 
 ### **Integration Branch Context (i)**
 **Planning Focus**: Integration testing and validation proposals
 **Work Storage**: Plans and proposals in `/AxiomTestApp/Documentation/` and `/AxiomTestApp/Proposals/`
+**ROADMAP Updates**: NO - ROADMAP.md updates handled by @CHECKPOINT.md when merging to main
 **Methodology**: References @INTEGRATE.md for integration approaches and validation standards
 
 ### **Main Branch Context (m)**
 **Planning Focus**: Strategic coordination and dual-scope proposal management
 **Work Storage**: Proposals in both framework and integration scopes, tracked in `ROADMAP.md`
+**ROADMAP Updates**: Only main branch can update ROADMAP.md with approved proposals
 **Methodology**: Strategic planning with repository intelligence analysis
 
 ## 🔄 Unified Workflow Execution
@@ -134,14 +137,14 @@
 
 ## 🧹 ROADMAP Integration
 
-**PLAN Updates ROADMAP.md**: All proposal lifecycle phases update the live coordination dashboard
+**PLAN Updates ROADMAP.md**: Only when on main branch - proposal lifecycle phases update the live coordination dashboard
 
-**Integration Process**:
+**Integration Process** (Main Branch Only):
 - **Planning Phase**: Initial proposal tracking and priority assignment
 - **Revision Phase**: Updated proposal status and change tracking
 - **Approval Phase**: Section replacement and archive management
 
-**Coordination Benefits**: Single command maintains ROADMAP.md consistency throughout entire proposal lifecycle
+**Coordination Benefits**: When on main branch, single command maintains ROADMAP.md consistency throughout entire proposal lifecycle
 
 ## 🛡️ Safety & Quality Features
 
@@ -229,7 +232,7 @@ Draft → Active → Under Revision → Ready for Approval → Approved → Inte
 1. **Mode Detection** → Determine operation type (planning/revision/approval/status)
 2. **Context Analysis** → Analyze branch context and repository state
 3. **Operation Execution** → Execute specified operation with quality assurance
-4. **Documentation Update** → Update ROADMAP.md and maintain proposal tracking
+4. **Documentation Update** → Update ROADMAP.md (main branch only) and maintain proposal tracking
 5. **User Communication** → Provide clear status and next step recommendations
 
 ---
