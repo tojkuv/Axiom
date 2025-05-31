@@ -2481,6 +2481,20 @@ public struct QueryResponse: Sendable, Identifiable {
         self.suggestions = suggestions
         self.respondedAt = respondedAt
     }
+    
+    /// Convenience method for creating test query responses
+    public static func explanation(_ answer: String, confidence: Double) -> QueryResponse {
+        return QueryResponse(
+            query: "Test Query",
+            intent: .getOverview,
+            answer: answer,
+            data: [:],
+            confidence: confidence,
+            executionTime: 0.001,
+            suggestions: ["Test suggestion"],
+            respondedAt: Date()
+        )
+    }
 }
 
 /// Cached query response
