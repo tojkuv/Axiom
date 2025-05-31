@@ -7,6 +7,7 @@ This command provides intelligent checkpoint management that adapts to your curr
 ### 🛡️ Safety Features
 - **Safe Merge Operations**: Uses --no-ff for clean merge history
 - **Uncommitted Change Detection**: Only commits when there are actual changes
+- **Merge Conflict Detection**: Stops automation and consults human if conflicts occur
 - **Branch Cleanup**: Automatically removes old branches after successful merge
 - **Fresh Branch Creation**: Creates clean branches for next development cycle
 ### 🔍 Branch Detection & Smart Actions
@@ -14,14 +15,14 @@ This command provides intelligent checkpoint management that adapts to your curr
 **Development Branch (`development`):**
 - ✅ Commit all changes with intelligent commit message
 - 🔄 Merge completed work into `main`
+- 🧪 Update integration branch with latest main
 - 🌱 Create fresh `development` branch for next cycle
-- 📊 Performance validation complete
 
 **Integration Branch (`integration`):**  
 - ✅ Commit integration validation results
 - 🔄 Merge validated work into `main`
+- 🔧 Update development branch with latest main
 - 🌱 Create fresh `integration` branch for next cycle
-- 🧪 Integration test verification complete
 
 **Main Branch (`main`):**
 - ✅ Commit current progress
@@ -77,7 +78,7 @@ case "$CURRENT_BRANCH" in
     git pull origin main
     
     echo "🚀 Merging development into main..."
-    git merge development --no-ff -m "🔧 Merge development cycle: $(date '+%Y-%m-%d')
+    if ! git merge development --no-ff -m "🔧 Merge development cycle: $(date '+%Y-%m-%d')
 
 ✅ Development work completed and validated
 📦 Framework enhancements integrated
@@ -85,11 +86,72 @@ case "$CURRENT_BRANCH" in
 
 🤖 Generated with Claude Code
 
-Co-Authored-By: Claude <noreply@anthropic.com>"
+Co-Authored-By: Claude <noreply@anthropic.com>"; then
+        echo ""
+        echo "🚨 MERGE CONFLICT DETECTED!"
+        echo "❌ Automatic checkpoint halted - this should not happen with our workflows"
+        echo ""
+        echo "🤔 Possible causes:"
+        echo "   • Unexpected changes made directly to main branch"
+        echo "   • Manual modifications to development branch history"
+        echo "   • External changes not following Axiom workflow"
+        echo ""
+        echo "🆘 HUMAN CONSULTATION REQUIRED"
+        echo "📋 Current status:"
+        echo "   • Development branch has been committed"
+        echo "   • Main branch is checked out"
+        echo "   • Merge conflict exists between development and main"
+        echo ""
+        echo "💡 Manual resolution steps:"
+        echo "   1. Run: git status (to see conflicted files)"
+        echo "   2. Edit conflicted files to resolve conflicts"
+        echo "   3. Run: git add <resolved-files>"
+        echo "   4. Run: git commit (to complete the merge)"
+        echo "   5. Then re-run: @CHECKPOINT.md (to continue automation)"
+        echo ""
+        echo "🛑 Checkpoint process stopped. Please resolve conflicts and retry."
+        exit 1
+    fi
     
     # Push updated main
     echo "📤 Pushing updated main..."
     git push origin main
+    
+    # Update integration branch with latest main
+    echo "🧪 Updating integration branch..."
+    if git show-ref --verify --quiet refs/remotes/origin/integration; then
+        git checkout integration
+        if ! git pull origin main; then
+            echo ""
+            echo "🚨 CONFLICT UPDATING INTEGRATION BRANCH!"
+            echo "❌ Cross-branch update failed - this should not happen with our workflows"
+            echo ""
+            echo "🆘 HUMAN CONSULTATION REQUIRED"
+            echo "📋 Current status:"
+            echo "   • Development work has been merged to main"
+            echo "   • Integration branch is checked out"
+            echo "   • Conflict exists when pulling main into integration"
+            echo ""
+            echo "💡 Manual resolution steps:"
+            echo "   1. Run: git status (to see conflicted files)"
+            echo "   2. Edit conflicted files to resolve conflicts"
+            echo "   3. Run: git add <resolved-files>"
+            echo "   4. Run: git commit (to complete the merge)"
+            echo "   5. Run: git push origin integration"
+            echo "   6. Then re-run: @CHECKPOINT.md (to continue automation)"
+            echo ""
+            echo "🛑 Checkpoint process stopped. Please resolve conflicts and retry."
+            exit 1
+        fi
+        git push origin integration
+        echo "✅ Integration branch updated with latest main"
+    else
+        echo "🌱 Integration branch doesn't exist, will be created fresh"
+    fi
+    
+    # Switch back to main
+    echo "🔄 Returning to main..."
+    git checkout main
     
     # Delete old development branch
     echo "🗑️ Cleaning up old development branch..."
@@ -136,7 +198,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
     git pull origin main
     
     echo "🚀 Merging integration into main..."
-    git merge integration --no-ff -m "🧪 Merge integration cycle: $(date '+%Y-%m-%d')
+    if ! git merge integration --no-ff -m "🧪 Merge integration cycle: $(date '+%Y-%m-%d')
 
 ✅ Integration validation completed
 📊 Performance metrics validated
@@ -144,11 +206,72 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 
 🤖 Generated with Claude Code
 
-Co-Authored-By: Claude <noreply@anthropic.com>"
+Co-Authored-By: Claude <noreply@anthropic.com>"; then
+        echo ""
+        echo "🚨 MERGE CONFLICT DETECTED!"
+        echo "❌ Automatic checkpoint halted - this should not happen with our workflows"
+        echo ""
+        echo "🤔 Possible causes:"
+        echo "   • Unexpected changes made directly to main branch"
+        echo "   • Manual modifications to integration branch history"
+        echo "   • External changes not following Axiom workflow"
+        echo ""
+        echo "🆘 HUMAN CONSULTATION REQUIRED"
+        echo "📋 Current status:"
+        echo "   • Integration branch has been committed"
+        echo "   • Main branch is checked out"
+        echo "   • Merge conflict exists between integration and main"
+        echo ""
+        echo "💡 Manual resolution steps:"
+        echo "   1. Run: git status (to see conflicted files)"
+        echo "   2. Edit conflicted files to resolve conflicts"
+        echo "   3. Run: git add <resolved-files>"
+        echo "   4. Run: git commit (to complete the merge)"
+        echo "   5. Then re-run: @CHECKPOINT.md (to continue automation)"
+        echo ""
+        echo "🛑 Checkpoint process stopped. Please resolve conflicts and retry."
+        exit 1
+    fi
     
     # Push updated main
     echo "📤 Pushing updated main..."
     git push origin main
+    
+    # Update development branch with latest main
+    echo "🔧 Updating development branch..."
+    if git show-ref --verify --quiet refs/remotes/origin/development; then
+        git checkout development
+        if ! git pull origin main; then
+            echo ""
+            echo "🚨 CONFLICT UPDATING DEVELOPMENT BRANCH!"
+            echo "❌ Cross-branch update failed - this should not happen with our workflows"
+            echo ""
+            echo "🆘 HUMAN CONSULTATION REQUIRED"
+            echo "📋 Current status:"
+            echo "   • Integration work has been merged to main"
+            echo "   • Development branch is checked out"
+            echo "   • Conflict exists when pulling main into development"
+            echo ""
+            echo "💡 Manual resolution steps:"
+            echo "   1. Run: git status (to see conflicted files)"
+            echo "   2. Edit conflicted files to resolve conflicts"
+            echo "   3. Run: git add <resolved-files>"
+            echo "   4. Run: git commit (to complete the merge)"
+            echo "   5. Run: git push origin development"
+            echo "   6. Then re-run: @CHECKPOINT.md (to continue automation)"
+            echo ""
+            echo "🛑 Checkpoint process stopped. Please resolve conflicts and retry."
+            exit 1
+        fi
+        git push origin development
+        echo "✅ Development branch updated with latest main"
+    else
+        echo "🌱 Development branch doesn't exist, will be created fresh"
+    fi
+    
+    # Switch back to main
+    echo "🔄 Returning to main..."
+    git checkout main
     
     # Delete old integration branch
     echo "🗑️ Cleaning up old integration branch..."
@@ -220,14 +343,14 @@ echo "🕐 Time: $(date)"
 ```bash
 # While working on framework features
 @CHECKPOINT.md  # Auto-detects development branch
-                # → Commits, merges to main, creates fresh development branch
+                # → Commits, merges to main, updates integration, creates fresh development
 ```
 
 ### **Integration Workflow**  
 ```bash
 # After validation testing
 @CHECKPOINT.md  # Auto-detects integration branch
-                # → Commits results, merges to main, creates fresh integration branch
+                # → Commits results, merges to main, updates development, creates fresh integration
 ```
 
 ### **Main Branch Coordination**
@@ -244,6 +367,8 @@ echo "🕐 Time: $(date)"
 - **🤖 Branch Auto-Detection**: Automatically adapts to current context
 - **📝 Intelligent Commit Messages**: Context-aware commit descriptions  
 - **🔄 Smart Merge & Restart**: Merges completed work to main and creates fresh branches
+- **🔄 Cross-Branch Updates**: Each branch updates the other with latest main changes
+- **🚨 Conflict Detection & Human Consultation**: Halts automation and provides guidance for conflicts
 - **🌱 Automated Branch Cycling**: Complete cycle automation for development and integration
 - **📊 Status Tracking**: Maintains project coordination across branches
 
