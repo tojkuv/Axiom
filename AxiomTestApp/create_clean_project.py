@@ -1,4 +1,18 @@
-// !$*UTF8*$!
+#!/usr/bin/env python3
+"""
+Create a clean, properly structured Xcode project.
+This will remove all incorrectly added files and create a proper structure.
+"""
+
+import os
+import re
+
+def create_clean_project():
+    """Create a clean project.pbxproj with proper structure"""
+    project_path = '/Users/tojkuv/Documents/GitHub/Axiom/AxiomTestApp/ExampleApp.xcodeproj/project.pbxproj'
+    
+    # Create a clean project file with only essential files
+    clean_project_content = '''// !$*UTF8*$!
 {
 	archiveVersion = 1;
 	classes = {
@@ -11,13 +25,13 @@
 		1A1234581234567890ABCDEF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1234571234567890ABCDEF /* ContentView.swift */; };
 		1A12345A1234567890ABCDEF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A1234591234567890ABCDEF /* Assets.xcassets */; };
 		2C2345671234567890ABCDEF /* CounterState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2345671234567890ABCDEF /* CounterState.swift */; };
+		2C2345681234567890ABCDEF /* CounterClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2345681234567890ABCDEF /* CounterClient.swift */; };
+		2C2345691234567890ABCDEF /* CounterContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2345691234567890ABCDEF /* CounterContext.swift */; };
 		2C234567A1234567890ABCDEF /* CounterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B234567A1234567890ABCDEF /* CounterView.swift */; };
 		2C234567B1234567890ABCDEF /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B234567B1234567890ABCDEF /* LoadingView.swift */; };
 		2C234567C1234567890ABCDEF /* ApplicationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B234567C1234567890ABCDEF /* ApplicationCoordinator.swift */; };
 		2C234567D1234567890ABCDEF /* ValidationViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B234567D1234567890ABCDEF /* ValidationViews.swift */; };
 		2C234567E1234567890ABCDEF /* EnterpriseCoordinators.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B234567E1234567890ABCDEF /* EnterpriseCoordinators.swift */; };
-		2C2345681234567890ABCDEF /* CounterClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2345681234567890ABCDEF /* CounterClient.swift */; };
-		2C2345691234567890ABCDEF /* CounterContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2345691234567890ABCDEF /* CounterContext.swift */; };
 		985E09942DEA35A7002EB05A /* Axiom in Frameworks */ = {isa = PBXBuildFile; productRef = 985E09932DEA35A7002EB05A /* Axiom */; };
 /* End PBXBuildFile section */
 
@@ -27,13 +41,13 @@
 		1A1234571234567890ABCDEF /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		1A1234591234567890ABCDEF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2B2345671234567890ABCDEF /* CounterState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterState.swift; sourceTree = "<group>"; };
+		2B2345681234567890ABCDEF /* CounterClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterClient.swift; sourceTree = "<group>"; };
+		2B2345691234567890ABCDEF /* CounterContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterContext.swift; sourceTree = "<group>"; };
 		2B234567A1234567890ABCDEF /* CounterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterView.swift; sourceTree = "<group>"; };
 		2B234567B1234567890ABCDEF /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		2B234567C1234567890ABCDEF /* ApplicationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationCoordinator.swift; sourceTree = "<group>"; };
 		2B234567D1234567890ABCDEF /* ValidationViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationViews.swift; sourceTree = "<group>"; };
 		2B234567E1234567890ABCDEF /* EnterpriseCoordinators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnterpriseCoordinators.swift; sourceTree = "<group>"; };
-		2B2345681234567890ABCDEF /* CounterClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterClient.swift; sourceTree = "<group>"; };
-		2B2345691234567890ABCDEF /* CounterContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterContext.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -333,7 +347,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = 5WK7M4ZSVR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -363,7 +376,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = 5WK7M4ZSVR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -423,4 +435,13 @@
 /* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1A12344A1234567890ABCDEF /* Project object */;
-}
+}'''
+    
+    # Write the clean project file
+    with open(project_path, 'w') as f:
+        f.write(clean_project_content)
+    
+    print("✅ Created clean Xcode project with essential files only")
+
+if __name__ == "__main__":
+    create_clean_project()

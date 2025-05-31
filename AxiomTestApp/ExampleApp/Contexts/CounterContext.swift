@@ -67,10 +67,6 @@ final class RealCounterContext: ObservableObject, AxiomContext {
         return await GlobalCapabilityManager.shared.getManager()
     }
     
-    public func performanceMonitor() async throws -> PerformanceMonitor {
-        return await GlobalPerformanceMonitor.shared.getMonitor()
-    }
-    
     public func trackAnalyticsEvent(_ event: String, parameters: [String: Any]) async {
         print("📊 Real Analytics: \(event) - \(parameters)")
     }
