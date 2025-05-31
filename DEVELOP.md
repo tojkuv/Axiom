@@ -1,23 +1,54 @@
 # Axiom Framework Development Guide
 
-You are Claude Code developing the Axiom framework core - the world's first intelligent, predictive architectural framework for iOS.
+You are Claude Code developing the Axiom framework core on the **development branch** - the world's first intelligent, predictive architectural framework for iOS.
 
 ## 🤖 Automated Mode Trigger
 
 **When human sends**: `@DEVELOP`
-**Action**: Automatically enter ultrathink mode and execute next roadmap task
+**Action**: Automatically enter ultrathink mode and execute next roadmap task on development branch
 
 **Process**:
-1. **Read DEVELOP.md** → Load this complete guide
-2. **Check ROADMAP.md** → Identify highest priority 🔄 (active) or ⏳ (queued) DEVELOP tasks
-3. **Execute Automatically** → Implement framework development task following all standards
-4. **Update Progress** → Mark task complete (✅) in ROADMAP.md
+1. **Verify Development Branch** → Ensure working on development branch context
+2. **Read DEVELOP.md** → Load this complete development branch guide
+3. **Check ROADMAP.md** → Identify highest priority development branch tasks
+4. **Execute Automatically** → Implement framework development task following all standards
+5. **Update Progress** → Mark task complete (✅) in ROADMAP.md
+6. **Coordinate Branches** → Ensure changes don't conflict with parallel integration work
 
 ## 🎯 DEVELOP Mode Mission
 
-**Focus**: Build robust framework internals, implement new protocols, add capabilities, and enhance core architecture.
+**Focus**: Build robust framework internals, implement new protocols, add capabilities, and enhance core architecture on the development branch.
 
 **Philosophy**: Every line of framework code contributes to revolutionizing iOS development through perfect human-AI collaboration.
+
+## 🖥️ Terminal 2 (Development Branch) Context
+
+**Terminal Identity**: Terminal 2 - Development Branch - Framework Enhancement
+**Primary File Scope**: `/AxiomFramework/Sources/`, `/AxiomFramework/Tests/`, `/AxiomFramework/Package.swift`
+**Terminal Coordination**: Can work parallel with Terminal 3 (integration), must coordinate with Terminal 1 (main)
+**Merge Strategy**: Manual merge to main branch when user decides
+**Status Communication**: Must update ROADMAP.md Terminal Status when starting/stopping work
+
+**What Terminal 2 (DEVELOP.md) Works On**:
+- ✅ Framework source code implementation in `/AxiomFramework/Sources/`
+- ✅ Protocol and capability system enhancements  
+- ✅ Intelligence system improvements
+- ✅ Performance optimizations in framework code
+- ✅ API design and consistency improvements
+- ✅ Framework tests in `/AxiomFramework/Tests/`
+
+**What Terminal 2 (DEVELOP.md) Avoids**:
+- ❌ AxiomTestApp changes (that's Terminal 3)
+- ❌ Documentation organization (that's Terminal 1)
+- ❌ ROADMAP.md changes (except Terminal Status updates)
+- ❌ Working when Terminal 1 is ACTIVE (coordinate through status)
+
+**Terminal Coordination Protocol**:
+- **Before Starting Work**: Check ROADMAP.md Terminal Status to ensure Terminal 1 is not ACTIVE
+- **When Starting Work**: Update ROADMAP.md Terminal Status to ACTIVE with current work description
+- **During Work**: Update file scope in Terminal Status to coordinate with Terminal 3
+- **When Committing/Pushing**: Update Terminal Status to COMMITTING/PUSHING to inform other terminals
+- **When Completing Work**: Update Terminal Status to IDLE to allow Terminal 1 potential access
 
 ## 🏗️ Framework Architecture
 

@@ -1,23 +1,154 @@
 # Axiom Framework Refactor Guide
 
-You are Claude Code organizing and preparing the Axiom framework for new development cycles through documentation restructuring and code organization.
+You are Claude Code organizing and preparing the Axiom framework for new development cycles through documentation restructuring and code organization on the **main branch**.
 
 ## 🤖 Automated Mode Trigger
 
 **When human sends**: `@REFACTOR`
-**Action**: Automatically enter ultrathink mode and execute next roadmap task
+**Action**: Automatically enter ultrathink mode and execute next roadmap task on main branch
 
 **Process**:
-1. **Read REFACTOR.md** → Load this complete guide
-2. **Check ROADMAP.md** → Identify organizational needs or phase completion triggers
-3. **Execute Reorganization** → Archive, organize, and prepare documentation structure
-4. **Update Progress** → Mark task complete (✅) in ROADMAP.md
+1. **Verify Main Branch** → Ensure working on main branch and other branches are inactive
+2. **Read REFACTOR.md** → Load this complete main branch guide
+3. **Check ROADMAP.md** → Identify organizational needs or phase completion triggers
+4. **Execute Reorganization** → Archive, organize, and prepare documentation structure
+5. **Update Progress** → Mark task complete (✅) in ROADMAP.md
+6. **Prepare for Branch Work** → Ready clean environment for development/integration work
 
 ## 🎯 REFACTOR Mode Mission
 
-**Focus**: Organize documentation, restructure for development efficiency, prepare for new phases, and maintain clean development environment.
+**Focus**: Comprehensive refactoring across the entire Axiom codebase - framework, test app, and documentation - to improve structure, organization, maintainability, and consistency without changing functionality.
 
-**Philosophy**: Well-organized foundation enables rapid development. Clean structure prevents technical debt and accelerates innovation.
+**Philosophy**: Well-organized foundation enables rapid development. Clean structure prevents technical debt and accelerates innovation. Refactoring improves what exists rather than adding new capabilities.
+
+## 🖥️ Terminal 1 (Main Branch) Context
+
+**Terminal Identity**: Terminal 1 - Main Branch - Comprehensive Refactoring & Organization
+**Primary File Scope**: **ENTIRE CODEBASE** - `/AxiomFramework/`, `/AxiomTestApp/`, `/Documentation/`, organizational structure
+**Terminal Coordination**: ONLY active when Terminal 2 AND Terminal 3 are both completely IDLE
+**Merge Strategy**: Merge development and integration branches when user decides
+**Status Communication**: Must check ROADMAP.md Terminal Status before ANY work
+
+**What Terminal 1 (REFACTOR.md) Works On**:
+- ✅ **Framework Refactoring**: Code organization, structure improvements in `/AxiomFramework/Sources/`
+- ✅ **Test App Refactoring**: Code organization, structure improvements in `/AxiomTestApp/`
+- ✅ **Cross-System Refactoring**: Consistency improvements across both framework and test app
+- ✅ **Documentation Organization**: Archival, structure, and navigation improvements in `/Documentation/`
+- ✅ **File Organization**: Moving, renaming, restructuring files across entire codebase
+- ✅ **Code Quality**: Removing duplication, improving naming, enhancing maintainability
+- ✅ **Architectural Cleanup**: Improving code patterns, dependencies, and structure
+- ✅ **Project-Wide Consistency**: Ensuring consistent patterns across framework and test app
+
+**What Terminal 1 (REFACTOR.md) Avoids**:
+- ❌ **New Feature Implementation** (that's Terminal 2 for framework, Terminal 3 for test app)
+- ❌ **New Integration Testing** (that's Terminal 3)
+- ❌ **Working when Terminal 2 OR Terminal 3 are ACTIVE** (prevents conflicts)
+- ❌ **ROADMAP.md sprint/priority changes** (only PLAN.md can do that)
+
+**Refactoring vs Development Distinction**:
+- **REFACTOR**: Improve existing code structure, organization, and quality without changing functionality
+- **DEVELOP**: Add new features, capabilities, and functionality to the framework
+- **INTEGRATE**: Test new features and validate functionality in real-world scenarios
+
+**Terminal Coordination Protocol (CRITICAL)**:
+- **MANDATORY Before ANY Work**: Check ROADMAP.md Terminal Status to verify BOTH Terminal 2 AND Terminal 3 are IDLE
+- **If Other Terminals Active**: WAIT - Terminal 1 cannot work when any other terminal is active
+- **When Starting Work**: Update ROADMAP.md Terminal Status to ACTIVE with current refactoring work description
+- **During Work**: Focus on structural improvements and organization across entire codebase
+- **When Completing Work**: Update Terminal Status to WAITING to resume normal coordination
+- **Emergency Stop**: If Terminal 2 or Terminal 3 need to start work, immediately stop and go to WAITING
+
+**BLOCKING RULE**: Terminal 1 NEVER works when Terminal 2 or Terminal 3 show status other than IDLE
+
+## 🔧 Comprehensive Refactoring Capabilities
+
+### **Framework Refactoring (`/AxiomFramework/`)**
+
+#### **Code Structure & Organization**
+- **File Reorganization**: Move files to more logical directory structures
+- **Module Separation**: Split large files into focused, single-responsibility modules  
+- **Naming Consistency**: Improve class, protocol, and method names for clarity
+- **Import Cleanup**: Remove unused imports, organize import statements
+- **Code Deduplication**: Extract common patterns into reusable utilities
+
+#### **Protocol & API Refactoring**
+- **Protocol Consolidation**: Merge similar protocols or split overly complex ones
+- **API Consistency**: Ensure consistent naming and parameter patterns across APIs
+- **Extension Organization**: Group related extensions and move them to appropriate files
+- **Access Control**: Review and optimize public/internal/private access levels
+- **Documentation Alignment**: Ensure code structure matches documentation descriptions
+
+#### **Performance & Quality Improvements**
+- **Memory Management**: Improve weak/strong reference patterns
+- **Actor Isolation**: Optimize actor usage and isolation boundaries
+- **Error Handling**: Standardize error patterns and improve error propagation
+- **Type Safety**: Enhance type safety through better generic usage
+- **Concurrency Patterns**: Improve async/await usage and Task coordination
+
+### **Test App Refactoring (`/AxiomTestApp/`)**
+
+#### **Application Structure**
+- **Feature Modularization**: Organize features into clear, cohesive modules
+- **View Hierarchy**: Improve SwiftUI view organization and composition
+- **Navigation Patterns**: Standardize navigation and routing approaches
+- **State Management**: Optimize context and client usage patterns
+- **Resource Organization**: Improve asset and resource file organization
+
+#### **Code Quality & Consistency**
+- **Naming Conventions**: Ensure consistent naming across the entire test app
+- **View Extraction**: Break down large views into smaller, reusable components
+- **Business Logic Separation**: Move business logic to appropriate clients/contexts
+- **Test Data Organization**: Improve mock data and test scenario organization
+- **Error Handling**: Standardize error handling patterns in UI layer
+
+#### **Integration Patterns**
+- **Framework Usage**: Optimize how the test app uses framework capabilities
+- **Macro Consistency**: Ensure consistent macro usage across all domains
+- **Performance Optimization**: Improve app performance and responsiveness
+- **Memory Usage**: Optimize memory patterns in complex view hierarchies
+- **Documentation Examples**: Align code with documentation examples
+
+### **Cross-System Refactoring**
+
+#### **Consistency Improvements**
+- **Pattern Standardization**: Ensure consistent patterns between framework and test app
+- **Naming Alignment**: Align naming conventions across framework and test usage
+- **Documentation Sync**: Ensure code matches documentation examples
+- **API Usage**: Standardize how test app uses framework APIs
+- **Error Patterns**: Consistent error handling between framework and application
+
+#### **Architectural Alignment**
+- **Constraint Adherence**: Ensure both framework and test app follow 8 architectural constraints
+- **Dependency Management**: Optimize dependencies between framework and test app
+- **Interface Consistency**: Align interfaces and protocols across systems
+- **Testing Patterns**: Standardize testing approaches in both framework and test app
+- **Performance Consistency**: Ensure consistent performance patterns
+
+## 🎯 Refactoring Focus Areas
+
+### **Priority 1: Code Organization & Structure**
+- File and directory reorganization for logical grouping
+- Module boundaries and separation of concerns
+- Import cleanup and dependency optimization
+- Naming consistency across entire codebase
+
+### **Priority 2: Quality & Maintainability**
+- Code deduplication and pattern extraction
+- Error handling standardization
+- Documentation alignment with code
+- Type safety and API consistency improvements
+
+### **Priority 3: Performance & Architecture**
+- Memory management optimization
+- Concurrency pattern improvements
+- Actor isolation refinements
+- Cross-system architectural alignment
+
+### **Priority 4: Developer Experience**
+- API consistency and predictability
+- Documentation and code synchronization
+- Example code quality and clarity
+- Testing pattern standardization
 
 ## 🗂️ Dual Documentation Architecture
 

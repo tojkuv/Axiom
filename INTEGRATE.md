@@ -1,23 +1,54 @@
 # Axiom Framework Integration Guide
 
-You are Claude Code refining the Axiom framework through comprehensive real-world testing and integration cycles with AxiomTestApp.
+You are Claude Code refining the Axiom framework through comprehensive real-world testing and integration cycles with AxiomTestApp on the **integration branch**.
 
 ## 🤖 Automated Mode Trigger
 
 **When human sends**: `@INTEGRATE`
-**Action**: Automatically enter ultrathink mode and execute next roadmap task
+**Action**: Automatically enter ultrathink mode and execute next roadmap task on integration branch
 
 **Process**:
-1. **Read INTEGRATE.md** → Load this complete comprehensive guide
-2. **Check ROADMAP.md** → Identify highest priority 🔄 (active) or ⏳ (queued) INTEGRATE tasks
-3. **Execute Comprehensive Test App Workflow** → Use AxiomTestApp for thorough validation and API refinement
-4. **Update Progress** → Mark task complete (✅) in ROADMAP.md
+1. **Verify Integration Branch** → Ensure working on integration branch context
+2. **Read INTEGRATE.md** → Load this complete integration branch guide
+3. **Check ROADMAP.md** → Identify highest priority integration branch tasks
+4. **Execute Comprehensive Test App Workflow** → Use AxiomTestApp for thorough validation and API refinement
+5. **Update Progress** → Mark task complete (✅) in ROADMAP.md
+6. **Coordinate Branches** → Ensure changes don't conflict with parallel development work
 
 ## 🎯 INTEGRATE Mode Mission
 
-**Focus**: Create INTERACTIVE validation experiences that demonstrate real framework capabilities through live user interaction, real-time feedback, and measurable results.
+**Focus**: Create INTERACTIVE validation experiences that demonstrate real framework capabilities through live user interaction, real-time feedback, and measurable results on the integration branch.
 
 **Philosophy**: Integration testing must prove framework capabilities through interactive demonstrations - not static placeholders. Every validation view must provide real user interaction that exercises actual framework features with immediate, measurable feedback.
+
+## 🖥️ Terminal 3 (Integration Branch) Context
+
+**Terminal Identity**: Terminal 3 - Integration Branch - AxiomTestApp Validation
+**Primary File Scope**: `/AxiomTestApp/`, integration-specific documentation
+**Terminal Coordination**: Can work parallel with Terminal 2 (development), must coordinate with Terminal 1 (main)
+**Merge Strategy**: Manual merge to main branch when user decides
+**Status Communication**: Must update ROADMAP.md Terminal Status when starting/stopping work
+
+**What Terminal 3 (INTEGRATE.md) Works On**:
+- ✅ AxiomTestApp implementation and validation views in `/AxiomTestApp/`
+- ✅ Real-world framework usage patterns and examples
+- ✅ Performance measurement and testing scenarios
+- ✅ Developer experience validation and documentation
+- ✅ Integration discovery and feedback communication to Terminal 2
+
+**What Terminal 3 (INTEGRATE.md) Avoids**:
+- ❌ Framework source code changes (that's Terminal 2)
+- ❌ Documentation organization (that's Terminal 1)
+- ❌ ROADMAP.md changes (except Terminal Status updates)
+- ❌ Working when Terminal 1 is ACTIVE (coordinate through status)
+
+**Terminal Coordination Protocol**:
+- **Before Starting Work**: Check ROADMAP.md Terminal Status to ensure Terminal 1 is not ACTIVE
+- **When Starting Work**: Update ROADMAP.md Terminal Status to ACTIVE with current work description
+- **During Work**: Update file scope in Terminal Status to coordinate with Terminal 2
+- **When Discovering Issues**: Update Terminal Status to communicate findings to Terminal 2
+- **When Committing/Pushing**: Update Terminal Status to COMMITTING/PUSHING to inform other terminals
+- **When Completing Work**: Update Terminal Status to IDLE to allow Terminal 1 potential access
 
 **Interactive Validation Principle**: No validation is complete until users can interact with real framework capabilities, see immediate results, receive live feedback, and trigger actual framework operations that demonstrate measurable outcomes.
 
@@ -28,13 +59,13 @@ You are Claude Code refining the Axiom framework through comprehensive real-worl
 - **Interactive Feedback**: Live status updates, progress indicators, result visualization
 - **User-Triggered Operations**: User actions that demonstrate actual framework capabilities working
 
-## 🏗️ Production-Quality AxiomTestApp Architecture
+## 🏗️ Production-Quality AxiomTestApp Architecture with Consistent Macro Usage
 
-### **Professional iOS Application Structure**
+### **Professional iOS Application Structure with Macro System Integration**
 ```
 AxiomTestApp/ExampleApp/
 ├── App/                # Professional app architecture
-│   ├── Navigation/             # Complex navigation patterns
+│   ├── Navigation/             # Complex navigation patterns  
 │   │   ├── TabBarCoordinator.swift      # Sophisticated tab management
 │   │   ├── NavigationFlowManager.swift  # Multi-level navigation
 │   │   └── DeepLinkingRouter.swift      # URL scheme handling
@@ -47,11 +78,12 @@ AxiomTestApp/ExampleApp/
 │       ├── DataSyncWorkflow.swift      # Complex data operations
 │       └── AnalyticsWorkflow.swift     # Event tracking flows
 │
-├── Domains/            # Multi-domain architecture with realistic complexity
-│   ├── User/                   # Comprehensive user management
-│   │   ├── UserState.swift             # Complex user state with validation
-│   │   ├── UserClient.swift            # Authentication, profiles, permissions
-│   │   ├── UserContext.swift           # User session orchestration
+├── Domains/            # Multi-domain architecture with CONSISTENT MACRO USAGE
+│   ├── User/                   # Complete macro system demonstration
+│   │   ├── UserState.swift             # @DomainModel with business rules and validation
+│   │   ├── UserClient.swift            # @Capabilities([.authentication, .userManagement, .dataAccess]) actor
+│   │   ├── UserContext.swift           # @Client + @CrossCutting([.analytics, .logging, .errorReporting]) context
+│   │   ├── UserView.swift              # AxiomView integration with 1:1 context binding
 │   │   ├── UserWorkflows/              # Complex user workflows
 │   │   │   ├── AuthenticationFlow.swift     # Multi-method auth
 │   │   │   ├── ProfileManagementFlow.swift  # Profile editing
@@ -61,10 +93,11 @@ AxiomTestApp/ExampleApp/
 │   │       ├── ProfileEditorView.swift      # Sophisticated form handling
 │   │       └── SettingsView.swift           # Complex settings interface
 │   │
-│   ├── Data/                   # Sophisticated data management
-│   │   ├── DataState.swift             # Complex data state with relationships
-│   │   ├── DataClient.swift            # Repository pattern with caching
-│   │   ├── DataContext.swift           # Data flow orchestration
+│   ├── Data/                   # Complete macro system demonstration
+│   │   ├── DataState.swift             # @DomainModel with validation rules and business logic
+│   │   ├── DataClient.swift            # @Capabilities([.dataAccess, .networkOperations, .caching]) actor
+│   │   ├── DataContext.swift           # @Client + @CrossCutting([.performance, .monitoring, .metrics]) context
+│   │   ├── DataView.swift              # AxiomView integration with 1:1 context binding
 │   │   ├── DataWorkflows/              # Complex data operations
 │   │   │   ├── SyncWorkflow.swift           # Multi-source data sync
 │   │   │   ├── BatchOperationsFlow.swift    # Bulk data operations
@@ -74,10 +107,11 @@ AxiomTestApp/ExampleApp/
 │   │       ├── DataVisualizationView.swift  # Charts and analytics
 │   │       └── DataExportView.swift         # Export functionality
 │   │
-│   ├── Analytics/              # Comprehensive analytics domain
-│   │   ├── AnalyticsState.swift        # Event tracking and metrics
-│   │   ├── AnalyticsClient.swift       # Performance monitoring
-│   │   ├── AnalyticsContext.swift      # Cross-cutting analytics
+│   ├── Analytics/              # Complete macro system demonstration
+│   │   ├── AnalyticsState.swift        # @DomainModel for event tracking and metrics
+│   │   ├── AnalyticsClient.swift       # @Capabilities([.analytics, .performance, .monitoring]) actor
+│   │   ├── AnalyticsContext.swift      # @Client + @CrossCutting([.analytics, .metrics]) context
+│   │   ├── AnalyticsView.swift         # AxiomView integration with 1:1 context binding
 │   │   ├── AnalyticsWorkflows/         # Analytics workflows
 │   │   │   ├── EventTrackingFlow.swift      # User behavior tracking
 │   │   │   ├── PerformanceMonitoring.swift  # App performance metrics
@@ -87,18 +121,33 @@ AxiomTestApp/ExampleApp/
 │   │       ├── PerformanceReportsView.swift # Performance analytics
 │   │       └── UserBehaviorAnalysisView.swift # Behavior insights
 │   │
-│   └── Intelligence/           # AI/Intelligence demonstration
-│       ├── IntelligenceState.swift    # AI query history and responses
-│       ├── IntelligenceClient.swift   # Natural language interface
-│       ├── IntelligenceContext.swift  # Smart recommendations
-│       ├── IntelligenceWorkflows/     # AI-powered workflows
-│       │   ├── NaturalLanguageQuery.swift   # Advanced query interface
-│       │   ├── PredictiveAnalysis.swift     # Predictive capabilities
-│       │   └── SmartRecommendations.swift   # AI recommendations
-│       └── IntelligenceInterface/     # AI user interfaces
-│           ├── QueryInterfaceView.swift     # Natural language UI
-│           ├── PredictiveInsightsView.swift # Predictive analytics
-│           └── RecommendationsView.swift    # Smart suggestions
+│   ├── Intelligence/           # Complete macro system demonstration  
+│   │   ├── IntelligenceState.swift    # @DomainModel for AI query history and learning
+│   │   ├── IntelligenceClient.swift   # @Capabilities([.naturalLanguage, .patternDetection, .predictiveAnalysis]) actor
+│   │   ├── IntelligenceContext.swift  # @Client + @CrossCutting([.analytics, .performance, .logging]) context
+│   │   ├── IntelligenceView.swift     # AxiomView integration with 1:1 context binding
+│   │   ├── IntelligenceWorkflows/     # AI-powered workflows
+│   │   │   ├── NaturalLanguageQuery.swift   # Advanced query interface
+│   │   │   ├── PredictiveAnalysis.swift     # Predictive capabilities
+│   │   │   └── SmartRecommendations.swift   # AI recommendations
+│   │   └── IntelligenceInterface/     # AI user interfaces
+│   │       ├── QueryInterfaceView.swift     # Natural language UI
+│   │       ├── PredictiveInsightsView.swift # Predictive analytics
+│   │       └── RecommendationsView.swift    # Smart suggestions
+│   │
+│   └── Notification/           # Complete macro system demonstration
+│       ├── NotificationState.swift    # @DomainModel for notification state and preferences
+│       ├── NotificationClient.swift   # @Capabilities([.pushNotifications, .localNotifications, .scheduling]) actor
+│       ├── NotificationContext.swift  # @Client + @CrossCutting([.analytics, .logging]) context
+│       ├── NotificationView.swift     # AxiomView integration with 1:1 context binding
+│       ├── NotificationWorkflows/     # Notification workflows
+│       │   ├── PushNotificationFlow.swift   # Push notification handling
+│       │   ├── LocalNotificationFlow.swift  # Local notification management
+│       │   └── NotificationScheduling.swift # Advanced scheduling
+│       └── NotificationInterface/     # Notification interfaces
+│           ├── NotificationCenterView.swift # Notification management
+│           ├── NotificationSettingsView.swift # User preferences
+│           └── NotificationHistoryView.swift # History and analytics
 │
 ├── Integration/        # Comprehensive framework integration demonstrations
 │   ├── CapabilityStressTesting/        # Capability system stress tests
@@ -738,6 +787,412 @@ AxiomTestApp/ExampleApp/
 - Fails to demonstrate actual framework functionality
 
 **This ensures integration validates framework readiness through INTERACTIVE demonstration of real capabilities with immediate user feedback.**
+
+## 🏗️ **CONSISTENT MACRO USAGE IMPLEMENTATION GUIDE**
+
+### **Four-Macro System: Complete Domain Architecture**
+
+Each domain in AxiomTestApp demonstrates the complete macro system integration with consistent patterns across all domains.
+
+#### **1. @DomainModel - Domain State Implementation**
+**Pattern**: Applied to struct representing domain state with business rules and validation
+
+```swift
+// UserState.swift - @DomainModel Implementation
+import Axiom
+
+@DomainModel
+struct UserState {
+    let id: String
+    let name: String
+    let email: String
+    let isActive: Bool
+    let lastLoginDate: Date?
+    let preferences: UserPreferences
+    
+    // Business rule methods for validation
+    @BusinessRule("User must have valid email format")
+    func hasValidEmail() -> Bool {
+        email.contains("@") && email.contains(".")
+    }
+    
+    @BusinessRule("Active users must have logged in within 90 days")
+    func hasRecentLogin() -> Bool {
+        guard isActive else { return true }
+        guard let lastLogin = lastLoginDate else { return false }
+        return Date().timeIntervalSince(lastLogin) < (90 * 24 * 60 * 60)
+    }
+}
+
+// Generated by @DomainModel macro:
+// - validate() -> ValidationResult
+// - businessRules() -> [BusinessRule]
+// - withUpdatedName(newName: String) -> Result<UserState, DomainError>
+// - withUpdatedEmail(newEmail: String) -> Result<UserState, DomainError>
+// - etc. for all properties
+// - ArchitecturalDNA properties (componentId, purpose, constraints)
+```
+
+#### **2. @Capabilities - Client Actor Implementation**
+**Pattern**: Applied to actor conforming to AxiomClient with capability declarations
+
+```swift
+// UserClient.swift - @Capabilities Implementation
+import Axiom
+
+@Capabilities([.authentication, .userManagement, .dataAccess])
+actor UserClient: AxiomClient {
+    typealias State = UserState
+    private(set) var stateSnapshot: UserState
+    
+    // Core AxiomClient implementation
+    func updateState(_ newState: UserState) async {
+        stateSnapshot = newState
+        await notifyObservers()
+    }
+    
+    // Domain-specific operations using capabilities
+    func authenticate(email: String, password: String) async throws -> AuthenticationResult {
+        try await capabilities.validate(.authentication)
+        // Authentication logic using capability system
+        return AuthenticationResult(success: true, userState: stateSnapshot)
+    }
+    
+    func updateUserProfile(_ updates: UserProfileUpdates) async throws {
+        try await capabilities.validate(.userManagement)
+        let result = stateSnapshot.withUpdatedName(updates.name)
+        switch result {
+        case .success(let updatedState):
+            await updateState(updatedState)
+        case .failure(let error):
+            throw error
+        }
+    }
+}
+
+// Generated by @Capabilities macro:
+// - private _capabilityManager: CapabilityManager
+// - var capabilities: CapabilityManager { _capabilityManager }
+// - static var requiredCapabilities: Set<Capability> { [.authentication, .userManagement, .dataAccess] }
+// - init(capabilityManager: CapabilityManager) async throws
+```
+
+#### **3. @Client + @CrossCutting - Context Implementation**
+**Pattern**: Applied to struct conforming to AxiomContext with client orchestration and cross-cutting concerns
+
+```swift
+// UserContext.swift - @Client + @CrossCutting Implementation
+import Axiom
+
+@Client
+@CrossCutting([.analytics, .logging, .errorReporting])
+struct UserContext: AxiomContext {
+    // Client properties marked with @Client (generated by macro)
+    @Client var userClient: UserClient
+    
+    // State access through client
+    var state: UserState {
+        userClient.stateSnapshot
+    }
+    
+    // Cross-cutting operations using injected services
+    func trackUserAction(_ action: UserAction) async {
+        await analytics.track(event: action.analyticsEvent)
+        await logger.log(level: .info, message: "User action: \(action)")
+    }
+    
+    // Orchestration operations
+    func performUserLogin(email: String, password: String) async throws {
+        do {
+            await logger.log(level: .info, message: "Attempting user login")
+            let result = try await userClient.authenticate(email: email, password: password)
+            
+            if result.success {
+                await analytics.track(event: "user_login_success")
+                await logger.log(level: .info, message: "User login successful")
+            }
+        } catch {
+            await errorReporting.reportError(error, context: "user_login")
+            await logger.log(level: .error, message: "User login failed: \(error)")
+            throw error
+        }
+    }
+}
+
+// Generated by @Client macro:
+// - private _userClient: UserClient
+// - var userClient: UserClient { _userClient }
+// - init(userClient: UserClient)
+// - deinit with observer cleanup
+
+// Generated by @CrossCutting macro:
+// - private _analytics: AnalyticsService
+// - private _logger: LoggingService  
+// - private _errorReporting: ErrorReportingService
+// - var analytics: AnalyticsService { _analytics }
+// - var logger: LoggingService { _logger }
+// - var errorReporting: ErrorReportingService { _errorReporting }
+// - Enhanced init with cross-cutting services
+```
+
+#### **4. AxiomView - SwiftUI Integration**
+**Pattern**: SwiftUI view with 1:1 context binding and reactive updates
+
+```swift
+// UserView.swift - AxiomView Implementation
+import Axiom
+import SwiftUI
+
+struct UserView: AxiomView {
+    @ObservedObject var context: UserContext
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            // State display with automatic updates
+            Text("Welcome, \(context.state.name)")
+                .font(.title)
+            
+            Text("Email: \(context.state.email)")
+                .font(.subtitle)
+            
+            if context.state.isActive {
+                Text("Status: Active")
+                    .foregroundColor(.green)
+            } else {
+                Text("Status: Inactive")
+                    .foregroundColor(.red)
+            }
+            
+            // User actions that trigger context operations
+            Button("Update Profile") {
+                Task {
+                    await context.trackUserAction(.profileUpdateRequested)
+                    // Navigate to profile editing
+                }
+            }
+            
+            Button("Refresh Data") {
+                Task {
+                    do {
+                        try await context.userClient.refreshUserData()
+                        await context.trackUserAction(.dataRefresh)
+                    } catch {
+                        // Error handling through context
+                        await context.analytics.track(event: "data_refresh_failed")
+                    }
+                }
+            }
+        }
+        .padding()
+        .onAppear {
+            Task {
+                await context.trackUserAction(.viewAppeared)
+            }
+        }
+    }
+}
+
+// AxiomView provides:
+// - 1:1 relationship with AxiomContext
+// - Automatic reactive updates when state changes
+// - Type-safe context access
+// - Integration with SwiftUI lifecycle
+```
+
+### **Complete Domain Pattern Summary**
+
+Each domain follows this exact four-file pattern:
+
+1. **`DomainState.swift`** → `@DomainModel` struct with business rules
+2. **`DomainClient.swift`** → `@Capabilities([...])` actor implementing AxiomClient  
+3. **`DomainContext.swift`** → `@Client` + `@CrossCutting([...])` struct implementing AxiomContext
+4. **`DomainView.swift`** → AxiomView with 1:1 context binding
+
+### **Macro Integration Benefits**
+
+1. **@DomainModel**: Automatic validation, immutable updates, ArchitecturalDNA
+2. **@Capabilities**: Runtime capability validation, graceful degradation
+3. **@Client**: Automatic dependency injection, observer management
+4. **@CrossCutting**: Supervised cross-cutting concerns, analytics/logging integration
+
+### **Domain-Specific Macro Configuration Matrix**
+
+#### **User Domain - Authentication & User Management**
+```swift
+// UserState.swift
+@DomainModel
+struct UserState {
+    let id: String
+    let name: String
+    let email: String
+    let isActive: Bool
+    let preferences: UserPreferences
+    
+    @BusinessRule("Valid email format required")
+    func hasValidEmail() -> Bool { /* validation */ }
+    
+    @BusinessRule("Active users must have recent login")
+    func hasRecentLogin() -> Bool { /* validation */ }
+}
+
+// UserClient.swift
+@Capabilities([.authentication, .userManagement, .dataAccess])
+actor UserClient: AxiomClient { /* implementation */ }
+
+// UserContext.swift
+@Client
+@CrossCutting([.analytics, .logging, .errorReporting])
+struct UserContext: AxiomContext { /* implementation */ }
+```
+
+#### **Data Domain - Data Operations & Caching**
+```swift
+// DataState.swift
+@DomainModel
+struct DataState {
+    let datasets: [Dataset]
+    let cacheStatus: CacheStatus
+    let syncStatus: SyncStatus
+    let lastSyncDate: Date?
+    
+    @BusinessRule("Cache must be valid for operations")
+    func hasCacheValidity() -> Bool { /* validation */ }
+    
+    @BusinessRule("Sync frequency must not exceed limits")
+    func respectsSyncLimits() -> Bool { /* validation */ }
+}
+
+// DataClient.swift
+@Capabilities([.dataAccess, .networkOperations, .caching])
+actor DataClient: AxiomClient { /* implementation */ }
+
+// DataContext.swift
+@Client
+@CrossCutting([.performance, .monitoring, .metrics])
+struct DataContext: AxiomContext { /* implementation */ }
+```
+
+#### **Analytics Domain - Performance Monitoring & Metrics**
+```swift
+// AnalyticsState.swift
+@DomainModel
+struct AnalyticsState {
+    let events: [AnalyticsEvent]
+    let metrics: PerformanceMetrics
+    let reports: [AnalyticsReport]
+    let configuration: AnalyticsConfig
+    
+    @BusinessRule("Event collection must respect privacy settings")
+    func respectsPrivacySettings() -> Bool { /* validation */ }
+    
+    @BusinessRule("Metrics retention within policy limits")
+    func respectsRetentionPolicy() -> Bool { /* validation */ }
+}
+
+// AnalyticsClient.swift
+@Capabilities([.analytics, .performance, .monitoring])
+actor AnalyticsClient: AxiomClient { /* implementation */ }
+
+// AnalyticsContext.swift
+@Client
+@CrossCutting([.analytics, .metrics])
+struct AnalyticsContext: AxiomContext { /* implementation */ }
+```
+
+#### **Intelligence Domain - AI & Natural Language Processing**
+```swift
+// IntelligenceState.swift
+@DomainModel
+struct IntelligenceState {
+    let queryHistory: [IntelligenceQuery]
+    let learnedPatterns: [Pattern]
+    let recommendations: [Recommendation]
+    let confidence: ConfidenceMetrics
+    
+    @BusinessRule("Query responses must meet accuracy threshold")
+    func meetsAccuracyThreshold() -> Bool { /* validation */ }
+    
+    @BusinessRule("Learning patterns must be valid")
+    func hasValidPatterns() -> Bool { /* validation */ }
+}
+
+// IntelligenceClient.swift
+@Capabilities([.naturalLanguage, .patternDetection, .predictiveAnalysis])
+actor IntelligenceClient: AxiomClient { /* implementation */ }
+
+// IntelligenceContext.swift
+@Client
+@CrossCutting([.analytics, .performance, .logging])
+struct IntelligenceContext: AxiomContext { /* implementation */ }
+```
+
+#### **Notification Domain - Push & Local Notifications**
+```swift
+// NotificationState.swift
+@DomainModel
+struct NotificationState {
+    let notifications: [Notification]
+    let preferences: NotificationPreferences
+    let schedules: [NotificationSchedule]
+    let deliveryStatus: DeliveryStatus
+    
+    @BusinessRule("Notification frequency must respect user limits")
+    func respectsFrequencyLimits() -> Bool { /* validation */ }
+    
+    @BusinessRule("Scheduled notifications must be valid")
+    func hasValidSchedules() -> Bool { /* validation */ }
+}
+
+// NotificationClient.swift
+@Capabilities([.pushNotifications, .localNotifications, .scheduling])
+actor NotificationClient: AxiomClient { /* implementation */ }
+
+// NotificationContext.swift
+@Client
+@CrossCutting([.analytics, .logging])
+struct NotificationContext: AxiomContext { /* implementation */ }
+```
+
+### **Capability System Matrix**
+
+| Domain | Primary Capabilities | Secondary Capabilities | Cross-Cutting Concerns |
+|--------|---------------------|----------------------|----------------------|
+| **User** | `.authentication`<br>`.userManagement` | `.dataAccess` | `.analytics`<br>`.logging`<br>`.errorReporting` |
+| **Data** | `.dataAccess`<br>`.networkOperations` | `.caching` | `.performance`<br>`.monitoring`<br>`.metrics` |
+| **Analytics** | `.analytics`<br>`.performance` | `.monitoring` | `.analytics`<br>`.metrics` |
+| **Intelligence** | `.naturalLanguage`<br>`.patternDetection` | `.predictiveAnalysis` | `.analytics`<br>`.performance`<br>`.logging` |
+| **Notification** | `.pushNotifications`<br>`.localNotifications` | `.scheduling` | `.analytics`<br>`.logging` |
+
+### **Cross-Cutting Concern Distribution**
+
+| Concern | User | Data | Analytics | Intelligence | Notification |
+|---------|------|------|-----------|--------------|--------------|
+| **Analytics** | ✅ | ❌ | ✅ | ✅ | ✅ |
+| **Logging** | ✅ | ❌ | ❌ | ✅ | ✅ |
+| **Error Reporting** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Performance** | ❌ | ✅ | ❌ | ✅ | ❌ |
+| **Monitoring** | ❌ | ✅ | ❌ | ❌ | ❌ |
+| **Metrics** | ❌ | ✅ | ✅ | ❌ | ❌ |
+
+### **Validation Consistency Requirements**
+
+Each domain's @DomainModel implementation must include:
+1. **Domain-specific business rules** - Validation logic relevant to the domain
+2. **Consistent property patterns** - ID, state, configuration, metadata
+3. **Appropriate business rule coverage** - 2-4 rules per domain for comprehensive validation
+4. **Generated methods utilization** - Use of withUpdated* methods in client operations
+
+Each domain's @Capabilities configuration must include:
+1. **Primary capability alignment** - Capabilities directly related to domain responsibility
+2. **Secondary capability support** - Supporting capabilities for cross-domain operations
+3. **Capability validation usage** - Proper validation in all client operations
+4. **Graceful degradation** - Handling of capability unavailability
+
+Each domain's @CrossCutting configuration must include:
+1. **Appropriate concern selection** - Concerns that align with domain operations
+2. **Service utilization** - Active use of injected services in context operations
+3. **Operation correlation** - Cross-cutting concerns used in relevant operations
+4. **Consistent service integration** - Standard patterns for service usage
 
 ## 🛠️ **INTERACTIVE VALIDATION IMPLEMENTATION GUIDE**
 
