@@ -10,20 +10,44 @@ import Combine
 actor MockAxiomIntelligence: AxiomIntelligence {
     var enabledFeatures: Set<IntelligenceFeature> = []
     var confidenceThreshold: Double = 0.8
-    var automationLevel: AutomationLevel = .assisted
-    var learningMode: LearningMode = .adaptive
+    var automationLevel: AutomationLevel = .supervised
+    var learningMode: LearningMode = .suggestion
     var performanceConfiguration: IntelligencePerformanceConfiguration = IntelligencePerformanceConfiguration()
     
     func enableFeature(_ feature: IntelligenceFeature) async { enabledFeatures.insert(feature) }
     func disableFeature(_ feature: IntelligenceFeature) async { enabledFeatures.remove(feature) }
     func setAutomationLevel(_ level: AutomationLevel) async { automationLevel = level }
     func setLearningMode(_ mode: LearningMode) async { learningMode = mode }
-    func getMetrics() async -> IntelligenceMetrics { return IntelligenceMetrics() }
+    func getMetrics() async -> IntelligenceMetrics { 
+        return IntelligenceMetrics(
+            totalOperations: 0,
+            averageResponseTime: 0.0,
+            cacheHitRate: 0.0,
+            successfulPredictions: 0,
+            predictionAccuracy: 0.0,
+            featureMetrics: [:],
+            timestamp: Date()
+        )
+    }
     func reset() async { enabledFeatures.removeAll() }
     func processQuery(_ query: String) async throws -> QueryResponse { return QueryResponse.explanation("Test", confidence: 0.9) }
     func analyzeCodePatterns() async throws -> [OptimizationSuggestion] { return [] }
     func predictArchitecturalIssues() async throws -> [ArchitecturalRisk] { return [] }
-    func generateDocumentation(for componentID: ComponentID) async throws -> GeneratedDocumentation { return GeneratedDocumentation(componentID: componentID, content: "Test") }
+    func generateDocumentation(for componentID: ComponentID) async throws -> GeneratedDocumentation { 
+        return GeneratedDocumentation(
+            componentID: componentID,
+            title: "Test Documentation",
+            overview: "Test overview",
+            purpose: "Test purpose",
+            responsibilities: ["Test responsibility"],
+            dependencies: ["Test dependency"],
+            usagePatterns: ["Test pattern"],
+            performanceCharacteristics: ["Test characteristic"],
+            bestPractices: ["Test practice"],
+            examples: ["Test example"],
+            generatedAt: Date()
+        )
+    }
     func suggestRefactoring() async throws -> [RefactoringSuggestion] { return [] }
     func registerComponent<T: AxiomContext>(_ component: T) async {}
 }

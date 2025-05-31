@@ -41,11 +41,10 @@ class TestTransactionClient {
         stateVersion
     }
     
-    func updateState(_ mutation: (inout TestTransactionState) -> Void) throws {
+    func updateState(_ mutation: (inout TestTransactionState) -> Void) async throws {
         let snapshot = StateSnapshot(state: currentState, version: stateVersion)
-        // Simplified for testing\n        var modifiedContext = StateTransactionContext(originalSnapshot: snapshot)
-        
-        var modifiedContext = context
+        // Simplified for testing
+        var modifiedContext = StateTransactionContext(originalSnapshot: snapshot)
         try modifiedContext.apply(mutation)
         
         // Validate and commit
@@ -201,7 +200,7 @@ func testTransactionContextValidation() throws {
 }
 
 @Test("StateTransactionContext timeout validation")
-func testTransactionContextTimeoutValidation() throws {
+func testTransactionContextTimeoutValidation() async throws {
     let state = TestTransactionState()
     let snapshot = StateSnapshot(state: state)
     let metadata = TransactionMetadata(timeout: 0.001) // 1ms timeout
