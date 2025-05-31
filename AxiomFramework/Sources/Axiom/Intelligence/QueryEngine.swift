@@ -51,6 +51,12 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
     /// Cache TTL (in seconds)
     private let cacheTimeout: TimeInterval
     
+    /// Cache size limit for memory management
+    private let maxCacheSize: Int = 1000
+    
+    /// LRU tracking for cache eviction
+    private var cacheAccessOrder: [String] = []
+    
     // MARK: Initialization
     
     public init(
@@ -80,6 +86,8 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
             let cacheKey = generateCacheKey(parsedQuery)
             if let cachedResponse = responseCache[cacheKey],
                !cachedResponse.isExpired(timeout: cacheTimeout) {
+                // Update LRU order
+                updateCacheAccess(cacheKey)
                 return cachedResponse.response
             }
         }
@@ -95,10 +103,7 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
         // Cache the response if enabled
         if configuration.enableCaching {
             let cacheKey = generateCacheKey(parsedQuery)
-            responseCache[cacheKey] = CachedResponse(
-                response: response,
-                timestamp: Date()
-            )
+            addToCache(cacheKey: cacheKey, response: response)
         }
         
         // Learn from the query
@@ -887,6 +892,48 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
     private func generateCacheKey(_ parsedQuery: ParsedQuery) -> String {
         let parametersString = parsedQuery.parameters.map { "\($0.key):\($0.value)" }.sorted().joined(separator: ",")
         return "\(parsedQuery.intent.rawValue)|\(parametersString)"
+    }
+    
+    /// Enhanced cache management with LRU eviction
+    private func addToCache(cacheKey: String, response: QueryResponse) {
+        // Evict expired entries first
+        cleanExpiredCacheEntries()
+        
+        // Evict LRU entries if cache is full
+        if responseCache.count >= maxCacheSize {
+            evictLRUCacheEntries()
+        }
+        
+        // Add new entry
+        responseCache[cacheKey] = CachedResponse(response: response, timestamp: Date())
+        updateCacheAccess(cacheKey)
+    }
+    
+    private func updateCacheAccess(_ cacheKey: String) {
+        // Remove from current position
+        cacheAccessOrder.removeAll { $0 == cacheKey }
+        // Add to end (most recently used)
+        cacheAccessOrder.append(cacheKey)
+    }
+    
+    private func cleanExpiredCacheEntries() {
+        let now = Date()
+        let expiredKeys = responseCache.compactMap { key, cachedResponse in
+            cachedResponse.isExpired(timeout: cacheTimeout) ? key : nil
+        }
+        
+        for key in expiredKeys {
+            responseCache.removeValue(forKey: key)
+            cacheAccessOrder.removeAll { $0 == key }
+        }
+    }
+    
+    private func evictLRUCacheEntries() {
+        let targetSize = maxCacheSize * 3 / 4 // Evict to 75% capacity
+        while responseCache.count > targetSize && !cacheAccessOrder.isEmpty {
+            let lruKey = cacheAccessOrder.removeFirst()
+            responseCache.removeValue(forKey: lruKey)
+        }
     }
     
     private func mapStringToCategory(_ type: String) -> ComponentCategory {
