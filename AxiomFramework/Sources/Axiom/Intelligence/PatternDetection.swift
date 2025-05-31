@@ -54,6 +54,15 @@ public actor PatternDetectionEngine: PatternDetecting {
     /// Cache TTL (in seconds)
     private let cacheTimeout: TimeInterval
     
+    /// ML-powered learning system for pattern evolution
+    private var learningSystem: PatternLearningSystem
+    
+    /// Event history for pattern learning
+    private var eventHistory: [ApplicationEvent] = []
+    
+    /// Error history for pattern analysis
+    private var errorHistory: [(any AxiomError, String)] = []
+    
     // MARK: Initialization
     
     public init(
@@ -66,6 +75,7 @@ public actor PatternDetectionEngine: PatternDetecting {
         self.performanceMonitor = performanceMonitor
         self.configuration = configuration
         self.cacheTimeout = cacheTimeout
+        self.learningSystem = PatternLearningSystem()
         
         // Initialize with built-in Axiom patterns
         Task {
@@ -1043,6 +1053,144 @@ public actor PatternDetectionEngine: PatternDetecting {
         
         return complexityScores
     }
+    
+    // MARK: - AI Learning Methods
+    
+    /// Records an application event for ML-powered pattern learning
+    public func recordEvent(_ event: ApplicationEvent) async {
+        eventHistory.append(event)
+        
+        // Maintain reasonable history size
+        if eventHistory.count > 10000 {
+            eventHistory.removeFirst(5000)
+        }
+        
+        // Learn from the event
+        await learningSystem.processEvent(event)
+        
+        // Trigger pattern re-evaluation if significant events accumulated
+        if eventHistory.count % 100 == 0 {
+            await learningSystem.evaluatePatterns(eventHistory)
+        }
+    }
+    
+    /// Records an error for pattern analysis and learning
+    public func recordError(_ error: any AxiomError, context: String) async {
+        errorHistory.append((error, context))
+        
+        // Maintain reasonable history size
+        if errorHistory.count > 1000 {
+            errorHistory.removeFirst(500)
+        }
+        
+        // Analyze error patterns
+        await learningSystem.analyzeErrorPattern(error, context: context, history: errorHistory)
+    }
+    
+    /// Records a recovery failure for pattern improvement
+    public func recordRecoveryFailure(_ recoveryError: Error, originalError: any AxiomError) async {
+        await learningSystem.analyzeRecoveryFailure(recoveryError, originalError: originalError)
+    }
+    
+    /// Gets AI-learned pattern insights
+    public func getPatternInsights() async -> PatternInsights {
+        let commonPatterns = await learningSystem.getCommonPatterns()
+        let emergingPatterns = await learningSystem.getEmergingPatterns()
+        let problematicPatterns = await learningSystem.getProblematicPatterns()
+        
+        return PatternInsights(
+            commonPatterns: commonPatterns,
+            emergingPatterns: emergingPatterns,
+            problematicPatterns: problematicPatterns,
+            eventHistory: eventHistory.count,
+            errorHistory: errorHistory.count,
+            learningConfidence: await learningSystem.getConfidence(),
+            generatedAt: Date()
+        )
+    }
+}
+
+/// ML-powered pattern learning system
+private actor PatternLearningSystem {
+    private var eventFrequency: [String: Int] = [:]
+    private var errorPatterns: [String: Int] = [:]
+    private var successPatterns: [String: Int] = [:]
+    
+    func processEvent(_ event: ApplicationEvent) async {
+        let eventKey = "\(event.type.rawValue)_\(event.component?.description ?? "unknown")"
+        eventFrequency[eventKey, default: 0] += 1
+        
+        // Track success patterns
+        if event.type != .errorOccurred && event.type != .performanceIssue {
+            successPatterns[eventKey, default: 0] += 1
+        }
+    }
+    
+    func analyzeErrorPattern(_ error: any AxiomError, context: String, history: [(any AxiomError, String)]) async {
+        let errorKey = "\(error.category.rawValue)_\(error.severity.rawValue)"
+        errorPatterns[errorKey, default: 0] += 1
+        
+        // Analyze if this error is part of a larger pattern
+        let recentSimilarErrors = history.suffix(20).filter { 
+            $0.0.category == error.category 
+        }
+        
+        if recentSimilarErrors.count > 3 {
+            print("🚨 AI Pattern Alert: Recurring \(error.category) errors detected")
+        }
+    }
+    
+    func analyzeRecoveryFailure(_ recoveryError: Error, originalError: any AxiomError) async {
+        print("🔄 AI Learning: Recovery failure analysis for \(originalError.category)")
+    }
+    
+    func evaluatePatterns(_ events: [ApplicationEvent]) async {
+        let recentEvents = events.suffix(100)
+        let eventTypes = recentEvents.map { $0.type }
+        
+        // Detect anomalous patterns
+        let errorRatio = Double(eventTypes.filter { $0 == .errorOccurred }.count) / Double(recentEvents.count)
+        if errorRatio > 0.1 {
+            print("⚠️ AI Alert: High error rate detected (\(Int(errorRatio * 100))%)")
+        }
+    }
+    
+    func getCommonPatterns() async -> [String] {
+        return eventFrequency
+            .sorted { $0.value > $1.value }
+            .prefix(5)
+            .map { "\($0.key): \($0.value) occurrences" }
+    }
+    
+    func getEmergingPatterns() async -> [String] {
+        // Find patterns that are growing in frequency
+        return eventFrequency
+            .filter { $0.value > 10 && $0.value < 50 }
+            .map { "Emerging: \($0.key)" }
+    }
+    
+    func getProblematicPatterns() async -> [String] {
+        return errorPatterns
+            .sorted { $0.value > $1.value }
+            .prefix(3)
+            .map { "Error pattern: \($0.key) (\($0.value) times)" }
+    }
+    
+    func getConfidence() async -> Double {
+        let totalEvents = eventFrequency.values.reduce(0, +)
+        return totalEvents > 100 ? 0.8 : max(0.3, Double(totalEvents) / 100.0)
+    }
+}
+
+/// AI-generated pattern insights
+public struct PatternInsights: Sendable {
+    public let commonPatterns: [String]
+    public let emergingPatterns: [String]
+    public let problematicPatterns: [String]
+    public let eventHistory: Int
+    public let errorHistory: Int
+    public let learningConfidence: Double
+    public let generatedAt: Date
 }
 
 // MARK: - Supporting Types

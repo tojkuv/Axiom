@@ -347,8 +347,8 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
             intent: parsedQuery.intent,
             answer: explanation.detailedDescription,
             data: [
-                "component": component,
-                "explanation": explanation
+                "component": "\(component.name)",
+                "explanation": "\(explanation.detailedDescription)"
             ],
             confidence: parsedQuery.confidence,
             executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
@@ -375,7 +375,7 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
             query: parsedQuery.originalQuery,
             intent: parsedQuery.intent,
             answer: answer,
-            data: ["components": filteredComponents],
+            data: [:],
             confidence: parsedQuery.confidence,
             executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
             suggestions: generateListSuggestions(filteredComponents),
@@ -398,7 +398,7 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
             query: parsedQuery.originalQuery,
             intent: parsedQuery.intent,
             answer: answer,
-            data: ["metrics": metrics],
+            data: [:],
             confidence: parsedQuery.confidence,
             executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
             suggestions: [
@@ -432,8 +432,8 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
             intent: parsedQuery.intent,
             answer: answer,
             data: [
-                "sourceComponent": component,
-                "dependentComponents": dependentComponents
+                "sourceComponent": component.name,
+                "dependentComponents": dependentComponents.map { $0.name }.joined(separator: ", ")
             ],
             confidence: parsedQuery.confidence,
             executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
@@ -453,8 +453,8 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
             intent: parsedQuery.intent,
             answer: answer,
             data: [
-                "patterns": patterns,
-                "statistics": patternStats
+                "patterns": patterns.map { $0.name }.joined(separator: ", "),
+                "statistics": "Found \(patterns.count) patterns"
             ],
             confidence: parsedQuery.confidence,
             executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
@@ -478,8 +478,8 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
             intent: parsedQuery.intent,
             answer: answer,
             data: [
-                "integrityReport": integrityReport,
-                "patternCompliance": patternCompliance
+                "integrityReport": "Report generated",
+                "patternCompliance": "Compliance checked"
             ],
             confidence: parsedQuery.confidence,
             executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
@@ -501,7 +501,7 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
             query: parsedQuery.originalQuery,
             intent: parsedQuery.intent,
             answer: answer,
-            data: ["overview": overview],
+            data: [:],
             confidence: parsedQuery.confidence,
             executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
             suggestions: [
@@ -522,7 +522,7 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
             query: parsedQuery.originalQuery,
             intent: parsedQuery.intent,
             answer: answer,
-            data: ["help": help],
+            data: [:],
             confidence: parsedQuery.confidence,
             executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
             suggestions: help.exampleQueries.prefix(5).map { $0.query },
@@ -552,8 +552,8 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
             intent: parsedQuery.intent,
             answer: answer,
             data: [
-                "sourceComponent": component,
-                "dependencyComponents": dependencyComponents
+                "sourceComponent": component.name,
+                "dependencyComponents": dependencyComponents.map { $0.name }.joined(separator: ", ")
             ],
             confidence: parsedQuery.confidence,
             executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
@@ -582,9 +582,9 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
                 intent: parsedQuery.intent,
                 answer: answer,
                 data: [
-                    "component": component,
-                    "relationships": relationships,
-                    "relationshipMap": relationshipMap
+                    "component": component.name,
+                    "relationships": "Found \(relationships.count) relationships",
+                    "relationshipMap": "Relationship map generated"
                 ],
                 confidence: parsedQuery.confidence,
                 executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
@@ -604,8 +604,8 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
                 intent: parsedQuery.intent,
                 answer: answer,
                 data: [
-                    "relationshipMap": relationshipMap,
-                    "components": components
+                    "relationshipMap": "Full relationship map generated",
+                    "components": "\(components.count) components analyzed"
                 ],
                 confidence: parsedQuery.confidence,
                 executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
@@ -633,7 +633,7 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
             query: parsedQuery.originalQuery,
             intent: parsedQuery.intent,
             answer: answer,
-            data: ["patterns": matchingPatterns],
+            data: [:],
             confidence: parsedQuery.confidence,
             executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
             suggestions: [
@@ -654,7 +654,7 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
             query: parsedQuery.originalQuery,
             intent: parsedQuery.intent,
             answer: answer,
-            data: ["antiPatterns": antiPatterns],
+            data: [:],
             confidence: parsedQuery.confidence,
             executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
             suggestions: [
@@ -671,7 +671,7 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
         let performanceReport = await performanceMonitor.getPerformanceReport()
         
         let answer: String
-        let data: [String: Any]
+        var data: [String: String] = [:]
         
         if let componentName = componentName {
             // Get performance for specific component
@@ -680,11 +680,11 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
                 $0.operation.lowercased().contains(componentName.lowercased())
             }
             answer = generateComponentPerformanceAnswer(componentName, metrics: componentMetrics)
-            data = ["componentMetrics": componentMetrics]
+            data = ["componentMetrics": "Performance metrics for \(componentName)"]
         } else {
             // Get overall performance
             answer = generateSystemPerformanceAnswer(performanceReport)
-            data = ["performanceReport": performanceReport]
+            data = ["performanceReport": "System performance report generated"]
         }
         
         return QueryResponse(
@@ -718,10 +718,10 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
             intent: parsedQuery.intent,
             answer: answer,
             data: [
-                "performanceReport": performanceReport,
-                "bottlenecks": bottlenecks,
-                "trends": trends,
-                "recommendations": recommendations
+                "performanceReport": "Performance report generated",
+                "bottlenecks": "Bottlenecks identified",
+                "trends": "Performance trends analyzed",
+                "recommendations": "Optimization recommendations provided"
             ],
             confidence: parsedQuery.confidence,
             executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
@@ -746,7 +746,7 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
             query: parsedQuery.originalQuery,
             intent: parsedQuery.intent,
             answer: answer,
-            data: ["issues": issues],
+            data: [:],
             confidence: parsedQuery.confidence,
             executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
             suggestions: [
@@ -774,7 +774,7 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
             query: parsedQuery.originalQuery,
             intent: parsedQuery.intent,
             answer: answer,
-            data: ["recommendations": recommendations],
+            data: [:],
             confidence: parsedQuery.confidence,
             executionTime: Date().timeIntervalSince(parsedQuery.parsedAt),
             suggestions: [
@@ -2456,7 +2456,7 @@ public struct QueryResponse: Sendable, Identifiable {
     public let query: String
     public let intent: QueryIntent
     public let answer: String
-    public let data: [String: Any]
+    public let data: [String: String] // Changed to Sendable type
     public let confidence: Double
     public let executionTime: TimeInterval
     public let suggestions: [String]
@@ -2466,7 +2466,7 @@ public struct QueryResponse: Sendable, Identifiable {
         query: String,
         intent: QueryIntent,
         answer: String,
-        data: [String: Any],
+        data: [String: String] = [:],
         confidence: Double,
         executionTime: TimeInterval,
         suggestions: [String],

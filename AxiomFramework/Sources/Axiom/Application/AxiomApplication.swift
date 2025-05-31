@@ -327,7 +327,7 @@ public class DefaultAxiomApplication<AppConfig: AxiomApplicationConfiguration, R
             currentState = .running
             
             // Record successful launch for intelligence
-            await GlobalIntelligenceManager.shared.recordApplicationEvent(.launched)
+            await GlobalIntelligenceManager.shared.recordApplicationEvent(ApplicationEvent(type: .stateAccess, metadata: ["event": "launched"]))
             
         } catch {
             currentState = .error
@@ -345,7 +345,7 @@ public class DefaultAxiomApplication<AppConfig: AxiomApplicationConfiguration, R
         // Save critical state
         await GlobalIntelligenceManager.shared.saveState()
         
-        await GlobalIntelligenceManager.shared.recordApplicationEvent(.backgrounded)
+        await GlobalIntelligenceManager.shared.recordApplicationEvent(ApplicationEvent(type: .stateUpdate, metadata: ["event": "backgrounded"]))
     }
     
     public func onForeground() async {
@@ -357,7 +357,7 @@ public class DefaultAxiomApplication<AppConfig: AxiomApplicationConfiguration, R
         // Refresh capabilities if needed
         await capabilityManager.refreshCapabilities()
         
-        await GlobalIntelligenceManager.shared.recordApplicationEvent(.foregrounded)
+        await GlobalIntelligenceManager.shared.recordApplicationEvent(ApplicationEvent(type: .stateUpdate, metadata: ["event": "foregrounded"]))
     }
     
     public func onTerminate() async {
@@ -432,15 +432,7 @@ public enum ApplicationState: String, Sendable, CaseIterable {
     case error
 }
 
-/// Application events for intelligence tracking
-public enum ApplicationEvent: String, Sendable, CaseIterable {
-    case launched
-    case backgrounded
-    case foregrounded
-    case terminated
-    case contextCreated
-    case errorOccurred
-}
+// ApplicationEvent is defined in AxiomIntelligence.swift
 
 /// Application-specific errors
 public enum AxiomApplicationError: Error, AxiomError {

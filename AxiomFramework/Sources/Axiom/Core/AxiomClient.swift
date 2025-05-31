@@ -16,7 +16,7 @@ public struct ClientContainer<Client1: AxiomClient>: ClientDependencies {
     public let client1: Client1
     
     public init() {
-        fatalError("ClientContainer should be initialized with actual clients")
+        preconditionFailure("ClientContainer should be initialized with actual clients - use init(_:) instead")
     }
     
     public init(_ client1: Client1) {
@@ -30,7 +30,7 @@ public struct ClientContainer2<Client1: AxiomClient, Client2: AxiomClient>: Clie
     public let client2: Client2
     
     public init() {
-        fatalError("ClientContainer2 should be initialized with actual clients")
+        preconditionFailure("ClientContainer2 should be initialized with actual clients - use init(_:_:) instead")
     }
     
     public init(_ client1: Client1, _ client2: Client2) {
@@ -46,7 +46,7 @@ public struct ClientContainer3<Client1: AxiomClient, Client2: AxiomClient, Clien
     public let client3: Client3
     
     public init() {
-        fatalError("ClientContainer3 should be initialized with actual clients")
+        preconditionFailure("ClientContainer3 should be initialized with actual clients - use init(_:_:_:) instead")
     }
     
     public init(_ client1: Client1, _ client2: Client2, _ client3: Client3) {

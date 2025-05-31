@@ -369,8 +369,8 @@ public actor NaturalLanguageQueryParser: QueryParsing {
         return .unknown
     }
     
-    private func extractParameters(from entities: [Entity], for intent: QueryIntent) -> [String: Any] {
-        var parameters: [String: Any] = [:]
+    private func extractParameters(from entities: [Entity], for intent: QueryIntent) -> [String: String] {
+        var parameters: [String: String] = [:]
         
         for entity in entities {
             switch entity.type {
@@ -383,7 +383,7 @@ public actor NaturalLanguageQueryParser: QueryParsing {
             case .metric:
                 parameters["metric"] = entity.value
             case .number:
-                parameters["count"] = Int(entity.value) ?? 0
+                parameters["count"] = String(Int(entity.value) ?? 0)
             }
         }
         
@@ -680,7 +680,7 @@ public struct ParsedQuery: Sendable {
     public let originalQuery: String
     public let normalizedQuery: String
     public let intent: QueryIntent
-    public let parameters: [String: Any]
+    public let parameters: [String: String] // Changed to Sendable type
     public let entities: [Entity]
     public let confidence: Double
     public let parsedAt: Date
@@ -689,7 +689,7 @@ public struct ParsedQuery: Sendable {
         originalQuery: String,
         normalizedQuery: String,
         intent: QueryIntent,
-        parameters: [String: Any],
+        parameters: [String: String],
         entities: [Entity],
         confidence: Double,
         parsedAt: Date

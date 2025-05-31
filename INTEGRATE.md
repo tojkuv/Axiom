@@ -15,19 +15,22 @@ You are Claude Code refining the Axiom framework through real-world testing and 
 
 ## 🎯 INTEGRATE Mode Mission
 
-**Focus**: Create comprehensive integration testing environment that scales with framework complexity and demonstrates full capabilities.
+**Focus**: Create feedback-driven integration testing that improves both framework implementation and demonstrates full capabilities through real-world usage.
 
-**Philosophy**: The test app is a living demonstration of framework power - it must showcase everything the framework can do and serve as both integration testing tool and capability demonstration.
+**Philosophy**: Integration testing is a discovery process where framework limitations are identified and resolved. The test app serves as both validation tool and framework improvement driver through real-world usage patterns.
 
-**Scaling Principle**: Application complexity must match framework sophistication. As framework capabilities grow, test app must demonstrate those capabilities in real scenarios.
+**Feedback-Driven Principle**: Integration issues indicate framework implementation gaps. Each integration challenge should drive framework enhancements, ensuring the framework evolves based on actual usage requirements.
+
+**Scaling Principle**: Application complexity must match framework sophistication. As framework capabilities grow, test app must demonstrate those capabilities in real scenarios, with framework changes expected during integration.
 
 ## 🧪 AxiomTestApp Integration Workflow
 
-### **Real-World Validation Environment**
-- **Location**: `/AxiomTestApp/ExampleApp/`
-- **Purpose**: Test framework APIs in actual iOS application context
-- **Integration**: Workspace with live framework dependency resolution
-- **Structure**: Modular organization for efficient testing and iteration
+### **Feedback-Driven Integration Environment**
+- **Location**: `/AxiomTestApp/ExampleApp/` + `/AxiomFramework/Sources/Axiom/`
+- **Purpose**: Test framework APIs in actual iOS application context AND improve framework based on integration findings
+- **Integration**: Workspace with live framework dependency resolution enabling immediate framework changes
+- **Structure**: Bi-directional development - test app drives framework improvements, framework changes validate in test app
+- **Expectation**: Framework code changes are normal and required during integration cycles
 
 ### **Comprehensive Multi-Domain Testing Structure**
 ```
@@ -115,56 +118,62 @@ AxiomTestApp/ExampleApp/
 - ✅ **Validate framework limitations** and create DEVELOP requirements for discovered issues
 - ✅ **Trigger next planning** by completing integration deliverables
 
-## 🔄 Comprehensive Integration Testing Cycle
+## 🔄 Feedback-Driven Integration Testing Cycle
 
-### **Phase 1: Framework Capability Assessment**
+### **Phase 1: Framework Capability Assessment & Gap Discovery**
 1. **Capability Inventory** → Catalog all framework features and their intended usage
-2. **Multi-Domain Validation** → Test framework across User, Data, Analytics, Intelligence domains
-3. **Integration Point Analysis** → Identify where domains interact and validate orchestration
-4. **Performance Baseline** → Establish performance metrics across all capability areas
-5. **Error Scenario Mapping** → Document error conditions and recovery mechanisms
+2. **Multi-Domain Integration Attempt** → Test framework across User, Data, Analytics, Intelligence domains
+3. **Integration Gap Identification** → Document where framework fails to support real-world usage
+4. **Framework Enhancement Requirements** → Define specific framework changes needed for successful integration
+5. **Performance Baseline** → Establish performance metrics AND identify performance improvement needs
 
-### **Phase 2: Advanced Usage Scenario Development**
-1. **Real-World Scenario Design** → Create scenarios that mirror actual application complexity
-2. **Cross-Domain Testing** → Validate framework when multiple domains interact simultaneously
-3. **Load Testing** → Test framework performance under realistic usage patterns
-4. **Edge Case Validation** → Test framework behavior in error conditions and edge cases
-5. **Intelligence System Validation** → Test natural language queries with complex architectural scenarios
+### **Phase 2: Framework-Driven Scenario Development**
+1. **Real-World Scenario Design** → Create scenarios that push framework boundaries and reveal limitations
+2. **Cross-Domain Integration Challenges** → Identify framework gaps when multiple domains interact
+3. **Framework Performance Enhancement** → Improve framework performance based on realistic usage patterns
+4. **Edge Case Framework Hardening** → Enhance framework robustness based on error condition discoveries
+5. **Intelligence System Framework Integration** → Implement framework changes needed for complex architectural scenarios
 
-### **Phase 3: Framework Limitation Discovery**
-1. **API Ergonomics Analysis** → Identify verbose or error-prone patterns in complex scenarios
-2. **Performance Bottleneck Identification** → Find performance issues under realistic load
-3. **Developer Experience Friction** → Document where framework creates unnecessary complexity
-4. **Missing Capability Gaps** → Identify what the framework should do but can't yet
-5. **Integration Pain Points** → Find difficult integration scenarios
+### **Phase 3: Active Framework Enhancement**
+1. **API Ergonomics Implementation** → Improve framework APIs to eliminate verbose or error-prone patterns
+2. **Performance Bottleneck Resolution** → Fix framework performance issues discovered under realistic load
+3. **Developer Experience Enhancement** → Simplify framework APIs where complexity creates friction
+4. **Missing Capability Implementation** → Add framework features discovered as essential during integration
+5. **Integration Pain Point Resolution** → Modify framework architecture to eliminate difficult integration scenarios
 
-### **Phase 4: Comprehensive Solution Implementation**
-1. **Framework Enhancement Design** → Design solutions for discovered limitations
-2. **Multi-Domain API Testing** → Validate new APIs across all domain implementations
-3. **Backward Compatibility Validation** → Ensure changes don't break existing functionality
-4. **Performance Impact Assessment** → Measure performance impact of framework changes
-5. **Documentation and Example Creation** → Create comprehensive usage examples
+### **Phase 4: Framework Validation & Integration Completion**
+1. **Enhanced Framework Testing** → Validate framework improvements work across all integration scenarios
+2. **Multi-Domain API Validation** → Confirm new framework APIs work seamlessly across all domain implementations
+3. **Backward Compatibility Verification** → Ensure framework changes maintain existing functionality
+4. **Performance Impact Measurement** → Confirm framework changes meet or exceed performance targets
+5. **Real-World Usage Documentation** → Document successful integration patterns using enhanced framework
 
-### **Phase 5: Validation and Demonstration**
-1. **End-to-End Testing** → Validate complete application scenarios work correctly
-2. **Framework Capability Demonstration** → Ensure test app showcases all framework features
-3. **Performance Target Validation** → Confirm framework meets performance objectives
-4. **Developer Experience Measurement** → Quantify improvements in developer productivity
-5. **Integration Guide Creation** → Document best practices discovered through testing
+### **Phase 5: Complete Integration Success Validation**
+1. **End-to-End Build Validation** → Both framework and test app build successfully with zero errors
+2. **Complete Framework Feature Integration** → Test app demonstrates ALL currently implemented framework capabilities
+3. **Performance Target Achievement** → Enhanced framework meets all performance objectives in real usage
+4. **Developer Experience Excellence** → Framework changes significantly improve developer productivity metrics
+5. **Integration Success Documentation** → Document framework enhancement process and successful integration patterns
 
 ## ⚠️ Critical Integration Rules
 
-### **Naming Consistency** (NEVER BREAK!)
-- **RealAxiomApplication** → Keep this name, improve implementation underneath
-- **RealCounterView** → Keep this name, enhance with new APIs
-- **RealCounterContext** → Keep this name, add convenience features
-- **Principle**: Improve implementations, don't rename everything
+### **Framework-First Integration Approach** (ESSENTIAL!)
+- **Integration issues indicate framework problems** → Fix framework, don't work around in test app
+- **Both framework AND test app must build successfully** → Integration not complete until both compile cleanly
+- **All framework features must be integrated** → Test app must demonstrate every implemented framework capability
+- **Framework changes expected and required** → Integration cycle includes active framework development
 
-### **API Refinement Approach**
-- **Add convenience APIs** without breaking existing patterns
-- **Supplement, don't replace** working functionality
-- **Test in Examples/ first** before updating main components
-- **Measure improvements** with concrete metrics (lines of code, complexity)
+### **Naming Consistency** (NEVER BREAK!)
+- **RealAxiomApplication** → Keep this name, improve framework implementation underneath
+- **RealCounterView** → Keep this name, enhance with new framework APIs
+- **RealCounterContext** → Keep this name, add framework convenience features
+- **Principle**: Improve framework implementations, maintain test app API consistency
+
+### **Framework Enhancement Approach**
+- **Fix framework issues, don't workaround** → Integration problems require framework solutions
+- **Enhance framework APIs based on real usage** → Test app usage patterns drive framework API design
+- **Test framework changes in Examples/ first** → Validate framework improvements before main component integration
+- **Measure framework improvements** with concrete metrics (reduced boilerplate, improved performance, fewer errors)
 
 ## 🎯 Current Integration Successes
 
@@ -226,14 +235,21 @@ cd Examples/ComparisonExample/
 # Measure concrete improvements (lines of code, complexity)
 ```
 
-## 📊 Comprehensive Integration Success Metrics
+## 📊 Integration Success Metrics (Framework + Test App)
+
+### **Complete Framework Integration Requirements**
+- **Framework Build Success**: AxiomFramework builds cleanly with zero errors or warnings
+- **Test App Build Success**: AxiomTestApp builds cleanly with all framework features integrated
+- **Feature Completeness**: Every implemented framework feature demonstrated in test app
+- **Integration Stability**: No workarounds or compromises - framework handles all test app requirements
+- **Performance Validation**: Framework meets performance targets in real test app usage
 
 ### **Framework Capability Coverage**
-- **8 Architectural Constraints**: All constraints validated in multi-domain scenarios
-- **8 Intelligence Systems**: Each intelligence capability demonstrated with real usage
-- **Multi-Domain Integration**: User, Data, Analytics, Intelligence domains working together
-- **Cross-Cutting Concerns**: Analytics, logging, error handling across all domains
-- **Capability System**: Runtime validation tested across all capability types
+- **8 Architectural Constraints**: All constraints validated AND working seamlessly in multi-domain scenarios
+- **8 Intelligence Systems**: Each intelligence capability implemented in framework AND demonstrated with real usage
+- **Multi-Domain Integration**: User, Data, Analytics, Intelligence domains working together through framework orchestration
+- **Cross-Cutting Concerns**: Analytics, logging, error handling implemented in framework and working across all domains
+- **Capability System**: Runtime validation implemented in framework and tested across all capability types
 
 ### **Developer Experience Excellence**
 - **Setup Complexity**: Multi-domain app initialization in <10 lines with AxiomApplicationBuilder
@@ -256,12 +272,14 @@ cd Examples/ComparisonExample/
 - **Performance Under Load**: Framework maintains performance with realistic data volumes
 - **Integration Testing Automation**: Comprehensive test suite validates all scenarios
 
-### **Framework Maturity Indicators**
-- **API Stability**: No breaking changes needed during complex scenario development
-- **Documentation Quality**: All framework features have working examples in test app
-- **Error Message Quality**: Clear, actionable guidance for all error conditions
-- **Debugging Experience**: Framework provides helpful debugging and diagnostic tools
-- **Migration Path Clarity**: Clear upgrade path for existing applications
+### **Framework Integration Maturity Indicators**
+- **Integration Stability**: Framework handles all test app scenarios without requiring workarounds
+- **API Completeness**: Framework provides all APIs needed for sophisticated test app functionality
+- **Build Reliability**: Both framework and test app build consistently across development iterations
+- **Feature Implementation**: All documented framework capabilities actually work in real integration scenarios
+- **Development Flow**: Framework changes integrate smoothly with test app development cycles
+- **Error Prevention**: Framework design prevents entire classes of integration errors
+- **Performance Delivery**: Framework meets performance promises in actual integrated usage
 
 ## 🎯 Integration Priorities (Framework Complexity Scaling)
 
@@ -292,38 +310,49 @@ cd Examples/ComparisonExample/
 - **Progressive Enhancement** → Test app grows with framework, always pushing boundaries
 - **Validation Depth** → From simple build validation to complex scenario validation
 
-### **Success Indicators (Scaled to Framework Complexity)**
-- ✅ Multi-domain test app demonstrates all framework capabilities
-- ✅ Framework handles complex real-world scenarios gracefully
-- ✅ Performance targets met across sophisticated usage patterns
-- ✅ Developer experience excellent even in complex scenarios
-- ✅ Framework intelligence provides meaningful architectural insights
+### **Integration Completion Criteria (Both Framework + Test App)**
+- ✅ **Framework builds successfully**: AxiomFramework compiles cleanly with all features implemented
+- ✅ **Test app builds successfully**: AxiomTestApp compiles cleanly with all framework features integrated
+- ✅ **Complete feature integration**: Every framework capability is demonstrated and working in test app
+- ✅ **No integration workarounds**: Framework provides proper solutions for all test app requirements
+- ✅ **Performance targets achieved**: Framework delivers promised performance in real test app scenarios
+- ✅ **Developer experience excellence**: Framework integration reduces complexity and prevents errors
+- ✅ **Framework evolution**: Integration process improved framework implementation based on real usage
 
 ## 🔧 Integration Commands
 
-### **Development Workflow**
+### **Framework Enhancement Workflow**
 ```bash
-# Test framework changes
+# 1. Test current framework state
 cd AxiomFramework && swift build
 
-# Test app integration  
+# 2. Attempt test app integration (expect failures/gaps)
 cd AxiomTestApp && xcodebuild -workspace ../Axiom.xcworkspace -scheme ExampleApp build
 
-# Full integration validation
+# 3. Fix framework issues discovered during integration
+cd AxiomFramework && # Implement framework improvements
+
+# 4. Validate framework improvements
+cd AxiomFramework && swift build
+
+# 5. Confirm complete integration success
 open Axiom.xcworkspace
-# Build and run both framework and app together
+# Build and run both framework and app - BOTH must succeed
 ```
 
-### **Integration Validation**
+### **Complete Integration Validation**
 ```bash
-# Quick framework check
-swift build --target Axiom
+# 1. Framework build validation
+cd AxiomFramework && swift build --target Axiom
 
-# Full integration test
-xcodebuild -workspace Axiom.xcworkspace -scheme ExampleApp build
+# 2. Test app integration validation
+cd .. && xcodebuild -workspace Axiom.xcworkspace -scheme ExampleApp build
 
-# Clean build validation
-xcodebuild clean build
+# 3. Clean complete integration validation
+xcodebuild -workspace Axiom.xcworkspace clean build
+
+# SUCCESS CRITERIA: All commands succeed with zero errors
+# If any fail, framework enhancement required before integration complete
 ```
 
 ## 📚 Integration Context
@@ -343,35 +372,37 @@ xcodebuild clean build
 
 ## 🎯 Integration Goals
 
-**Create framework APIs that feel natural and prevent errors:**
-- Developers fall into "pit of success" 
-- Common patterns are concise and clear
-- Mistakes are caught at compile time
-- Real-world usage validates design decisions
-- Integration with existing iOS patterns is seamless
+**Enhance framework through real-world integration feedback:**
+- Framework APIs evolve based on actual usage patterns
+- Integration challenges drive framework improvements
+- Both framework and test app achieve build success
+- Real-world usage validates AND improves framework design
+- Framework changes enable seamless integration with iOS patterns
+- Complete feature integration demonstrates framework maturity
 
 ## 🚀 Automated Integration Process
 
-**INTEGRATE mode automatically follows unified roadmap priorities:**
+**INTEGRATE mode automatically follows feedback-driven framework enhancement:**
 
 1. **Check ROADMAP.md** → Identify 🔄 (active) INTEGRATE tasks or highest priority ⏳ (queued) tasks
-2. **Validate Mode Selection** → Confirm task requires real-world testing and API refinement
-3. **Execute Test App Workflow** → Use AxiomTestApp to discover issues and validate improvements
-4. **Document Discoveries** → Capture pain points, API improvements, and new framework requirements
-5. **Update Progress** → Mark task complete (✅) in `/ROADMAP.md` and create new DEVELOP tasks
+2. **Validate Integration Readiness** → Confirm framework features are ready for real-world integration testing
+3. **Execute Framework Enhancement Workflow** → Use AxiomTestApp integration to discover and fix framework issues
+4. **Implement Framework Improvements** → Modify framework code based on integration discoveries and requirements
+5. **Validate Complete Integration** → Ensure both framework and test app build successfully with all features
+6. **Update Progress** → Mark task complete (✅) only when both framework and test app achieve integration success
 
-**Current INTEGRATE Priority Order (from ROADMAP.md):**
-- **Priority 1**: Real-world validation of streamlined APIs and error handling
-- **Priority 2**: Performance measurement and developer experience metrics
-- **Priority 3**: Advanced feature validation and usage pattern discovery
-- **Priority 4**: Community readiness testing and migration pattern validation
+**Current INTEGRATE Priority Order (Framework Enhancement Focus):**
+- **Priority 1**: Framework API enhancement based on real-world integration challenges
+- **Priority 2**: Framework performance optimization using test app measurements
+- **Priority 3**: Framework feature completion driven by integration requirements
+- **Priority 4**: Framework stability and reliability validation in complex scenarios
 
-**Three-Cycle Flow:**
-- **Use INTEGRATE** → Discover framework limitations through real usage
-- **Create DEVELOP** → Plan framework improvements based on discoveries
-- **Trigger REFACTOR** → Organize learnings when cycles complete
+**Enhanced Three-Cycle Flow:**
+- **Use INTEGRATE** → Discover framework limitations AND implement framework improvements
+- **Enhanced DEVELOP** → Plan additional framework features based on integration learnings
+- **Informed REFACTOR** → Organize enhanced framework and validated integration patterns
 
-**Ready to automatically execute next INTEGRATE task from unified roadmap.**
+**Ready to automatically execute framework enhancement through integration testing.**
 
 ## 🤖 Automated Execution Command (Framework Complexity Scaling)
 
@@ -383,21 +414,20 @@ xcodebuild clean build
 3. **Gap Identification** → Identify framework features not demonstrated in test app
 4. **Complexity Scaling Decision** → Determine required test app enhancements
 
-**Comprehensive Automated Workflow**:
-1. **Read INTEGRATE.md** → Load comprehensive integration testing guide
-2. **Framework State Assessment** → Analyze current framework capabilities vs test app complexity
-3. **ROADMAP.md Priority Analysis** → Identify highest priority tasks with complexity scaling consideration
-4. **Multi-Domain Test App Enhancement**:
-   - **Domain Coverage Validation** → Ensure User, Data, Analytics, Intelligence domains represented
-   - **Advanced API Testing** → Test AxiomApplicationBuilder, ContextStateBinder in complex scenarios
-   - **Cross-Domain Integration** → Validate framework orchestration across multiple domains
-   - **Intelligence System Validation** → Test natural language queries with architectural complexity
-   - **Performance Scenario Testing** → Multi-client, multi-domain performance validation
-   - **Error Recovery Scenarios** → Complex error handling and graceful degradation testing
-5. **Framework Limitation Discovery** → Use complex scenarios to uncover framework gaps
-6. **Solution Implementation** → Implement framework enhancements for discovered limitations
-7. **Comprehensive Validation** → End-to-end testing of enhanced framework capabilities
-8. **Documentation & Examples** → Create sophisticated usage examples and best practices
+**Framework Enhancement Through Integration Workflow**:
+1. **Read INTEGRATE.md** → Load feedback-driven framework enhancement guide
+2. **Framework Build Validation** → Ensure framework builds successfully before integration attempt
+3. **Integration Attempt & Gap Discovery** → Attempt test app integration to discover framework limitations
+4. **Framework Enhancement Implementation**:
+   - **API Enhancement** → Improve framework APIs based on integration challenges
+   - **Missing Feature Implementation** → Add framework capabilities required by test app scenarios
+   - **Performance Optimization** → Enhance framework performance based on real usage patterns
+   - **Error Handling Improvement** → Strengthen framework error handling based on integration discoveries
+   - **Integration Support Enhancement** → Improve framework's integration capabilities
+5. **Enhanced Framework Validation** → Verify framework improvements build successfully
+6. **Complete Integration Testing** → Validate test app integration with enhanced framework
+7. **Success Criteria Verification** → Confirm both framework and test app build with all features integrated
+8. **Integration Success Documentation** → Document framework enhancements and successful integration patterns
 
 **Dynamic Task Selection (Framework Sophistication Aware)**:
 - **Tier 1 (Current)**: Multi-domain architecture, advanced API ergonomics, intelligence integration
@@ -410,13 +440,14 @@ xcodebuild clean build
 - Measure framework maturity indicators: API stability, documentation quality, debugging experience
 - Scale test complexity to match and push framework boundaries
 
-**Framework Complexity Success Criteria**:
-- ✅ Test app demonstrates ALL current framework capabilities
-- ✅ Multi-domain scenarios work seamlessly with sophisticated orchestration
-- ✅ Framework performance maintained under realistic complex usage patterns  
-- ✅ Intelligence system provides meaningful insights in complex scenarios
-- ✅ Developer experience excellent even with advanced framework features
-- ✅ Framework automatically scales to handle increased application sophistication
+**Complete Integration Success Criteria**:
+- ✅ **Framework builds successfully** - AxiomFramework compiles cleanly with all enhancements
+- ✅ **Test app builds successfully** - AxiomTestApp compiles cleanly with all framework features integrated
+- ✅ **All features integrated** - Test app demonstrates ALL implemented framework capabilities
+- ✅ **No integration workarounds** - Framework provides proper solutions for all integration challenges
+- ✅ **Framework enhanced through feedback** - Integration process resulted in measurable framework improvements
+- ✅ **Performance targets met** - Enhanced framework delivers promised performance in real usage
+- ✅ **Development experience improved** - Framework changes reduce complexity and prevent integration errors
 
 **Adaptive Integration Strategy**:
 - **Framework Growth Response** → Test app automatically adapts to new framework capabilities
@@ -424,4 +455,21 @@ xcodebuild clean build
 - **Real-World Scenario Emphasis** → Focus on scenarios that mirror actual application complexity
 - **Continuous Capability Discovery** → Each cycle uncovers new framework potential
 
-**Ready for comprehensive framework capability validation on `@INTEGRATE . ultrathink` command.**
+**Ready for feedback-driven framework enhancement through integration testing on `@INTEGRATE . ultrathink` command.**
+
+## 🎯 Integration Completion Requirements
+
+### **Mandatory Success Criteria** (NEVER mark complete without these)
+1. **Framework Build Success**: `cd AxiomFramework && swift build` succeeds with zero errors
+2. **Test App Build Success**: `xcodebuild -workspace Axiom.xcworkspace -scheme ExampleApp build` succeeds with zero errors
+3. **Feature Integration Completeness**: Every implemented framework feature is demonstrated in working test app code
+4. **No Integration Compromises**: Framework provides proper APIs for all test app requirements (no workarounds)
+5. **Framework Enhancement Evidence**: Integration process resulted in measurable framework improvements
+
+### **Integration NOT Complete Until**:
+- ❌ Any build errors exist in framework or test app
+- ❌ Any framework features are not integrated into test app
+- ❌ Any integration workarounds are used instead of proper framework solutions
+- ❌ Framework has not been enhanced based on integration feedback
+
+**This ensures integration drives framework excellence and validates real-world usage success.**

@@ -243,4 +243,42 @@ extension AxiomApplicationBuilder {
         
         return (client: client, intelligence: intelligence)
     }
+    
+    /// Create a complete user context with automatic setup
+    /// Supports sophisticated user domain initialization
+    public func createUserContext<ClientType: AxiomClient, StateType: Sendable>(
+        clientFactory: @escaping (CapabilityManager) async throws -> ClientType
+    ) async throws -> (client: ClientType, intelligence: AxiomIntelligence) where ClientType.State == StateType {
+        
+        guard isInitialized else {
+            throw ApplicationBuilderError.notInitialized
+        }
+        
+        let intelligence = await GlobalIntelligenceManager.shared.getIntelligence()
+        let capabilityManager = await GlobalCapabilityManager.shared.getManager()
+        
+        let client = try await clientFactory(capabilityManager)
+        try await client.initialize()
+        
+        return (client: client, intelligence: intelligence)
+    }
+    
+    /// Create a complete data context with automatic setup
+    /// Supports sophisticated data domain initialization
+    public func createDataContext<ClientType: AxiomClient, StateType: Sendable>(
+        clientFactory: @escaping (CapabilityManager) async throws -> ClientType
+    ) async throws -> (client: ClientType, intelligence: AxiomIntelligence) where ClientType.State == StateType {
+        
+        guard isInitialized else {
+            throw ApplicationBuilderError.notInitialized
+        }
+        
+        let intelligence = await GlobalIntelligenceManager.shared.getIntelligence()
+        let capabilityManager = await GlobalCapabilityManager.shared.getManager()
+        
+        let client = try await clientFactory(capabilityManager)
+        try await client.initialize()
+        
+        return (client: client, intelligence: intelligence)
+    }
 }

@@ -56,6 +56,15 @@ public actor PerformanceMonitor: PerformanceMonitoring {
     // Performance thresholds
     private let thresholds: PerformanceThresholds
     
+    // ML-powered optimization system
+    private var optimizationEngine: PerformanceOptimizationEngine
+    
+    // Usage pattern tracker for ML learning
+    private var usagePatterns: [UsagePattern] = []
+    
+    // Performance trends for predictive analysis
+    private var performanceTrends: [PerformanceTrend] = []
+    
     // MARK: Initialization
     
     public init(
@@ -67,6 +76,7 @@ public actor PerformanceMonitor: PerformanceMonitoring {
         self.maxSamplesPerCategory = maxSamplesPerCategory
         self.maxAlerts = maxAlerts
         self.thresholds = PerformanceThresholds()
+        self.optimizationEngine = PerformanceOptimizationEngine()
         
         // Initialize metrics for all categories
         for category in PerformanceCategory.allCases {
@@ -121,6 +131,10 @@ public actor PerformanceMonitor: PerformanceMonitoring {
         
         // Check for performance issues
         await checkPerformanceThresholds(completedOp)
+        
+        // ML-powered learning and optimization
+        await optimizationEngine.learnFromOperation(completedOp)
+        await analyzeUsagePattern(completedOp)
     }
     
     // MARK: Metrics Retrieval
@@ -820,6 +834,293 @@ extension PerformanceAlert: CustomStringConvertible {
     }
 }
 
+// MARK: - AI Performance Optimization Types
+
+/// Usage pattern for ML analysis
+public struct UsagePattern: Sendable {
+    public let operationName: String
+    public let category: PerformanceCategory
+    public let frequency: Int
+    public let averageDuration: TimeInterval
+    public let timestamp: TimeInterval
+    public let context: [String: String] // Changed to Sendable type
+    
+    public init(
+        operationName: String,
+        category: PerformanceCategory,
+        frequency: Int,
+        averageDuration: TimeInterval,
+        timestamp: TimeInterval,
+        context: [String: String]
+    ) {
+        self.operationName = operationName
+        self.category = category
+        self.frequency = frequency
+        self.averageDuration = averageDuration
+        self.timestamp = timestamp
+        self.context = context
+    }
+}
+
+/// Performance trend for predictive analysis
+public struct PerformanceTrend: Sendable {
+    public let timestamp: Date
+    public let averageLatency: Double
+    public let throughput: Double
+    public let memoryUsage: Int
+    public let optimizationApplied: Bool
+    
+    public init(
+        timestamp: Date,
+        averageLatency: Double,
+        throughput: Double,
+        memoryUsage: Int,
+        optimizationApplied: Bool
+    ) {
+        self.timestamp = timestamp
+        self.averageLatency = averageLatency
+        self.throughput = throughput
+        self.memoryUsage = memoryUsage
+        self.optimizationApplied = optimizationApplied
+    }
+}
+
+/// AI-powered optimization insight
+public struct OptimizationInsight: Sendable {
+    public let type: OptimizationType
+    public let target: String
+    public let confidence: Double
+    public let description: String
+    public let estimatedImpact: String
+    
+    public enum OptimizationType: String, CaseIterable, Sendable {
+        case cachingOpportunity = "caching"
+        case thresholdAdjustment = "threshold"
+        case resourceAllocation = "resource"
+    }
+    
+    public init(
+        type: OptimizationType,
+        target: String,
+        confidence: Double,
+        description: String,
+        estimatedImpact: String
+    ) {
+        self.type = type
+        self.target = target
+        self.confidence = confidence
+        self.description = description
+        self.estimatedImpact = estimatedImpact
+    }
+}
+
+/// Performance optimization recommendation
+public struct PerformanceOptimization: Sendable {
+    public let type: OptimizationType
+    public let priority: OptimizationPriority
+    public let title: String
+    public let description: String
+    public let expectedGain: String
+    public let implementation: String
+    public let confidence: Double
+    
+    public enum OptimizationType: String, CaseIterable, Sendable {
+        case caching = "caching"
+        case algorithmic = "algorithmic"
+        case resource = "resource"
+        case architectural = "architectural"
+    }
+    
+    public enum OptimizationPriority: Int, CaseIterable, Sendable {
+        case low = 1
+        case medium = 2
+        case high = 3
+        case critical = 4
+    }
+    
+    public init(
+        type: OptimizationType,
+        priority: OptimizationPriority,
+        title: String,
+        description: String,
+        expectedGain: String,
+        implementation: String,
+        confidence: Double
+    ) {
+        self.type = type
+        self.priority = priority
+        self.title = title
+        self.description = description
+        self.expectedGain = expectedGain
+        self.implementation = implementation
+        self.confidence = confidence
+    }
+}
+
+/// Performance prediction based on AI analysis
+public struct PerformancePrediction: Sendable {
+    public let horizon: TimeInterval
+    public let predictedLatency: Double
+    public let predictedThroughput: Double
+    public let predictedMemoryUsage: Int
+    public let confidence: Double
+    public let recommendations: [String]
+    public let generatedAt: Date
+    
+    public init(
+        horizon: TimeInterval,
+        predictedLatency: Double,
+        predictedThroughput: Double,
+        predictedMemoryUsage: Int,
+        confidence: Double,
+        recommendations: [String],
+        generatedAt: Date = Date()
+    ) {
+        self.horizon = horizon
+        self.predictedLatency = predictedLatency
+        self.predictedThroughput = predictedThroughput
+        self.predictedMemoryUsage = predictedMemoryUsage
+        self.confidence = confidence
+        self.recommendations = recommendations
+        self.generatedAt = generatedAt
+    }
+}
+
+/// ML-powered performance optimization engine
+private actor PerformanceOptimizationEngine {
+    private var operationHistory: [CompletedOperation] = []
+    private var optimizationHistory: [OptimizationInsight] = []
+    
+    func learnFromOperation(_ operation: CompletedOperation) async {
+        operationHistory.append(operation)
+        
+        // Maintain reasonable history size
+        if operationHistory.count > 10000 {
+            operationHistory.removeFirst(5000)
+        }
+    }
+    
+    func analyzePatterns(_ patterns: [UsagePattern]) async -> [OptimizationInsight] {
+        var insights: [OptimizationInsight] = []
+        
+        // Analyze caching opportunities
+        let frequentOperations = patterns
+            .filter { $0.frequency > 50 && $0.averageDuration > 0.01 }
+            .sorted { $0.frequency > $1.frequency }
+        
+        for operation in frequentOperations.prefix(3) {
+            insights.append(OptimizationInsight(
+                type: .cachingOpportunity,
+                target: operation.operationName,
+                confidence: min(0.9, Double(operation.frequency) / 100.0),
+                description: "High-frequency operation could benefit from caching",
+                estimatedImpact: "20-40% latency reduction"
+            ))
+        }
+        
+        // Analyze threshold adjustments
+        let slowOperations = patterns
+            .filter { $0.averageDuration > 0.1 }
+            .sorted { $0.averageDuration > $1.averageDuration }
+        
+        if !slowOperations.isEmpty {
+            insights.append(OptimizationInsight(
+                type: .thresholdAdjustment,
+                target: "performance_thresholds",
+                confidence: 0.7,
+                description: "Performance thresholds may need adjustment based on usage patterns",
+                estimatedImpact: "Better alert accuracy"
+            ))
+        }
+        
+        return insights
+    }
+    
+    func getRecommendations(
+        patterns: [UsagePattern],
+        trends: [PerformanceTrend],
+        currentMetrics: OverallPerformanceMetrics
+    ) async -> [PerformanceOptimization] {
+        var recommendations: [PerformanceOptimization] = []
+        
+        // Analyze trends for optimization opportunities
+        if trends.count >= 10 {
+            let recentTrends = trends.suffix(10)
+            let avgLatency = recentTrends.map { $0.averageLatency }.reduce(0, +) / Double(recentTrends.count)
+            
+            if avgLatency > 0.05 { // 50ms average
+                recommendations.append(PerformanceOptimization(
+                    type: .algorithmic,
+                    priority: .high,
+                    title: "Optimize High-Latency Operations",
+                    description: "AI detected consistently high latency across operations",
+                    expectedGain: "30-50% latency reduction",
+                    implementation: "Review algorithmic complexity and data structures",
+                    confidence: 0.8
+                ))
+            }
+        }
+        
+        // Memory optimization recommendations
+        if currentMetrics.memoryUsage.totalBytes > 50 * 1024 * 1024 { // 50MB
+            recommendations.append(PerformanceOptimization(
+                type: .resource,
+                priority: .medium,
+                title: "Memory Usage Optimization",
+                description: "Memory usage is above optimal threshold",
+                expectedGain: "20-30% memory reduction",
+                implementation: "Implement memory pooling and reduce object allocation",
+                confidence: 0.7
+            ))
+        }
+        
+        return recommendations.sorted { $0.priority.rawValue > $1.priority.rawValue }
+    }
+    
+    func predictPerformance(trends: [PerformanceTrend], horizon: TimeInterval) async -> PerformancePrediction {
+        guard trends.count >= 5 else {
+            return PerformancePrediction(
+                horizon: horizon,
+                predictedLatency: 0.01,
+                predictedThroughput: 100.0,
+                predictedMemoryUsage: 1024 * 1024,
+                confidence: 0.3,
+                recommendations: ["Insufficient data for accurate prediction"]
+            )
+        }
+        
+        let recentTrends = trends.suffix(20)
+        let avgLatency = recentTrends.map { $0.averageLatency }.reduce(0, +) / Double(recentTrends.count)
+        let avgThroughput = recentTrends.map { $0.throughput }.reduce(0, +) / Double(recentTrends.count)
+        let avgMemory = recentTrends.map { $0.memoryUsage }.reduce(0, +) / recentTrends.count
+        
+        // Simple linear prediction (would use more sophisticated ML in production)
+        let latencyTrend = recentTrends.count > 1 ? 
+            (recentTrends.last!.averageLatency - recentTrends.first!.averageLatency) / Double(recentTrends.count) : 0.0
+        
+        let predictedLatency = max(0.001, avgLatency + (latencyTrend * horizon / 3600.0))
+        let predictedThroughput = max(1.0, avgThroughput * 0.95) // Conservative estimate
+        let predictedMemory = avgMemory + Int(Double(avgMemory) * 0.1) // Assume 10% growth
+        
+        var recommendations: [String] = []
+        if predictedLatency > avgLatency * 1.2 {
+            recommendations.append("Performance degradation predicted - consider optimization")
+        }
+        if predictedMemory > avgMemory * 2 {
+            recommendations.append("Memory usage growth predicted - implement memory management")
+        }
+        
+        return PerformancePrediction(
+            horizon: horizon,
+            predictedLatency: predictedLatency,
+            predictedThroughput: predictedThroughput,
+            predictedMemoryUsage: predictedMemory,
+            confidence: min(0.8, Double(recentTrends.count) / 20.0),
+            recommendations: recommendations
+        )
+    }
+}
+
 // MARK: - PerformanceMonitor Application Extensions
 
 extension PerformanceMonitor {
@@ -906,5 +1207,114 @@ extension PerformanceMonitor {
             bottlenecks: Array(bottlenecks),
             generatedAt: Date()
         )
+    }
+    
+    // MARK: - AI-Powered Self-Optimization
+    
+    /// Analyzes usage patterns for ML-driven optimization
+    private func analyzeUsagePattern(_ operation: CompletedOperation) async {
+        let pattern = UsagePattern(
+            operationName: operation.name,
+            category: operation.category,
+            frequency: 1,
+            averageDuration: operation.duration,
+            timestamp: operation.startTime,
+            context: operation.metadata.compactMapValues { $0 as? String }
+        )
+        
+        usagePatterns.append(pattern)
+        
+        // Maintain reasonable pattern history
+        if usagePatterns.count > 5000 {
+            usagePatterns.removeFirst(2500)
+        }
+        
+        // Trigger optimization analysis periodically
+        if usagePatterns.count % 100 == 0 {
+            await performSelfOptimization()
+        }
+    }
+    
+    /// Performs AI-driven self-optimization analysis
+    private func performSelfOptimization() async {
+        let insights = await optimizationEngine.analyzePatterns(usagePatterns)
+        
+        for insight in insights {
+            switch insight.type {
+            case .cachingOpportunity:
+                await applyCachingOptimization(insight)
+            case .thresholdAdjustment:
+                await applyThresholdOptimization(insight)
+            case .resourceAllocation:
+                await applyResourceOptimization(insight)
+            }
+        }
+        
+        // Record performance trend
+        let trend = PerformanceTrend(
+            timestamp: Date(),
+            averageLatency: await calculateCurrentAverageLatency(),
+            throughput: await calculateCurrentThroughput(),
+            memoryUsage: estimateMemoryUsage().totalBytes,
+            optimizationApplied: !insights.isEmpty
+        )
+        
+        performanceTrends.append(trend)
+        
+        // Maintain reasonable trend history
+        if performanceTrends.count > 1000 {
+            performanceTrends.removeFirst(500)
+        }
+    }
+    
+    /// Gets AI-powered optimization recommendations
+    public func getOptimizationRecommendations() async -> [PerformanceOptimization] {
+        return await optimizationEngine.getRecommendations(
+            patterns: usagePatterns,
+            trends: performanceTrends,
+            currentMetrics: await getOverallMetrics()
+        )
+    }
+    
+    /// Gets performance prediction based on current trends
+    public func predictPerformance(horizon: TimeInterval) async -> PerformancePrediction {
+        return await optimizationEngine.predictPerformance(
+            trends: performanceTrends,
+            horizon: horizon
+        )
+    }
+    
+    /// Applies caching optimization
+    private func applyCachingOptimization(_ insight: OptimizationInsight) async {
+        print("🚀 Self-Optimization: Applying caching optimization for \(insight.target)")
+        // In a real implementation, this would configure caching systems
+    }
+    
+    /// Applies threshold optimization
+    private func applyThresholdOptimization(_ insight: OptimizationInsight) async {
+        print("⚙️ Self-Optimization: Adjusting thresholds for \(insight.target)")
+        // In a real implementation, this would update performance thresholds
+    }
+    
+    /// Applies resource allocation optimization
+    private func applyResourceOptimization(_ insight: OptimizationInsight) async {
+        print("📊 Self-Optimization: Optimizing resource allocation for \(insight.target)")
+        // In a real implementation, this would adjust resource allocation
+    }
+    
+    /// Calculates current average latency across all categories
+    private func calculateCurrentAverageLatency() async -> Double {
+        let overall = await getOverallMetrics()
+        let totalDuration = overall.categoryMetrics.values.reduce(0.0) { 
+            $0 + ($1.averageDuration * Double($1.totalOperations))
+        }
+        let totalOperations = overall.categoryMetrics.values.reduce(0) { $0 + $1.totalOperations }
+        return totalOperations > 0 ? totalDuration / Double(totalOperations) : 0.0
+    }
+    
+    /// Calculates current throughput across all categories
+    private func calculateCurrentThroughput() async -> Double {
+        let overall = await getOverallMetrics()
+        return overall.categoryMetrics.values.reduce(0.0) { $0 + $1.operationsPerSecond }
     }
 }

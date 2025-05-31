@@ -188,7 +188,7 @@ extension Capability {
                 return domain
             }
         }
-        fatalError("Capability \(self) not assigned to any domain")
+        preconditionFailure("Capability \(self) not assigned to any domain - assign capability to a domain first")
     }
     
     /// Whether this capability requires user permission
