@@ -25,8 +25,10 @@ This command provides intelligent checkpoint management that adapts to your curr
 
 **Main Branch (`main`):**
 - ✅ Commit current progress
-- 📋 Update project status
-- 🎯 No PR needed (already on main)
+- 📋 Update project status  
+- 🔧 Coordinate with development branch (fetch/create)
+- 🧪 Coordinate with integration branch (fetch/create)
+- 🔄 Return to main for continued work
 
 ---
 
@@ -171,7 +173,7 @@ EOF
     ;;
     
   "main")
-    echo "🎯 MAIN BRANCH CHECKPOINT"
+    echo "🎯 MAIN BRANCH CHECKPOINT - WITH BRANCH COORDINATION"
     
     # Commit progress on main
     echo "✅ Committing main branch progress..."
@@ -189,8 +191,42 @@ EOF
     echo "🚀 Pushing to main..."
     git push origin main
     
-    echo "✅ Main branch checkpoint complete"
-    echo "📋 No PR needed (already on main)"
+    # Coordinate with development branch
+    echo "🔧 Coordinating with development branch..."
+    if git show-ref --verify --quiet refs/remotes/origin/development; then
+        echo "📡 Development branch exists - fetching updates..."
+        git checkout development
+        git fetch origin development
+        git pull origin development
+        echo "✅ Development branch updated"
+    else
+        echo "🌱 Creating fresh development branch..."
+        git checkout -b development
+        git push origin development -u
+        echo "✅ Fresh development branch created"
+    fi
+    
+    # Coordinate with integration branch  
+    echo "🧪 Coordinating with integration branch..."
+    if git show-ref --verify --quiet refs/remotes/origin/integration; then
+        echo "📡 Integration branch exists - fetching updates..."
+        git checkout integration
+        git fetch origin integration
+        git pull origin integration
+        echo "✅ Integration branch updated"
+    else
+        echo "🌱 Creating fresh integration branch..."
+        git checkout -b integration
+        git push origin integration -u
+        echo "✅ Fresh integration branch created"
+    fi
+    
+    # Return to main
+    echo "🔄 Returning to main branch..."
+    git checkout main
+    
+    echo "✅ Main branch checkpoint complete with branch coordination"
+    echo "📋 All branches synchronized and ready"
     ;;
     
   *)
@@ -240,7 +276,7 @@ echo "🕐 Time: $(date)"
 ```bash
 # Strategic planning and coordination
 @CHECKPOINT.md  # Auto-detects main branch
-                # → Commits status, pushes to main
+                # → Commits, pushes main, coordinates with dev/integration branches
 ```
 
 ---
@@ -251,6 +287,7 @@ echo "🕐 Time: $(date)"
 - **📝 Intelligent Commit Messages**: Context-aware commit descriptions  
 - **🔄 Smart Updates**: Rebase from main to keep history clean
 - **🚀 Automated PRs**: Creates appropriate pull requests with detailed descriptions
+- **🌐 Branch Coordination**: Main branch automatically coordinates with dev/integration
 - **📊 Status Tracking**: Maintains project coordination across branches
 
 **Perfect for the Axiom development workflow with seamless human-AI collaboration!**
