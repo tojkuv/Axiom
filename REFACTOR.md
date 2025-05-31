@@ -66,26 +66,27 @@
 - ❌ **Breaking API Changes**: Maintain compatibility while improving structure
 
 ### **Integration Branch Refactoring Context**
-**Primary Focus**: Test app code organization and integration pattern improvements
-**File Scope**: `/AxiomTestApp/ExampleApp/`, integration-related files
-**Purpose**: Test app code quality, structure, and framework integration optimization
+**Primary Focus**: AxiomTestApp organization, structure optimization, and production-ready app code
+**File Scope**: `/AxiomTestApp/ExampleApp/`, `/AxiomTestApp/Scripts/`, project organization
+**Purpose**: Clean, maintainable test app with standardized naming and optimal file organization
 
 **What Integration Branch REFACTOR Works On**:
-- ✅ **Test App Code Organization**: Improve structure in `/AxiomTestApp/ExampleApp/`
-- ✅ **Feature Modularization**: Organize features into cohesive modules
-- ✅ **View Hierarchy**: Improve SwiftUI view organization and composition
-- ✅ **Integration Patterns**: Optimize how test app uses framework capabilities
-- ✅ **Macro Usage Consistency**: Ensure consistent macro patterns across domains
-- ✅ **Navigation Patterns**: Standardize navigation and routing approaches
-- ✅ **State Management**: Optimize context and client usage patterns
-- ✅ **Performance Optimization**: Improve app performance and memory usage
-- ✅ **Business Logic Separation**: Move logic to appropriate clients/contexts
+- ✅ **Script Organization**: Create `/AxiomTestApp/Scripts/` and consolidate Python utilities
+- ✅ **File Cleanup**: Remove backup files and unused artifacts (ContentView_Backup.swift)
+- ✅ **Naming Standardization**: Implement concise, semantic naming conventions across all files
+- ✅ **Folder Structure Optimization**: Ensure logical organization of domains, views, and utilities
+- ✅ **Macro Demonstration Clarity**: Clear separation between production code and macro examples
+- ✅ **Project File Management**: Optimize Xcode project structure and build organization
+- ✅ **Integration Pattern Standards**: Consistent framework usage patterns across domains
+- ✅ **View Architecture**: Optimize SwiftUI view hierarchy and composition patterns
+- ✅ **Domain Organization**: Standardize domain structure (Client, Context, State, View patterns)
+- ✅ **Example vs Production**: Clear distinction between example/demo code and production patterns
 
 **What Integration Branch REFACTOR Avoids**:
 - ❌ **Framework Source Code**: No changes to `/AxiomFramework/Sources/` (development branch scope)
-- ❌ **Documentation Files**: No changes to documentation (main branch scope)
-- ❌ **New Integration Features**: Focus on organization, not new test scenarios
-- ❌ **Framework API Changes**: Work within existing framework capabilities
+- ❌ **Documentation Organization**: No changes to documentation structure (main branch scope)
+- ❌ **Macro Implementation**: Focus on organization, not macro feature development
+- ❌ **API Design Changes**: Work within existing framework capabilities
 
 ## 🔧 Branch-Specific Refactoring Capabilities
 
@@ -136,26 +137,45 @@
 
 ### **Integration Branch Refactoring Operations**
 
-#### **Test App Structure (`/AxiomTestApp/ExampleApp/`)**
-- **Feature Modularization**: Organize features into clear modules
-- **View Extraction**: Break down large views into reusable components
-- **Navigation Standardization**: Improve routing and navigation patterns
-- **Resource Organization**: Better asset and resource file organization
-- **State Management**: Optimize context and client coordination
+#### **Project Organization & Scripts (`/AxiomTestApp/`)**
+- **Scripts Folder Creation**: Create `/AxiomTestApp/Scripts/` directory for Python utilities
+- **Script Consolidation**: Move all `.py` files to Scripts/ folder:
+  - `sync_files_to_xcode.py` → `Scripts/sync_files_to_xcode.py`
+  - `add_files_to_project.py` → `Scripts/add_files_to_project.py`
+  - `create_clean_project.py` → `Scripts/create_clean_project.py`
+  - `fix_file_paths.py` → `Scripts/fix_file_paths.py`
+- **Script Evaluation**: Assess which scripts are actively needed vs redundant
+- **Script Documentation**: Add README.md in Scripts/ explaining each utility
+
+#### **File Cleanup & Naming Standards (`/AxiomTestApp/ExampleApp/`)**
+- **Backup File Removal**: Delete `ContentView_Backup.swift` and similar artifacts
+- **Semantic Naming**: Standardize file names to be concise and descriptive:
+  - Clear purpose indication in names
+  - Consistent suffixes (Client, Context, State, View)
+  - Remove ambiguous or temporary naming
+- **Folder Structure**: Optimize directory organization for logical navigation
+- **Build Artifact Cleanup**: Remove files not included in Xcode project build
+
+#### **Domain Structure Standardization**
+- **Consistent Domain Pattern**: Ensure all domains follow Client/Context/State/View structure
+- **Macro Example Clarity**: Clear naming distinction between production and macro demonstration files:
+  - Production files: `UserClient.swift`, `UserContext.swift`
+  - Macro examples: `UserClient_MacroEnabled.swift` (clearly marked as demonstrations)
+- **Import Optimization**: Clean up unnecessary imports and dependencies
+- **File Location Logic**: Ensure files are in appropriate folders based on responsibility
 
 #### **Integration Pattern Optimization**
-- **Framework Usage**: Optimize how test app uses framework capabilities
-- **Macro Consistency**: Ensure consistent macro usage across domains
-- **Business Logic Separation**: Move logic to appropriate layers
-- **Error Handling**: Standardize error handling in UI layer
-- **Performance Patterns**: Improve app responsiveness and memory usage
+- **Framework Usage Standards**: Consistent patterns for using Axiom framework across domains
+- **View Architecture**: Optimize SwiftUI view composition and reusability
+- **Navigation Patterns**: Standardize routing and navigation approaches
+- **State Management**: Consistent context and client coordination patterns
+- **Error Handling**: Standardized error handling patterns in UI and business logic
 
-#### **Code Quality & Consistency**
-- **Naming Conventions**: Ensure consistent naming across test app
-- **SwiftUI Patterns**: Standardize view composition and state management
-- **Test Data Organization**: Improve mock data and scenario organization
-- **Integration Documentation**: Align code with usage examples
-- **Validation Patterns**: Improve testing and validation approaches
+#### **Project File Management**
+- **Xcode Project Optimization**: Ensure all source files are properly included in build
+- **Asset Organization**: Optimize asset and resource file structure
+- **Build Configuration**: Clean build settings and remove unused configurations
+- **Dependency Management**: Optimize framework dependency resolution
 
 ## 🎯 Branch-Specific Refactoring Priorities
 
@@ -174,11 +194,13 @@
 5. **Type Safety**: Enhance type safety and error handling patterns
 
 ### **Integration Branch Priorities**
-1. **Test App Structure**: Improve modularization and view organization
-2. **Integration Patterns**: Optimize framework usage and macro consistency
-3. **Performance**: Improve app responsiveness and memory usage
-4. **Code Quality**: Standardize naming and patterns across test app
-5. **Business Logic**: Properly separate concerns and improve architecture
+1. **Script Organization**: Create Scripts/ folder and consolidate Python utilities for maintainability
+2. **File Cleanup**: Remove backup files and unused artifacts to clean up project structure
+3. **Naming Standardization**: Implement concise, semantic naming conventions across all files and folders
+4. **Domain Structure**: Ensure consistent Client/Context/State/View patterns across all domains
+5. **Project Organization**: Optimize Xcode project structure and build configuration for efficiency
+6. **Example Clarity**: Clear separation between production code and macro demonstration files
+7. **Integration Patterns**: Standardize framework usage and SwiftUI architecture patterns
 
 ## 🔄 Branch-Aware Refactoring Workflow
 
@@ -240,13 +262,38 @@ elif on integration branch:
 - ✅ Type safety and error handling are enhanced
 
 ### **Integration Branch Success Criteria**
-- ✅ Test app code is well-modularized and organized
-- ✅ Framework integration patterns are consistent and optimized
-- ✅ SwiftUI views are properly composed and reusable
-- ✅ Business logic is properly separated across layers
-- ✅ App performance and memory usage are optimized
+- ✅ Scripts are organized in dedicated `/AxiomTestApp/Scripts/` folder with clear documentation
+- ✅ All backup files and build artifacts are removed from project
+- ✅ File and folder names follow concise, semantic naming conventions throughout
+- ✅ Domain structure is consistent with clear Client/Context/State/View patterns
+- ✅ Production code is clearly separated from macro demonstration examples
+- ✅ Xcode project structure is optimized with all necessary files included in build
+- ✅ Framework integration patterns are standardized across all domains
+- ✅ SwiftUI architecture follows consistent composition and state management patterns
 
 ## 🔧 Refactoring Guidelines
+
+### **Integration Branch Naming Conventions**
+
+#### **File Naming Standards**
+- **Domain Files**: `{Domain}{Type}.swift` (e.g., `UserClient.swift`, `DataContext.swift`)
+- **Macro Examples**: `{Domain}{Type}_MacroEnabled.swift` (clearly marked as demonstrations)
+- **Views**: `{Purpose}View.swift` (e.g., `CounterView.swift`, `LoadingView.swift`)
+- **Utilities**: `{Purpose}{Type}.swift` (e.g., `ApplicationCoordinator.swift`)
+- **No Underscores**: Avoid except for macro examples (e.g., no `user_client.swift`)
+- **No Abbreviations**: Use full words for clarity (e.g., `NavigationController`, not `NavController`)
+
+#### **Folder Naming Standards**
+- **Domains**: Single word, PascalCase (e.g., `User/`, `Data/`, `Analytics/`)
+- **Feature Groups**: Descriptive, PascalCase (e.g., `Integration/`, `Examples/`, `Utils/`)
+- **Scripts**: Dedicated `Scripts/` folder at `/AxiomTestApp/Scripts/`
+- **No Plurals**: Use singular names (e.g., `Model/`, not `Models/`)
+
+#### **Scripts Organization**
+- **Location**: `/AxiomTestApp/Scripts/` (dedicated folder)
+- **Naming**: Descriptive, snake_case for Python files (e.g., `sync_files_to_xcode.py`)
+- **Documentation**: `Scripts/README.md` explaining each utility's purpose
+- **Consolidation**: Remove redundant or unused scripts
 
 ### **Code Organization Principles**
 - **Single Responsibility**: Each file and module has clear, focused purpose
@@ -274,8 +321,15 @@ elif on integration branch:
 **REFACTOR STATUS**: Branch-aware refactoring system with context-specific scopes ✅  
 **MAIN SCOPE**: `/Proposals/`, `/AxiomTestApp/Documentation/`, `/AxiomFramework/Documentation/`  
 **DEVELOPMENT SCOPE**: `/AxiomFramework/Sources/`, `/AxiomFramework/Tests/`  
-**INTEGRATION SCOPE**: `/AxiomTestApp/ExampleApp/`  
+**INTEGRATION SCOPE**: `/AxiomTestApp/ExampleApp/`, `/AxiomTestApp/Scripts/`, project organization  
 **AUTOMATION READY**: Supports `@REFACTOR . ultrathink` for branch-aware organization  
-**QUALITY FOCUSED**: Structural improvements and code quality without functionality changes
+**INTEGRATION FOCUS**: Script consolidation, naming standards, file cleanup, and structure optimization
 
-**Use this system for branch-specific code organization and quality improvements while maintaining focused development workflows.**
+**Integration Branch Refactoring Priorities:**
+1. 🗂️ **Script Organization** - Create `/AxiomTestApp/Scripts/` and consolidate Python utilities
+2. 🧹 **File Cleanup** - Remove backup files and unused artifacts  
+3. 📝 **Naming Standards** - Implement concise, semantic naming conventions
+4. 🏗️ **Structure Optimization** - Ensure logical organization and clear domain patterns
+5. 📱 **Project Organization** - Optimize Xcode project and build configuration
+
+**Use this system for AxiomTestApp organization and structure improvements while maintaining framework integration quality.**

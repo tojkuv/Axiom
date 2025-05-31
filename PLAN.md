@@ -4,24 +4,34 @@
 
 ## 🤖 Automated Mode Trigger
 
-**When human sends**: `@PLAN`
-**Action**: Automatically enter ultrathink mode and execute branch-aware planning
+**When human sends**: `@PLAN [optional-args]`
+**Action**: Automatically enter ultrathink mode and execute intelligent branch-aware planning
 
-**Branch-Aware Process**:
+**Enhanced Branch-Aware Process**:
 1. **Detect Current Branch** → Determine planning context (main, development, integration)
-2. **Read PLAN.md** → Load this complete branch-aware planning guide
-3. **Check ROADMAP.md** → Assess current status, completed work, and branch coordination
-4. **Branch Coordination** → Plan work within branch scope and coordinate with other branches
-5. **Plan Branch Work** → Identify tasks for current branch based on context and priorities
-6. **Update ROADMAP.md** → Update branch-specific priorities and coordination status
+2. **Repository State Analysis** → Analyze current files, progress, and project state
+3. **Read PLAN.md** → Load this complete branch-aware planning guide
+4. **Check ROADMAP.md** → Assess current status, completed work, and branch coordination
+5. **Intelligent Planning** → Execute sophisticated planning based on branch context and repository state
+6. **Proposal Generation** → Generate technical enhancement proposals if in main branch
+7. **Cross-Branch Coordination** → Plan work within branch scope and coordinate with other branches
+8. **Documentation Updates** → Update branch-specific priorities and coordination status
+9. **Smart Recommendations** → Provide intelligent next steps and priority suggestions
 
 ## 🎯 PLAN Mode Mission
 
-**Primary Focus**: Intelligent branch-aware planning that automatically adjusts planning scope and priorities based on current branch context.
+**Primary Focus**: Intelligent branch-aware planning engine that automatically adapts to current branch context and repository state for optimal development coordination.
 
-**Enhanced Responsibility**: PLAN.md is the **Branch-Aware Planning Engine** - detecting current branch and executing specialized planning for framework development, integration testing, or strategic coordination.
+**Enhanced Responsibility**: PLAN.md is the **Unified Planning Intelligence System** - combining proposal generation, strategic coordination, and branch-specific planning into a single comprehensive planning engine that replaces the need for separate @PROPOSE.md functionality.
 
-**Philosophy**: Planning should be contextual and intelligent. When called in development branch, plan framework work. When called in integration branch, plan integration work. When called in main branch, plan strategic work.
+**Core Capabilities**:
+- **Branch Intelligence**: Automatic branch detection and context-aware planning
+- **Proposal Generation**: Technical enhancement proposal creation and management (main branch)
+- **Repository Analysis**: Intelligent assessment of current project state and progress
+- **Cross-Branch Coordination**: Strategic alignment across all development branches
+- **Smart Prioritization**: Data-driven priority setting based on project needs and dependencies
+
+**Philosophy**: Planning should be contextual, intelligent, and comprehensive. One planning system that understands your current context and automatically provides the right type of planning - whether that's framework development, integration testing, strategic coordination, or technical proposal generation.
 
 ## 🌿 Branch-Aware Planning Execution
 
@@ -54,71 +64,100 @@
 - 🎯 **Usage Examples**: Plan integration documentation and usage patterns
 
 ### **When Called in Main Branch**
-**Automatic Behavior**: Plan strategic coordination, generate technical enhancement proposals, and organize documentation
-**Planning Focus**: Strategic direction, proposal generation and management, documentation structure, roadmap coordination
+**Automatic Behavior**: Comprehensive strategic planning including intelligent proposal generation, documentation organization, and cross-branch coordination
+**Planning Focus**: Strategic direction, technical enhancement proposal generation, proposal management, documentation structure, roadmap coordination
 **Work Details**: Managed in `/Proposals/`, documentation folders, and `ROADMAP.md`
-**Methodology Reference**: Strategic planning approaches and technical enhancement proposal generation
+**Methodology Reference**: Strategic planning approaches, technical enhancement proposal generation, and comprehensive project coordination
+
+**🎯 Unified Proposal Generation System** (Replaces @PROPOSE.md):
+This system combines strategic planning with intelligent proposal generation, eliminating the need for a separate @PROPOSE.md file. All proposal functionality is integrated into this branch-aware planning engine.
 
 **Main Branch Planning Priorities**:
-- 🔧 **Technical Proposal Generation**: Generate enhancement proposals for framework capabilities, performance, and developer experience
-- 📋 **Proposal Management**: Plan proposal review, approval workflows, and implementation coordination
-- 📚 **Documentation Organization**: Plan structure improvements and archive management
-- 🗺️ **ROADMAP Coordination**: Plan cross-branch coordination and strategic alignment
-- 📦 **Archive Management**: Plan historical work organization and accessibility
-- 🎯 **Strategic Direction**: Plan long-term framework development and vision coordination
+- 🔧 **Intelligent Proposal Generation**: Automatically analyze repository state and generate targeted technical enhancement proposals
+- 📋 **Advanced Proposal Management**: Sophisticated proposal workflow including categorization, prioritization, and implementation tracking
+- 📚 **Documentation Organization**: Strategic documentation structure planning and archive management
+- 🗺️ **ROADMAP Coordination**: Advanced cross-branch coordination and strategic alignment planning
+- 📦 **Archive Management**: Intelligent historical work organization and accessibility planning
+- 🎯 **Strategic Direction**: Long-term framework development vision and roadmap coordination
+- 🤖 **Repository Intelligence**: Automated analysis of project state to inform strategic decisions
 
-**Technical Enhancement Proposal Areas**:
-- **🏗️ Framework Architecture**: New patterns, module optimization, protocol design, error handling
-- **⚡ Performance & Optimization**: Advanced techniques, caching, concurrency, memory optimization
-- **🔧 Developer Experience**: API improvements, macro enhancements, debugging, type safety
-- **🧠 Intelligence & AI Features**: Pattern detection, predictive analysis, ML integration
-- **🔐 Capabilities & Validation**: New capability types, runtime detection, graceful degradation
-- **🧪 Testing & Quality**: Testing infrastructure, benchmarking, automated validation
+**Technical Enhancement Proposal Categories** (Comprehensive Coverage):
+- **🏗️ Framework Architecture**: Advanced patterns, module optimization, protocol design, error handling, type safety
+- **⚡ Performance & Optimization**: Memory management, concurrency patterns, caching strategies, algorithmic improvements
+- **🔧 Developer Experience**: API ergonomics, macro system enhancements, debugging tools, development workflow improvements
+- **🧠 Intelligence & AI Features**: Pattern detection, predictive analysis, ML integration, architectural DNA evolution
+- **🔐 Capabilities & Validation**: Advanced capability types, runtime detection enhancement, graceful degradation strategies
+- **🧪 Testing & Quality**: Testing infrastructure, automated validation, benchmarking, quality assurance systems
+- **📊 Analytics & Monitoring**: Performance analytics, usage tracking, development metrics, health monitoring
+- **🔄 Integration & Deployment**: Build optimization, deployment strategies, CI/CD improvements, release management
 
-## 🔄 Command System Architecture
+## 🔄 Unified Command System Architecture
 
-### **PLAN.md: Branch-Aware Planning Engine**
-- **Intelligent Detection**: Automatically detects current branch and adjusts planning behavior
-- **Development Branch**: Plans framework development work using @DEVELOP.md methodology
-- **Integration Branch**: Plans integration testing work using @INTEGRATE.md methodology  
-- **Main Branch**: Plans strategic coordination, proposals, and documentation organization
-- **Work Storage**: Specific plans stored in appropriate Documentation/ folders and ROADMAP.md
+### **PLAN.md: Comprehensive Planning Intelligence Engine**
+- **Unified System**: Single planning engine that replaces @PROPOSE.md functionality with integrated proposal generation
+- **Intelligent Detection**: Automatically detects current branch and adjusts planning behavior with repository state analysis
+- **Development Branch**: Advanced framework development planning using @DEVELOP.md methodology integration
+- **Integration Branch**: Sophisticated integration testing planning using @INTEGRATE.md methodology integration  
+- **Main Branch**: Comprehensive strategic coordination with intelligent proposal generation and documentation organization
+- **Repository Intelligence**: Automated analysis of project state, files, and progress to inform planning decisions
+- **Work Storage**: Specific plans stored in appropriate Documentation/ folders and ROADMAP.md with cross-branch coordination
 
-### **DEVELOP.md: General Development Methodology**
+### **DEVELOP.md: Development Methodology Integration**
 - **Purpose**: Contains general development principles, approaches, and best practices
 - **Scope**: Framework development methodology and guidance
-- **Coordination**: Works with PLAN.md when called in development branch
+- **Coordination**: Seamlessly integrates with PLAN.md when called in development branch
+- **Enhancement**: Provides methodology foundation for intelligent planning algorithms
 - **Specifics**: Detailed development work tracked in `/AxiomFramework/Documentation/` and `ROADMAP.md`
 
-### **INTEGRATE.md: General Integration Methodology**
+### **INTEGRATE.md: Integration Methodology Integration**
 - **Purpose**: Contains general integration principles, testing approaches, and validation methods
-- **Scope**: Integration testing methodology and guidance
-- **Coordination**: Works with PLAN.md when called in integration branch
+- **Scope**: Integration testing methodology and guidance  
+- **Coordination**: Seamlessly integrates with PLAN.md when called in integration branch
+- **Enhancement**: Provides methodology foundation for intelligent integration planning
 - **Specifics**: Detailed integration work tracked in `/AxiomTestApp/Documentation/` and `ROADMAP.md`
 
-### **Documentation Hierarchy**
-- **@PLAN.md**: Branch-aware planning execution (detects branch and plans accordingly, includes proposal generation for main branch)
-- **@DEVELOP.md**: General development methodology and principles
-- **@INTEGRATE.md**: General integration methodology and principles
+### **Enhanced Documentation Hierarchy**
+- **@PLAN.md**: Unified planning intelligence engine (branch-aware planning + proposal generation + strategic coordination)
+- **@DEVELOP.md**: Development methodology and principles (integrates with @PLAN.md)
+- **@INTEGRATE.md**: Integration methodology and principles (integrates with @PLAN.md)
 - **@REFACTOR.md**: Branch-aware code organization and quality improvements
-- **@APPROVE.md**: Proposal review and integration system
+- **@APPROVE.md**: Proposal review and integration system (works with @PLAN.md generated proposals)
 - **/AxiomFramework/Documentation/**: Specific development work details and tracking
 - **/AxiomTestApp/Documentation/**: Specific integration work details and tracking
-- **/Proposals/**: Technical enhancement proposals generated by @PLAN (main branch)
-- **ROADMAP.md**: Cross-branch coordination and progress tracking
+- **/Proposals/**: Technical enhancement proposals generated by @PLAN.md (main branch)
+- **ROADMAP.md**: Cross-branch coordination and progress tracking with intelligent updates
 
-## 🔧 Technical Proposal Generation (Main Branch)
+### **System Consolidation Benefits**
+- **Simplified Workflow**: Single @PLAN command handles all planning needs based on context
+- **Reduced Complexity**: Eliminates confusion between @PLAN and @PROPOSE functionality
+- **Enhanced Intelligence**: Repository state analysis improves planning quality
+- **Better Coordination**: Unified system ensures better cross-branch coordination
+- **Comprehensive Coverage**: All planning and proposal needs handled by one intelligent system
 
-When @PLAN is called in main branch, it includes technical enhancement proposal generation capabilities in addition to strategic planning.
+## 🔧 Advanced Technical Proposal Generation (Main Branch)
 
-### **Proposal Generation Process**
-1. **Current State Assessment** → Analyze framework capabilities and identify enhancement opportunities
-2. **Technical Gap Analysis** → Find areas needing new capabilities or architectural improvements
-3. **Performance Review** → Identify optimization opportunities and performance improvements
-4. **Developer Experience Evaluation** → Assess API ergonomics and usability enhancements
-5. **Enhancement Opportunity Discovery** → Generate specific technical improvement proposals
-6. **Proposal File Creation** → Create structured proposal files in `/Proposals/Active/`
-7. **User Presentation** → Present enhancement proposals for review and approval
+**Comprehensive Proposal System**: When @PLAN is called in main branch, it activates the advanced technical enhancement proposal generation system that replaces and extends all @PROPOSE.md functionality.
+
+### **Intelligent Proposal Generation Process**
+1. **Repository State Analysis** → Deep analysis of current codebase, structure, and implementation status
+2. **Current Capability Assessment** → Comprehensive review of framework capabilities and identify enhancement opportunities  
+3. **Technical Gap Analysis** → Sophisticated identification of areas needing new capabilities or architectural improvements
+4. **Performance Intelligence Review** → Data-driven analysis of optimization opportunities and performance improvements
+5. **Developer Experience Evaluation** → User experience assessment of API ergonomics and usability enhancements
+6. **Cross-Branch Intelligence** → Analysis of development and integration branch feedback to inform proposals
+7. **Strategic Alignment Check** → Ensure proposals align with long-term framework vision and goals
+8. **Enhancement Opportunity Discovery** → Generate specific, targeted technical improvement proposals
+9. **Priority Intelligence** → Smart prioritization based on impact, effort, and strategic importance
+10. **Proposal File Creation** → Create structured, detailed proposal files in `/Proposals/Active/`
+11. **Implementation Planning** → Include detailed implementation roadmaps and resource requirements
+12. **User Presentation** → Present comprehensive enhancement proposals for review and approval
+
+### **Enhanced Repository Intelligence**
+- **File Analysis**: Examine source code patterns, architecture, and implementation quality
+- **Progress Assessment**: Analyze completed work and identify next logical enhancement steps
+- **Dependency Mapping**: Understand interdependencies and plan coordinated improvements
+- **Usage Pattern Analysis**: Review integration patterns to identify API improvement opportunities
+- **Performance Data**: Analyze performance characteristics and optimization potential
 
 ### **Proposal Categories & Focus Areas**
 - **Framework Extensions** → New capabilities, protocols, and architectural patterns
@@ -417,14 +456,23 @@ elif on main branch:
 
 ---
 
-**PLANNING STATUS**: Intelligent branch-aware planning engine with integrated proposal generation ✅  
-**BRANCH INTELLIGENCE**: Automatically detects branch context and adapts planning behavior  
-**METHODOLOGY INTEGRATION**: Works with @DEVELOP.md and @INTEGRATE.md for general guidance  
-**PROPOSAL GENERATION**: Technical enhancement proposal generation when called in main branch  
-**WORK STORAGE**: Specific plans stored in appropriate Documentation/ folders and ROADMAP.md  
-**DEVELOPMENT PLANNING**: Framework development planning when called in development branch  
-**INTEGRATION PLANNING**: Integration testing planning when called in integration branch  
-**STRATEGIC PLANNING**: Proposal generation, coordination, and documentation planning when called in main branch  
-**AUTOMATION READY**: Supports `@PLAN` command with intelligent branch detection and contextual execution
+**PLANNING STATUS**: Advanced unified planning intelligence engine with comprehensive proposal generation ✅  
+**SYSTEM CONSOLIDATION**: Successfully replaces @PROPOSE.md functionality with integrated proposal generation  
+**BRANCH INTELLIGENCE**: Automatically detects branch context and adapts planning behavior with repository analysis  
+**REPOSITORY INTELLIGENCE**: Deep analysis of project state, files, and progress to inform intelligent planning  
+**METHODOLOGY INTEGRATION**: Seamless integration with @DEVELOP.md and @INTEGRATE.md methodologies  
+**PROPOSAL GENERATION**: Advanced technical enhancement proposal generation with intelligent prioritization  
+**WORK STORAGE**: Comprehensive plan storage in appropriate Documentation/ folders and ROADMAP.md  
+**DEVELOPMENT PLANNING**: Sophisticated framework development planning when called in development branch  
+**INTEGRATION PLANNING**: Advanced integration testing planning when called in integration branch  
+**STRATEGIC PLANNING**: Comprehensive proposal generation, strategic coordination, and documentation planning when called in main branch  
+**CROSS-BRANCH COORDINATION**: Intelligent coordination and communication across all development branches  
+**AUTOMATION READY**: Supports `@PLAN` command with intelligent branch detection, repository analysis, and contextual execution
 
-**Use @PLAN in any branch for intelligent, contextual planning that automatically adapts to your current development focus and generates technical enhancement proposals when needed.**
+**🎯 Single Command for All Planning Needs**:
+- **@PLAN** → Automatically provides the right type of planning based on your current branch and project state
+- **Development Branch**: Framework development planning with @DEVELOP.md methodology integration
+- **Integration Branch**: Integration testing planning with @INTEGRATE.md methodology integration  
+- **Main Branch**: Strategic planning with intelligent proposal generation and documentation organization
+
+**Use @PLAN in any branch for comprehensive, intelligent planning that automatically adapts to your current context and provides exactly the planning capabilities you need - from technical proposals to cross-branch coordination.**

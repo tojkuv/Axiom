@@ -667,20 +667,20 @@
 ## 🔄 ENHANCED FIVE-COMMAND COORDINATION SYSTEM
 
 ### **Strategic Proposal Integration Protocol** 🚀
-**PROPOSE.md → PLAN.md → Implementation Coordination**: Approved strategic proposals (#1, #2, #3) successfully integrated into sprint planning and cycle coordination for revolutionary framework transformation.
+**PLAN.md Unified System → Implementation Coordination**: Approved strategic proposals (#1, #2, #3) successfully integrated into sprint planning and cycle coordination for revolutionary framework transformation.
 
 ### **Command Responsibilities**
 
 **DEVELOP.md** → Framework Core Enhancement
 - **Updates**: DEVELOP DELIVERABLES section with completed framework work
 - **Current Focus**: Revolutionary AI intelligence implementation, self-optimizing performance architecture, enterprise-grade capabilities
-- **Strategic Integration**: Implement approved PROPOSE.md recommendations for genuine AI and ML-driven optimization
+- **Strategic Integration**: Implement approved @PLAN.md recommendations for genuine AI and ML-driven optimization
 - **Success**: Revolutionary framework features implemented with >95% test coverage and genuine AI capabilities
 
 **INTEGRATE.md** → Real-World Validation  
 - **Updates**: INTEGRATE DELIVERABLES section with integration testing results
 - **Recent Achievement**: Revolutionary capability validation completed with 95%+ AI accuracy and enterprise-grade architecture proven
-- **Strategic Success**: All PROPOSE.md recommendations validated in comprehensive real-world scenarios with measurable evidence
+- **Strategic Success**: All @PLAN.md recommendations validated in comprehensive real-world scenarios with measurable evidence
 - **Ready For**: Next integration cycle when Phase 4 advanced intelligence features are ready for validation
 
 **REFACTOR.md** → Organization & Preparation
@@ -695,7 +695,7 @@
 - **Triggers**: Cycle completion, strategic priority changes, roadmap updates needed
 - **Success**: Clear next sprint definition with realistic scope and success criteria
 
-**PROPOSE.md** → Strategic Rethinking & Improvement
+**PLAN.md** → Unified Strategic Planning & Proposal Generation
 - **Updates**: Provides comprehensive proposals for framework, test app, and process improvements
 - **Focus**: Strategic analysis, architectural optimization, process enhancement, innovation acceleration
 - **Triggers**: Major milestone completion, strategic review needs, innovation opportunity identification

@@ -49,7 +49,7 @@ switch_to_branch() {
             echo "🎯 **MAIN BRANCH WORKSPACE**"
             echo "Focus: Documentation, organization, refactoring, strategic coordination"
             echo "Files: All documentation, archival, project coordination"
-            echo "Tools: @REFACTOR.md, @PLAN.md, @PROPOSE.md"
+            echo "Tools: @REFACTOR.md, @PLAN.md (unified planning & proposals)"
             echo "Avoid: Framework code changes, test app changes"
             ;;
         "development") 
@@ -130,8 +130,7 @@ current_branch=$(git branch --show-current)
 case "$current_branch" in
     "main")
         echo "   📋 @REFACTOR.md - Comprehensive code organization and cleanup"
-        echo "   🎯 @PLAN.md - Strategic planning and coordination"  
-        echo "   💡 @PROPOSE.md - Technical enhancement proposals"
+        echo "   🎯 @PLAN.md - Unified planning, strategic coordination, and proposal generation"
         ;;
     "development")
         echo "   🔧 @DEVELOP.md - Framework implementation and features"
@@ -157,7 +156,7 @@ echo "❓ **Need help**: @WORKSPACE help"
 **Keywords**: `document`, `organize`, `refactor`, `plan`, `coordinate`, `archive`
 - **Purpose**: Project coordination, documentation organization, strategic planning
 - **Files**: All documentation, project coordination files, archives
-- **Tools**: `@REFACTOR.md`, `@PLAN.md`, `@PROPOSE.md`
+- **Tools**: `@REFACTOR.md`, `@PLAN.md` (unified planning & proposals)
 - **When to use**: Organizing docs, planning cycles, refactoring codebase structure
 
 ### **🔧 Development Branch** - Framework Implementation  
@@ -230,7 +229,7 @@ echo "❓ **Need help**: @WORKSPACE help"
 ├── Focus: Strategic planning, documentation, organization
 ├── Files: All .md files, archives, project coordination
 ├── Avoid: Framework source code, test app implementation
-├── Tools: @REFACTOR.md, @PLAN.md, @PROPOSE.md
+├── Tools: @REFACTOR.md, @PLAN.md (unified planning & proposals)
 └── Goal: Clean, organized foundation for development work
 ```
 
