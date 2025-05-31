@@ -90,6 +90,13 @@ echo "⚡ Target workflow: $TARGET_WORKFLOW"
 echo "📋 Current changes:"
 git status --short
 
+# Early exit if no changes and target is development/integration
+if [ -z "$(git status --porcelain)" ] && [ "$TARGET_WORKFLOW" != "main" ]; then
+    echo "✅ No changes detected on $TARGET_WORKFLOW branch"
+    echo "🤖 Skipping checkpoint - no work to commit or merge"
+    exit 0
+fi
+
 # 4. Execute workflow based on target (auto-detected or forced)
 case "$TARGET_WORKFLOW" in
   "development")
@@ -100,14 +107,15 @@ case "$TARGET_WORKFLOW" in
         # Commit changes with intelligent message
         echo "✅ Committing development progress..."
         git add .
-        git commit -m "🔧 Development checkpoint: $(date '+%Y-%m-%d %H:%M')
+        CURRENT_DATE=$(date '+%Y-%m-%d %H:%M')
+        git commit -m "🔧 Development checkpoint: $CURRENT_DATE
 
-    📦 Framework enhancements and feature development
-    🎯 Ready for main branch merge
-    
-    🤖 Generated with Claude Code
-    
-    Co-Authored-By: Claude <noreply@anthropic.com>"
+📦 Framework enhancements and feature development
+🎯 Ready for main branch merge
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
     else
         echo "✅ No uncommitted changes to commit"
     fi
@@ -116,19 +124,33 @@ case "$TARGET_WORKFLOW" in
     echo "🔄 Fetching latest main..."
     git fetch origin main
     
-    # Switch to main and merge development
-    echo "🔄 Switching to main..."
+    # Check if development has changes to merge (avoid empty merges)
     git checkout main
     git pull origin main
     
+    echo "🔍 Checking if development has new changes..."
+    if git merge-tree $(git merge-base main development) main development | grep -q "^"; then
+        echo "📝 Changes detected - proceeding with merge"
+    else
+        echo "✅ No changes to merge - development already integrated"
+        echo "🌱 Creating fresh development branch..."
+        git branch -D development 2>/dev/null || true
+        git push origin --delete development 2>/dev/null || true
+        git checkout -b development
+        git push origin development -u
+        echo "✅ Development cycle complete (no merge needed)!"
+        exit 0
+    fi
+    
     echo "🚀 Merging development into main..."
-    if ! git merge development --no-ff -m "🔧 Merge development cycle: $(date '+%Y-%m-%d')
+    MERGE_DATE=$(date '+%Y-%m-%d')
+    if ! git merge development --no-ff -m "🔧 Merge development cycle: $MERGE_DATE
 
 ✅ Development work completed and validated
 📦 Framework enhancements integrated
 🎯 Ready for next development cycle
 
-🤖 Generated with Claude Code
+🤖 Generated with [Claude Code](https://claude.ai/code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>"; then
         echo ""
@@ -219,15 +241,16 @@ Co-Authored-By: Claude <noreply@anthropic.com>"; then
         # Commit integration results
         echo "✅ Committing integration validation..."
         git add .
-        git commit -m "🧪 Integration checkpoint: $(date '+%Y-%m-%d %H:%M')
+        CURRENT_DATE=$(date '+%Y-%m-%d %H:%M')
+        git commit -m "🧪 Integration checkpoint: $CURRENT_DATE
 
-    ✅ Real-world validation completed
-    📊 Performance metrics captured
-    🎯 Ready for main branch merge
-    
-    🤖 Generated with Claude Code
-    
-    Co-Authored-By: Claude <noreply@anthropic.com>"
+✅ Real-world validation completed
+📊 Performance metrics captured
+🎯 Ready for main branch merge
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
     else
         echo "✅ No uncommitted changes to commit"
     fi
@@ -236,19 +259,33 @@ Co-Authored-By: Claude <noreply@anthropic.com>"; then
     echo "🔄 Fetching latest main..."
     git fetch origin main
     
-    # Switch to main and merge integration
-    echo "🔄 Switching to main..."
+    # Check if integration has changes to merge (avoid empty merges)
     git checkout main
     git pull origin main
     
+    echo "🔍 Checking if integration has new changes..."
+    if git merge-tree $(git merge-base main integration) main integration | grep -q "^"; then
+        echo "📝 Changes detected - proceeding with merge"
+    else
+        echo "✅ No changes to merge - integration already integrated"
+        echo "🌱 Creating fresh integration branch..."
+        git branch -D integration 2>/dev/null || true
+        git push origin --delete integration 2>/dev/null || true
+        git checkout -b integration
+        git push origin integration -u
+        echo "✅ Integration cycle complete (no merge needed)!"
+        exit 0
+    fi
+    
     echo "🚀 Merging integration into main..."
-    if ! git merge integration --no-ff -m "🧪 Merge integration cycle: $(date '+%Y-%m-%d')
+    MERGE_DATE=$(date '+%Y-%m-%d')
+    if ! git merge integration --no-ff -m "🧪 Merge integration cycle: $MERGE_DATE
 
 ✅ Integration validation completed
 📊 Performance metrics validated
 🎯 Ready for next integration cycle
 
-🤖 Generated with Claude Code
+🤖 Generated with [Claude Code](https://claude.ai/code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>"; then
         echo ""
@@ -335,25 +372,28 @@ Co-Authored-By: Claude <noreply@anthropic.com>"; then
     echo "🎯 MAIN BRANCH CHECKPOINT - UPDATE ALL BRANCHES"
     
     # Check for uncommitted changes first
-    if [ -n "$(git status --porcelain)" ]; then
+    CHANGES_COUNT=$(git status --porcelain | wc -l)
+    if [ "$CHANGES_COUNT" -gt 0 ]; then
         # Commit progress on main
-        echo "✅ Committing main branch progress..."
+        echo "✅ Committing main branch progress ($CHANGES_COUNT files changed)..."
         git add .
-        git commit -m "🎯 Main branch checkpoint: $(date '+%Y-%m-%d %H:%M')
+        CURRENT_DATE=$(date '+%Y-%m-%d %H:%M')
+        git commit -m "🎯 Main branch checkpoint: $CURRENT_DATE
 
-    📋 Project status update and coordination
-    🚀 Strategic planning and documentation
-    
-    🤖 Generated with Claude Code
-    
-    Co-Authored-By: Claude <noreply@anthropic.com>"
+📋 Project status update and coordination
+🚀 Strategic planning and documentation
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+        
+        # Push to main
+        echo "🚀 Pushing to main..."
+        git push origin main
     else
         echo "✅ No uncommitted changes to commit"
+        echo "📋 Proceeding with branch synchronization only..."
     fi
-    
-    # Push to main
-    echo "🚀 Pushing to main..."
-    git push origin main
     
     # Update development branch with latest main
     echo "🔧 Updating development branch with latest main..."
@@ -432,20 +472,26 @@ Co-Authored-By: Claude <noreply@anthropic.com>"; then
     
   *)
     echo "❓ Unknown branch: $CURRENT_BRANCH"
-    echo "🎯 Creating standard checkpoint..."
     
-    # Standard checkpoint for other branches
-    git add .
-    git commit -m "📌 Checkpoint on $CURRENT_BRANCH: $(date '+%Y-%m-%d %H:%M')
+    # Only checkpoint if there are changes
+    if [ -n "$(git status --porcelain)" ]; then
+        echo "🎯 Creating standard checkpoint..."
+        git add .
+        CURRENT_DATE=$(date '+%Y-%m-%d %H:%M')
+        git commit -m "📌 Checkpoint on $CURRENT_BRANCH: $CURRENT_DATE
 
-    🔄 Branch-specific progress update
-    
-    🤖 Generated with Claude Code
-    
-    Co-Authored-By: Claude <noreply@anthropic.com>"
-    
-    git push origin "$CURRENT_BRANCH" -u
-    echo "✅ Standard checkpoint complete"
+🔄 Branch-specific progress update
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+        
+        git push origin "$CURRENT_BRANCH" -u
+        echo "✅ Standard checkpoint complete"
+    else
+        echo "✅ No changes detected on $CURRENT_BRANCH"
+        echo "🤖 Skipping checkpoint - no work to commit"
+    fi
     ;;
 esac
 
