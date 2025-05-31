@@ -103,6 +103,51 @@ Current State:
 - **Consistent Linking**: Use relative paths for maintainable cross-references
 - **Unified Glossary**: Shared terminology across both documentation systems
 
+## 📋 ROADMAP.md Update Protocol
+
+**When REFACTOR work completes, update the REFACTOR DELIVERABLES section:**
+
+1. **Locate Current Cycle** → Find the refactor cycle you were working on (e.g., "Refactor Cycle 3")
+2. **Update Cycle Status** → Change from 🔄 IN PROGRESS to ✅ COMPLETED
+3. **Add Completed Organization** → List each major organizational achievement
+4. **Include Efficiency Metrics** → Document navigation improvements and development velocity gains
+5. **Start Next Cycle** → If applicable, add next refactor cycle as ⏳ PLANNED
+
+**Update Template:**
+```markdown
+**Refactor Cycle [N]: [Cycle Focus]** ✅ COMPLETED
+- ✅ **[Organizational Achievement]**: [Specific improvement and navigation benefits]
+- ✅ **[Structure Enhancement]**: [Development efficiency improvement achieved]
+- ✅ **[Archive Management]**: [Historical preservation and future preparation]
+
+**REFACTOR Impact Metrics**:
+- **[Efficiency Category]**: [Specific time savings and workflow improvements]
+- **[Organization Quality]**: [Structure improvements and redundancy elimination]
+- **[Development Velocity]**: [Speed improvements and reduced cognitive load]
+- **[Knowledge Management]**: [Information accessibility and maintenance efficiency]
+```
+
+**Example Update:**
+```markdown
+**Refactor Cycle 3: Advanced Development Infrastructure** ✅ COMPLETED
+- ✅ **Enhanced IDE Integration**: Development environment optimized for 40% faster iteration
+- ✅ **Automated Quality Gates**: CI/CD pipeline with framework performance validation
+- ✅ **Community Preparation Structure**: Documentation and examples ready for external developers
+
+**REFACTOR Impact Metrics**:
+- **Development Speed**: 40% faster compile-test-iterate cycles
+- **Quality Assurance**: Automated performance regression prevention
+- **Structure Scalability**: Framework development patterns ready for team expansion
+- **Community Readiness**: External developer onboarding reduced from hours to minutes
+```
+
+**Critical Rules:**
+- ✅ **Measure efficiency gains** with concrete development velocity improvements
+- ✅ **Document navigation improvements** showing reduced time to find information
+- ✅ **Validate cross-system consistency** ensuring framework and app docs stay aligned
+- ✅ **Archive completed work** properly preserving learning and decisions
+- ✅ **Trigger next planning** by completing refactor deliverables
+
 ## 🔄 Refactor Workflow
 
 ### **Phase 1: Assessment**

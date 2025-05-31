@@ -70,6 +70,51 @@ AxiomTestApp/ExampleApp/
     └── IntegrationTestRunner.swift # Automated integration testing
 ```
 
+## 📋 ROADMAP.md Update Protocol
+
+**When INTEGRATE work completes, update the INTEGRATE DELIVERABLES section:**
+
+1. **Locate Current Cycle** → Find the integration cycle you were working on (e.g., "Integration Cycle 2")
+2. **Update Cycle Status** → Change from ⏳ PLANNED to ✅ COMPLETED  
+3. **Add Validated Features** → List each framework feature successfully validated in AxiomTestApp
+4. **Include Integration Metrics** → Document performance measurements and developer experience improvements
+5. **Start Next Cycle** → If applicable, add next integration cycle as ⏳ PLANNED
+
+**Update Template:**
+```markdown
+**Integration Cycle [N]: [Cycle Focus]** ✅ COMPLETED
+- ✅ **[Framework Feature]**: [Validation results and real-world usage confirmation]
+- ✅ **[API Enhancement]**: [Developer experience improvement measurement]
+- ✅ **[Performance Feature]**: [Benchmark validation and target achievement]
+
+**INTEGRATE Impact Metrics**:
+- **[Validation Category]**: [Specific testing results and success criteria met]
+- **[Performance Measurement]**: [Benchmarks confirmed in real iOS app scenarios]
+- **[Developer Experience]**: [Usability improvements and error reduction measured]
+- **[Integration Quality]**: [Build stability, API ergonomics, real-world usage validation]
+```
+
+**Example Update:**
+```markdown
+**Integration Cycle 2: Advanced Feature Testing** ✅ COMPLETED
+- ✅ **@AxiomClient Macro Integration**: Successfully reduces setup in complex multi-domain scenarios
+- ✅ **Type-Safe Client Access Validation**: Prevents runtime errors across all domain configurations
+- ✅ **AxiomDiagnostics Integration**: Provides actionable guidance in real development scenarios
+
+**INTEGRATE Impact Metrics**:
+- **Complex Scenario Validation**: Framework handles 4+ domain configurations seamlessly
+- **Performance Under Load**: Maintains <5ms targets with enhanced APIs in real app
+- **Developer Experience**: 75% setup reduction confirmed in sophisticated AxiomTestApp scenarios
+- **Error Prevention**: Zero runtime client discovery failures across comprehensive test scenarios
+```
+
+**Critical Rules:**
+- ✅ **Test in AxiomTestApp** with real iOS application complexity
+- ✅ **Measure performance** in realistic usage scenarios, not isolated tests
+- ✅ **Document developer experience** improvements with concrete usage examples
+- ✅ **Validate framework limitations** and create DEVELOP requirements for discovered issues
+- ✅ **Trigger next planning** by completing integration deliverables
+
 ## 🔄 Comprehensive Integration Testing Cycle
 
 ### **Phase 1: Framework Capability Assessment**

@@ -184,13 +184,14 @@ open Axiom.xcworkspace
 - ✅ **Industry Standard**: Same approach used by Apple frameworks
 - ✅ **Modular Testing**: Isolated feature testing in organized structure
 
-### **Three-Cycle Development System** 🔄
-**Strategic development coordination with automated planning**
+### **Four-Command Development System** 🔄
+**Strategic development coordination with automated planning and continuous improvement**
 
 - **DEVELOP Cycle** → Framework core enhancement (`@DEVELOP.md`)
 - **INTEGRATE Cycle** → Real-world validation (`@INTEGRATE.md`)
 - **REFACTOR Cycle** → Organization & preparation (`@REFACTOR.md`)
 - **PLAN Coordination** → Automated cycle planning (`@PLAN d|i|r`)
+- **PROPOSE Strategy** → Strategic rethinking and improvement (`@PROPOSE.md`)
 
 ```bash
 # Example strategic workflow
@@ -199,6 +200,7 @@ open Axiom.xcworkspace
 @INTEGRATE.md    # Validate in real iOS app
 @PLAN r          # Plan documentation organization
 @REFACTOR.md     # Archive and prepare next phase
+@PROPOSE.md      # Strategic rethinking and improvements
 @PLAN d          # Plan next development cycle
 ```
 

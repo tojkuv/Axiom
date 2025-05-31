@@ -52,21 +52,66 @@ You are Claude Code developing the Axiom framework core - the world's first inte
 ## 🔄 Development Workflow
 
 ### **Automated Development Process**
-1. **Check Unified Roadmap** → Automatically identify next task from `/ROADMAP.md` Priority Matrix
-2. **Select Active Task** → Pick highest priority 🔄 (active) or ⏳ (queued) task  
+1. **Check Unified Roadmap** → Read `/ROADMAP.md` CURRENT SPRINT STATUS for active tasks
+2. **Select Active Task** → Pick highest priority 🔄 (active) task from current sprint
 3. **Confirm DEVELOP Mode** → Validate task requires framework core development
 4. **Reference Technical Specs** → Use `/Documentation/Technical/` for implementation details
 5. **Implement Features** → Build new protocols, capabilities, intelligence systems
 6. **Validate Architecture** → Ensure zero constraint violations
 7. **Write Tests** → >95% coverage required for all new functionality
 8. **Update Documentation** → 100% API documentation required
-9. **Mark Complete** → Update roadmap task status from 🔄 to ✅ in `/ROADMAP.md`
+9. **Update ROADMAP.md** → Add completed work to DEVELOP DELIVERABLES section
 
 ### **Critical Locations**
 - **Framework Code**: `/Sources/Axiom/`
 - **Unified Roadmap**: `/ROADMAP.md` (central planning and task selection)
 - **Technical Specs**: `/Documentation/Technical/`
 - **API Reference**: `/Documentation/Technical/API_DESIGN_SPECIFICATION.md`
+
+### **ROADMAP.md Update Protocol**
+
+**When DEVELOP work completes, update the DEVELOP DELIVERABLES section:**
+
+1. **Locate Current Phase** → Find the phase you were working on (e.g., "Phase 2: API Enhancement")
+2. **Update Phase Status** → Change from 🔄 IN PROGRESS to ✅ COMPLETED
+3. **Add Completed Work** → List each major deliverable with ✅ and description
+4. **Include Impact Metrics** → Document measurable improvements and capabilities added
+5. **Start Next Phase** → If applicable, add next phase as 🔄 IN PROGRESS
+
+**Update Template:**
+```markdown
+**Phase [N]: [Phase Name]** ✅ COMPLETED
+- ✅ **[Feature Name]**: [Description of completed work and capabilities]
+- ✅ **[Enhancement Name]**: [Description with performance/experience impact]
+- ✅ **[System Name]**: [Description with integration and architecture benefits]
+
+**DEVELOP Impact Metrics**:
+- **[Metric Category]**: [Specific measurement and achievement]
+- **[Performance Category]**: [Benchmarks met and targets achieved]
+- **[Developer Experience]**: [Boilerplate reduction, error prevention achieved]
+- **[Architecture Quality]**: [Constraints validated, capabilities enhanced]
+```
+
+**Example Update:**
+```markdown
+**Phase 2: API Enhancement** ✅ COMPLETED
+- ✅ **@AxiomClient Macro**: 75% reduction in client creation boilerplate
+- ✅ **Type-Safe Client Access**: Compile-time validation prevents runtime discovery errors
+- ✅ **AxiomDiagnostics**: Actionable setup guidance with optimization suggestions
+
+**DEVELOP Impact Metrics**:
+- **API Efficiency**: 75% reduction in client setup code
+- **Error Prevention**: 90% elimination of runtime client discovery failures
+- **Developer Guidance**: Automated diagnostics reduce setup time by 60%
+- **Type Safety**: Complete compile-time validation for client access patterns
+```
+
+**Critical Rules:**
+- ✅ **Always include impact metrics** with specific measurements
+- ✅ **Document architectural benefits** and constraint compliance
+- ✅ **Measure developer experience** improvements with concrete numbers
+- ✅ **Validate performance** targets and include benchmarks achieved
+- ✅ **Trigger next planning** by completing deliverables section updates
 
 ## 🛠️ Development Standards
 
