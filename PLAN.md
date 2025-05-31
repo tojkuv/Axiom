@@ -35,51 +35,54 @@
 
 ## 🌿 Branch-Aware Planning Execution
 
-### **When Called in Development Branch**
-**Automatic Behavior**: Plan framework development, enhancement, and testing work
-**Planning Focus**: Framework capabilities, APIs, performance optimization, architecture evolution
-**Work Details**: Stored in `/AxiomFramework/Documentation/` and tracked in `ROADMAP.md`
+### **When Called in Development Branch (PLAN.md d)**
+**Automatic Behavior**: Plan framework development, enhancement, and testing work with framework-specific proposal generation
+**Planning Focus**: Framework capabilities, APIs, performance optimization, architecture evolution, framework enhancement proposals
+**Work Details**: Stored in `/AxiomFramework/Documentation/`, `/AxiomFramework/Proposals/Active/` and tracked in `ROADMAP.md`
 **Methodology Reference**: General development approaches available in `@DEVELOP.md`
 
-**Development Branch Planning Priorities**:
+**Development Branch Planning Priorities** (Framework-Focused):
 - 🔧 **Framework Features**: Plan new capabilities, protocols, and architectural improvements
 - ⚡ **Performance Work**: Plan optimization strategies and performance improvements
 - 🏗️ **API Development**: Plan interface improvements and developer experience enhancements
 - 🧪 **Testing Infrastructure**: Plan framework testing and validation capabilities
 - 📊 **Intelligence Features**: Plan AI and ML capability development
 - 🔄 **Code Quality**: Plan refactoring and structural improvements
+- 📋 **Framework Proposal Generation**: Generate framework-specific enhancement proposals in `/AxiomFramework/Proposals/Active/`
 
-### **When Called in Integration Branch**
-**Automatic Behavior**: Plan integration testing, validation, and test app development work
-**Planning Focus**: Framework validation, developer experience testing, integration patterns
-**Work Details**: Stored in `/AxiomTestApp/Documentation/` and tracked in `ROADMAP.md`
+### **When Called in Integration Branch (PLAN.md i)**
+**Automatic Behavior**: Plan integration testing, validation, and test app development work with integration-specific proposal generation
+**Planning Focus**: Framework validation, developer experience testing, integration patterns, test app enhancement proposals
+**Work Details**: Stored in `/AxiomTestApp/Documentation/`, `/AxiomTestApp/Proposals/Active/` and tracked in `ROADMAP.md`
 **Methodology Reference**: General integration approaches available in `@INTEGRATE.md`
 
-**Integration Branch Planning Priorities**:
+**Integration Branch Planning Priorities** (Integration-Focused):
 - ✅ **Framework Validation**: Plan comprehensive testing of framework capabilities
 - 👥 **Developer Experience**: Plan API ergonomics testing and usability improvements
 - 🔗 **Integration Patterns**: Plan optimal framework usage patterns and examples
 - 📈 **Performance Validation**: Plan real-world performance testing and measurement
 - 📱 **Test App Development**: Plan test application features and validation scenarios
 - 🎯 **Usage Examples**: Plan integration documentation and usage patterns
+- 📋 **Integration Proposal Generation**: Generate test app and validation improvement proposals in `/AxiomTestApp/Proposals/Active/`
 
-### **When Called in Main Branch**
-**Automatic Behavior**: Comprehensive strategic planning including intelligent proposal generation, documentation organization, and cross-branch coordination
-**Planning Focus**: Strategic direction, technical enhancement proposal generation, proposal management, documentation structure, roadmap coordination
-**Work Details**: Managed in `/Proposals/`, documentation folders, and `ROADMAP.md`
-**Methodology Reference**: Strategic planning approaches, technical enhancement proposal generation, and comprehensive project coordination
+### **When Called in Main Branch (PLAN.md m)**
+**Automatic Behavior**: Comprehensive strategic planning including intelligent proposal generation for BOTH framework and integration app, documentation organization, and cross-branch coordination
+**Planning Focus**: Strategic direction, dual-scope proposal generation, proposal management, documentation structure, roadmap coordination
+**Work Details**: Managed in `/AxiomFramework/Proposals/`, `/AxiomTestApp/Proposals/`, documentation folders, and `ROADMAP.md`
+**Methodology Reference**: Strategic planning approaches, comprehensive technical enhancement proposal generation, and project coordination
 
-**🎯 Unified Proposal Generation System** (Replaces @PROPOSE.md):
-This system combines strategic planning with intelligent proposal generation, eliminating the need for a separate @PROPOSE.md file. All proposal functionality is integrated into this branch-aware planning engine.
+**🎯 Dual-Scope Proposal Generation System** (Replaces @PROPOSE.md):
+This system combines strategic planning with intelligent proposal generation for both framework enhancements and integration app improvements, eliminating the need for a separate @PROPOSE.md file. All proposal functionality is integrated into this branch-aware planning engine.
 
-**Main Branch Planning Priorities**:
-- 🔧 **Intelligent Proposal Generation**: Automatically analyze repository state and generate targeted technical enhancement proposals
-- 📋 **Advanced Proposal Management**: Sophisticated proposal workflow including categorization, prioritization, and implementation tracking
-- 📚 **Documentation Organization**: Strategic documentation structure planning and archive management
+**Main Branch Planning Priorities** (Dual-Scope):
+- 🔧 **Framework Proposal Generation**: Analyze framework state and generate targeted enhancement proposals in `/AxiomFramework/Proposals/Active/`
+- 🧪 **Integration Proposal Generation**: Analyze test app state and generate validation/testing improvement proposals in `/AxiomTestApp/Proposals/Active/`
+- 📋 **Advanced Proposal Management**: Sophisticated workflow for both framework and integration proposals
+- 📚 **Documentation Organization**: Strategic documentation structure planning across both scopes
 - 🗺️ **ROADMAP Coordination**: Advanced cross-branch coordination and strategic alignment planning
-- 📦 **Archive Management**: Intelligent historical work organization and accessibility planning
-- 🎯 **Strategic Direction**: Long-term framework development vision and roadmap coordination
-- 🤖 **Repository Intelligence**: Automated analysis of project state to inform strategic decisions
+- 📦 **Archive Management**: Intelligent historical work organization for both framework and integration proposals
+- 🎯 **Strategic Direction**: Long-term development vision coordination across both scopes
+- 🤖 **Repository Intelligence**: Automated analysis of both framework and integration app state
 
 **Technical Enhancement Proposal Categories** (Comprehensive Coverage):
 - **🏗️ Framework Architecture**: Advanced patterns, module optimization, protocol design, error handling, type safety
@@ -124,7 +127,8 @@ This system combines strategic planning with intelligent proposal generation, el
 - **@APPROVE.md**: Proposal review and integration system (works with @PLAN.md generated proposals)
 - **/AxiomFramework/Documentation/**: Specific development work details and tracking
 - **/AxiomTestApp/Documentation/**: Specific integration work details and tracking
-- **/Proposals/**: Technical enhancement proposals generated by @PLAN.md (main branch)
+- **/AxiomFramework/Proposals/**: Framework enhancement proposals generated by @PLAN.md
+- **/AxiomTestApp/Proposals/**: Integration and test app improvement proposals generated by @PLAN.md
 - **ROADMAP.md**: Cross-branch coordination and progress tracking with intelligent updates
 
 ### **System Consolidation Benefits**
@@ -148,7 +152,7 @@ This system combines strategic planning with intelligent proposal generation, el
 7. **Strategic Alignment Check** → Ensure proposals align with long-term framework vision and goals
 8. **Enhancement Opportunity Discovery** → Generate specific, targeted technical improvement proposals
 9. **Priority Intelligence** → Smart prioritization based on impact, effort, and strategic importance
-10. **Proposal File Creation** → Create structured, detailed proposal files in `/Proposals/Active/`
+10. **Proposal File Creation** → Create structured, detailed proposal files in `/AxiomFramework/Proposals/Active/` and/or `/AxiomTestApp/Proposals/Active/`
 11. **Implementation Planning** → Include detailed implementation roadmaps and resource requirements
 12. **User Presentation** → Present comprehensive enhancement proposals for review and approval
 
@@ -202,11 +206,14 @@ This system combines strategic planning with intelligent proposal generation, el
 ```
 
 ### **Proposal Workflow Integration**
-- **Generation**: @PLAN (main branch) creates proposals in `/Proposals/Active/`
+- **Generation**: 
+  - @PLAN m (main branch) creates proposals in both `/AxiomFramework/Proposals/Active/` and `/AxiomTestApp/Proposals/Active/`
+  - @PLAN d (development branch) creates framework proposals in `/AxiomFramework/Proposals/Active/`
+  - @PLAN i (integration branch) creates test app proposals in `/AxiomTestApp/Proposals/Active/`
 - **Review**: User reviews generated proposals and selects those for implementation
 - **Approval**: @APPROVE command integrates selected proposals into roadmap and documentation
-- **Implementation**: Approved proposals become priorities for development and integration branches
-- **Tracking**: Proposal implementation tracked through ROADMAP.md and branch-specific documentation
+- **Implementation**: Approved proposals become priorities for appropriate development scope
+- **Tracking**: Proposal implementation tracked through ROADMAP.md and scope-specific documentation
 
 ## 🧹 ROADMAP Health Management
 
@@ -421,19 +428,22 @@ This system combines strategic planning with intelligent proposal generation, el
 if on development branch:
     methodology = @DEVELOP.md  # General development principles and approaches
     work_details = /AxiomFramework/Documentation/  # Specific development tasks and tracking
-    focus = "Framework development, APIs, performance, testing infrastructure"
+    proposals = /AxiomFramework/Proposals/Active/  # Framework-specific proposals
+    focus = "Framework development, APIs, performance, testing infrastructure, framework proposals"
 
 # Integration Branch Context  
 elif on integration branch:
     methodology = @INTEGRATE.md  # General integration principles and approaches
     work_details = /AxiomTestApp/Documentation/  # Specific integration tasks and tracking
-    focus = "Framework validation, developer experience, integration patterns"
+    proposals = /AxiomTestApp/Proposals/Active/  # Integration-specific proposals
+    focus = "Framework validation, developer experience, integration patterns, test app proposals"
 
 # Main Branch Context
 elif on main branch:
-    methodology = "Strategic planning and proposal generation"  # Strategic coordination and technical enhancement proposals
-    work_details = "/Proposals/, Documentation folders, ROADMAP.md"  # Strategic work and proposal tracking
-    focus = "Technical proposal generation, proposal management, documentation organization, roadmap coordination"
+    methodology = "Strategic planning and dual-scope proposal generation"  # Strategic coordination and comprehensive proposals
+    work_details = "/AxiomFramework/Proposals/, /AxiomTestApp/Proposals/, Documentation folders, ROADMAP.md"  # Strategic work and dual-scope proposal tracking
+    proposals = "Both /AxiomFramework/Proposals/Active/ and /AxiomTestApp/Proposals/Active/"  # Dual-scope proposals
+    focus = "Dual-scope proposal generation, proposal management, documentation organization, roadmap coordination"
 ```
 
 **Automated Planning Execution**:
@@ -446,12 +456,13 @@ elif on main branch:
 7. **Cross-Branch Awareness** → Ensure planning coordinates with other branch activities
 
 **Command Integration Model**:
-- **@PLAN** (development branch) + **@DEVELOP.md** → Framework development planning with general methodology
-- **@PLAN** (integration branch) + **@INTEGRATE.md** → Integration testing planning with general methodology
-- **@PLAN** (main branch) → Strategic planning, technical proposal generation, and documentation organization
-- **@APPROVE** → Proposal review and integration system (works with proposals generated by @PLAN main branch)
+- **@PLAN d** (development branch) + **@DEVELOP.md** → Framework development planning with framework proposal generation
+- **@PLAN i** (integration branch) + **@INTEGRATE.md** → Integration testing planning with test app proposal generation
+- **@PLAN m** (main branch) → Strategic planning, dual-scope technical proposal generation, and documentation organization
+- **@APPROVE** → Proposal review and integration system (works with proposals from both scopes)
 - **Work Details** → Stored in appropriate `/Documentation/` folders and tracked in `ROADMAP.md`
-- **Proposals** → Generated by @PLAN (main branch) and managed through @APPROVE workflow
+- **Framework Proposals** → Generated in `/AxiomFramework/Proposals/Active/` and managed through @APPROVE workflow
+- **Integration Proposals** → Generated in `/AxiomTestApp/Proposals/Active/` and managed through @APPROVE workflow
 - **Progress Coordination** → All branches update `ROADMAP.md` for cross-branch awareness
 
 ---

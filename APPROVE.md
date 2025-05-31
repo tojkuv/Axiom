@@ -5,15 +5,25 @@
 ## 🤖 Automated Mode Trigger
 
 **When human sends**: `@APPROVE <proposal-file>`
-**Action**: Automatically enter ultrathink mode and integrate the specified proposal
+**Action**: Automatically enter ultrathink mode and integrate the specified proposal from either proposal scope
 
-**Multi-Terminal Integration Process**:
-1. **Verify Main Branch** → Ensure working on main branch (Terminal 1 context)
-2. **Read APPROVE.md** → Load this complete integration guide
-3. **Validate Proposal** → Ensure proposal file exists and is properly formatted
-4. **Integrate Proposal** → Apply proposal changes to roadmap and documentation
-5. **Move to Approved** → Transfer proposal from Active to Approved directory
-6. **Update Terminal Status** → Communicate integration completion to other terminals
+### 🎯 **Dual-Scope Approval System**
+- **`@APPROVE framework-proposal.md`** → Approve framework enhancement proposals from `/AxiomFramework/Proposals/Active/`
+- **`@APPROVE integration-proposal.md`** → Approve integration improvement proposals from `/AxiomTestApp/Proposals/Active/`
+- **Auto-Detection**: System automatically detects which proposal scope contains the specified file
+
+### 🧠 **Scope-Specific Approval Intelligence**
+**Framework Proposals**: Framework enhancement priorities, core feature implementation, architecture evolution
+**Integration Proposals**: Testing validation priorities, integration pattern implementation, test app improvements
+**Main Branch Context**: Always operates in main branch for strategic coordination and documentation updates
+
+**Dual-Scope Integration Process**:
+1. **Auto-Detect Proposal Scope** → Determine if proposal is in framework or integration scope
+2. **Validate Proposal** → Ensure proposal file exists and is properly formatted
+3. **Scope-Specific Integration** → Apply proposal changes with appropriate scope focus
+4. **Update Roadmap Priorities** → Add proposal to appropriate scope-specific roadmap priorities
+5. **Move to Approved** → Transfer proposal from Active to Approved directory with scope context
+6. **Update Coordination** → Communicate integration completion with scope-specific implementation guidance
 
 ## 🎯 APPROVE Mode Mission
 
@@ -23,25 +33,42 @@
 
 **Philosophy**: Strategic thinking becomes valuable only when carefully integrated into active development. Bridge the gap between isolated exploration and coordinated implementation.
 
-## 🖥️ Terminal 1 (Main Branch) Integration Context
+## 🌿 Scope-Specific Approval Contexts
 
-**Terminal Identity**: Terminal 1 - Main Branch - Proposal Integration & Documentation Updates
-**Primary File Scope**: `/Proposals/`, `ROADMAP.md`, `/AxiomFramework/Documentation/`, `/AxiomTestApp/Documentation/`
-**Terminal Coordination**: Works on main branch, updates documentation that other terminals reference
-**Integration Strategy**: Precise updates that enhance rather than disrupt ongoing work
+### 🔧 **Framework Proposal Approval Context**
+**Focus**: Framework enhancement priorities, core feature implementation, architecture evolution
+**Primary File Scope**: `/AxiomFramework/Proposals/`, `/AxiomFramework/Documentation/Implementation/`, development priorities in `ROADMAP.md`
+**Integration Strategy**: Framework development priorities, core capability enhancements, architecture improvements
+**Implementation Target**: Development branch framework implementation work
 
-**What Terminal 1 (APPROVE.md) Works On**:
-- ✅ **Proposal Validation**: Verify proposal format and completeness
-- ✅ **ROADMAP.md Integration**: Add approved proposals to roadmap priorities and sprint planning
-- ✅ **Framework Documentation**: Update AxiomFramework/Documentation/ based on proposal content
-- ✅ **Test App Documentation**: Update AxiomTestApp/Documentation/ based on proposal content
-- ✅ **Proposal Management**: Move approved proposals to appropriate directories
-- ✅ **Implementation Tracking**: Add proposal implementation tracking to development coordination
+### 🧪 **Integration Proposal Approval Context**
+**Focus**: Testing validation priorities, integration pattern implementation, real-world validation
+**Primary File Scope**: `/AxiomTestApp/Proposals/`, `/AxiomTestApp/Documentation/`, integration priorities in `ROADMAP.md`
+**Integration Strategy**: Testing validation priorities, integration patterns, developer experience improvements
+**Implementation Target**: Integration branch validation and testing work
 
-**What Terminal 1 (APPROVE.md) Avoids**:
+### 🎯 **Main Branch Coordination Context**
+**Focus**: Strategic coordination, documentation organization, cross-scope planning
+**Primary File Scope**: Both proposal scopes, `ROADMAP.md`, all documentation directories
+**Integration Strategy**: Strategic coordination priorities, documentation updates, cross-scope planning
+**Implementation Target**: Main branch coordination and strategic planning across both scopes
+
+**What Scope-Aware APPROVE.md Works On**:
+- ✅ **Proposal Validation**: Verify proposal format and completeness in both scopes
+- ✅ **Scope-Specific ROADMAP Integration**: Add proposals to appropriate scope priorities
+- ✅ **Context-Aware Documentation**: Update documentation based on proposal scope and content
+- ✅ **Proposal Management**: Move approved proposals with scope context tracking
+- ✅ **Implementation Tracking**: Add proposal implementation to appropriate scope coordination
+
+**Scope-Specific Integration Focus**:
+- **Framework Proposals**: Framework enhancement priorities, core implementation planning
+- **Integration Proposals**: Testing validation priorities, integration pattern planning
+- **Cross-Scope Coordination**: Strategic coordination, documentation organization
+
+**What Scope-Aware APPROVE.md Avoids**:
 - ❌ **Framework Code Changes**: No modifications to actual framework source code
-- ❌ **Test App Code Changes**: No modifications to actual test app source code
-- ❌ **Active Development Interference**: No disruption to Terminal 2 or Terminal 3 work
+- ❌ **Test App Code Changes**: No modifications to actual test app source code  
+- ❌ **Active Development Interference**: No disruption to active development work
 - ❌ **ROADMAP.md Sprint Status**: Only PLAN.md updates current sprint status
 
 **Integration Coordination Protocol**:
@@ -53,7 +80,7 @@
 ## 📋 Proposal Integration Workflow
 
 ### **Phase 1: Proposal Validation**
-1. **File Existence Check** → Verify proposal file exists in `/Proposals/Active/`
+1. **File Existence Check** → Verify proposal file exists in `/AxiomFramework/Proposals/Active/` or `/AxiomTestApp/Proposals/Active/`
 2. **Format Validation** → Ensure proposal follows standardized format
 3. **Completeness Assessment** → Verify all required sections are present
 4. **Integration Readiness** → Confirm proposal is ready for implementation coordination
@@ -83,7 +110,7 @@
 - **Examples Documentation** → Update examples based on proposed changes
 
 ### **Phase 4: Proposal Management**
-1. **Move to Approved** → Transfer proposal from `/Proposals/Active/` to `/Proposals/Approved/`
+1. **Move to Approved** → Transfer proposal from `/AxiomFramework/Proposals/Active/` or `/AxiomTestApp/Proposals/Active/` to respective Approved directory
 2. **Implementation Notes** → Create implementation tracking notes
 3. **Cross-Reference Updates** → Update proposal references in documentation
 4. **Archive Preparation** → Prepare proposal for future archival when implemented
@@ -134,11 +161,15 @@
 
 ### **Proposal File Operations**
 ```bash
-# Move approved proposal
-mv /Proposals/Active/YYYY-MM-DD-proposal-name.md /Proposals/Approved/
+# Move approved framework proposal
+mv /AxiomFramework/Proposals/Active/YYYY-MM-DD-proposal-name.md /AxiomFramework/Proposals/Approved/
+
+# Move approved integration proposal  
+mv /AxiomTestApp/Proposals/Active/YYYY-MM-DD-proposal-name.md /AxiomTestApp/Proposals/Approved/
 
 # Create implementation notes
-echo "# Implementation Notes for [Proposal Name]" > /Proposals/Approved/YYYY-MM-DD-proposal-name-implementation.md
+echo "# Implementation Notes for [Proposal Name]" > /AxiomFramework/Proposals/Approved/YYYY-MM-DD-proposal-name-implementation.md
+echo "# Implementation Notes for [Proposal Name]" > /AxiomTestApp/Proposals/Approved/YYYY-MM-DD-proposal-name-implementation.md
 ```
 
 ### **Documentation Update Patterns**
@@ -183,21 +214,29 @@ echo "# Implementation Notes for [Proposal Name]" > /Proposals/Approved/YYYY-MM-
 - **Documentation Errors**: Validate all documentation updates before applying
 - **Rollback Capability**: Able to reverse integration if issues discovered
 
-## 🤖 Automated Approval Process
+## 🤖 Automated Scope-Aware Approval Process
 
-**Trigger**: `@APPROVE <proposal-file>` (e.g., `@APPROVE 2025-01-01-macro-enhancement.md`)
+**Trigger Examples**:
+- `@APPROVE framework-proposal.md` → Approve framework enhancement proposal
+- `@APPROVE integration-proposal.md` → Approve integration improvement proposal
+- `@APPROVE proposal-name.md` → Auto-detect scope and approve accordingly
 
-**Integration Workflow**:
-1. **Validate Input** → Ensure proposal file parameter is provided
-2. **Check Proposal** → Verify proposal exists in `/Proposals/Active/`
-3. **Validate Format** → Ensure proposal follows standardized structure
-4. **Analyze Integration** → Determine what documentation and roadmap updates are needed
-5. **Update ROADMAP.md** → Add proposal to appropriate terminal priorities
-6. **Update Framework Docs** → Apply framework-related documentation changes
-7. **Update Test App Docs** → Apply test app-related documentation changes
-8. **Move Proposal** → Transfer to `/Proposals/Approved/` with implementation notes
-9. **Validate Integration** → Ensure all updates are consistent and complete
-10. **Report Success** → Summarize integration and next steps for implementation
+**Scope-Aware Integration Workflow**:
+1. **Auto-Detect Proposal Scope** → Determine if proposal is in framework or integration scope
+2. **Validate Input** → Ensure proposal file parameter is provided
+3. **Check Proposal** → Verify proposal exists in appropriate Active directory
+4. **Validate Format** → Ensure proposal follows standardized structure
+5. **Analyze Scope Context** → Determine scope-specific documentation and roadmap updates needed
+6. **Update Scope-Specific ROADMAP** → Add proposal to appropriate scope priorities
+7. **Update Context Documentation** → Apply scope-focused documentation changes
+8. **Move Proposal with Context** → Transfer to appropriate Approved directory with scope implementation notes
+9. **Validate Integration** → Ensure all updates are consistent and scope-appropriate
+10. **Report Scope Success** → Summarize integration and scope-specific next steps
+
+**Scope-Specific Integration Patterns**:
+- **Framework Proposals**: Framework implementation priorities, core feature development, architecture evolution
+- **Integration Proposals**: Testing validation priorities, integration pattern implementation, test app improvements
+- **Cross-Scope Coordination**: Strategic priorities, documentation organization, roadmap coordination
 
 ## 📊 Integration Success Metrics
 
@@ -221,10 +260,12 @@ echo "# Implementation Notes for [Proposal Name]" > /Proposals/Approved/YYYY-MM-
 
 ---
 
-**APPROVE STATUS**: Multi-terminal proposal integration system ready for strategic proposal implementation ✅  
-**INTEGRATION SCOPE**: ROADMAP.md, AxiomFramework/Documentation/, AxiomTestApp/Documentation/  
-**AUTOMATION READY**: Supports `@APPROVE <proposal-file>` for controlled proposal integration  
-**COORDINATION SAFE**: Integrates proposals without disrupting active Terminal 2 and Terminal 3 work  
-**DOCUMENTATION FOCUSED**: Updates documentation and roadmap while preserving source code integrity
+**APPROVE STATUS**: Scope-aware proposal integration system ready for dual-scope proposal implementation ✅  
+**INTEGRATION SCOPE**: ROADMAP.md, AxiomFramework/Documentation/, AxiomTestApp/Documentation/, both proposal directories  
+**AUTOMATION READY**: Supports `@APPROVE <proposal-file>` with automatic scope detection for controlled proposal integration  
+**SCOPE INTELLIGENCE**: Auto-detects proposal scope and adapts integration focus (framework/integration)  
+**COORDINATION SAFE**: Integrates proposals without disrupting active development work  
+**DOCUMENTATION FOCUSED**: Updates documentation and roadmap while preserving source code integrity  
+**DUAL-SCOPE SUPPORT**: Handles both framework enhancement and integration improvement proposals seamlessly
 
-**Use this system to carefully integrate strategic proposals into the active development ecosystem through precise documentation and roadmap updates.**
+**Use this system to carefully integrate strategic proposals into the active development ecosystem through precise scope-aware documentation and roadmap updates.**

@@ -2,7 +2,18 @@
 
 ## ⚡ Intelligent Branch-Aware Checkpoint Management
 
-This command provides intelligent checkpoint management that adapts to your current branch context:
+This command provides intelligent checkpoint management that adapts to your current branch context or explicit branch targeting:
+
+### 🎯 **Usage Modes**
+- **`@CHECKPOINT.md`** → Auto-detect current branch and execute appropriate workflow
+- **`@CHECKPOINT.md m`** → Force main branch checkpoint workflow (regardless of current branch)
+- **`@CHECKPOINT.md d`** → Force development branch checkpoint workflow (regardless of current branch)  
+- **`@CHECKPOINT.md i`** → Force integration branch checkpoint workflow (regardless of current branch)
+
+### 🧠 **Branch Flag Intelligence**
+**Auto-Detection Mode** (no flags): Detects current git branch and executes appropriate workflow
+**Forced Mode** (with flags): Executes specific branch workflow regardless of current branch context
+**Safety Override**: Forced mode useful for cross-branch operations and explicit workflow control
 
 ### 🛡️ Safety Features
 - **Safe Merge Operations**: Uses --no-ff for clean merge history
@@ -37,19 +48,50 @@ This command provides intelligent checkpoint management that adapts to your curr
 
 **Claude, execute this intelligent checkpoint process:**
 
-1. **Detect Current Branch & Execute Appropriate Workflow**
+1. **Parse Branch Flag & Execute Appropriate Workflow**
 
 ```bash
-# 1. Detect current branch
+# 1. Parse branch flag argument
+BRANCH_FLAG="$1"
 CURRENT_BRANCH=$(git branch --show-current)
-echo "🎯 Current branch: $CURRENT_BRANCH"
 
-# 2. Check git status and show what will be committed
+# 2. Determine target workflow based on flag or auto-detection
+if [ -n "$BRANCH_FLAG" ]; then
+    case "$BRANCH_FLAG" in
+        "m"|"main")
+            TARGET_WORKFLOW="main"
+            echo "🎯 Forced main branch checkpoint workflow"
+            ;;
+        "d"|"development")
+            TARGET_WORKFLOW="development"
+            echo "🎯 Forced development branch checkpoint workflow"
+            ;;
+        "i"|"integration")
+            TARGET_WORKFLOW="integration"
+            echo "🎯 Forced integration branch checkpoint workflow"
+            ;;
+        *)
+            echo "❌ Invalid branch flag: $BRANCH_FLAG"
+            echo "💡 Valid flags: m (main), d (development), i (integration)"
+            echo "📋 Or use @CHECKPOINT.md without flags for auto-detection"
+            exit 1
+            ;;
+    esac
+else
+    # Auto-detect mode
+    TARGET_WORKFLOW="$CURRENT_BRANCH"
+    echo "🤖 Auto-detected branch: $CURRENT_BRANCH"
+fi
+
+echo "🎯 Current branch: $CURRENT_BRANCH"
+echo "⚡ Target workflow: $TARGET_WORKFLOW"
+
+# 3. Check git status and show what will be committed
 echo "📋 Current changes:"
 git status --short
 
-# 3. Branch-specific checkpoint logic
-case "$CURRENT_BRANCH" in
+# 4. Execute workflow based on target (auto-detected or forced)
+case "$TARGET_WORKFLOW" in
   "development")
     echo "🔧 DEVELOPMENT BRANCH CHECKPOINT - MERGE & RESTART"
     
@@ -417,37 +459,57 @@ echo "🕐 Time: $(date)"
 
 ## 🎯 Usage Patterns
 
-### **Development Workflow**
+### **Auto-Detection Mode** (Recommended)
+```bash
+# From any branch - automatically adapts
+@CHECKPOINT.md  # Auto-detects current branch and executes appropriate workflow
+```
+
+### **Development Workflow** (Auto or Forced)
 ```bash
 # While working on framework features
-@CHECKPOINT.md  # Auto-detects development branch
-                # → Commits, merges to main, updates integration, creates fresh development
+@CHECKPOINT.md     # Auto-detects development branch
+@CHECKPOINT.md d   # Forces development workflow from any branch
+                   # → Commits, merges to main, updates integration, creates fresh development
 ```
 
-### **Integration Workflow**  
+### **Integration Workflow** (Auto or Forced)
 ```bash
-# After validation testing
-@CHECKPOINT.md  # Auto-detects integration branch
-                # → Commits results, merges to main, updates development, creates fresh integration
+# After validation testing  
+@CHECKPOINT.md     # Auto-detects integration branch
+@CHECKPOINT.md i   # Forces integration workflow from any branch
+                   # → Commits results, merges to main, updates development, creates fresh integration
 ```
 
-### **Main Branch Coordination**
+### **Main Branch Coordination** (Auto or Forced)
 ```bash
 # Strategic planning and coordination
-@CHECKPOINT.md  # Auto-detects main branch
-                # → Commits status, pushes to main, updates all branches with latest main
+@CHECKPOINT.md     # Auto-detects main branch
+@CHECKPOINT.md m   # Forces main workflow from any branch
+                   # → Commits status, pushes to main, updates all branches with latest main
+```
+
+### **Cross-Branch Operations** (Advanced)
+```bash
+# Force specific workflow regardless of current branch
+@CHECKPOINT.md d   # Execute development checkpoint from main/integration branch
+@CHECKPOINT.md i   # Execute integration checkpoint from main/development branch  
+@CHECKPOINT.md m   # Execute main checkpoint from development/integration branch
 ```
 
 ---
 
 ## ⚡ Intelligence Features
 
-- **🤖 Branch Auto-Detection**: Automatically adapts to current context
+- **🤖 Branch Auto-Detection**: Automatically adapts to current context (default mode)
+- **🎯 Forced Workflow Execution**: Execute specific branch workflows regardless of current branch
 - **📝 Intelligent Commit Messages**: Context-aware commit descriptions  
 - **🔄 Smart Merge & Restart**: Merges completed work to main and creates fresh branches
 - **🔄 Cross-Branch Synchronization**: All branches automatically synchronize with latest main changes
 - **🚨 Conflict Detection & Human Consultation**: Halts automation and provides guidance for conflicts
 - **🌱 Automated Branch Cycling**: Complete cycle automation for development and integration
 - **📊 Status Tracking**: Maintains project coordination across branches
+- **⚡ Flexible Operation Modes**: Both auto-detection and explicit branch targeting supported
+- **🛡️ Safety Validation**: Validates branch flags and provides clear error messages for invalid usage
 
-**Perfect for the Axiom development workflow with seamless human-AI collaboration!**
+**Perfect for the Axiom development workflow with seamless human-AI collaboration and flexible branch management!**

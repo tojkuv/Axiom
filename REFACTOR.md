@@ -26,16 +26,17 @@
 ## 🌿 Branch-Aware Refactoring Contexts
 
 ### **Main Branch Refactoring Context**
-**Primary Focus**: Stable version tracking, proposal exploration, and documentation organization
-**File Scope**: `/Proposals/`, `/AxiomTestApp/Documentation/`, `/AxiomFramework/Documentation/`
-**Purpose**: Documentation organization, proposal management, and roadmap maintenance
+**Primary Focus**: Stable version tracking, dual-scope proposal organization, and documentation management
+**File Scope**: `/AxiomFramework/Proposals/`, `/AxiomTestApp/Proposals/`, `/AxiomTestApp/Documentation/`, `/AxiomFramework/Documentation/`
+**Purpose**: Dual-scope proposal management, documentation organization, and roadmap maintenance
 
 **What Main Branch REFACTOR Works On**:
-- ✅ **Proposal Organization**: Structure and organize `/Proposals/` directory
+- ✅ **Framework Proposal Organization**: Structure and organize `/AxiomFramework/Proposals/` directory
+- ✅ **Integration Proposal Organization**: Structure and organize `/AxiomTestApp/Proposals/` directory
 - ✅ **Framework Documentation**: Organize `/AxiomFramework/Documentation/` structure
 - ✅ **Test App Documentation**: Organize `/AxiomTestApp/Documentation/` structure
 - ✅ **Documentation Cross-References**: Maintain links and navigation between docs
-- ✅ **Archive Management**: Organize completed work into archives
+- ✅ **Archive Management**: Organize completed work into archives across both scopes
 - ✅ **ROADMAP.md Updates**: Coordinate roadmap organization and status updates
 
 **What Main Branch REFACTOR Avoids**:
@@ -45,9 +46,9 @@
 - ❌ **Active Development Work**: No interference with ongoing development/integration
 
 ### **Development Branch Refactoring Context**
-**Primary Focus**: Framework code organization and structural improvements
-**File Scope**: `/AxiomFramework/Sources/`, `/AxiomFramework/Tests/`, framework-related files
-**Purpose**: Framework code quality, structure, and maintainability improvements
+**Primary Focus**: Framework code organization, structural improvements, and framework proposal management
+**File Scope**: `/AxiomFramework/Sources/`, `/AxiomFramework/Tests/`, `/AxiomFramework/Proposals/`, framework-related files
+**Purpose**: Framework code quality, structure, maintainability improvements, and framework proposal organization
 
 **What Development Branch REFACTOR Works On**:
 - ✅ **Framework Code Organization**: Improve structure in `/AxiomFramework/Sources/`
@@ -58,6 +59,7 @@
 - ✅ **Framework Test Organization**: Improve test structure in `/AxiomFramework/Tests/`
 - ✅ **Code Quality**: Remove duplication, improve naming, enhance maintainability
 - ✅ **Type Safety**: Enhance type safety and generic usage patterns
+- ✅ **Framework Proposal Organization**: Structure and organize `/AxiomFramework/Proposals/` directory
 
 **What Development Branch REFACTOR Avoids**:
 - ❌ **Test App Code**: No changes to `/AxiomTestApp/ExampleApp/` (integration branch scope)
@@ -66,9 +68,9 @@
 - ❌ **Breaking API Changes**: Maintain compatibility while improving structure
 
 ### **Integration Branch Refactoring Context**
-**Primary Focus**: AxiomTestApp organization, structure optimization, and production-ready app code
-**File Scope**: `/AxiomTestApp/ExampleApp/`, `/AxiomTestApp/Scripts/`, project organization
-**Purpose**: Clean, maintainable test app with standardized naming and optimal file organization
+**Primary Focus**: AxiomTestApp organization, structure optimization, production-ready app code, and integration proposal management
+**File Scope**: `/AxiomTestApp/ExampleApp/`, `/AxiomTestApp/Scripts/`, `/AxiomTestApp/Proposals/`, project organization
+**Purpose**: Clean, maintainable test app with standardized naming, optimal file organization, and integration proposal management
 
 **What Integration Branch REFACTOR Works On**:
 - ✅ **Script Organization**: Create `/AxiomTestApp/Scripts/` and consolidate Python utilities
@@ -81,6 +83,7 @@
 - ✅ **View Architecture**: Optimize SwiftUI view hierarchy and composition patterns
 - ✅ **Domain Organization**: Standardize domain structure (Client, Context, State, View patterns)
 - ✅ **Example vs Production**: Clear distinction between example/demo code and production patterns
+- ✅ **Integration Proposal Organization**: Structure and organize `/AxiomTestApp/Proposals/` directory
 
 **What Integration Branch REFACTOR Avoids**:
 - ❌ **Framework Source Code**: No changes to `/AxiomFramework/Sources/` (development branch scope)
@@ -92,12 +95,13 @@
 
 ### **Main Branch Refactoring Operations**
 
-#### **Proposal Management (`/Proposals/`)**
-- **Proposal Organization**: Structure active, approved, and archived proposals
-- **Template Maintenance**: Update and organize proposal templates
-- **Cross-Reference Updates**: Maintain links between proposals and implementation
-- **Archive Cleanup**: Organize completed and deprecated proposals
-- **Analysis File Updates**: Maintain supporting analysis and benchmark data
+#### **Dual-Scope Proposal Management (`/AxiomFramework/Proposals/`, `/AxiomTestApp/Proposals/`)**
+- **Framework Proposal Organization**: Structure active, approved, and archived framework proposals
+- **Integration Proposal Organization**: Structure active, approved, and archived integration proposals
+- **Template Maintenance**: Update and organize proposal templates in both scopes
+- **Cross-Reference Updates**: Maintain links between proposals and implementation across both scopes
+- **Archive Cleanup**: Organize completed and deprecated proposals in both framework and integration scopes
+- **Analysis File Updates**: Maintain supporting analysis and benchmark data for both proposal types
 
 #### **Documentation Organization (`/AxiomFramework/Documentation/`, `/AxiomTestApp/Documentation/`)**
 - **Structure Optimization**: Improve documentation navigation and organization
@@ -134,6 +138,12 @@
 - **Error Handling**: Standardize error patterns and propagation
 - **Concurrency Patterns**: Improve async/await usage and Task coordination
 - **Type Safety**: Enhance type safety through better design
+
+#### **Framework Proposal Management (`/AxiomFramework/Proposals/`)**
+- **Framework Proposal Organization**: Structure active, approved, and archived framework proposals
+- **Framework Template Maintenance**: Update framework-specific proposal templates
+- **Implementation Cross-References**: Maintain links between framework proposals and code implementation
+- **Framework Archive Cleanup**: Organize completed framework proposals
 
 ### **Integration Branch Refactoring Operations**
 
@@ -177,6 +187,12 @@
 - **Build Configuration**: Clean build settings and remove unused configurations
 - **Dependency Management**: Optimize framework dependency resolution
 
+#### **Integration Proposal Management (`/AxiomTestApp/Proposals/`)**
+- **Integration Proposal Organization**: Structure active, approved, and archived integration proposals
+- **Integration Template Maintenance**: Update integration-specific proposal templates
+- **Test App Cross-References**: Maintain links between integration proposals and test app implementation
+- **Integration Archive Cleanup**: Organize completed integration proposals
+
 ## 🎯 Branch-Specific Refactoring Priorities
 
 ### **Main Branch Priorities**
@@ -208,18 +224,18 @@
 ```bash
 # Main Branch Context
 if on main branch:
-    scope = ["/Proposals/", "/AxiomTestApp/Documentation/", "/AxiomFramework/Documentation/"]
-    focus = "Documentation organization and proposal management"
+    scope = ["/AxiomFramework/Proposals/", "/AxiomTestApp/Proposals/", "/AxiomTestApp/Documentation/", "/AxiomFramework/Documentation/"]
+    focus = "Dual-scope proposal management and documentation organization"
 
 # Development Branch Context  
 elif on development branch:
-    scope = ["/AxiomFramework/Sources/", "/AxiomFramework/Tests/"]
-    focus = "Framework code organization and quality improvements"
+    scope = ["/AxiomFramework/Sources/", "/AxiomFramework/Tests/", "/AxiomFramework/Proposals/"]
+    focus = "Framework code organization, quality improvements, and framework proposal management"
 
 # Integration Branch Context
 elif on integration branch:
-    scope = ["/AxiomTestApp/ExampleApp/"]
-    focus = "Test app code organization and integration optimization"
+    scope = ["/AxiomTestApp/ExampleApp/", "/AxiomTestApp/Proposals/"]
+    focus = "Test app code organization, integration optimization, and integration proposal management"
 ```
 
 ### **Branch-Specific Execution Process**
@@ -318,12 +334,12 @@ elif on integration branch:
 
 ---
 
-**REFACTOR STATUS**: Branch-aware refactoring system with context-specific scopes ✅  
-**MAIN SCOPE**: `/Proposals/`, `/AxiomTestApp/Documentation/`, `/AxiomFramework/Documentation/`  
-**DEVELOPMENT SCOPE**: `/AxiomFramework/Sources/`, `/AxiomFramework/Tests/`  
-**INTEGRATION SCOPE**: `/AxiomTestApp/ExampleApp/`, `/AxiomTestApp/Scripts/`, project organization  
-**AUTOMATION READY**: Supports `@REFACTOR . ultrathink` for branch-aware organization  
-**INTEGRATION FOCUS**: Script consolidation, naming standards, file cleanup, and structure optimization
+**REFACTOR STATUS**: Branch-aware refactoring system with context-specific scopes and proposal management ✅  
+**MAIN SCOPE**: `/AxiomFramework/Proposals/`, `/AxiomTestApp/Proposals/`, `/AxiomTestApp/Documentation/`, `/AxiomFramework/Documentation/`  
+**DEVELOPMENT SCOPE**: `/AxiomFramework/Sources/`, `/AxiomFramework/Tests/`, `/AxiomFramework/Proposals/`  
+**INTEGRATION SCOPE**: `/AxiomTestApp/ExampleApp/`, `/AxiomTestApp/Scripts/`, `/AxiomTestApp/Proposals/`, project organization  
+**AUTOMATION READY**: Supports `@REFACTOR . ultrathink` for branch-aware organization with proposal management  
+**PROPOSAL INTEGRATION**: Dual-scope proposal organization with branch-specific proposal management
 
 **Integration Branch Refactoring Priorities:**
 1. 🗂️ **Script Organization** - Create `/AxiomTestApp/Scripts/` and consolidate Python utilities
