@@ -12,8 +12,9 @@ This command provides intelligent checkpoint management that adapts to your curr
 
 ### 🧠 **Branch Flag Intelligence**
 **Auto-Detection Mode** (no flags): Detects current git branch and executes appropriate workflow
-**Forced Mode** (with flags): Executes specific branch workflow regardless of current branch context
+**Forced Mode** (with flags): Switches to target branch first, then executes branch-specific workflow
 **Safety Override**: Forced mode useful for cross-branch operations and explicit workflow control
+**Branch Switching**: Forced mode automatically switches to target branch to check for its changes
 **ROADMAP.md Updates**: Only handled on main branch - development/integration branches don't update ROADMAP.md
 
 ### 🛡️ Safety Features
@@ -25,12 +26,14 @@ This command provides intelligent checkpoint management that adapts to your curr
 ### 🔍 Branch Detection & Smart Actions
 
 **Development Branch (`development`):**
-- ✅ Commit all changes with intelligent commit message (framework work only, no ROADMAP.md)
+- 🔄 Switch to development branch (if using forced mode)
+- ✅ Commit development changes with intelligent commit message (framework work only, no ROADMAP.md)
 - 🔄 Merge completed work into `main`
 - 🧪 Update integration branch with latest main
 - 🌱 Create fresh `development` branch for next cycle
 
 **Integration Branch (`integration`):**  
+- 🔄 Switch to integration branch (if using forced mode)
 - ✅ Commit integration validation results (test app work only, no ROADMAP.md)
 - 🔄 Merge validated work into `main`
 - 🔧 Update development branch with latest main
@@ -88,22 +91,21 @@ echo "🎯 Current branch: $CURRENT_BRANCH"
 echo "⚡ Target workflow: $TARGET_WORKFLOW"
 
 # 3. Check git status and show what will be committed
-echo "📋 Current changes:"
+echo "📋 Current changes on $CURRENT_BRANCH:"
 git status --short
-
-# Early exit if no changes and target is development/integration
-if [ -z "$(git status --porcelain)" ] && [ "$TARGET_WORKFLOW" != "main" ]; then
-    echo "✅ No changes detected on $TARGET_WORKFLOW branch"
-    echo "🤖 Skipping checkpoint - no work to commit or merge"
-    exit 0
-fi
 
 # 4. Execute workflow based on target (auto-detected or forced)
 case "$TARGET_WORKFLOW" in
   "development")
     echo "🔧 DEVELOPMENT BRANCH CHECKPOINT - MERGE & RESTART"
     
-    # Check for uncommitted changes first
+    # Switch to development branch first to check for its changes
+    if [ "$CURRENT_BRANCH" != "development" ]; then
+        echo "🔄 Switching to development branch to check for changes..."
+        git checkout development
+    fi
+    
+    # Check for uncommitted changes on development branch
     if [ -n "$(git status --porcelain)" ]; then
         # Commit changes with intelligent message
         echo "✅ Committing development progress..."
@@ -118,7 +120,7 @@ case "$TARGET_WORKFLOW" in
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
     else
-        echo "✅ No uncommitted changes to commit"
+        echo "✅ No uncommitted changes to commit on development branch"
     fi
     
     # Fetch latest main
@@ -237,7 +239,13 @@ Co-Authored-By: Claude <noreply@anthropic.com>"; then
   "integration")
     echo "🧪 INTEGRATION BRANCH CHECKPOINT - MERGE & RESTART"
     
-    # Check for uncommitted changes first
+    # Switch to integration branch first to check for its changes
+    if [ "$CURRENT_BRANCH" != "integration" ]; then
+        echo "🔄 Switching to integration branch to check for changes..."
+        git checkout integration
+    fi
+    
+    # Check for uncommitted changes on integration branch
     if [ -n "$(git status --porcelain)" ]; then
         # Commit integration results
         echo "✅ Committing integration validation..."
@@ -253,7 +261,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"; then
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
     else
-        echo "✅ No uncommitted changes to commit"
+        echo "✅ No uncommitted changes to commit on integration branch"
     fi
     
     # Fetch latest main
@@ -539,9 +547,9 @@ echo "🕐 Time: $(date)"
 ### **Cross-Branch Operations** (Advanced)
 ```bash
 # Force specific workflow regardless of current branch
-@CHECKPOINT.md d   # Execute development checkpoint from main/integration branch
-@CHECKPOINT.md i   # Execute integration checkpoint from main/development branch  
-@CHECKPOINT.md m   # Execute main checkpoint from development/integration branch
+@CHECKPOINT.md d   # Switch to development, commit its changes, merge to main, restart cycle
+@CHECKPOINT.md i   # Switch to integration, commit its changes, merge to main, restart cycle  
+@CHECKPOINT.md m   # Execute main checkpoint (commits current branch as main work, syncs all)
 ```
 
 ---
