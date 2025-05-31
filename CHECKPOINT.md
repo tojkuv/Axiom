@@ -4,6 +4,11 @@
 
 This command provides intelligent checkpoint management that adapts to your current branch context:
 
+### 🛡️ Safety Features
+- **No Automatic Rebasing**: Prevents data loss from conflicts
+- **Uncommitted Change Detection**: Only commits when there are actual changes
+- **Safe Update Mode**: Fetches and reports status without dangerous operations
+- **User Control**: Provides manual options for updating branches
 ### 🔍 Branch Detection & Smart Actions
 
 **Development Branch (`development`):**
@@ -45,10 +50,12 @@ case "$CURRENT_BRANCH" in
   "development")
     echo "🔧 DEVELOPMENT BRANCH CHECKPOINT"
     
-    # Commit changes with intelligent message
-    echo "✅ Committing development progress..."
-    git add .
-    git commit -m "🔧 Development checkpoint: $(date '+%Y-%m-%d %H:%M')
+    # Check for uncommitted changes first
+    if [ -n "$(git status --porcelain)" ]; then
+        # Commit changes with intelligent message
+        echo "✅ Committing development progress..."
+        git add .
+        git commit -m "🔧 Development checkpoint: $(date '+%Y-%m-%d %H:%M')
 
     📦 Framework enhancements and feature development
     🎯 Preparing for integration validation
@@ -56,11 +63,24 @@ case "$CURRENT_BRANCH" in
     🤖 Generated with Claude Code
     
     Co-Authored-By: Claude <noreply@anthropic.com>"
+    else
+        echo "✅ No uncommitted changes to commit"
+    fi
     
-    # Update from main
-    echo "🔄 Updating from main..."
+    # Update from main (SAFE MODE)
+    echo "🔄 Fetching latest from main..."
     git fetch origin main
-    git rebase origin/main
+    
+    # Check if rebase is needed and safe
+    BEHIND_COUNT=$(git rev-list --count HEAD..origin/main)
+    if [ "$BEHIND_COUNT" -eq 0 ]; then
+        echo "✅ Development branch is up to date with main"
+    else
+        echo "⚠️  Development branch is $BEHIND_COUNT commits behind main"
+        echo "🛑 SAFETY: Skipping automatic rebase to prevent conflicts"
+        echo "💡 To update manually: git rebase origin/main"
+        echo "💡 Or merge instead: git merge origin/main"
+    fi
     
     # Push and create PR
     echo "🚀 Creating pull request..."
@@ -91,10 +111,12 @@ EOF
   "integration")
     echo "🧪 INTEGRATION BRANCH CHECKPOINT"
     
-    # Commit integration results
-    echo "✅ Committing integration validation..."
-    git add .
-    git commit -m "🧪 Integration checkpoint: $(date '+%Y-%m-%d %H:%M')
+    # Check for uncommitted changes first
+    if [ -n "$(git status --porcelain)" ]; then
+        # Commit integration results
+        echo "✅ Committing integration validation..."
+        git add .
+        git commit -m "🧪 Integration checkpoint: $(date '+%Y-%m-%d %H:%M')
 
     ✅ Real-world validation completed
     📊 Performance metrics captured
@@ -103,11 +125,24 @@ EOF
     🤖 Generated with Claude Code
     
     Co-Authored-By: Claude <noreply@anthropic.com>"
+    else
+        echo "✅ No uncommitted changes to commit"
+    fi
     
-    # Update from main
-    echo "🔄 Updating from main..."
+    # Update from main (SAFE MODE)
+    echo "🔄 Fetching latest from main..."
     git fetch origin main
-    git rebase origin/main
+    
+    # Check if rebase is needed and safe
+    BEHIND_COUNT=$(git rev-list --count HEAD..origin/main)
+    if [ "$BEHIND_COUNT" -eq 0 ]; then
+        echo "✅ Integration branch is up to date with main"
+    else
+        echo "⚠️  Integration branch is $BEHIND_COUNT commits behind main"
+        echo "🛑 SAFETY: Skipping automatic rebase to prevent conflicts"
+        echo "💡 To update manually: git rebase origin/main"
+        echo "💡 Or merge instead: git merge origin/main"
+    fi
     
     # Push and create PR
     echo "🚀 Creating pull request..."
