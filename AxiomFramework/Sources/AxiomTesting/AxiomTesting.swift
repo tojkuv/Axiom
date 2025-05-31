@@ -70,16 +70,224 @@ public actor MockCapabilityManager {
     }
 }
 
-/// Mock performance monitor for testing
-public actor MockPerformanceMonitor {
+/// Mock performance monitor for testing that implements full PerformanceMonitoring protocol
+public actor MockPerformanceMonitor: PerformanceMonitoring {
+    // MARK: - Internal Storage
+    
+    /// Active operations being tracked
+    private var activeOperations: [UUID: MockActiveOperation] = [:]
+    
+    /// Completed operations organized by category
+    private var categoryMetrics: [PerformanceCategory: MockCategoryMetrics] = [:]
+    
+    /// Performance alerts generated during testing
+    private var alerts: [PerformanceAlert] = []
+    
+    /// Performance configuration for testing
+    private let configuration: PerformanceConfiguration
+    
+    /// Maximum samples per category for memory management
+    private let maxSamplesPerCategory: Int
+    
+    /// Performance thresholds for testing
+    private let thresholds: PerformanceThresholds
+    
+    /// Test-specific operation tracking
     public private(set) var operationCount: Int = 0
     public private(set) var operationNames: [String] = []
     
-    public init() {}
+    // MARK: - Initialization
     
-    public func recordOperation(_ name: String) async {
+    public init(
+        configuration: PerformanceConfiguration = PerformanceConfiguration(),
+        maxSamplesPerCategory: Int = 1000
+    ) {
+        self.configuration = configuration
+        self.maxSamplesPerCategory = maxSamplesPerCategory
+        self.thresholds = PerformanceThresholds()
+        
+        // Initialize metrics for all categories
+        for category in PerformanceCategory.allCases {
+            categoryMetrics[category] = MockCategoryMetrics()
+        }
+    }
+    
+    // MARK: - PerformanceMonitoring Protocol Implementation
+    
+    public func startOperation(_ name: String, category: PerformanceCategory) -> PerformanceToken {
+        let token = PerformanceToken(
+            id: UUID(),
+            operationName: name,
+            category: category,
+            startTime: CFAbsoluteTimeGetCurrent()
+        )
+        
+        let activeOp = MockActiveOperation(
+            token: token,
+            startTime: CFAbsoluteTimeGetCurrent(),
+            metadata: [:]
+        )
+        
+        activeOperations[token.id] = activeOp
+        
+        // Update legacy tracking
         operationCount += 1
         operationNames.append(name)
+        
+        return token
+    }
+    
+    public func endOperation(_ token: PerformanceToken) async {
+        await endOperation(token, metadata: [:])
+    }
+    
+    public func endOperation(_ token: PerformanceToken, metadata: [String: Any]) async {
+        guard let activeOp = activeOperations.removeValue(forKey: token.id) else {
+            return
+        }
+        
+        let endTime = CFAbsoluteTimeGetCurrent()
+        let duration = endTime - activeOp.startTime
+        
+        let completedOp = MockCompletedOperation(
+            name: token.operationName,
+            category: token.category,
+            duration: duration,
+            startTime: activeOp.startTime,
+            endTime: endTime,
+            metadata: metadata
+        )
+        
+        // Add to category metrics
+        await addCompletedOperation(completedOp)
+        
+        // Check performance thresholds and generate alerts if needed
+        await checkPerformanceThresholds(completedOp)
+    }
+    
+    public func recordMetric(_ metric: PerformanceMetric) async {
+        let completedOp = MockCompletedOperation(
+            name: metric.name,
+            category: metric.category,
+            duration: 0.0,
+            startTime: metric.timestamp.timeIntervalSinceReferenceDate,
+            endTime: metric.timestamp.timeIntervalSinceReferenceDate,
+            metadata: [
+                "value": metric.value,
+                "unit": metric.unit.rawValue,
+                "type": "custom_metric"
+            ]
+        )
+        
+        await addCompletedOperation(completedOp)
+    }
+    
+    public func getMetrics(for category: PerformanceCategory) async -> PerformanceCategoryMetrics {
+        guard let categoryData = categoryMetrics[category] else {
+            return PerformanceCategoryMetrics(
+                category: category,
+                totalOperations: 0,
+                averageDuration: 0,
+                minDuration: 0,
+                maxDuration: 0,
+                percentile95: 0,
+                percentile99: 0,
+                operationsPerSecond: 0,
+                recentSamples: []
+            )
+        }
+        
+        let samples = categoryData.samples
+        guard !samples.isEmpty else {
+            return PerformanceCategoryMetrics(
+                category: category,
+                totalOperations: 0,
+                averageDuration: 0,
+                minDuration: 0,
+                maxDuration: 0,
+                percentile95: 0,
+                percentile99: 0,
+                operationsPerSecond: 0,
+                recentSamples: []
+            )
+        }
+        
+        let durations = samples.map { $0.duration }.sorted()
+        let totalOps = samples.count
+        let avgDuration = durations.reduce(0, +) / Double(totalOps)
+        let minDuration = durations.first ?? 0
+        let maxDuration = durations.last ?? 0
+        
+        let p95Index = Int(Double(totalOps) * 0.95)
+        let p99Index = Int(Double(totalOps) * 0.99)
+        let percentile95 = p95Index < totalOps ? durations[p95Index] : maxDuration
+        let percentile99 = p99Index < totalOps ? durations[p99Index] : maxDuration
+        
+        // Calculate operations per second over last minute
+        let oneMinuteAgo = CFAbsoluteTimeGetCurrent() - 60
+        let recentOps = samples.filter { $0.endTime >= oneMinuteAgo }
+        let opsPerSecond = Double(recentOps.count) / 60.0
+        
+        return PerformanceCategoryMetrics(
+            category: category,
+            totalOperations: totalOps,
+            averageDuration: avgDuration,
+            minDuration: minDuration,
+            maxDuration: maxDuration,
+            percentile95: percentile95,
+            percentile99: percentile99,
+            operationsPerSecond: opsPerSecond,
+            recentSamples: Array(samples.suffix(100)).map { OperationSample(from: $0) }
+        )
+    }
+    
+    public func getOverallMetrics() async -> OverallPerformanceMetrics {
+        var categoryMetricsDict: [PerformanceCategory: PerformanceCategoryMetrics] = [:]
+        
+        for category in PerformanceCategory.allCases {
+            categoryMetricsDict[category] = await getMetrics(for: category)
+        }
+        
+        let totalOperations = categoryMetricsDict.values.reduce(0) { $0 + $1.totalOperations }
+        let totalActiveOperations = activeOperations.count
+        
+        let memoryUsage = estimateMemoryUsage()
+        let healthScore = calculateHealthScore(categoryMetrics: categoryMetricsDict)
+        
+        return OverallPerformanceMetrics(
+            categoryMetrics: categoryMetricsDict,
+            totalOperations: totalOperations,
+            activeOperations: totalActiveOperations,
+            memoryUsage: memoryUsage,
+            healthScore: healthScore,
+            alertCount: alerts.count,
+            uptime: 0.0
+        )
+    }
+    
+    public func getPerformanceAlerts() async -> [PerformanceAlert] {
+        return Array(alerts.suffix(100))
+    }
+    
+    public func clearMetrics() async {
+        categoryMetrics.removeAll()
+        alerts.removeAll()
+        activeOperations.removeAll()
+        operationCount = 0
+        operationNames.removeAll()
+        
+        // Reinitialize metrics for all categories
+        for category in PerformanceCategory.allCases {
+            categoryMetrics[category] = MockCategoryMetrics()
+        }
+    }
+    
+    // MARK: - Legacy Testing Methods
+    
+    public func recordOperation(_ name: String) async {
+        let token = startOperation(name, category: .businessLogic)
+        try? await Task.sleep(nanoseconds: 1_000_000) // 1ms simulation
+        await endOperation(token)
     }
     
     public func getOperationCount() async -> Int {
@@ -91,8 +299,133 @@ public actor MockPerformanceMonitor {
     }
     
     public func reset() async {
-        operationCount = 0
-        operationNames.removeAll()
+        await clearMetrics()
+    }
+    
+    // MARK: - Testing-Specific Methods
+    
+    /// Simulates a slow operation for testing performance alerts
+    public func simulateSlowOperation(
+        _ name: String, 
+        category: PerformanceCategory, 
+        duration: TimeInterval
+    ) async {
+        let token = startOperation(name, category: category)
+        
+        // Simulate the operation duration
+        let nanoseconds = UInt64(duration * 1_000_000_000)
+        try? await Task.sleep(nanoseconds: nanoseconds)
+        
+        await endOperation(token, metadata: ["simulated": true])
+    }
+    
+    /// Simulates high-frequency operations for throughput testing
+    public func simulateHighFrequencyOperations(
+        _ name: String,
+        category: PerformanceCategory,
+        count: Int,
+        avgDuration: TimeInterval = 0.001
+    ) async {
+        for i in 0..<count {
+            let token = startOperation("\(name)-\(i)", category: category)
+            
+            // Add some variation to duration
+            let variation = Double.random(in: 0.5...1.5)
+            let duration = avgDuration * variation
+            let nanoseconds = UInt64(duration * 1_000_000_000)
+            try? await Task.sleep(nanoseconds: nanoseconds)
+            
+            await endOperation(token)
+        }
+    }
+    
+    /// Adds a test alert manually
+    public func addTestAlert(_ alert: PerformanceAlert) async {
+        alerts.append(alert)
+    }
+    
+    /// Gets specific metrics for testing validation
+    public func getTestMetrics() async -> MockTestMetrics {
+        return MockTestMetrics(
+            totalOperations: operationCount,
+            activeOperationsCount: activeOperations.count,
+            alertsCount: alerts.count,
+            categoriesWithData: categoryMetrics.compactMap { (category, metrics) in
+                metrics.samples.isEmpty ? nil : category
+            }
+        )
+    }
+    
+    // MARK: - Private Helper Methods
+    
+    private func addCompletedOperation(_ operation: MockCompletedOperation) async {
+        guard var categoryData = categoryMetrics[operation.category] else { return }
+        
+        categoryData.samples.append(operation)
+        
+        // Enforce sample limit
+        if categoryData.samples.count > maxSamplesPerCategory {
+            let excess = categoryData.samples.count - maxSamplesPerCategory
+            categoryData.samples.removeFirst(excess)
+        }
+        
+        categoryMetrics[operation.category] = categoryData
+    }
+    
+    private func checkPerformanceThresholds(_ operation: MockCompletedOperation) async {
+        let threshold = thresholds.threshold(for: operation.category)
+        
+        // Check duration threshold
+        if operation.duration > threshold.maxDuration {
+            let alert = PerformanceAlert(
+                type: .slowOperation,
+                category: operation.category,
+                operationName: operation.name,
+                threshold: threshold.maxDuration,
+                actualValue: operation.duration,
+                timestamp: Date(),
+                message: "Test operation '\(operation.name)' exceeded duration threshold: \(operation.duration)s > \(threshold.maxDuration)s"
+            )
+            
+            alerts.append(alert)
+        }
+    }
+    
+    private func estimateMemoryUsage() -> MemoryUsage {
+        let activeOpsMemory = activeOperations.count * MemoryLayout<MockActiveOperation>.size
+        let metricsMemory = categoryMetrics.values.reduce(0) { total, categoryData in
+            total + (categoryData.samples.count * MemoryLayout<MockCompletedOperation>.size)
+        }
+        let alertsMemory = alerts.count * MemoryLayout<PerformanceAlert>.size
+        
+        return MemoryUsage(
+            activeOperations: activeOpsMemory,
+            historicalMetrics: metricsMemory,
+            alerts: alertsMemory,
+            totalBytes: activeOpsMemory + metricsMemory + alertsMemory
+        )
+    }
+    
+    private func calculateHealthScore(categoryMetrics: [PerformanceCategory: PerformanceCategoryMetrics]) -> Double {
+        guard !categoryMetrics.isEmpty else { return 1.0 }
+        
+        let scores = categoryMetrics.compactMap { (category, metrics) -> Double? in
+            guard metrics.totalOperations > 0 else { return nil }
+            
+            let threshold = thresholds.threshold(for: category)
+            
+            // Score based on P95 performance vs threshold
+            let p95Score = min(1.0, threshold.p95Threshold / max(metrics.percentile95, 0.001))
+            
+            // Score based on operations per second vs expected throughput
+            let throughputScore = min(1.0, metrics.operationsPerSecond / max(threshold.expectedThroughput, 0.001))
+            
+            // Combined score (weighted average)
+            return (p95Score * 0.7) + (throughputScore * 0.3)
+        }
+        
+        guard !scores.isEmpty else { return 1.0 }
+        return scores.reduce(0, +) / Double(scores.count)
     }
 }
 
@@ -428,6 +761,385 @@ public actor TestAnalyticsClient: InfrastructureClient {
             state["configuration"] = configuration.settings
         }
     }
+}
+
+// MARK: - Mock Performance Testing Support Types
+
+/// Mock active operation for testing
+private struct MockActiveOperation {
+    let token: PerformanceToken
+    let startTime: TimeInterval
+    let metadata: [String: Any]
+}
+
+/// Mock completed operation for testing
+private struct MockCompletedOperation {
+    let name: String
+    let category: PerformanceCategory
+    let duration: TimeInterval
+    let startTime: TimeInterval
+    let endTime: TimeInterval
+    let metadata: [String: Any]
+}
+
+/// Mock category metrics storage
+private struct MockCategoryMetrics {
+    var samples: [MockCompletedOperation] = []
+}
+
+/// Test metrics summary
+public struct MockTestMetrics {
+    public let totalOperations: Int
+    public let activeOperationsCount: Int
+    public let alertsCount: Int
+    public let categoriesWithData: [PerformanceCategory]
+}
+
+/// Extension to create OperationSample from MockCompletedOperation
+fileprivate extension OperationSample {
+    init(from operation: MockCompletedOperation) {
+        self.name = operation.name
+        self.duration = operation.duration
+        self.timestamp = Date(timeIntervalSinceReferenceDate: operation.endTime)
+    }
+}
+
+// MARK: - Performance Benchmark Testing Infrastructure
+
+/// Performance benchmark test suite for comprehensive testing
+public struct PerformanceBenchmarkSuite {
+    public let name: String
+    public let benchmarks: [PerformanceBenchmark]
+    public let configuration: BenchmarkConfiguration
+    
+    public init(name: String, benchmarks: [PerformanceBenchmark], configuration: BenchmarkConfiguration = BenchmarkConfiguration()) {
+        self.name = name
+        self.benchmarks = benchmarks
+        self.configuration = configuration
+    }
+    
+    /// Runs all benchmarks in the suite
+    public func runBenchmarks(monitor: MockPerformanceMonitor) async -> BenchmarkSuiteResults {
+        var results: [BenchmarkResult] = []
+        
+        for benchmark in benchmarks {
+            let result = await benchmark.run(monitor: monitor, configuration: configuration)
+            results.append(result)
+        }
+        
+        return BenchmarkSuiteResults(
+            suiteName: name,
+            results: results,
+            overallScore: calculateOverallScore(results),
+            executedAt: Date()
+        )
+    }
+    
+    private func calculateOverallScore(_ results: [BenchmarkResult]) -> Double {
+        guard !results.isEmpty else { return 0.0 }
+        return results.map { $0.score }.reduce(0, +) / Double(results.count)
+    }
+}
+
+/// Individual performance benchmark
+public struct PerformanceBenchmark {
+    public let name: String
+    public let category: PerformanceCategory
+    public let targetLatency: TimeInterval
+    public let targetThroughput: Double
+    public let operation: (MockPerformanceMonitor) async throws -> Void
+    
+    public init(
+        name: String,
+        category: PerformanceCategory,
+        targetLatency: TimeInterval,
+        targetThroughput: Double,
+        operation: @escaping (MockPerformanceMonitor) async throws -> Void
+    ) {
+        self.name = name
+        self.category = category
+        self.targetLatency = targetLatency
+        self.targetThroughput = targetThroughput
+        self.operation = operation
+    }
+    
+    /// Runs the benchmark and returns results
+    public func run(monitor: MockPerformanceMonitor, configuration: BenchmarkConfiguration) async -> BenchmarkResult {
+        let startTime = Date()
+        
+        do {
+            // Run the benchmark operation
+            try await operation(monitor)
+            
+            // Get metrics for this benchmark's category
+            let metrics = await monitor.getMetrics(for: category)
+            
+            // Calculate score based on how well we met targets
+            let latencyScore = targetLatency > 0 ? min(1.0, targetLatency / max(metrics.averageDuration, 0.001)) : 1.0
+            let throughputScore = targetThroughput > 0 ? min(1.0, metrics.operationsPerSecond / targetThroughput) : 1.0
+            let score = (latencyScore + throughputScore) / 2.0
+            
+            return BenchmarkResult(
+                benchmarkName: name,
+                category: category,
+                success: true,
+                score: score,
+                metrics: metrics,
+                duration: Date().timeIntervalSince(startTime),
+                error: nil
+            )
+        } catch {
+            return BenchmarkResult(
+                benchmarkName: name,
+                category: category,
+                success: false,
+                score: 0.0,
+                metrics: await monitor.getMetrics(for: category),
+                duration: Date().timeIntervalSince(startTime),
+                error: error
+            )
+        }
+    }
+}
+
+/// Configuration for benchmark execution
+public struct BenchmarkConfiguration {
+    public let iterations: Int
+    public let warmupIterations: Int
+    public let timeout: TimeInterval
+    public let allowFailures: Bool
+    
+    public init(
+        iterations: Int = 100,
+        warmupIterations: Int = 10,
+        timeout: TimeInterval = 30.0,
+        allowFailures: Bool = false
+    ) {
+        self.iterations = iterations
+        self.warmupIterations = warmupIterations
+        self.timeout = timeout
+        self.allowFailures = allowFailures
+    }
+}
+
+/// Result of a benchmark execution
+public struct BenchmarkResult {
+    public let benchmarkName: String
+    public let category: PerformanceCategory
+    public let success: Bool
+    public let score: Double // 0.0 to 1.0
+    public let metrics: PerformanceCategoryMetrics
+    public let duration: TimeInterval
+    public let error: Error?
+    
+    public init(
+        benchmarkName: String,
+        category: PerformanceCategory,
+        success: Bool,
+        score: Double,
+        metrics: PerformanceCategoryMetrics,
+        duration: TimeInterval,
+        error: Error?
+    ) {
+        self.benchmarkName = benchmarkName
+        self.category = category
+        self.success = success
+        self.score = score
+        self.metrics = metrics
+        self.duration = duration
+        self.error = error
+    }
+}
+
+/// Results of a complete benchmark suite execution
+public struct BenchmarkSuiteResults {
+    public let suiteName: String
+    public let results: [BenchmarkResult]
+    public let overallScore: Double
+    public let executedAt: Date
+    
+    public var successfulBenchmarks: [BenchmarkResult] {
+        results.filter { $0.success }
+    }
+    
+    public var failedBenchmarks: [BenchmarkResult] {
+        results.filter { !$0.success }
+    }
+    
+    public var successRate: Double {
+        guard !results.isEmpty else { return 0.0 }
+        return Double(successfulBenchmarks.count) / Double(results.count)
+    }
+}
+
+// MARK: - Performance Analysis Tools
+
+/// Performance analysis and reporting tools
+public struct PerformanceAnalyzer {
+    
+    /// Analyzes performance metrics and provides insights
+    public static func analyzeMetrics(_ metrics: OverallPerformanceMetrics) -> PerformanceAnalysisReport {
+        var insights: [PerformanceInsight] = []
+        var recommendations: [String] = []
+        
+        // Analyze each category
+        for (category, categoryMetrics) in metrics.categoryMetrics {
+            if categoryMetrics.totalOperations > 0 {
+                // Check for performance issues
+                if categoryMetrics.percentile95 > 0.1 { // 100ms
+                    insights.append(PerformanceInsight(
+                        type: .latencyIssue,
+                        category: category,
+                        severity: .high,
+                        description: "High P95 latency detected",
+                        value: categoryMetrics.percentile95
+                    ))
+                    recommendations.append("Optimize \(category.rawValue) operations to reduce latency")
+                }
+                
+                if categoryMetrics.operationsPerSecond < 10 && categoryMetrics.totalOperations > 100 {
+                    insights.append(PerformanceInsight(
+                        type: .throughputIssue,
+                        category: category,
+                        severity: .medium,
+                        description: "Low throughput detected",
+                        value: categoryMetrics.operationsPerSecond
+                    ))
+                    recommendations.append("Consider optimizing \(category.rawValue) for higher throughput")
+                }
+            }
+        }
+        
+        // Check memory usage
+        if metrics.memoryUsage.totalBytes > 10 * 1024 * 1024 { // 10MB
+            insights.append(PerformanceInsight(
+                type: .memoryIssue,
+                category: .businessLogic,
+                severity: .medium,
+                description: "High memory usage detected",
+                value: Double(metrics.memoryUsage.totalBytes)
+            ))
+            recommendations.append("Consider implementing memory optimization strategies")
+        }
+        
+        // Calculate overall performance score
+        let score = metrics.healthScore
+        
+        return PerformanceAnalysisReport(
+            overallScore: score,
+            insights: insights,
+            recommendations: recommendations,
+            totalOperations: metrics.totalOperations,
+            averageLatency: calculateAverageLatency(metrics),
+            totalMemoryUsage: metrics.memoryUsage.totalBytes,
+            analyzedAt: Date()
+        )
+    }
+    
+    /// Compares two sets of performance metrics
+    public static func compareMetrics(
+        baseline: OverallPerformanceMetrics,
+        current: OverallPerformanceMetrics
+    ) -> PerformanceComparisonReport {
+        var categoryComparisons: [PerformanceCategoryComparison] = []
+        
+        for category in PerformanceCategory.allCases {
+            let baselineMetrics = baseline.categoryMetrics[category]
+            let currentMetrics = current.categoryMetrics[category]
+            
+            if let baseline = baselineMetrics, let current = currentMetrics {
+                let comparison = PerformanceCategoryComparison(
+                    category: category,
+                    latencyChange: calculatePercentageChange(
+                        from: baseline.averageDuration,
+                        to: current.averageDuration
+                    ),
+                    throughputChange: calculatePercentageChange(
+                        from: baseline.operationsPerSecond,
+                        to: current.operationsPerSecond
+                    ),
+                    p95Change: calculatePercentageChange(
+                        from: baseline.percentile95,
+                        to: current.percentile95
+                    )
+                )
+                categoryComparisons.append(comparison)
+            }
+        }
+        
+        return PerformanceComparisonReport(
+            categoryComparisons: categoryComparisons,
+            overallLatencyChange: calculatePercentageChange(
+                from: calculateAverageLatency(baseline),
+                to: calculateAverageLatency(current)
+            ),
+            memoryUsageChange: calculatePercentageChange(
+                from: Double(baseline.memoryUsage.totalBytes),
+                to: Double(current.memoryUsage.totalBytes)
+            ),
+            comparedAt: Date()
+        )
+    }
+    
+    private static func calculateAverageLatency(_ metrics: OverallPerformanceMetrics) -> Double {
+        let totalDuration = metrics.categoryMetrics.values.reduce(0.0) {
+            $0 + ($1.averageDuration * Double($1.totalOperations))
+        }
+        let totalOperations = metrics.categoryMetrics.values.reduce(0) { $0 + $1.totalOperations }
+        return totalOperations > 0 ? totalDuration / Double(totalOperations) : 0.0
+    }
+    
+    private static func calculatePercentageChange(from baseline: Double, to current: Double) -> Double {
+        guard baseline > 0 else { return current > 0 ? 100.0 : 0.0 }
+        return ((current - baseline) / baseline) * 100.0
+    }
+}
+
+/// Performance insight from analysis
+public struct PerformanceInsight {
+    public let type: InsightType
+    public let category: PerformanceCategory
+    public let severity: Severity
+    public let description: String
+    public let value: Double
+    
+    public enum InsightType {
+        case latencyIssue
+        case throughputIssue
+        case memoryIssue
+        case alertSpike
+    }
+    
+    public enum Severity {
+        case low, medium, high, critical
+    }
+}
+
+/// Comprehensive performance analysis report
+public struct PerformanceAnalysisReport {
+    public let overallScore: Double
+    public let insights: [PerformanceInsight]
+    public let recommendations: [String]
+    public let totalOperations: Int
+    public let averageLatency: Double
+    public let totalMemoryUsage: Int
+    public let analyzedAt: Date
+}
+
+/// Performance comparison between two measurement periods
+public struct PerformanceComparisonReport {
+    public let categoryComparisons: [PerformanceCategoryComparison]
+    public let overallLatencyChange: Double // Percentage change
+    public let memoryUsageChange: Double // Percentage change
+    public let comparedAt: Date
+}
+
+/// Comparison data for a specific performance category
+public struct PerformanceCategoryComparison {
+    public let category: PerformanceCategory
+    public let latencyChange: Double // Percentage change
+    public let throughputChange: Double // Percentage change
+    public let p95Change: Double // Percentage change
 }
 
 // MARK: - Testing Utilities
