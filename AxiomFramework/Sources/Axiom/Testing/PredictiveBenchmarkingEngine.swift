@@ -198,7 +198,7 @@ public actor PredictiveBenchmarkingEngine {
         for change in changes {
             let complexity = await calculateChangeComplexity(change)
             totalComplexityImpact += complexity.score
-            affectedComponents.insert(change.componentId)
+            affectedComponents.insert(change.file)
             
             if complexity.riskLevel.rawValue >= 3 { // High or Critical
                 riskFactors.append(ChangeRiskFactor(
@@ -224,14 +224,14 @@ public actor PredictiveBenchmarkingEngine {
         for change in changes {
             let similarChanges = performanceHistory.filter { dataPoint in
                 dataPoint.context.changeType == change.type &&
-                dataPoint.context.componentId == change.componentId
+                dataPoint.context.componentId == change.file
             }
             
             if !similarChanges.isEmpty {
                 let averageImpact = similarChanges.reduce(0.0) { $0 + $1.metrics.averageLatency } / Double(similarChanges.count)
                 impacts.append(HistoricalImpact(
                     changeType: change.type,
-                    componentId: change.componentId,
+                    componentId: change.file,
                     averagePerformanceImpact: averageImpact,
                     sampleSize: similarChanges.count
                 ))
@@ -756,6 +756,7 @@ public enum OptimizationType: String, CaseIterable, Sendable {
     case storageOptimization = "storage_optimization"
     case networkOptimization = "network_optimization"
     case energyOptimization = "energy_optimization"
+    case latencyOptimization = "latency_optimization"
 }
 
 public enum OptimizationPriority: Int, CaseIterable, Sendable {
@@ -771,6 +772,11 @@ public enum BottleneckType: String, CaseIterable, Sendable {
     case cpu = "cpu"
     case io = "io"
     case concurrency = "concurrency"
+    case storage = "storage"
+    case network = "network"
+    case energy = "energy"
+    case concurrencyBottleneck = "concurrencyBottleneck"
+    case memoryLeakSuspicion = "memoryLeakSuspicion"
 }
 
 public enum BottleneckSeverity: Int, CaseIterable, Sendable {
@@ -905,7 +911,7 @@ private actor RegressionPredictionModel {
 
 /// Performance optimization engine
 private actor PerformanceOptimizationEngine {
-    func prioritizeOptimizations(_ optimizations: [PerformanceOptimization]) async -> [PerformanceOptimization] {
+    func prioritizeOptimizations(_ optimizations: [PredictivePerformanceOptimization]) async -> [PredictivePerformanceOptimization] {
         return optimizations.sorted { $0.priority.rawValue > $1.priority.rawValue }
     }
 }
@@ -914,7 +920,7 @@ private actor PerformanceOptimizationEngine {
 private actor PerformanceForecastingModel {
     func generateForecast(
         timeline: TimeInterval,
-        trends: [PerformanceTrend],
+        trends: [PredictivePerformanceTrend],
         trajectory: PerformanceTrajectory,
         externalFactors: [ExternalFactor]
     ) async -> ForecastResult {

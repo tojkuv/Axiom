@@ -240,7 +240,7 @@ public actor DevicePerformanceProfiler {
     }
     
     /// Generates device-specific performance reports
-    public func generateDeviceReport(_ device: DeviceType) async -> DevicePerformanceReport {
+    public func generateDeviceReport(_ device: DeviceType) async throws -> DevicePerformanceReport {
         guard let profile = deviceProfiles[device] else {
             throw DeviceProfilingError.profileNotFound(device: device)
         }
@@ -295,13 +295,13 @@ public actor DevicePerformanceProfiler {
         var bottlenecks: [DeviceBottleneck] = []
         
         // Memory bottlenecks
-        if results.memoryMetrics.peakUsage > capabilities.memory.available * 0.8 {
+        if results.memoryMetrics.peakUsage > Int(Double(capabilities.memory.available) * 0.8) {
             bottlenecks.append(DeviceBottleneck(
                 type: .memory,
                 severity: .high,
                 description: "Memory usage approaching device limits",
-                currentValue: results.memoryMetrics.peakUsage,
-                threshold: capabilities.memory.available * 0.8,
+                currentValue: Double(results.memoryMetrics.peakUsage),
+                threshold: Double(capabilities.memory.available) * 0.8,
                 impact: .performanceDegradation,
                 recommendations: ["Implement memory pooling", "Optimize data structures"]
             ))
@@ -395,6 +395,56 @@ public actor DevicePerformanceProfiler {
                     priority: .high,
                     requirements: ["Energy monitoring", "Power management"]
                 ))
+            case .latency:
+                optimizations.append(DeviceSpecificOptimization(
+                    type: .latencyOptimization,
+                    device: device,
+                    description: "Latency optimization for \(device.rawValue)",
+                    implementation: await generateLatencyOptimizationImplementation(device, capabilities),
+                    estimatedImpact: 0.25,
+                    priority: .high,
+                    requirements: ["Response time monitoring", "Async optimization"]
+                ))
+            case .io:
+                optimizations.append(DeviceSpecificOptimization(
+                    type: .ioOptimization,
+                    device: device,
+                    description: "I/O optimization for \(device.rawValue)",
+                    implementation: await generateIOOptimizationImplementation(device, capabilities),
+                    estimatedImpact: 0.2,
+                    priority: .medium,
+                    requirements: ["I/O monitoring", "Buffer optimization"]
+                ))
+            case .concurrency:
+                optimizations.append(DeviceSpecificOptimization(
+                    type: .concurrencyOptimization,
+                    device: device,
+                    description: "Concurrency optimization for \(device.rawValue)",
+                    implementation: await generateConcurrencyOptimizationImplementation(device, capabilities),
+                    estimatedImpact: 0.3,
+                    priority: .medium,
+                    requirements: ["Thread profiling", "Actor optimization"]
+                ))
+            case .concurrencyBottleneck:
+                optimizations.append(DeviceSpecificOptimization(
+                    type: .concurrencyOptimization,
+                    device: device,
+                    description: "Concurrency bottleneck optimization for \(device.rawValue)",
+                    implementation: await generateConcurrencyOptimizationImplementation(device, capabilities),
+                    estimatedImpact: 0.3,
+                    priority: .high,
+                    requirements: ["Concurrency profiling", "Thread optimization"]
+                ))
+            case .memoryLeakSuspicion:
+                optimizations.append(DeviceSpecificOptimization(
+                    type: .memoryOptimization,
+                    device: device,
+                    description: "Memory leak prevention for \(device.rawValue)",
+                    implementation: await generateMemoryOptimizationImplementation(device, capabilities),
+                    estimatedImpact: 0.4,
+                    priority: .critical,
+                    requirements: ["Memory leak detection", "Lifecycle management"]
+                ))
             }
         }
         
@@ -471,6 +521,10 @@ public actor DevicePerformanceProfiler {
                 optimizationType = .ioOptimization
             case .concurrency:
                 optimizationType = .concurrencyOptimization
+            case .concurrencyBottleneck:
+                optimizationType = .concurrencyOptimization
+            case .memoryLeakSuspicion:
+                optimizationType = .memoryOptimization
             }
             
             optimizations.append(UniversalOptimization(
@@ -622,6 +676,9 @@ public actor DevicePerformanceProfiler {
     private func generateStorageOptimizationImplementation(_ device: DeviceType, _ capabilities: DeviceCapabilities) async -> String { return "Storage optimization implementation" }
     private func generateNetworkOptimizationImplementation(_ device: DeviceType, _ capabilities: DeviceCapabilities) async -> String { return "Network optimization implementation" }
     private func generateEnergyOptimizationImplementation(_ device: DeviceType, _ capabilities: DeviceCapabilities) async -> String { return "Energy optimization implementation" }
+    private func generateLatencyOptimizationImplementation(_ device: DeviceType, _ capabilities: DeviceCapabilities) async -> String { return "Latency optimization implementation" }
+    private func generateIOOptimizationImplementation(_ device: DeviceType, _ capabilities: DeviceCapabilities) async -> String { return "I/O optimization implementation" }
+    private func generateConcurrencyOptimizationImplementation(_ device: DeviceType, _ capabilities: DeviceCapabilities) async -> String { return "Concurrency optimization implementation" }
     private func optimizeMemoryConfiguration(_ device: DeviceType, _ profile: DevicePerformanceProfile) async -> MemorySettings { return MemorySettings() }
     private func optimizeCPUConfiguration(_ device: DeviceType, _ profile: DevicePerformanceProfile) async -> CPUSettings { return CPUSettings() }
     private func optimizeStorageConfiguration(_ device: DeviceType, _ profile: DevicePerformanceProfile) async -> StorageSettings { return StorageSettings() }

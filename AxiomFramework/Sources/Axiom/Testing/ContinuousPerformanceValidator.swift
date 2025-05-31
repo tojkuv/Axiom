@@ -97,7 +97,7 @@ public struct ContinuousPerformanceValidator: Sendable {
             let alert = ContinuousPerformanceAlert(
                 id: UUID().uuidString,
                 timestamp: Date(),
-                severity: regression.severity,
+                severity: regression.severity.alertSeverity,
                 metric: regression.metric,
                 currentValue: regression.currentValue,
                 baselineValue: regression.baselineValue,
@@ -111,7 +111,7 @@ public struct ContinuousPerformanceValidator: Sendable {
             alerts.append(alert)
             
             // Send immediate alert for critical regressions
-            if alert.severity == .critical {
+            if alert.severity == AlertSeverity.critical {
                 await alertSystem.sendCriticalAlert(alert)
             }
         }
@@ -181,7 +181,7 @@ public struct ContinuousPerformanceValidator: Sendable {
         
         // Validate data repository configuration
         let repositoryStatus = await dataRepository.validateConfiguration()
-        if !repositoryStatus.isValid {
+        if !repositoryStatus {
             issues.append(ConfigurationIssue(
                 severity: .warning,
                 component: "DataRepository",
@@ -192,7 +192,7 @@ public struct ContinuousPerformanceValidator: Sendable {
         
         // Validate alert system configuration
         let alertStatus = await alertSystem.validateConfiguration()
-        if !alertStatus.isValid {
+        if !alertStatus {
             issues.append(ConfigurationIssue(
                 severity: .warning,
                 component: "AlertSystem",
@@ -478,7 +478,7 @@ public struct ContinuousPerformanceValidator: Sendable {
         for optimization in optimizations.prefix(3) { // Top 3 optimizations
             actions.append(RecommendedAction(
                 type: .optimization,
-                priority: optimization.priority.actionPriority,
+                priority: optimization.priority,
                 description: optimization.description,
                 implementation: optimization.implementationSteps.joined(separator: "; "),
                 expectedImpact: optimization.estimatedImpact
@@ -562,6 +562,23 @@ public struct ContinuousPerformanceValidator: Sendable {
                     timeframe: .large,
                     riskLevel: .medium,
                     validationCriteria: ["Stable memory usage", "No memory growth over time"]
+                ))
+            default:
+                // Handle other bottleneck types with generic optimization
+                opportunities.append(ContinuousOptimizationOpportunity(
+                    type: .algorithmOptimization,
+                    priority: .medium,
+                    description: "General performance optimization for \(bottleneck.type.rawValue)",
+                    estimatedImpact: 0.2,
+                    implementationSteps: [
+                        "Analyze performance characteristics",
+                        "Implement targeted optimizations",
+                        "Monitor improvements"
+                    ],
+                    requirements: ["Performance monitoring", "Optimization tools"],
+                    timeframe: .medium,
+                    riskLevel: .low,
+                    validationCriteria: ["Improved performance metrics", "Reduced bottleneck impact"]
                 ))
             }
         }
@@ -919,6 +936,15 @@ public enum RegressionSeverity: Int, CaseIterable, Sendable {
         case .critical: return .critical
         }
     }
+    
+    var alertSeverity: AlertSeverity {
+        switch self {
+        case .minor: return .low
+        case .moderate: return .medium
+        case .major: return .high
+        case .critical: return .critical
+        }
+    }
 }
 
 public enum ContinuousStabilityLevel: String, CaseIterable, Sendable {
@@ -1021,8 +1047,8 @@ public struct PerformanceDataRepository: Sendable {
         // Record optimization actions for tracking
     }
     
-    public func validateConfiguration() async -> (isValid: Bool) {
-        return (isValid: true)
+    public func validateConfiguration() async -> Bool {
+        return true
     }
     
     public func initializeContinuousMonitoring(_ config: MonitoringConfiguration) async {
@@ -1069,8 +1095,8 @@ public struct PerformanceAlertSystem: Sendable {
         print("🚨 CRITICAL PERFORMANCE ALERT: \(alert.description)")
     }
     
-    public func validateConfiguration() async -> (isValid: Bool) {
-        return (isValid: true)
+    public func validateConfiguration() async -> Bool {
+        return true
     }
     
     public func initializeMonitoring(_ config: MonitoringConfiguration) async {

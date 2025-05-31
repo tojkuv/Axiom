@@ -48,6 +48,15 @@ public actor PatternDetectionEngine: PatternDetecting {
     /// Codified patterns repository
     private var codifiedPatterns: [PatternType: CodifiedPattern] = [:]
     
+    /// Cache TTL for pattern detection results
+    private let patternCacheTimeout: TimeInterval = 180 // 3 minutes
+    
+    /// Last cache update timestamp
+    private var lastCacheUpdate: Date = Date()
+    
+    /// Batch processing optimization
+    private var pendingPatternTypes: Set<PatternType> = []
+    
     /// Pattern detection configuration
     private let configuration: PatternDetectionConfiguration
     
@@ -89,18 +98,49 @@ public actor PatternDetectionEngine: PatternDetecting {
         let token = await performanceMonitor.startOperation("detect_patterns", category: .patternDetection)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
+        // Check if cache is still valid
+        if Date().timeIntervalSince(lastCacheUpdate) < patternCacheTimeout && !patternCache.isEmpty {
+            return patternCache.values.flatMap { $0 }
+        }
+        
         var allPatterns: [DetectedPattern] = []
         
-        // Detect patterns by type
-        for patternType in PatternType.allCases {
-            if configuration.enabledPatterns.contains(patternType) {
-                let patterns = await detectPatternsOfType(patternType)
-                allPatterns.append(contentsOf: patterns)
-                patternCache[patternType] = patterns
+        // Batch process enabled patterns
+        let enabledPatterns = Array(configuration.enabledPatterns)
+        let batchSize = 3 // Process 3 pattern types concurrently
+        
+        for batch in enabledPatterns.chunked(into: batchSize) {
+            await withTaskGroup(of: (PatternType, [DetectedPattern]).self) { group in
+                for patternType in batch {
+                    group.addTask {
+                        let patterns = await self.detectPatternsOfTypeCached(patternType)
+                        return (patternType, patterns)
+                    }
+                }
+                
+                for await (patternType, patterns) in group {
+                    patternCache[patternType] = patterns
+                    allPatterns.append(contentsOf: patterns)
+                }
             }
         }
         
+        // Update cache timestamp
+        lastCacheUpdate = Date()
+        
         return allPatterns
+    }
+    
+    /// Cached version of pattern detection for specific type
+    private func detectPatternsOfTypeCached(_ patternType: PatternType) async -> [DetectedPattern] {
+        // Check type-specific cache first
+        if let cached = patternCache[patternType],
+           Date().timeIntervalSince(lastCacheUpdate) < patternCacheTimeout {
+            return cached
+        }
+        
+        // Detect patterns if not cached
+        return await detectPatternsOfType(patternType)
     }
     
     public func analyzePattern(_ patternType: PatternType) async -> PatternAnalysis {
@@ -1621,5 +1661,17 @@ public actor GlobalPatternDetectionEngine {
         )
         self.engine = newEngine
         return newEngine
+    }
+}
+
+// MARK: - Array Extensions for Performance Optimization
+
+private extension Array {
+    /// Chunks array into batches of specified size for concurrent processing
+    func chunked(into size: Int) -> [[Element]] {
+        guard size > 0 else { return [self] }
+        return stride(from: 0, to: count, by: size).map {
+            Array(self[$0..<Swift.min($0 + size, count)])
+        }
     }
 }
