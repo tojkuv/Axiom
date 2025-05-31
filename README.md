@@ -191,7 +191,7 @@ open Axiom.xcworkspace
 - **INTEGRATE Cycle** → Real-world validation (`@INTEGRATE.md`)
 - **REFACTOR Cycle** → Organization & preparation (`@REFACTOR.md`)
 - **PLAN Coordination** → Automated cycle planning (`@PLAN d|i|r`)
-- **PROPOSE Strategy** → Strategic rethinking and improvement (`@PROPOSE.md`)
+- **PROPOSE Strategy** → Technical enhancement proposals via `@PLAN` (main branch)
 
 ```bash
 # Example strategic workflow
@@ -200,7 +200,7 @@ open Axiom.xcworkspace
 @INTEGRATE.md    # Validate in real iOS app
 @PLAN r          # Plan documentation organization
 @REFACTOR.md     # Archive and prepare next phase
-@PROPOSE.md      # Strategic rethinking and improvements
+@PLAN (main)     # Strategic planning and technical enhancement proposals
 @PLAN d          # Plan next development cycle
 ```
 

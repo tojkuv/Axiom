@@ -1,724 +1,281 @@
-# Axiom Framework Refactor Guide
+# Axiom Framework: Branch-Aware Refactoring System
 
-You are Claude Code organizing and preparing the Axiom framework for new development cycles through documentation restructuring and code organization on the **main branch**.
+**Comprehensive code organization and structural improvements across development branches**
 
 ## 🤖 Automated Mode Trigger
 
 **When human sends**: `@REFACTOR`
-**Action**: Automatically enter ultrathink mode and execute next roadmap task on main branch
+**Action**: Automatically enter ultrathink mode and execute branch-specific refactoring
 
-**Process**:
-1. **Verify Main Branch** → Ensure working on main branch and other branches are inactive
-2. **Read REFACTOR.md** → Load this complete main branch guide
-3. **Check ROADMAP.md** → Identify organizational needs or phase completion triggers
-4. **Execute Reorganization** → Archive, organize, and prepare documentation structure
-5. **Update Progress** → Mark task complete (✅) in ROADMAP.md
-6. **Prepare for Branch Work** → Ready clean environment for development/integration work
+**Branch-Aware Process**:
+1. **Detect Current Branch** → Determine refactoring scope (main, development, integration)
+2. **Read REFACTOR.md** → Load this complete branch-aware guide
+3. **Check Branch Context** → Understand current work and refactoring needs
+4. **Execute Branch-Specific Refactoring** → Organize and improve code within branch scope
+5. **Update Progress** → Mark refactoring tasks complete in appropriate documentation
+6. **Prepare for Next Work** → Ready clean environment for continued development
 
 ## 🎯 REFACTOR Mode Mission
 
-**Focus**: Comprehensive refactoring across the entire Axiom codebase - framework, test app, and documentation - to improve structure, organization, maintainability, and consistency without changing functionality.
+**Primary Focus**: Branch-specific code organization, structural improvements, and quality enhancements to maintain clean, maintainable, and efficient codebase without changing functionality.
 
-**Philosophy**: Well-organized foundation enables rapid development. Clean structure prevents technical debt and accelerates innovation. Refactoring improves what exists rather than adding new capabilities.
+**Enhanced Responsibility**: REFACTOR.md is the **Branch-Aware Organization Engine** - providing different refactoring scopes based on current branch context while maintaining code quality and structural integrity.
 
-## 🖥️ Terminal 1 (Main Branch) Context
+**Philosophy**: Well-organized code enables rapid development. Clean structure prevents technical debt and accelerates innovation. Branch-specific refactoring ensures focused improvements without cross-branch conflicts.
 
-**Terminal Identity**: Terminal 1 - Main Branch - Comprehensive Refactoring & Organization
-**Primary File Scope**: **ENTIRE CODEBASE** - `/AxiomFramework/`, `/AxiomTestApp/`, `/Documentation/`, organizational structure
-**Terminal Coordination**: ONLY active when Terminal 2 AND Terminal 3 are both completely IDLE
-**Merge Strategy**: Merge development and integration branches when user decides
-**Status Communication**: Must check ROADMAP.md Terminal Status before ANY work
+## 🌿 Branch-Aware Refactoring Contexts
 
-**What Terminal 1 (REFACTOR.md) Works On**:
-- ✅ **Framework Refactoring**: Code organization, structure improvements in `/AxiomFramework/Sources/`
-- ✅ **Test App Refactoring**: Code organization, structure improvements in `/AxiomTestApp/`
-- ✅ **Cross-System Refactoring**: Consistency improvements across both framework and test app
-- ✅ **Documentation Organization**: Archival, structure, and navigation improvements in `/Documentation/`
-- ✅ **File Organization**: Moving, renaming, restructuring files across entire codebase
-- ✅ **Code Quality**: Removing duplication, improving naming, enhancing maintainability
-- ✅ **Architectural Cleanup**: Improving code patterns, dependencies, and structure
-- ✅ **Project-Wide Consistency**: Ensuring consistent patterns across framework and test app
+### **Main Branch Refactoring Context**
+**Primary Focus**: Stable version tracking, proposal exploration, and documentation organization
+**File Scope**: `/Proposals/`, `/AxiomTestApp/Documentation/`, `/AxiomFramework/Documentation/`
+**Purpose**: Documentation organization, proposal management, and roadmap maintenance
 
-**What Terminal 1 (REFACTOR.md) Avoids**:
-- ❌ **New Feature Implementation** (that's Terminal 2 for framework, Terminal 3 for test app)
-- ❌ **New Integration Testing** (that's Terminal 3)
-- ❌ **Working when Terminal 2 OR Terminal 3 are ACTIVE** (prevents conflicts)
-- ❌ **ROADMAP.md sprint/priority changes** (only PLAN.md can do that)
+**What Main Branch REFACTOR Works On**:
+- ✅ **Proposal Organization**: Structure and organize `/Proposals/` directory
+- ✅ **Framework Documentation**: Organize `/AxiomFramework/Documentation/` structure
+- ✅ **Test App Documentation**: Organize `/AxiomTestApp/Documentation/` structure
+- ✅ **Documentation Cross-References**: Maintain links and navigation between docs
+- ✅ **Archive Management**: Organize completed work into archives
+- ✅ **ROADMAP.md Updates**: Coordinate roadmap organization and status updates
 
-**Refactoring vs Development Distinction**:
-- **REFACTOR**: Improve existing code structure, organization, and quality without changing functionality
-- **DEVELOP**: Add new features, capabilities, and functionality to the framework
-- **INTEGRATE**: Test new features and validate functionality in real-world scenarios
+**What Main Branch REFACTOR Avoids**:
+- ❌ **Framework Source Code**: No changes to `/AxiomFramework/Sources/` (development branch scope)
+- ❌ **Test App Source Code**: No changes to `/AxiomTestApp/ExampleApp/` (integration branch scope)
+- ❌ **New Feature Implementation**: Focus on organization, not new capabilities
+- ❌ **Active Development Work**: No interference with ongoing development/integration
 
-**Terminal Coordination Protocol (CRITICAL)**:
-- **MANDATORY Before ANY Work**: Check ROADMAP.md Terminal Status to verify BOTH Terminal 2 AND Terminal 3 are IDLE
-- **If Other Terminals Active**: WAIT - Terminal 1 cannot work when any other terminal is active
-- **When Starting Work**: Update ROADMAP.md Terminal Status to ACTIVE with current refactoring work description
-- **During Work**: Focus on structural improvements and organization across entire codebase
-- **When Completing Work**: Update Terminal Status to WAITING to resume normal coordination
-- **Emergency Stop**: If Terminal 2 or Terminal 3 need to start work, immediately stop and go to WAITING
+### **Development Branch Refactoring Context**
+**Primary Focus**: Framework code organization and structural improvements
+**File Scope**: `/AxiomFramework/Sources/`, `/AxiomFramework/Tests/`, framework-related files
+**Purpose**: Framework code quality, structure, and maintainability improvements
 
-**BLOCKING RULE**: Terminal 1 NEVER works when Terminal 2 or Terminal 3 show status other than IDLE
+**What Development Branch REFACTOR Works On**:
+- ✅ **Framework Code Organization**: Improve structure in `/AxiomFramework/Sources/`
+- ✅ **Module Boundaries**: Optimize module separation and dependencies
+- ✅ **Protocol Refactoring**: Consolidate and improve protocol design
+- ✅ **API Consistency**: Standardize naming and patterns across framework APIs
+- ✅ **Performance Patterns**: Optimize memory management and concurrency patterns
+- ✅ **Framework Test Organization**: Improve test structure in `/AxiomFramework/Tests/`
+- ✅ **Code Quality**: Remove duplication, improve naming, enhance maintainability
+- ✅ **Type Safety**: Enhance type safety and generic usage patterns
 
-## 🔧 Comprehensive Refactoring Capabilities
+**What Development Branch REFACTOR Avoids**:
+- ❌ **Test App Code**: No changes to `/AxiomTestApp/ExampleApp/` (integration branch scope)
+- ❌ **Documentation Files**: No changes to documentation (main branch scope)
+- ❌ **New Framework Features**: Focus on organization, not new capabilities
+- ❌ **Breaking API Changes**: Maintain compatibility while improving structure
 
-### **Framework Refactoring (`/AxiomFramework/`)**
+### **Integration Branch Refactoring Context**
+**Primary Focus**: Test app code organization and integration pattern improvements
+**File Scope**: `/AxiomTestApp/ExampleApp/`, integration-related files
+**Purpose**: Test app code quality, structure, and framework integration optimization
 
-#### **Code Structure & Organization**
-- **File Reorganization**: Move files to more logical directory structures
-- **Module Separation**: Split large files into focused, single-responsibility modules  
-- **Naming Consistency**: Improve class, protocol, and method names for clarity
+**What Integration Branch REFACTOR Works On**:
+- ✅ **Test App Code Organization**: Improve structure in `/AxiomTestApp/ExampleApp/`
+- ✅ **Feature Modularization**: Organize features into cohesive modules
+- ✅ **View Hierarchy**: Improve SwiftUI view organization and composition
+- ✅ **Integration Patterns**: Optimize how test app uses framework capabilities
+- ✅ **Macro Usage Consistency**: Ensure consistent macro patterns across domains
+- ✅ **Navigation Patterns**: Standardize navigation and routing approaches
+- ✅ **State Management**: Optimize context and client usage patterns
+- ✅ **Performance Optimization**: Improve app performance and memory usage
+- ✅ **Business Logic Separation**: Move logic to appropriate clients/contexts
+
+**What Integration Branch REFACTOR Avoids**:
+- ❌ **Framework Source Code**: No changes to `/AxiomFramework/Sources/` (development branch scope)
+- ❌ **Documentation Files**: No changes to documentation (main branch scope)
+- ❌ **New Integration Features**: Focus on organization, not new test scenarios
+- ❌ **Framework API Changes**: Work within existing framework capabilities
+
+## 🔧 Branch-Specific Refactoring Capabilities
+
+### **Main Branch Refactoring Operations**
+
+#### **Proposal Management (`/Proposals/`)**
+- **Proposal Organization**: Structure active, approved, and archived proposals
+- **Template Maintenance**: Update and organize proposal templates
+- **Cross-Reference Updates**: Maintain links between proposals and implementation
+- **Archive Cleanup**: Organize completed and deprecated proposals
+- **Analysis File Updates**: Maintain supporting analysis and benchmark data
+
+#### **Documentation Organization (`/AxiomFramework/Documentation/`, `/AxiomTestApp/Documentation/`)**
+- **Structure Optimization**: Improve documentation navigation and organization
+- **Content Consolidation**: Merge duplicates and remove outdated content
+- **Cross-Reference Maintenance**: Ensure all internal links work correctly
+- **Archive Management**: Move completed phase documentation to archives
+- **Index Updates**: Maintain documentation indices and navigation
+
+#### **ROADMAP.md Coordination**
+- **Status Updates**: Coordinate roadmap organization and cleanup
+- **Archive Integration**: Connect roadmap to archived work
+- **Priority Organization**: Structure priorities and upcoming work
+- **Cross-Terminal Status**: Maintain terminal coordination information
+
+### **Development Branch Refactoring Operations**
+
+#### **Framework Code Structure (`/AxiomFramework/Sources/`)**
+- **File Reorganization**: Move files to logical directory structures
+- **Module Separation**: Split large files into focused modules
 - **Import Cleanup**: Remove unused imports, organize import statements
+- **Naming Consistency**: Improve class, protocol, and method names
 - **Code Deduplication**: Extract common patterns into reusable utilities
 
 #### **Protocol & API Refactoring**
-- **Protocol Consolidation**: Merge similar protocols or split overly complex ones
-- **API Consistency**: Ensure consistent naming and parameter patterns across APIs
-- **Extension Organization**: Group related extensions and move them to appropriate files
-- **Access Control**: Review and optimize public/internal/private access levels
-- **Documentation Alignment**: Ensure code structure matches documentation descriptions
+- **Protocol Consolidation**: Merge similar protocols or split complex ones
+- **API Consistency**: Ensure consistent naming and parameter patterns
+- **Extension Organization**: Group related extensions appropriately
+- **Access Control**: Optimize public/internal/private access levels
+- **Generic Optimization**: Improve generic usage and type safety
 
-#### **Performance & Quality Improvements**
+#### **Performance & Quality**
 - **Memory Management**: Improve weak/strong reference patterns
 - **Actor Isolation**: Optimize actor usage and isolation boundaries
-- **Error Handling**: Standardize error patterns and improve error propagation
-- **Type Safety**: Enhance type safety through better generic usage
+- **Error Handling**: Standardize error patterns and propagation
 - **Concurrency Patterns**: Improve async/await usage and Task coordination
+- **Type Safety**: Enhance type safety through better design
 
-### **Test App Refactoring (`/AxiomTestApp/`)**
+### **Integration Branch Refactoring Operations**
 
-#### **Application Structure**
-- **Feature Modularization**: Organize features into clear, cohesive modules
-- **View Hierarchy**: Improve SwiftUI view organization and composition
-- **Navigation Patterns**: Standardize navigation and routing approaches
-- **State Management**: Optimize context and client usage patterns
-- **Resource Organization**: Improve asset and resource file organization
+#### **Test App Structure (`/AxiomTestApp/ExampleApp/`)**
+- **Feature Modularization**: Organize features into clear modules
+- **View Extraction**: Break down large views into reusable components
+- **Navigation Standardization**: Improve routing and navigation patterns
+- **Resource Organization**: Better asset and resource file organization
+- **State Management**: Optimize context and client coordination
+
+#### **Integration Pattern Optimization**
+- **Framework Usage**: Optimize how test app uses framework capabilities
+- **Macro Consistency**: Ensure consistent macro usage across domains
+- **Business Logic Separation**: Move logic to appropriate layers
+- **Error Handling**: Standardize error handling in UI layer
+- **Performance Patterns**: Improve app responsiveness and memory usage
 
 #### **Code Quality & Consistency**
-- **Naming Conventions**: Ensure consistent naming across the entire test app
-- **View Extraction**: Break down large views into smaller, reusable components
-- **Business Logic Separation**: Move business logic to appropriate clients/contexts
-- **Test Data Organization**: Improve mock data and test scenario organization
-- **Error Handling**: Standardize error handling patterns in UI layer
+- **Naming Conventions**: Ensure consistent naming across test app
+- **SwiftUI Patterns**: Standardize view composition and state management
+- **Test Data Organization**: Improve mock data and scenario organization
+- **Integration Documentation**: Align code with usage examples
+- **Validation Patterns**: Improve testing and validation approaches
 
-#### **Integration Patterns**
-- **Framework Usage**: Optimize how the test app uses framework capabilities
-- **Macro Consistency**: Ensure consistent macro usage across all domains
-- **Performance Optimization**: Improve app performance and responsiveness
-- **Memory Usage**: Optimize memory patterns in complex view hierarchies
-- **Documentation Examples**: Align code with documentation examples
+## 🎯 Branch-Specific Refactoring Priorities
 
-### **Cross-System Refactoring**
+### **Main Branch Priorities**
+1. **Documentation Structure**: Organize docs for efficient navigation and maintenance
+2. **Proposal Management**: Maintain clean proposal workflow and archives
+3. **ROADMAP Coordination**: Keep roadmap organized and focused
+4. **Archive Organization**: Properly structure completed work archives
+5. **Cross-Reference Maintenance**: Ensure all documentation links work correctly
 
-#### **Consistency Improvements**
-- **Pattern Standardization**: Ensure consistent patterns between framework and test app
-- **Naming Alignment**: Align naming conventions across framework and test usage
-- **Documentation Sync**: Ensure code matches documentation examples
-- **API Usage**: Standardize how test app uses framework APIs
-- **Error Patterns**: Consistent error handling between framework and application
+### **Development Branch Priorities**
+1. **Framework Code Quality**: Improve structure, naming, and maintainability
+2. **API Consistency**: Standardize patterns across framework interfaces
+3. **Performance Optimization**: Improve memory management and concurrency
+4. **Module Organization**: Optimize boundaries and dependencies
+5. **Type Safety**: Enhance type safety and error handling patterns
 
-#### **Architectural Alignment**
-- **Constraint Adherence**: Ensure both framework and test app follow 8 architectural constraints
-- **Dependency Management**: Optimize dependencies between framework and test app
-- **Interface Consistency**: Align interfaces and protocols across systems
-- **Testing Patterns**: Standardize testing approaches in both framework and test app
-- **Performance Consistency**: Ensure consistent performance patterns
+### **Integration Branch Priorities**
+1. **Test App Structure**: Improve modularization and view organization
+2. **Integration Patterns**: Optimize framework usage and macro consistency
+3. **Performance**: Improve app responsiveness and memory usage
+4. **Code Quality**: Standardize naming and patterns across test app
+5. **Business Logic**: Properly separate concerns and improve architecture
 
-## 🎯 Refactoring Focus Areas
+## 🔄 Branch-Aware Refactoring Workflow
 
-### **Priority 1: Code Organization & Structure**
-- File and directory reorganization for logical grouping
-- Module boundaries and separation of concerns
-- Import cleanup and dependency optimization
-- Naming consistency across entire codebase
-
-### **Priority 2: Quality & Maintainability**
-- Code deduplication and pattern extraction
-- Error handling standardization
-- Documentation alignment with code
-- Type safety and API consistency improvements
-
-### **Priority 3: Performance & Architecture**
-- Memory management optimization
-- Concurrency pattern improvements
-- Actor isolation refinements
-- Cross-system architectural alignment
-
-### **Priority 4: Developer Experience**
-- API consistency and predictability
-- Documentation and code synchronization
-- Example code quality and clarity
-- Testing pattern standardization
-
-## 🗂️ Dual Documentation Architecture
-
-### **Documentation System Roles** 🎯
-
-#### **AxiomFramework/Documentation/** - Technical Foundation
-- **Purpose**: Framework internals, technical specifications, implementation guides
-- **Audience**: Framework developers working on core capabilities
-- **Focus**: Protocols, architecture, technical implementation details
-
-#### **AxiomTestApp/Documentation/** - Integration & Validation  
-- **Purpose**: Real-world usage, integration testing, performance validation
-- **Audience**: Framework users and integration developers
-- **Focus**: Usage patterns, testing methodologies, practical application
-
-### **Consistent Organizational Principles** 📋
-
-#### **Single Source of Truth Pattern**
-- **ONLY top-level README.md** → Comprehensive project overview (like STATUS.md)
-- **NO subdirectory READMEs** → Eliminates all duplication and confusion
-- **Single authoritative source** → All project information in one place
-
-#### **Standard Directory Categories**
-1. **Technical/** → Core technical specifications and API documentation
-2. **Implementation/** → Implementation guides, roadmaps, development workflows
-3. **Testing/** → Testing approaches, validation methodologies
-4. **Performance/** → Performance measurement, optimization, benchmarking
-5. **Usage/** → Usage patterns, examples, best practices
-6. **Integration/** → How components work together or with external systems
-7. **Troubleshooting/** → Common issues, debugging, problem resolution
-8. **Archive/** → Historical documents, completed phases
-
-#### **Standard File Naming Patterns**
-- **Project Overview**: ONLY top-level `README.md` (comprehensive, authoritative)
-- **Guides**: `[TOPIC]_GUIDE.md` (e.g., `INTEGRATION_GUIDE.md`)
-- **Specifications**: `[SYSTEM]_SPECIFICATION.md` (e.g., `API_SPECIFICATION.md`)
-- **Workflows**: `[PROCESS]_WORKFLOW.md` (e.g., `TESTING_WORKFLOW.md`)
-- **Analysis**: `[AREA]_ANALYSIS.md` (e.g., `PERFORMANCE_ANALYSIS.md`)
-
-### **Current Documentation Status** 📊
-
-#### **AxiomFramework/Documentation/** (Needs Reorganization)
-```
-Current State:
-├── [Multiple files at root] ⚠️ NEEDS ORGANIZATION
-├── Technical/ ✅ WELL ORGANIZED
-└── Archive/ ✅ WELL ORGANIZED
-
-Target Structure:
-├── README.md                           # Overview & navigation
-├── Technical/                          # Core technical specs ✅
-│   ├── API_DESIGN_SPECIFICATION.md
-│   ├── INTELLIGENCE_SYSTEM_SPECIFICATION.md
-│   ├── CAPABILITY_SYSTEM_SPECIFICATION.md
-│   ├── DOMAIN_MODEL_DESIGN_PATTERNS.md
-│   └── MACRO_SYSTEM_SPECIFICATION.md
-├── Implementation/                     # Implementation guides
-│   ├── IMPLEMENTATION_ROADMAP.md
-│   ├── DEVELOPMENT_GUIDELINES.md
-│   └── IMPLEMENTATION_INDEX.md
-├── Testing/                           # Framework testing strategy
-│   └── TESTING_STRATEGY.md
-├── Performance/                       # Framework performance specs
-│   └── PERFORMANCE_TARGETS.md
-└── Archive/                           # Historical documents ✅
-```
-
-#### **AxiomTestApp/Documentation/** (Well Organized) ✅
-```
-Current State:
-├── README.md                           # Overview & navigation ✅
-├── Integration/                        # Framework integration ✅
-├── Testing/                           # Testing methodologies ✅
-├── Usage/                             # Real-world patterns ✅
-├── Performance/                       # Performance measurement ✅
-├── Troubleshooting/                   # Problem resolution ✅
-└── Examples/                          # Example documentation ✅
-```
-
-### **Cross-Reference Management** 🔗
-- **Framework → App**: Technical specs reference real-world usage examples
-- **App → Framework**: Integration guides reference technical specifications
-- **Consistent Linking**: Use relative paths for maintainable cross-references
-- **Unified Glossary**: Shared terminology across both documentation systems
-
-## 📋 ROADMAP.md Update Protocol
-
-**When REFACTOR work completes, update the REFACTOR DELIVERABLES section:**
-
-1. **Locate Current Cycle** → Find the refactor cycle you were working on (e.g., "Refactor Cycle 3")
-2. **Update Cycle Status** → Change from 🔄 IN PROGRESS to ✅ COMPLETED
-3. **Add Completed Organization** → List each major organizational achievement
-4. **Include Efficiency Metrics** → Document navigation improvements and development velocity gains
-5. **Start Next Cycle** → If applicable, add next refactor cycle as ⏳ PLANNED
-
-**Update Template:**
-```markdown
-**Refactor Cycle [N]: [Cycle Focus]** ✅ COMPLETED
-- ✅ **[Organizational Achievement]**: [Specific improvement and navigation benefits]
-- ✅ **[Structure Enhancement]**: [Development efficiency improvement achieved]
-- ✅ **[Archive Management]**: [Historical preservation and future preparation]
-
-**REFACTOR Impact Metrics**:
-- **[Efficiency Category]**: [Specific time savings and workflow improvements]
-- **[Organization Quality]**: [Structure improvements and redundancy elimination]
-- **[Development Velocity]**: [Speed improvements and reduced cognitive load]
-- **[Knowledge Management]**: [Information accessibility and maintenance efficiency]
-```
-
-**Example Update:**
-```markdown
-**Refactor Cycle 3: Advanced Development Infrastructure** ✅ COMPLETED
-- ✅ **Enhanced IDE Integration**: Development environment optimized for 40% faster iteration
-- ✅ **Automated Quality Gates**: CI/CD pipeline with framework performance validation
-- ✅ **Community Preparation Structure**: Documentation and examples ready for external developers
-
-**REFACTOR Impact Metrics**:
-- **Development Speed**: 40% faster compile-test-iterate cycles
-- **Quality Assurance**: Automated performance regression prevention
-- **Structure Scalability**: Framework development patterns ready for team expansion
-- **Community Readiness**: External developer onboarding reduced from hours to minutes
-```
-
-**Critical Rules:**
-- ✅ **Measure efficiency gains** with concrete development velocity improvements
-- ✅ **Document navigation improvements** showing reduced time to find information
-- ✅ **Validate cross-system consistency** ensuring framework and app docs stay aligned
-- ✅ **Archive completed work** properly preserving learning and decisions
-- ✅ **Trigger next planning** by completing refactor deliverables
-
-## 🔄 Refactor Workflow
-
-### **Phase 1: Assessment**
-1. **Review Current State** → Read ROADMAP.md and identify completed phases
-2. **Analyze Documentation** → Find outdated, redundant, or missing content
-3. **Identify Patterns** → Look for recurring organizational needs
-4. **Plan Restructuring** → Design improved organization for next development cycle
-
-### **Phase 2: Reorganization** 
-1. **Archive Completed** → Move finished phase documentation to Archive/
-2. **Update Active Docs** → Refresh current documentation with latest patterns
-3. **Consolidate Duplicates** → Merge redundant information into authoritative sources
-4. **Create New Structure** → Build organization for next development phase
-
-### **Phase 3: Preparation**
-1. **Prepare New Guides** → Create documentation for upcoming work
-2. **Update References** → Ensure all links and references are correct
-3. **Validate Structure** → Confirm organization supports efficient development
-4. **Document Changes** → Update ROADMAP.md with new organization and next phase planning
-
-### **Phase 4: Maintenance**
-1. **Monitor Usage** → Track which documentation is actively used
-2. **Iterate Organization** → Improve structure based on actual usage patterns
-3. **Keep Current** → Regular updates to prevent documentation drift
-4. **Plan Next Cycle** → Prepare for future reorganization needs
-
-## 📋 Refactor Priorities
-
-### **Documentation Health**
-- **Remove Redundancy** → Consolidate duplicate information
-- **Update Currency** → Ensure all content reflects current state
-- **Improve Navigation** → Make it easy to find relevant information
-- **Enhance Clarity** → Clear, actionable content with concrete examples
-
-### **Code Organization**
-- **Clean Dependencies** → Remove unused imports and dependencies
-- **Consistent Patterns** → Align code structure with documented patterns
-- **Performance Optimization** → Profile and optimize based on real usage
-- **Test Organization** → Ensure test structure matches code organization
-
-### **Development Environment**
-- **Workspace Optimization** → Ensure efficient development setup
-- **Build Performance** → Optimize for fast development cycles
-- **Tool Integration** → Streamline development workflow tools
-- **CI/CD Updates** → Keep automation current with project structure
-
-## 🎯 Current Refactor Needs
-
-### **Immediate Opportunities**
-1. **Unified Planning Document** → Create ROADMAP.md combining status and roadmap ✅ COMPLETED
-2. **Organize Prompts** → Split PROMPT.md into focused guides ✅ COMPLETED
-3. **AxiomTestApp Documentation** → Comprehensive app-specific documentation ✅ COMPLETED
-4. **Clean Archive** → Move completed phase docs to proper archive structure
-5. **Update References** → Fix links and references to reflect new organization
-
-### **Structural Improvements**
-1. **Example Organization** → Better structure for AxiomTestApp examples ✅ COMPLETED
-2. **API Documentation** → Consolidate API reference with usage examples
-3. **Performance Tracking** → Organize performance metrics and benchmarks ✅ COMPLETED
-4. **Integration Guides** → Better organization of integration patterns ✅ COMPLETED
-
-## 🎯 AxiomTestApp Documentation Achievement
-
-### **Comprehensive Structure Created** ✅
-```
-AxiomTestApp/Documentation/
-├── README.md                           # Overview and navigation
-├── Integration/                        # Framework integration guides
-│   ├── INTEGRATION_WORKFLOW.md         # Step-by-step integration testing ✅
-│   ├── API_VALIDATION_PATTERNS.md      # Validating framework APIs
-│   ├── MODULAR_TESTING_GUIDE.md        # Using modular structure for testing
-│   └── WORKSPACE_DEVELOPMENT.md        # Workspace-based development workflow
-├── Testing/                            # Testing methodologies and patterns
-│   ├── TESTING_METHODOLOGIES.md        # How to test framework features ✅
-│   ├── PERFORMANCE_MEASUREMENT.md      # Measuring framework performance ✅
-│   ├── COMPARISON_TESTING.md           # Before/after API comparisons
-│   └── REGRESSION_TESTING.md           # Ensuring stability across changes
-├── Usage/                              # Real-world usage patterns
-│   ├── USAGE_PATTERNS.md               # Discovered patterns from real app ✅
-│   ├── API_ERGONOMICS.md               # API usability insights
-│   ├── DEVELOPER_EXPERIENCE.md         # DX insights from real usage
-│   └── COMMON_SCENARIOS.md             # Typical integration scenarios
-├── Performance/                        # Performance analysis and optimization
-│   ├── PERFORMANCE_ANALYSIS.md         # Framework performance measurement
-│   ├── OPTIMIZATION_OPPORTUNITIES.md   # Identified optimization areas
-│   ├── BENCHMARKING_GUIDE.md           # How to benchmark framework changes
-│   └── METRICS_COLLECTION.md           # Collecting and analyzing metrics
-├── Troubleshooting/                    # Common issues and solutions
-│   ├── COMMON_ISSUES.md                # Frequently encountered problems ✅
-│   ├── DEBUGGING_GUIDE.md              # How to debug framework integration
-│   ├── BUILD_ISSUES.md                 # Workspace and build troubleshooting
-│   └── PERFORMANCE_ISSUES.md           # Performance problem diagnosis
-└── Examples/                           # Detailed example documentation
-    ├── BASIC_EXAMPLE_GUIDE.md          # Manual implementation patterns
-    ├── STREAMLINED_EXAMPLE_GUIDE.md    # Streamlined API usage
-    ├── COMPARISON_EXAMPLE_GUIDE.md     # Side-by-side comparisons
-    └── CUSTOM_EXAMPLE_CREATION.md      # Creating new test examples
-```
-
-### **Documentation Benefits Achieved**
-- **Clear Separation** → App-specific docs separate from framework technical specs
-- **Focused Guidance** → Each doc addresses specific development needs
-- **Real-World Focus** → All content based on actual AxiomTestApp usage
-- **Easy Navigation** → Structured for quick access to needed information
-- **Comprehensive Coverage** → Integration, testing, performance, troubleshooting
-
-## 🔧 Refactor Operations
-
-### **Documentation Consolidation & Consistency**
-
-#### **AxiomFramework/Documentation Reorganization**
+### **Automated Branch Detection**
 ```bash
-# Organize scattered root-level files
-mkdir -p AxiomFramework/Documentation/Implementation/
-mv AxiomFramework/Documentation/IMPLEMENTATION_*.md AxiomFramework/Documentation/Implementation/
-mv AxiomFramework/Documentation/DEVELOPMENT_GUIDELINES.md AxiomFramework/Documentation/Implementation/
+# Main Branch Context
+if on main branch:
+    scope = ["/Proposals/", "/AxiomTestApp/Documentation/", "/AxiomFramework/Documentation/"]
+    focus = "Documentation organization and proposal management"
 
-mkdir -p AxiomFramework/Documentation/Testing/
-mv AxiomFramework/Documentation/TESTING_STRATEGY.md AxiomFramework/Documentation/Testing/
+# Development Branch Context  
+elif on development branch:
+    scope = ["/AxiomFramework/Sources/", "/AxiomFramework/Tests/"]
+    focus = "Framework code organization and quality improvements"
 
-mkdir -p AxiomFramework/Documentation/Performance/
-# Create PERFORMANCE_TARGETS.md from existing specifications
-
-# Create overview README
-touch AxiomFramework/Documentation/README.md
+# Integration Branch Context
+elif on integration branch:
+    scope = ["/AxiomTestApp/ExampleApp/"]
+    focus = "Test app code organization and integration optimization"
 ```
 
-#### **Cross-Reference Validation**
-```bash
-# Check for broken links across both documentation systems
-grep -r "\.\./\.\./AxiomFramework" AxiomTestApp/Documentation/
-grep -r "\.\./\.\./AxiomTestApp" AxiomFramework/Documentation/
+### **Branch-Specific Execution Process**
 
-# Validate consistent terminology
-grep -r "AxiomClient\|AxiomContext\|AxiomView" */Documentation/ | # Ensure consistent usage
+#### **Phase 1: Context Analysis**
+1. **Detect Current Branch** → Determine refactoring scope and priorities
+2. **Assess Branch State** → Understand current work and refactoring needs
+3. **Review Scope Files** → Analyze files within branch refactoring scope
+4. **Identify Improvements** → Find organization and quality opportunities
+5. **Plan Refactoring** → Define specific improvements to implement
 
-# Update cross-references for new structure
-find */Documentation/ -name "*.md" -exec grep -l "old-path" {} \; | # Fix relocated files
-```
+#### **Phase 2: Refactoring Execution**
+1. **Structure Improvements** → File organization and module boundaries
+2. **Code Quality** → Naming, deduplication, and pattern standardization
+3. **Documentation Sync** → Align code with documentation where applicable
+4. **Cross-Reference Updates** → Maintain links and dependencies
+5. **Performance Optimization** → Memory and concurrency pattern improvements
 
-#### **Unified Documentation Templates**
-```bash
-# Create consistent README templates
-cat > doc_template_README.md << 'EOF'
-# [Directory Name]
+#### **Phase 3: Validation & Cleanup**
+1. **Build Validation** → Ensure all refactoring maintains functionality
+2. **Test Execution** → Verify tests pass after structural changes
+3. **Documentation Updates** → Update relevant documentation for changes
+4. **Quality Verification** → Confirm improvements meet quality standards
+5. **Progress Tracking** → Mark refactoring tasks complete
 
-## 🎯 Purpose
-Brief description of what this documentation covers.
+## 🚀 Refactoring Success Metrics
 
-## 📁 Contents
-- **File1.md** → Description
-- **File2.md** → Description
+### **Main Branch Success Criteria**
+- ✅ Documentation is well-organized and easily navigable
+- ✅ Proposals directory maintains clean workflow and archives
+- ✅ All documentation cross-references work correctly
+- ✅ ROADMAP.md is organized and focused
+- ✅ Archived work is properly structured and accessible
 
-## 🔗 Related Documentation
-- [Framework Technical Specs](../AxiomFramework/Documentation/Technical/)
-- [App Integration Guides](../AxiomTestApp/Documentation/Integration/)
+### **Development Branch Success Criteria**
+- ✅ Framework code has clear structure and module boundaries
+- ✅ API patterns are consistent across framework interfaces
+- ✅ Code quality improvements reduce technical debt
+- ✅ Performance patterns are optimized for memory and concurrency
+- ✅ Type safety and error handling are enhanced
 
-## 📊 Quick Navigation
-- **For Framework Development** → Use framework technical docs
-- **For Integration Testing** → Use app integration guides
-EOF
-```
+### **Integration Branch Success Criteria**
+- ✅ Test app code is well-modularized and organized
+- ✅ Framework integration patterns are consistent and optimized
+- ✅ SwiftUI views are properly composed and reusable
+- ✅ Business logic is properly separated across layers
+- ✅ App performance and memory usage are optimized
 
-### **Consistency Validation Workflow**
-```bash
-# Check naming pattern consistency
-find */Documentation/ -name "*.md" | grep -E "(GUIDE|SPECIFICATION|WORKFLOW|ANALYSIS)" | sort
+## 🔧 Refactoring Guidelines
 
-# Validate directory structure consistency
-ls -la AxiomFramework/Documentation/
-ls -la AxiomTestApp/Documentation/
+### **Code Organization Principles**
+- **Single Responsibility**: Each file and module has clear, focused purpose
+- **Logical Grouping**: Related functionality is grouped together
+- **Consistent Naming**: Names clearly communicate purpose and usage
+- **Minimal Dependencies**: Reduce unnecessary coupling between modules
+- **Clear Interfaces**: Public APIs are intuitive and well-designed
 
-# Check for orphaned files
-find */Documentation/ -name "*.md" -exec basename {} \; | sort | uniq -d | # Find duplicates
-```
+### **Quality Improvement Standards**
+- **No Functionality Changes**: Refactoring improves structure without changing behavior
+- **Maintain Compatibility**: API changes preserve backward compatibility
+- **Improve Readability**: Code is easier to understand and maintain
+- **Reduce Duplication**: Common patterns are extracted and reused
+- **Enhance Performance**: Memory and performance patterns are optimized
 
-### **Code Organization**
-```bash
-# Analyze dependencies
-swift package show-dependencies
+### **Branch Coordination Rules**
+- **Scope Respect**: Only work within designated branch scope
+- **No Cross-Branch Changes**: Avoid changes that affect other branch scopes
+- **Documentation Sync**: Keep code aligned with branch-appropriate documentation
+- **Quality Focus**: Prioritize quality improvements over new functionality
+- **Build Safety**: Ensure all changes maintain working builds and tests
 
-# Profile build times
-swift build --verbose | # Identify slow compilation
+---
 
-# Clean unused code
-grep -r "unused-pattern" Sources/ | # Find potential cleanup opportunities
-```
+**REFACTOR STATUS**: Branch-aware refactoring system with context-specific scopes ✅  
+**MAIN SCOPE**: `/Proposals/`, `/AxiomTestApp/Documentation/`, `/AxiomFramework/Documentation/`  
+**DEVELOPMENT SCOPE**: `/AxiomFramework/Sources/`, `/AxiomFramework/Tests/`  
+**INTEGRATION SCOPE**: `/AxiomTestApp/ExampleApp/`  
+**AUTOMATION READY**: Supports `@REFACTOR . ultrathink` for branch-aware organization  
+**QUALITY FOCUSED**: Structural improvements and code quality without functionality changes
 
-### **Testing Structure**
-```bash
-# Organize test files
-find Tests/ -name "*.swift" | # Ensure tests match code structure
-
-# Validate test coverage
-swift test --enable-code-coverage | # Check coverage metrics
-```
-
-## 📊 Refactor Success Metrics
-
-### **Documentation Quality**
-- **Navigation Time** → How quickly can needed information be found?
-- **Currency** → How up-to-date is the documentation?
-- **Clarity** → How clear and actionable is the content?
-- **Usage** → Which documents are actually being used?
-
-### **Code Quality**
-- **Build Time** → How fast is the development cycle?
-- **Test Coverage** → How comprehensive is the test suite?
-- **Performance** → How efficient is the framework?
-- **Maintainability** → How easy is it to make changes?
-
-### **Development Efficiency**
-- **Setup Time** → How quickly can development begin?
-- **Iteration Speed** → How fast can changes be tested?
-- **Error Prevention** → How well does structure prevent mistakes?
-- **Knowledge Transfer** → How easy is it to understand the codebase?
-
-## 🎯 Refactor Phases
-
-### **Phase 1: Foundation Organization** ✅ COMPLETED
-- ✅ Global STATUS.md consolidation
-- ✅ Split PROMPT.md into focused guides (DEVELOP, INTEGRATE, REFACTOR)
-- ✅ Modular AxiomTestApp structure organization
-- ✅ Comprehensive AI agent context guides
-
-### **Phase 2: AxiomTestApp Documentation Structure** ✅ COMPLETED
-- ✅ Created comprehensive `/AxiomTestApp/Documentation/` structure
-- ✅ Integration workflow and testing methodologies documented
-- ✅ Performance measurement and troubleshooting guides
-- ✅ Usage patterns and real-world validation approaches
-- ✅ Separated app-specific docs from framework technical specs
-
-### **Phase 3: Dual Documentation System Consistency** ✅ COMPLETED
-- ✅ Established consistent organizational principles across both systems
-- ✅ Defined clear roles for framework vs app documentation
-- ✅ Created unified maintenance workflows and cross-reference management
-- ✅ Implemented context management principles for easier navigation
-- ✅ Documented standardized naming patterns and terminology
-- ✅ Consolidated to ONLY top-level README.md (like STATUS.md) - removed all subdirectory READMEs
-
-### **Phase 4: Archive and Cleanup** (Current)
-- Execute AxiomFramework/Documentation reorganization
-- Archive completed development phase documentation  
-- Clean up redundant or outdated content
-- Validate cross-system consistency and fix broken references
-
-### **Phase 5: Next Phase Preparation** (Upcoming)
-- Prepare documentation structure for advanced features
-- Design organization for expanded example applications
-- Plan structure for community contributions
-- Create templates for new development phases
-
-### **Phase 6: Continuous Improvement** (Ongoing)
-- Monitor documentation usage patterns
-- Iterate organization based on actual development needs
-- Maintain clean, current, and useful documentation
-- Prepare for scaling and team development
-
-## 📚 Refactor Resources
-
-### **Organization Templates**
-- **Feature Documentation**: Standard template for new features
-- **API Reference**: Consistent format for protocol documentation
-- **Example Structure**: Pattern for new example applications
-- **Testing Guide**: Standard approach for test organization
-
-### **Maintenance Checklists**
-- **Weekly Review**: Check for outdated content and broken links
-- **Phase Completion**: Archive and reorganize for next phase
-- **Performance Check**: Profile and optimize development workflow
-- **Tool Updates**: Keep development environment current
-
-## 🎯 Refactor Goals
-
-### **Organizational Excellence**
-- **Intuitive Structure** → Information is where developers expect to find it
-- **Minimal Redundancy** → Single source of truth for all information
-- **Easy Maintenance** → Structure supports keeping content current
-- **Scalable Design** → Organization grows cleanly with project complexity
-
-### **Development Velocity**
-- **Fast Navigation** → Quick access to needed information
-- **Clear Patterns** → Consistent organization reduces cognitive load
-- **Efficient Workflow** → Tools and structure optimize development speed
-- **Error Prevention** → Organization prevents common mistakes
-
-### **Quality Assurance**
-- **Documentation Health** → All content is current, accurate, and useful
-- **Code Quality** → Structure supports best practices and maintainability
-- **Test Coverage** → Comprehensive testing aligned with code organization
-- **Performance Optimization** → Regular profiling and optimization
-
-## 🔄 Unified Maintenance Workflow
-
-### **Regular Consistency Checks**
-```bash
-# Weekly consistency validation
-./scripts/validate_documentation_consistency.sh
-
-# Check for:
-# - Consistent naming patterns across both systems
-# - Broken cross-references between framework and app docs
-# - Orphaned files that should be organized
-# - Unwanted README files in subdirectories (should not exist)
-```
-
-### **Cross-System Update Workflow**
-1. **Framework Changes** → Update both framework technical specs AND app integration guides
-2. **App Discoveries** → Update both app usage patterns AND framework enhancement backlog
-3. **Performance Updates** → Update both framework targets AND app measurement guides
-4. **New Features** → Document in framework specs AND create app integration examples
-5. **Major Updates** → Update top-level README.md AND ROADMAP.md to reflect current project state
-
-### **Context Management Principles** 🧠
-
-#### **Predictable Documentation Locations**
-- **Technical Question** → `AxiomFramework/Documentation/Technical/`
-- **Integration Question** → `AxiomTestApp/Documentation/Integration/`
-- **Performance Question** → Both systems have `Performance/` directories
-- **Troubleshooting** → `AxiomTestApp/Documentation/Troubleshooting/`
-
-#### **Consistent Cross-References**
-```markdown
-# Standard cross-reference patterns
-[Framework API Spec](../../AxiomFramework/Documentation/Technical/API_DESIGN_SPECIFICATION.md)
-[Integration Workflow](../../AxiomTestApp/Documentation/Integration/INTEGRATION_WORKFLOW.md)
-[Performance Measurement](../../AxiomTestApp/Documentation/Performance/PERFORMANCE_MEASUREMENT.md)
-```
-
-#### **Unified Terminology Management**
-- **AxiomClient** → Always refer to actor-based state management
-- **AxiomContext** → Always refer to client orchestration + SwiftUI integration
-- **AxiomView** → Always refer to 1:1 reactive binding with contexts
-- **Framework Integration** → Always refer to real iOS app usage patterns
-- **Performance Validation** → Always refer to measurable real-world metrics
-
-### **Documentation Health Metrics** 📊
-```bash
-# Measure documentation consistency
-docs_health_check() {
-    echo "📊 Documentation Health Report"
-    echo "Framework docs: $(find AxiomFramework/Documentation -name '*.md' | wc -l) files"
-    echo "App docs: $(find AxiomTestApp/Documentation -name '*.md' | wc -l) files"
-    echo "Broken links: $(find */Documentation -name '*.md' -exec grep -l 'broken' {} \; | wc -l)"
-    echo "Unwanted READMEs: $(find */Documentation -name 'README.md' | wc -l) (should be 0)"
-}
-```
-
-## 🔄 Maintenance Schedule
-
-### **Regular Maintenance** (Enhanced for Dual System)
-- **Weekly**: Cross-system consistency validation and broken link checks
-- **Monthly**: Terminology alignment and navigation optimization
-- **Phase Completion**: Reorganization across both documentation systems
-- **Milestone Achievement**: Archive coordination and next phase preparation
-
-### **Trigger Events** (Dual System Aware)
-- **Framework Architecture Changes** → Update framework specs AND app integration guides
-- **New App Patterns Discovered** → Update app docs AND framework enhancement backlog
-- **Performance Optimization** → Update both framework targets AND measurement methodologies
-- **Integration Issues** → Update troubleshooting guides AND framework design principles
-
-### **Context Management Success Criteria** ✅
-- **Predictable Navigation** → Can find needed info quickly in expected location
-- **Consistent Terminology** → Same concepts described same way across both systems
-- **Maintained Cross-References** → Links between systems work and provide value
-- **Unified Development Flow** → Documentation supports seamless framework → app → framework iteration
-
-## 🚀 Automated Refactor Process
-
-**REFACTOR mode automatically follows unified roadmap priorities:**
-
-1. **Check ROADMAP.md** → Identify phase completion triggers or organizational needs
-2. **Assess Current State** → Review documentation health and development environment
-3. **Execute Reorganization** → Archive completed work, organize active content, prepare next phase
-4. **Validate Structure** → Ensure documentation supports efficient development workflows
-5. **Update Planning** → Mark tasks complete (✅) in `/ROADMAP.md` and prepare for next cycle
-
-**Current REFACTOR Priority Order (from ROADMAP.md):**
-- **Priority 1**: Archive completed development phase documentation
-- **Priority 2**: Organize framework documentation for efficiency
-- **Priority 3**: Cross-system consistency validation and maintenance
-- **Priority 4**: Prepare structure for advanced features and community expansion
-
-**Three-Cycle Integration:**
-- **DEVELOP/INTEGRATE → REFACTOR** → Organize learnings from development cycles
-- **REFACTOR → DEVELOP** → Clean structure enables efficient framework development
-- **REFACTOR → INTEGRATE** → Well-organized documentation supports testing workflows
-
-**Refactor Triggers:**
-- **Phase Completion** → Major development phases finished, need organization
-- **Documentation Drift** → Content becomes outdated or poorly organized
-- **Development Inefficiency** → Structure is hindering development velocity
-- **Cross-System Issues** → Framework and app documentation inconsistencies
-
-**Ready to automatically execute next REFACTOR task from unified roadmap.**
-
-## 🤖 Automated Execution Command
-
-**Trigger**: `@REFACTOR . ultrathink`
-
-**Automated Workflow**:
-1. **Read REFACTOR.md** → Load this guide and understand REFACTOR mode mission
-2. **Check ROADMAP.md** → Identify phase completion triggers or organizational needs
-3. **Assess Current State** → Review documentation health and development environment:
-   - Check for completed development phases needing archival
-   - Identify outdated, redundant, or poorly organized content
-   - Validate dual documentation system consistency
-   - Analyze development workflow efficiency
-4. **Execute Reorganization** → Archive, organize, and prepare:
-   - Move completed phase docs to Archive/ directories
-   - Reorganize scattered files into standard categories
-   - Validate cross-system consistency and fix broken references
-   - Update documentation templates and navigation
-5. **Update ROADMAP.md** → Mark completed tasks as ✅ and prepare for next cycle
-6. **Validate Structure** → Ensure documentation supports efficient development
-
-**Task Selection Priority**:
-- **Priority 1**: Archive completed development phase documentation
-- **Priority 2**: Organize framework documentation for efficiency  
-- **Priority 3**: Cross-system consistency validation and maintenance
-- **Priority 4**: Prepare structure for advanced features and community expansion
-
-**Refactor Operations**:
-- **Documentation Consolidation**: Merge duplicates, update currency, improve navigation
-- **Code Organization**: Clean dependencies, optimize patterns, align structure
-- **Development Environment**: Optimize workspace, improve build performance
-- **Cross-System Maintenance**: Validate consistency between framework and app docs
-
-**Success Criteria**:
-- ✅ All completed work properly archived and organized
-- ✅ Documentation structure supports efficient development workflows
-- ✅ Cross-references between framework and app docs work correctly
-- ✅ No redundant or outdated content remains
-- ✅ Next development phase has clean, prepared structure
-
-**Refactor Triggers**:
-- **Phase Completion**: Major development phases finished, need organization
-- **Documentation Drift**: Content becomes outdated or poorly organized  
-- **Development Inefficiency**: Structure is hindering development velocity
-- **Cross-System Issues**: Framework and app documentation inconsistencies
-
-**Ready for automated organization and cleanup on `@REFACTOR . ultrathink` command.**
+**Use this system for branch-specific code organization and quality improvements while maintaining focused development workflows.**

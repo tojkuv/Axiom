@@ -1,0 +1,221 @@
+# @CHECKPOINT.md - Branch-Aware Checkpoint System
+
+## ⚡ Intelligent Branch-Aware Checkpoint Management
+
+This command provides intelligent checkpoint management that adapts to your current branch context:
+
+### 🔍 Branch Detection & Smart Actions
+
+**Development Branch (`development`):**
+- ✅ Commit all changes with intelligent commit message
+- 🔄 Update from latest `main` via rebase
+- 🚀 Create pull request to `main`
+- 📊 Performance validation
+
+**Integration Branch (`integration`):**  
+- ✅ Commit integration validation results
+- 🔄 Update from latest `main` via rebase
+- 🚀 Create pull request to `main`
+- 🧪 Integration test verification
+
+**Main Branch (`main`):**
+- ✅ Commit current progress
+- 📋 Update project status
+- 🎯 No PR needed (already on main)
+
+---
+
+## 🤖 Execution
+
+**Claude, execute this intelligent checkpoint process:**
+
+1. **Detect Current Branch & Execute Appropriate Workflow**
+
+```bash
+# 1. Detect current branch
+CURRENT_BRANCH=$(git branch --show-current)
+echo "🎯 Current branch: $CURRENT_BRANCH"
+
+# 2. Check git status and show what will be committed
+echo "📋 Current changes:"
+git status --short
+
+# 3. Branch-specific checkpoint logic
+case "$CURRENT_BRANCH" in
+  "development")
+    echo "🔧 DEVELOPMENT BRANCH CHECKPOINT"
+    
+    # Commit changes with intelligent message
+    echo "✅ Committing development progress..."
+    git add .
+    git commit -m "🔧 Development checkpoint: $(date '+%Y-%m-%d %H:%M')
+
+    📦 Framework enhancements and feature development
+    🎯 Preparing for integration validation
+    
+    🤖 Generated with Claude Code
+    
+    Co-Authored-By: Claude <noreply@anthropic.com>"
+    
+    # Update from main
+    echo "🔄 Updating from main..."
+    git fetch origin main
+    git rebase origin/main
+    
+    # Push and create PR
+    echo "🚀 Creating pull request..."
+    git push origin development -u
+    gh pr create --title "🔧 Development Progress: $(date '+%Y-%m-%d')" --body "$(cat <<'EOF'
+## 🔧 Development Progress Summary
+
+### ✅ Completed Development Work
+- Framework feature enhancements
+- Core functionality improvements
+- Developer experience optimizations
+
+### 🎯 Ready for Integration
+- All development targets met
+- Framework builds cleanly
+- Ready for real-world validation
+
+### 🧪 Next Steps
+- Integration testing in AxiomTestApp
+- Performance validation
+- Real-world usage verification
+
+🤖 Generated with Claude Code
+EOF
+)"
+    ;;
+    
+  "integration")
+    echo "🧪 INTEGRATION BRANCH CHECKPOINT"
+    
+    # Commit integration results
+    echo "✅ Committing integration validation..."
+    git add .
+    git commit -m "🧪 Integration checkpoint: $(date '+%Y-%m-%d %H:%M')
+
+    ✅ Real-world validation completed
+    📊 Performance metrics captured
+    🎯 Ready for main branch merge
+    
+    🤖 Generated with Claude Code
+    
+    Co-Authored-By: Claude <noreply@anthropic.com>"
+    
+    # Update from main
+    echo "🔄 Updating from main..."
+    git fetch origin main
+    git rebase origin/main
+    
+    # Push and create PR
+    echo "🚀 Creating pull request..."
+    git push origin integration -u
+    gh pr create --title "🧪 Integration Validation: $(date '+%Y-%m-%d')" --body "$(cat <<'EOF'
+## 🧪 Integration Validation Complete
+
+### ✅ Validation Results
+- Real-world iOS app testing
+- Performance benchmarking
+- Feature integration verification
+
+### 📊 Metrics & Performance
+- All performance targets met
+- Clean integration with AxiomTestApp
+- Zero integration issues
+
+### 🎯 Production Readiness
+- Framework validated in real application
+- All tests passing
+- Ready for production merge
+
+🤖 Generated with Claude Code
+EOF
+)"
+    ;;
+    
+  "main")
+    echo "🎯 MAIN BRANCH CHECKPOINT"
+    
+    # Commit progress on main
+    echo "✅ Committing main branch progress..."
+    git add .
+    git commit -m "🎯 Main branch checkpoint: $(date '+%Y-%m-%d %H:%M')
+
+    📋 Project status update and coordination
+    🚀 Strategic planning and documentation
+    
+    🤖 Generated with Claude Code
+    
+    Co-Authored-By: Claude <noreply@anthropic.com>"
+    
+    # Push to main
+    echo "🚀 Pushing to main..."
+    git push origin main
+    
+    echo "✅ Main branch checkpoint complete"
+    echo "📋 No PR needed (already on main)"
+    ;;
+    
+  *)
+    echo "❓ Unknown branch: $CURRENT_BRANCH"
+    echo "🎯 Creating standard checkpoint..."
+    
+    # Standard checkpoint for other branches
+    git add .
+    git commit -m "📌 Checkpoint on $CURRENT_BRANCH: $(date '+%Y-%m-%d %H:%M')
+
+    🔄 Branch-specific progress update
+    
+    🤖 Generated with Claude Code
+    
+    Co-Authored-By: Claude <noreply@anthropic.com>"
+    
+    git push origin "$CURRENT_BRANCH" -u
+    echo "✅ Standard checkpoint complete"
+    ;;
+esac
+
+echo ""
+echo "🎉 CHECKPOINT COMPLETE"
+echo "📍 Branch: $CURRENT_BRANCH"
+echo "🕐 Time: $(date)"
+```
+
+---
+
+## 🎯 Usage Patterns
+
+### **Development Workflow**
+```bash
+# While working on framework features
+@CHECKPOINT.md  # Auto-detects development branch
+                # → Commits, updates, creates PR
+```
+
+### **Integration Workflow**  
+```bash
+# After validation testing
+@CHECKPOINT.md  # Auto-detects integration branch
+                # → Commits results, updates, creates PR
+```
+
+### **Main Branch Coordination**
+```bash
+# Strategic planning and coordination
+@CHECKPOINT.md  # Auto-detects main branch
+                # → Commits status, pushes to main
+```
+
+---
+
+## ⚡ Intelligence Features
+
+- **🤖 Branch Auto-Detection**: Automatically adapts to current context
+- **📝 Intelligent Commit Messages**: Context-aware commit descriptions  
+- **🔄 Smart Updates**: Rebase from main to keep history clean
+- **🚀 Automated PRs**: Creates appropriate pull requests with detailed descriptions
+- **📊 Status Tracking**: Maintains project coordination across branches
+
+**Perfect for the Axiom development workflow with seamless human-AI collaboration!**

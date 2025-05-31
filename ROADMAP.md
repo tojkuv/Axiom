@@ -29,7 +29,7 @@
 #### **Main Branch Coordination**
 - ✅ **Branch Coordination System**: Updated @REFACTOR.md and @PLAN.md for branch-aware development
 - ✅ **Command System Revision**: All commands now support branch-specific operation and coordination
-- ⏳ **Technical Proposal Generation**: Strategic enhancement proposals using updated @PROPOSE.md
+- ⏳ **Technical Proposal Generation**: Strategic enhancement proposals using @PLAN (main branch)
 - ⏳ **Documentation Organization**: Structured documentation improvements and archive management
 
 ### **Branch Coordination Success Criteria**
@@ -88,7 +88,7 @@
 ### **Priority 3: Main Branch - Strategic Coordination** ⏳ READY
 **Target Branch**: Main branch (`/Proposals/`, Documentation, ROADMAP coordination)
 **Goal**: Strategic proposal management and documentation organization
-- ⏳ **Technical Proposal Generation**: Create enhancement proposals using @PROPOSE.md
+- ⏳ **Technical Proposal Generation**: Create enhancement proposals using @PLAN (main branch)
 - ⏳ **Documentation Organization**: Structure and organize framework and test app documentation
 - ⏳ **Archive Management**: Move completed work to organized archives
 - ⏳ **ROADMAP Coordination**: Maintain roadmap health and cross-branch coordination
@@ -783,7 +783,7 @@
 
 **ROADMAP STATUS**: Living coordination system operational ✅  
 **UPDATE OWNERSHIP**: Each cycle owns their deliverables, PLAN.md orchestrates sprints  
-**AUTOMATION READY**: Supports `@DEVELOP`/`@INTEGRATE`/`@REFACTOR`/`@PLAN`/`@PROPOSE` automated execution  
+**AUTOMATION READY**: Supports `@DEVELOP`/`@INTEGRATE`/`@REFACTOR`/`@PLAN` automated execution  
 **STRATEGIC ALIGNMENT**: All development coordinated toward intelligent, predictive iOS framework revolution
 
 **Use this roadmap as the single source of truth for all development coordination.**

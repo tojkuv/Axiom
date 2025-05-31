@@ -1,684 +1,430 @@
-# Axiom Framework: Multi-Terminal Development Planning Command
+# Axiom Framework: Intelligent Branch-Aware Planning Engine
 
-**Central planning coordination for three simultaneous Claude Code terminals**
+**Contextual planning that automatically adapts to current branch focus**
 
 ## 🤖 Automated Mode Trigger
 
 **When human sends**: `@PLAN`
-**Action**: Automatically enter ultrathink mode and execute terminal-aware planning
+**Action**: Automatically enter ultrathink mode and execute branch-aware planning
 
-**Enhanced Process**:
-1. **Detect Terminal Context** → Determine which terminal: main (refactor), development (framework), integration (test app)
-2. **Read PLAN.md** → Load this complete planning guide with multi-terminal coordination protocols
-3. **Check ROADMAP.md** → Assess current status, completed work, and cross-terminal coordination
-4. **Terminal Coordination** → Coordinate with other active terminals through ROADMAP.md
-5. **Plan Terminal Work** → Identify tasks for current terminal based on context and other terminal states
-6. **Update ROADMAP.md** → Update terminal-specific priorities and coordination status for other terminals to see
+**Branch-Aware Process**:
+1. **Detect Current Branch** → Determine planning context (main, development, integration)
+2. **Read PLAN.md** → Load this complete branch-aware planning guide
+3. **Check ROADMAP.md** → Assess current status, completed work, and branch coordination
+4. **Branch Coordination** → Plan work within branch scope and coordinate with other branches
+5. **Plan Branch Work** → Identify tasks for current branch based on context and priorities
+6. **Update ROADMAP.md** → Update branch-specific priorities and coordination status
 
 ## 🎯 PLAN Mode Mission
 
-**Primary Focus**: Coordinate three simultaneous Claude Code terminals with real-time parallel work coordination.
+**Primary Focus**: Intelligent branch-aware planning that automatically adjusts planning scope and priorities based on current branch context.
 
-**Enhanced Responsibility**: PLAN.md is the **Multi-Terminal Coordination Manager** - maintaining roadmap health, coordinating parallel work across terminals, and ensuring conflict-free development through real-time status updates.
+**Enhanced Responsibility**: PLAN.md is the **Branch-Aware Planning Engine** - detecting current branch and executing specialized planning for framework development, integration testing, or strategic coordination.
 
-**Philosophy**: Multi-terminal planning enables true parallel development and integration while maintaining code quality and avoiding merge conflicts through intelligent coordination via ROADMAP.md as the central communication hub.
+**Philosophy**: Planning should be contextual and intelligent. When called in development branch, plan framework work. When called in integration branch, plan integration work. When called in main branch, plan strategic work.
 
-## 🖥️ Three-Terminal Planning System
+## 🌿 Branch-Aware Planning Execution
 
-### **Terminal 1: Main Branch** → Comprehensive Refactoring Context
-**When Active**: ONLY when Terminal 2 (development) and Terminal 3 (integration) are both inactive/not committing
-**Purpose**: Comprehensive refactoring across entire codebase - framework, test app, and documentation
-**Focus**: 
-- Refactor framework code structure and organization in `/AxiomFramework/`
-- Refactor test app code structure and organization in `/AxiomTestApp/`
-- Improve cross-system consistency and architectural alignment
-- Archive completed development phases and organize documentation
-- Enhance code quality, maintainability, and performance patterns
-**Coordination**: Must check ROADMAP.md for other terminal activity before starting work
+### **When Called in Development Branch**
+**Automatic Behavior**: Plan framework development, enhancement, and testing work
+**Planning Focus**: Framework capabilities, APIs, performance optimization, architecture evolution
+**Work Details**: Stored in `/AxiomFramework/Documentation/` and tracked in `ROADMAP.md`
+**Methodology Reference**: General development approaches available in `@DEVELOP.md`
 
-### **Terminal 2: Development Branch** → Framework Planning Context  
-**When Active**: Can run parallel with Terminal 3 (integration), must coordinate with Terminal 1 (main)
-**Purpose**: Framework core enhancement and new capabilities
-**Focus**:
-- Implement framework limitations discovered through integration
-- Build new protocol implementations and capabilities
-- Design enhanced capability system features
-- Improve intelligence system accuracy and performance
-**Coordination**: Updates ROADMAP.md status for other terminals, coordinates file changes with Terminal 3
+**Development Branch Planning Priorities**:
+- 🔧 **Framework Features**: Plan new capabilities, protocols, and architectural improvements
+- ⚡ **Performance Work**: Plan optimization strategies and performance improvements
+- 🏗️ **API Development**: Plan interface improvements and developer experience enhancements
+- 🧪 **Testing Infrastructure**: Plan framework testing and validation capabilities
+- 📊 **Intelligence Features**: Plan AI and ML capability development
+- 🔄 **Code Quality**: Plan refactoring and structural improvements
 
-### **Terminal 3: Integration Branch** → Test App Planning Context
-**When Active**: Can run parallel with Terminal 2 (development), must coordinate with Terminal 1 (main)
-**Purpose**: Real-world validation and API refinement in AxiomTestApp
-**Focus**:
-- Validate new framework features in real-world scenarios
-- Test API ergonomics and developer experience improvements
-- Discover usage patterns and optimization opportunities
-- Measure performance against established targets
-**Coordination**: Updates ROADMAP.md status for other terminals, coordinates file changes with Terminal 2
+### **When Called in Integration Branch**
+**Automatic Behavior**: Plan integration testing, validation, and test app development work
+**Planning Focus**: Framework validation, developer experience testing, integration patterns
+**Work Details**: Stored in `/AxiomTestApp/Documentation/` and tracked in `ROADMAP.md`
+**Methodology Reference**: General integration approaches available in `@INTEGRATE.md`
 
-## 🔄 Multi-Terminal Coordination Principles
+**Integration Branch Planning Priorities**:
+- ✅ **Framework Validation**: Plan comprehensive testing of framework capabilities
+- 👥 **Developer Experience**: Plan API ergonomics testing and usability improvements
+- 🔗 **Integration Patterns**: Plan optimal framework usage patterns and examples
+- 📈 **Performance Validation**: Plan real-world performance testing and measurement
+- 📱 **Test App Development**: Plan test application features and validation scenarios
+- 🎯 **Usage Examples**: Plan integration documentation and usage patterns
 
-### **Terminal Activity Rules**
-- **Terminal 2 + Terminal 3**: Can work simultaneously on different file scopes
-- **Terminal 1 Exclusivity**: Refactor work ONLY when Terminal 2 and Terminal 3 are both completely inactive and not working on commits
-- **Real-Time Coordination**: All terminals use ROADMAP.md as central communication hub
-- **Manual Merge Control**: User decides when and how to merge branches from any terminal
+### **When Called in Main Branch**
+**Automatic Behavior**: Plan strategic coordination, generate technical enhancement proposals, and organize documentation
+**Planning Focus**: Strategic direction, proposal generation and management, documentation structure, roadmap coordination
+**Work Details**: Managed in `/Proposals/`, documentation folders, and `ROADMAP.md`
+**Methodology Reference**: Strategic planning approaches and technical enhancement proposal generation
 
-### **Terminal File Coordination Strategy**
-- **Terminal 2 (Development)**: New feature development in `/AxiomFramework/Sources/`, `/AxiomFramework/Tests/`, `/AxiomFramework/Package.swift`
-- **Terminal 3 (Integration)**: New integration testing in `/AxiomTestApp/`, integration documentation  
-- **Terminal 1 (Main)**: **COMPREHENSIVE REFACTORING** across entire codebase `/AxiomFramework/`, `/AxiomTestApp/`, `/Documentation/` - but ONLY when Terminal 2 and Terminal 3 are IDLE
-- **Coordination Principle**: Terminal 1 can refactor any code, but must wait for Terminal 2 and Terminal 3 to be completely inactive to avoid conflicts
-- **Shared Communication**: ROADMAP.md Terminal Status section used for real-time coordination
+**Main Branch Planning Priorities**:
+- 🔧 **Technical Proposal Generation**: Generate enhancement proposals for framework capabilities, performance, and developer experience
+- 📋 **Proposal Management**: Plan proposal review, approval workflows, and implementation coordination
+- 📚 **Documentation Organization**: Plan structure improvements and archive management
+- 🗺️ **ROADMAP Coordination**: Plan cross-branch coordination and strategic alignment
+- 📦 **Archive Management**: Plan historical work organization and accessibility
+- 🎯 **Strategic Direction**: Plan long-term framework development and vision coordination
 
-### **Terminal Status Communication**
-- **ROADMAP.md Terminal Status Section**: Each terminal updates its current activity status
-- **Commit/Push Notifications**: Terminals announce when they're actively committing/pushing
-- **Quiet Period Detection**: Terminal 1 monitors for Terminal 2 and Terminal 3 inactivity
-- **Cross-Terminal Awareness**: Each terminal checks other terminal status before major operations
+**Technical Enhancement Proposal Areas**:
+- **🏗️ Framework Architecture**: New patterns, module optimization, protocol design, error handling
+- **⚡ Performance & Optimization**: Advanced techniques, caching, concurrency, memory optimization
+- **🔧 Developer Experience**: API improvements, macro enhancements, debugging, type safety
+- **🧠 Intelligence & AI Features**: Pattern detection, predictive analysis, ML integration
+- **🔐 Capabilities & Validation**: New capability types, runtime detection, graceful degradation
+- **🧪 Testing & Quality**: Testing infrastructure, benchmarking, automated validation
 
-### **Integration with PROPOSE.md**
-**Strategic Improvement Coordination**: PROPOSE.md provides comprehensive strategic analysis and improvement proposals that can influence PLAN.md decisions across all branches.
+## 🔄 Command System Architecture
 
-**When to Use PROPOSE**:
-- Major milestone completion requiring strategic assessment
-- Innovation opportunity identification and evaluation  
-- Architectural rethinking and optimization needs
-- Process improvement and development velocity enhancement
+### **PLAN.md: Branch-Aware Planning Engine**
+- **Intelligent Detection**: Automatically detects current branch and adjusts planning behavior
+- **Development Branch**: Plans framework development work using @DEVELOP.md methodology
+- **Integration Branch**: Plans integration testing work using @INTEGRATE.md methodology  
+- **Main Branch**: Plans strategic coordination, proposals, and documentation organization
+- **Work Storage**: Specific plans stored in appropriate Documentation/ folders and ROADMAP.md
 
-**PROPOSE → PLAN Flow**:
-1. **PROPOSE.md** → Generates strategic improvement proposals
-2. **User Selection** → User chooses which proposals to implement
-3. **PLAN.md Integration** → Approved proposals influence branch planning and priority adjustments
-4. **Implementation Coordination** → PLAN.md coordinates proposal implementation across development/integration/main branches
+### **DEVELOP.md: General Development Methodology**
+- **Purpose**: Contains general development principles, approaches, and best practices
+- **Scope**: Framework development methodology and guidance
+- **Coordination**: Works with PLAN.md when called in development branch
+- **Specifics**: Detailed development work tracked in `/AxiomFramework/Documentation/` and `ROADMAP.md`
 
-## 🧹 ROADMAP HEALTH MANAGEMENT
+### **INTEGRATE.md: General Integration Methodology**
+- **Purpose**: Contains general integration principles, testing approaches, and validation methods
+- **Scope**: Integration testing methodology and guidance
+- **Coordination**: Works with PLAN.md when called in integration branch
+- **Specifics**: Detailed integration work tracked in `/AxiomTestApp/Documentation/` and `ROADMAP.md`
 
-**PLAN.md Enhanced Responsibility**: As the Roadmap Health Manager, PLAN.md maintains a clean, forward-looking roadmap focused on current and upcoming work, not historical accumulation.
+### **Documentation Hierarchy**
+- **@PLAN.md**: Branch-aware planning execution (detects branch and plans accordingly, includes proposal generation for main branch)
+- **@DEVELOP.md**: General development methodology and principles
+- **@INTEGRATE.md**: General integration methodology and principles
+- **@REFACTOR.md**: Branch-aware code organization and quality improvements
+- **@APPROVE.md**: Proposal review and integration system
+- **/AxiomFramework/Documentation/**: Specific development work details and tracking
+- **/AxiomTestApp/Documentation/**: Specific integration work details and tracking
+- **/Proposals/**: Technical enhancement proposals generated by @PLAN (main branch)
+- **ROADMAP.md**: Cross-branch coordination and progress tracking
+
+## 🔧 Technical Proposal Generation (Main Branch)
+
+When @PLAN is called in main branch, it includes technical enhancement proposal generation capabilities in addition to strategic planning.
+
+### **Proposal Generation Process**
+1. **Current State Assessment** → Analyze framework capabilities and identify enhancement opportunities
+2. **Technical Gap Analysis** → Find areas needing new capabilities or architectural improvements
+3. **Performance Review** → Identify optimization opportunities and performance improvements
+4. **Developer Experience Evaluation** → Assess API ergonomics and usability enhancements
+5. **Enhancement Opportunity Discovery** → Generate specific technical improvement proposals
+6. **Proposal File Creation** → Create structured proposal files in `/Proposals/Active/`
+7. **User Presentation** → Present enhancement proposals for review and approval
+
+### **Proposal Categories & Focus Areas**
+- **Framework Extensions** → New capabilities, protocols, and architectural patterns
+- **Performance Improvements** → Optimization techniques and advanced performance features
+- **Developer Experience** → API enhancements, tooling improvements, and ease-of-use features
+- **Architecture Evolution** → Structural improvements and advanced design patterns
+- **Quality & Testing** → Enhanced validation, testing infrastructure, and quality assurance
+
+### **Proposal File Structure**
+```markdown
+# Proposal: [Title]
+
+**Date**: YYYY-MM-DD
+**Category**: [Framework/TestApp/Process/Strategic]
+**Priority**: [High/Medium/Low]
+**Estimated Effort**: [Small/Medium/Large]
+**Impact**: [High/Medium/Low]
+
+## Problem Statement
+[What specific issue or opportunity does this address?]
+
+## Proposed Solution
+[Detailed description of the proposed improvement]
+
+## Benefits
+[Quantified benefits and improvements]
+
+## Implementation Plan
+[Step-by-step implementation approach]
+
+## Risk Assessment
+[Potential issues and mitigation strategies]
+
+## Success Metrics
+[How will success be measured?]
+
+## Dependencies
+[What other work must be completed first?]
+
+## Approval Requirements
+[What needs to happen to approve this proposal?]
+```
+
+### **Proposal Workflow Integration**
+- **Generation**: @PLAN (main branch) creates proposals in `/Proposals/Active/`
+- **Review**: User reviews generated proposals and selects those for implementation
+- **Approval**: @APPROVE command integrates selected proposals into roadmap and documentation
+- **Implementation**: Approved proposals become priorities for development and integration branches
+- **Tracking**: Proposal implementation tracked through ROADMAP.md and branch-specific documentation
+
+## 🧹 ROADMAP Health Management
+
+**PLAN.md Branch Coordination**: As the Branch Coordination Manager, PLAN.md maintains a healthy roadmap that reflects coordinated work across all branches.
 
 ### **Roadmap Health Targets**
-- **Active Content**: <300 lines total roadmap size
-- **Navigation Speed**: <30 seconds to find current sprint status  
-- **Decision Efficiency**: <2 minutes to plan next cycle from clean roadmap
-- **Historical Access**: All completed work preserved but archived, not cluttering active planning
+- **Active Content**: <300 lines total roadmap size for efficient navigation
+- **Navigation Speed**: <30 seconds to find current branch status and priorities
+- **Decision Efficiency**: <2 minutes to plan next work from clean roadmap
+- **Historical Access**: Completed work preserved in archives, not cluttering active planning
+- **Branch Clarity**: Clear separation of branch responsibilities and progress
 
 ### **Core Roadmap Maintenance Operations**
 
-#### **Phase A: Roadmap Health Assessment**
-1. **Size Analysis** → Check if ROADMAP.md exceeds 300 lines or clutters current priorities
-2. **Historical Content Review** → Identify completed phases/cycles ready for archival
-3. **Navigation Efficiency Check** → Ensure current sprint and priorities are immediately visible
-4. **Cleanup Opportunity Identification** → Find redundant, outdated, or overly detailed historical content
-
-#### **Phase B: Archive Management** 
-1. **Create Archive Documents** → Move completed phases to `/Documentation/Archive/` with comprehensive detail preservation
-2. **Archive Navigation Updates** → Ensure archived content remains accessible through clear links
-3. **Historical Summarization** → Replace detailed completed sections with concise summaries + archive links
-4. **Learning Preservation** → Maintain important discoveries and patterns in accessible archive format
-
-#### **Phase C: Current Priority Optimization**
-1. **Prominent Current Sprint** → Ensure active work is the first thing users see
-2. **Clear Priority Queue** → Make next 2-3 priorities immediately obvious for rapid planning
-3. **Completed Priority Removal** → Archive achieved priorities, advance priority queue
-4. **Decision-Making Optimization** → Structure roadmap for rapid cycle coordination
-
-#### **Phase D: Roadmap Quality Validation**
-1. **Size Compliance** → Verify roadmap remains <300 lines and navigable
-2. **Content Focus** → Confirm roadmap emphasizes current/future work over historical achievements
-3. **Archive Integrity** → Validate all archived content is properly linked and accessible
-4. **Planning Efficiency** → Test that clean roadmap enables faster cycle selection
-
-### **Archive Strategy and Organization**
-
-#### **Archive File Structure**
-```
-/Documentation/Archive/
-├── PHASE_1_2_FOUNDATION_ARCHIVE.md          # Detailed Phase 1-2 achievements
-├── DEVELOP_DELIVERABLES_ARCHIVE.md          # Historical development achievements  
-├── INTEGRATE_DELIVERABLES_ARCHIVE.md        # Historical integration results
-├── REFACTOR_DELIVERABLES_ARCHIVE.md         # Historical organization work
-├── QUARTERLY_ROADMAP_SNAPSHOTS/             # Periodic roadmap state preservation
-└── ARCHIVE_NAVIGATION.md                    # Master index for all archived content
-```
-
-#### **Archive Content Principles**
-- **Complete Preservation**: All historical detail maintained in archives
-- **Enhanced Organization**: Archived content better organized than original
-- **Searchable Structure**: Archives organized for easy reference and discovery
-- **Living Documents**: Archives updated when relevant to current work
-
-#### **Roadmap Summary Replacement Pattern**
-```markdown
-## Instead of 50+ lines of detailed historical deliverables:
-
-**DEVELOP Phases 1-2** ✅ COMPLETED (Archived)
-- Foundation infrastructure and enhanced APIs implemented  
-- [Complete Development History](../Documentation/Archive/DEVELOP_DELIVERABLES_ARCHIVE.md)
-
-**Current Phase**: Phase 3 Advanced Framework Patterns 🔄
-- ContextFactory implementation in progress
-- AxiomIntelligence concrete actor development  
-- Comprehensive test suite establishment
-```
-
-### **Command Mode Separation of Concerns**
-
-#### **What PLAN.md DOES (Roadmap Health Manager)**
-- ✅ **Current Sprint Management**: Updates CURRENT SPRINT STATUS with new cycle coordination
-- ✅ **Priority Queue Management**: Maintains UPCOMING PRIORITIES based on cycle completions
-- ✅ **Roadmap Cleanup**: Archives completed work, maintains <300 line target
-- ✅ **Historical Organization**: Ensures completed work is preserved but not cluttering
-- ✅ **Planning Coordination**: Traditional cycle planning based on clean, focused roadmap
-
-#### **What PLAN.md DOES NOT DO**
-- ❌ **Framework Implementation**: No coding, no technical development work
-- ❌ **Integration Testing**: No AxiomTestApp validation or performance measurement
-- ❌ **Documentation Organization**: No technical docs structure (that's REFACTOR.md)
-- ❌ **Strategic Analysis**: No strategic proposals (that's PROPOSE.md)
-
-#### **What Other Modes DO NOT DO**
-- **DEVELOP.md**: ❌ No roadmap cleanup, ❌ No priority management, ❌ No cycle planning
-- **INTEGRATE.md**: ❌ No roadmap updates, ❌ No sprint coordination, ❌ No historical archival  
-- **REFACTOR.md**: ❌ No roadmap maintenance, ❌ No sprint planning, ❌ No priority management
-- **PROPOSE.md**: ❌ No direct roadmap changes, ❌ No cycle coordination, ❌ No implementation
-
-## 📋 Multi-Terminal Planning Workflow
-
-### **Phase 1: Terminal Context Detection & Coordination Check**
-1. **Detect Current Terminal** → Determine planning context (Terminal 1: main, Terminal 2: development, Terminal 3: integration)
-2. **Check Other Terminal Status** → Read ROADMAP.md to assess what other terminals are actively working on
-3. **Assess Terminal Compatibility** → Determine if current terminal can work alongside other active terminals
-4. **Read CURRENT SPRINT STATUS** → Understand current multi-terminal development state
-5. **Identify Terminal Blockers** → Check if other terminals prevent current terminal work (especially Terminal 1)
-
-### **Phase 2: Terminal-Specific Planning**
-1. **Identify Terminal Priorities** → Select high-impact tasks for current terminal's file scope
-2. **Coordinate File Isolation** → Ensure current terminal work doesn't conflict with other terminals
-3. **Plan Parallel Work Strategy** → Enable Terminal 2 and Terminal 3 to work simultaneously
-4. **Estimate Terminal Effort** → Gauge complexity and time requirements for terminal-specific work
-
-### **Phase 3: Roadmap Health Management** (Multi-Terminal Aware)
-1. **Execute Roadmap Health Assessment** → Check roadmap coordination status across all terminals
-2. **Update Terminal Status** → Announce current terminal's planned work to other terminals
-3. **Coordinate Priority Updates** → Ensure terminal priorities don't conflict with other terminal work
-4. **Maintain Terminal Communication** → Keep ROADMAP.md as effective coordination hub
-
-### **Phase 4: Cross-Terminal Coordination**
-1. **Update TERMINAL STATUS** → Define current terminal work and announce to other terminals
-2. **Coordinate With Active Terminals** → Ensure Terminal 2 and Terminal 3 can work together, Terminal 1 waits for quiet
-3. **Plan Multi-Terminal Strategy** → Coordinate how multiple terminals work together without conflicts
-4. **Document Terminal Rationale** → Record why specific terminal work was planned and how it coordinates
-
-### **Phase 5: Terminal Work Preparation & Cross-Terminal Validation**
-1. **Validate Cross-Terminal Coordination** → Confirm terminals can work together without conflicts
-2. **Prepare Terminal Execution** → Ready for terminal-specific work with clear file scope boundaries
-3. **Set Terminal Status Monitoring** → Establish how terminals will monitor each other's activity
-4. **Define Terminal Success Criteria** → Set measurable goals for current terminal work with coordination requirements
-
-## 📋 Multi-Terminal ROADMAP.md Management Protocol
-
-**PLAN.md is the ONLY mode that updates CURRENT SPRINT STATUS and UPCOMING PRIORITIES**
-
-**ENHANCED RESPONSIBILITY**: PLAN.md is the **Multi-Terminal Coordination Manager** - the only mode that maintains roadmap health AND coordinates real-time status between three simultaneous terminals.
-
-### **ROADMAP.md Terminal Status Section** (NEW)
-
-Each terminal must update its status in ROADMAP.md for cross-terminal coordination:
-
-```markdown
-## 🖥️ TERMINAL STATUS (Real-Time Coordination)
-
-### **Terminal 1 (Main Branch)** 
-**Status**: [ACTIVE/WAITING/IDLE] 
-**Current Work**: [Description of current refactor/organization work]
-**Blocking For**: [Waiting for Terminal 2 and/or Terminal 3 to go idle]
-**Last Updated**: [Timestamp]
-
-### **Terminal 2 (Development Branch)**
-**Status**: [ACTIVE/COMMITTING/PUSHING/IDLE]
-**Current Work**: [Description of current framework development work] 
-**File Scope**: [Specific files being modified]
-**Coordination**: [How this work coordinates with Terminal 3]
-**Last Updated**: [Timestamp]
-
-### **Terminal 3 (Integration Branch)**
-**Status**: [ACTIVE/COMMITTING/PUSHING/IDLE] 
-**Current Work**: [Description of current integration/testing work]
-**File Scope**: [Specific files being modified]
-**Coordination**: [How this work coordinates with Terminal 2]
-**Last Updated**: [Timestamp]
-```
-
-### **Step 1: Read All Deliverables**
-Before planning, read the latest updates from each cycle mode:
-- **DEVELOP DELIVERABLES** → What framework work was completed
-- **INTEGRATE DELIVERABLES** → What validation and testing was completed
-- **REFACTOR DELIVERABLES** → What organizational work was completed
-
-### **Step 2: Execute Roadmap Health Management** (NEW - Enhanced Responsibility)
-Before updating sprint status, maintain roadmap health:
-
-#### **Roadmap Health Assessment**
-- **Size Check** → Does ROADMAP.md exceed 300 lines? Is navigation >30 seconds?
-- **Clutter Analysis** → Are completed phases/cycles cluttering current priorities?
-- **Priority Visibility** → Is current sprint immediately visible? Are next priorities clear?
-
-#### **Archive Management Operations**
-- **Identify Archive Candidates** → Completed phases, extensive historical deliverables, old cycle results
-- **Create Archive Documents** → Move completed content to `/Documentation/Archive/` with full detail preservation
-- **Update Archive Navigation** → Ensure archived content remains accessible via clear links
-- **Summarize for Roadmap** → Replace detailed sections with concise summaries + archive links
-
-#### **Roadmap Optimization**
-- **Prioritize Current Content** → Ensure current sprint and next 2-3 priorities are prominently featured
-- **Remove Historical Clutter** → Archive completed priorities, streamline deliverable sections
-- **Validate Size Target** → Confirm roadmap is <300 lines and decision-optimized
-
-### **Step 3: Update CURRENT SPRINT STATUS**
-
-**Template for new sprint:**
-```markdown
-## 🎯 CURRENT SPRINT STATUS
-
-**Active Sprint**: [CYCLE TYPE] [Sprint Name]
-**Sprint Owner**: [DEVELOP.md/INTEGRATE.md/REFACTOR.md]  
-**Sprint Goal**: [Clear, measurable objective for this sprint]
-**Sprint Duration**: [Expected timeframe]
-**Next Planning**: PLAN.md will assess deliverables and plan next sprint
-
-### **Active Tasks** 🔄
-- 🔄 **[Task 1]**: [Description of work to be completed]
-- 🔄 **[Task 2]**: [Description of work to be completed]
-- 🔄 **[Task 3]**: [Description of work to be completed]
-
-### **Sprint Success Criteria**
-- [ ] [Measurable success criterion 1]
-- [ ] [Measurable success criterion 2]
-- [ ] [Measurable success criterion 3]
-- [ ] [Framework integration requirement]
-- [ ] [Performance/quality requirement]
-```
-
-### **Step 4: Update UPCOMING PRIORITIES**
-
-**Reorder priorities based on:**
-- **Completed deliverables** → What was just finished
-- **Discovered requirements** → What the completed cycle revealed
-- **Strategic alignment** → What supports framework goals
-- **Dependency resolution** → What blocks can now be resolved
-
-**Priority Update Template:**
-```markdown
-### **Priority [N]: [Priority Name]** [STATUS]
-**Current Sprint**: [Which cycle is working on this / Next cycle planned]
-**Target**: [What this priority aims to achieve]
-**Next**: [What happens after current work / dependencies]
-```
-
-### **Examples of Sprint Planning**
-
-**Example 1: After DEVELOP Phase 2 Completes**
-```markdown
-**Active Sprint**: INTEGRATE Phase 2 Validation
-**Sprint Owner**: INTEGRATE.md  
-**Sprint Goal**: Validate @AxiomClient macro and type-safe patterns in AxiomTestApp
-**Sprint Duration**: Week 3-4 of Developer Experience Enhancement
-**Next Planning**: PLAN.md will assess integration results and plan Phase 3 or next priority
-
-### **Active Tasks** 🔄
-- 🔄 **@AxiomClient Macro Testing**: Validate 75% boilerplate reduction in complex scenarios
-- 🔄 **Type-Safe Access Validation**: Confirm error prevention in multi-domain configurations
-- 🔄 **Performance Measurement**: Ensure enhanced APIs maintain <5ms targets
-```
-
-**Example 2: After Major Integration Discovery**
-```markdown
-**Active Sprint**: DEVELOP Critical Fix Implementation
-**Sprint Owner**: DEVELOP.md
-**Sprint Goal**: Address integration limitations discovered in complex scenarios
-**Sprint Duration**: Week 1-2 Emergency Enhancement
-**Next Planning**: PLAN.md will assess fixes and plan continued integration testing
-
-### **Active Tasks** 🔄
-- 🔄 **Memory Leak Fix**: Resolve state binding memory issues in multi-domain scenarios
-- 🔄 **Performance Optimization**: Improve client discovery performance in complex configurations
-- 🔄 **API Enhancement**: Add missing convenience methods for discovered usage patterns
-```
-
-### **Multi-Terminal Coordination Decision Matrix**
-
-**Terminal 2 (Development) Can Work When:**
-- Framework limitations need code changes (independent of Terminal 3)
-- New framework features needed for strategic goals
-- Performance targets need framework-level optimization
-- Core architecture needs enhancement or new capabilities
-- **Coordination**: Can work simultaneously with Terminal 3, must avoid shared files
-
-**Terminal 3 (Integration) Can Work When:**
-- Framework features ready for real-world validation in AxiomTestApp
-- Developer experience needs measurement and refinement
-- Performance needs validation in complex test scenarios
-- Usage patterns need discovery and documentation
-- **Coordination**: Can work simultaneously with Terminal 2, must avoid shared files
-
-**Terminal 1 (Main) Can ONLY Work When:**
-- **BOTH Terminal 2 AND Terminal 3 are completely IDLE** (not committing, not pushing, not actively working)
-- Framework code needs structural refactoring and organization
-- Test app code needs refactoring and consistency improvements
-- Cross-system refactoring needed for architectural alignment
-- Major development phase completion needs archival
-- Documentation organization needs improvement
-- **Critical**: Must check ROADMAP.md Terminal Status before starting ANY work
-
-### **Critical Rules for PLAN.md Updates**
-- ✅ **Only PLAN.md updates CURRENT SPRINT** and UPCOMING PRIORITIES
-- ✅ **Read ALL deliverable sections** before making planning decisions
-- ✅ **Base decisions on concrete deliverables** not assumptions
-- ✅ **Define measurable success criteria** for every sprint
-- ✅ **Document planning rationale** for future reference
-
-## 🎯 Planning Priorities by Branch Context
-
-### **Development Branch Planning**
-**Primary Focus**: Framework core enhancement
-**File Scope**: `/AxiomFramework/Sources/` and related framework code
-
-**Typical Tasks**:
-- Implement missing framework APIs discovered in integration
-- Enhance performance of critical framework components
-- Add new capability types and validation patterns
-- Improve intelligence system accuracy and speed
-- Implement advanced architectural constraints
-
-**Success Criteria**:
-- New framework capabilities implemented and tested
-- Performance targets maintained or improved
-- API consistency and type safety preserved
-- No breaking changes to existing functionality
-
-### **Integration Branch Planning**  
-**Primary Focus**: Real-world validation in AxiomTestApp
-**File Scope**: `/AxiomTestApp/` and test application code
-
-**Typical Tasks**:
-- Test new framework features in AxiomTestApp
-- Validate API ergonomics and developer experience
-- Measure performance against established targets
-- Discover usage patterns and common scenarios
-- Identify framework limitations and improvement opportunities
-
-**Success Criteria**:
-- AxiomTestApp successfully uses new framework features
-- Performance targets validated in real scenarios
-- Developer experience improvements documented
-- New requirements identified for future development
-
-### **Main Branch Planning**
-**Primary Focus**: Comprehensive refactoring and organizational improvements
-**File Scope**: **ENTIRE CODEBASE** - `/AxiomFramework/`, `/AxiomTestApp/`, `/Documentation/`
-
-**Typical Tasks**:
-- Refactor framework code structure and organization
-- Refactor test app code structure and consistency
-- Improve cross-system architectural alignment
-- Archive completed development phase documentation
-- Reorganize code and documentation for better maintainability
-- Enhance code quality and eliminate duplication
-- Standardize patterns across framework and test app
-- Optimize performance patterns and memory management
-
-**Success Criteria**:
-- Framework code well-organized and maintainable
-- Test app code follows consistent patterns and structure
-- Cross-system consistency achieved between framework and test app
-- Documentation well-organized and navigable
-- Code quality improvements reduce technical debt
-- Development environment optimized for parallel work
-- Historical work properly archived and accessible
-
-## 📊 Branch Coordination Decision Matrix
-
-### **Current Branch: Development**
-- **High integration needs** → Coordinate with integration branch for parallel validation
-- **Documentation debt** → Wait for main branch availability or coordinate shared files
-- **Continued development** → Continue development branch work with regular commits
-
-### **Current Branch: Integration**
-- **Framework limitations found** → Coordinate with development branch for parallel fixes
-- **Phase completion** → Prepare for main branch documentation when available
-- **More validation needed** → Continue integration branch work and testing
-
-### **Current Branch: Main**
-- **Development work needed** → Switch to development branch after completing organization
-- **Integration testing needed** → Switch to integration branch after completing organization
-- **More organization needed** → Continue main branch cleanup and archival work
-
-## 🔄 ROADMAP.md Update Patterns
-
-### **Progress Tracking Updates**
-```markdown
-# Mark completed work
-- ✅ **Task Name**: Description of completed work
-- 🔄 **Task Name**: Work in progress → ✅ **Task Name**: Completed description
-
-# Update priority status  
-### **Priority 1: Current Focus** ✅ COMPLETED
-### **Priority 2: Next Focus** 🔄 ACTIVE
-```
-
-### **Cycle Results Documentation**
-```markdown
-## 📚 [CYCLE] CYCLE RESULTS
-
-### **[CYCLE] Cycle [N] Completed** ✅ (Brief Description)
-**[Context]**: What was discovered or achieved
-**Solutions Implemented**:
-- ✅ **Achievement 1**: Description
-- ✅ **Achievement 2**: Description
-
-**Results**:
-- ✅ Specific measurable outcome
-- ✅ Validation or proof of success
-```
-
-### **Active Priority Matrix Updates**
-```markdown
-### **Priority 1: [Current Focus]** 🔄 ACTIVE
-**Target Cycle**: [DEVELOP/INTEGRATE/REFACTOR]
-- 🔄 **Active Task**: Current work description
-- ⏳ **Queued Task**: Planned follow-up work
-
-### **Priority 2: [Next Focus]** ⏳ QUEUED
-**Target Cycle**: [DEVELOP/INTEGRATE/REFACTOR]
-- ⏳ **Planned Task**: Future work description
-```
-
-## 🎯 Branch-Aware Planning Templates
-
-### **Development Branch** Template
-```markdown
-## Development Branch Planning
-
-### Framework Enhancement Focus
-- **Core Systems**: [Capabilities/Intelligence/State/SwiftUI]
-- **Performance**: [Targets to achieve]
-- **API Design**: [New protocols or improvements]
-- **File Scope**: /AxiomFramework/Sources/ and related framework code
-
-### Implementation Tasks
-1. **High Priority**: [Critical framework needs]
-2. **Medium Priority**: [Important enhancements]
-3. **Nice to Have**: [Optional improvements]
-
-### Branch Coordination
-- **Parallel Integration**: [How integration branch can test changes]
-- **Merge Strategy**: [When and how to merge to main]
-- **Conflict Prevention**: [Files to coordinate with other branches]
-
-### Success Criteria
-- [ ] Framework builds successfully
-- [ ] New features implemented and tested
-- [ ] Performance targets maintained
-- [ ] No breaking changes introduced
-- [ ] Ready for integration branch testing
-```
-
-### **Integration Branch** Template  
-```markdown
-## Integration Branch Planning
-
-### Validation Focus
-- **New Features**: [Framework capabilities to test in AxiomTestApp]
-- **Performance**: [Metrics to measure in real scenarios]
-- **Developer Experience**: [Usability to assess]
-- **File Scope**: /AxiomTestApp/ and test application code
-
-### Integration Tasks
-1. **Feature Testing**: [Test new framework capabilities]
-2. **Performance Validation**: [Measure against targets]
-3. **Pattern Discovery**: [Find usage patterns]
-
-### Branch Coordination
-- **Parallel Development**: [How development branch changes are incorporated]
-- **Merge Strategy**: [When and how to merge to main]
-- **Feedback Loop**: [How to communicate findings to development branch]
-
-### Success Criteria
-- [ ] AxiomTestApp successfully integrates new features
-- [ ] Performance validated in real scenarios
-- [ ] Developer experience improvements documented
-- [ ] Framework limitations identified and communicated
-```
-
-### **Main Branch** Template
+#### **Phase A: Branch Status Assessment**
+1. **Branch Progress Review** → Check progress across main, development, and integration branches
+2. **Priority Alignment** → Ensure branch priorities support overall framework goals
+3. **Coordination Needs** → Identify where branches need to coordinate or share information
+4. **Roadmap Size Check** → Verify roadmap remains focused and navigable
+
+#### **Phase B: Cross-Branch Planning**
+1. **Main Branch Planning** → Strategic planning, proposals, documentation organization
+2. **Development Branch Planning** → Framework enhancement and capability development
+3. **Integration Branch Planning** → Validation, testing, and developer experience improvement
+4. **Coordination Planning** → Plan how branches share progress and coordinate major milestones
+
+#### **Phase C: Priority Organization**
+1. **Branch Priority Updates** → Update priorities for each branch based on progress and needs
+2. **Cross-Branch Dependencies** → Identify and plan for work that depends on other branches
+3. **Timeline Coordination** → Align branch timelines for major releases and milestones
+4. **Resource Allocation** → Plan effort distribution across branches
+
+#### **Phase D: Roadmap Optimization**
+1. **Content Organization** → Ensure roadmap clearly shows current and upcoming work
+2. **Archive Management** → Move completed work to archives while maintaining accessibility
+3. **Navigation Improvement** → Optimize roadmap structure for efficient planning
+4. **Status Clarity** → Ensure branch status and coordination is clearly visible
+
+## 📋 Branch-Specific Planning Workflow
+
+### **Main Branch Planning Process**
+
+#### **Strategic Planning Assessment**
+1. **Proposal Pipeline Review** → Assess active proposals and approval needs
+2. **Documentation Status** → Review documentation organization and improvement needs
+3. **ROADMAP Health Check** → Evaluate roadmap organization and coordination effectiveness
+4. **Archive Management** → Plan historical work organization and accessibility
+5. **Cross-Branch Coordination** → Plan how to support development and integration branches
+
+#### **Main Branch Work Planning**
+1. **Proposal Management Tasks** → Plan proposal review, organization, and approval workflows
+2. **Documentation Projects** → Plan documentation organization and structure improvements
+3. **ROADMAP Updates** → Plan roadmap coordination and health maintenance
+4. **Strategic Initiatives** → Plan long-term framework direction and vision
+5. **Archive Organization** → Plan completed work organization and historical access
+
+### **Development Branch Planning Process**
+
+#### **Framework Enhancement Assessment**
+1. **Capability Gaps** → Identify framework capabilities needing development or enhancement
+2. **API Improvement Opportunities** → Find API design improvements and developer experience enhancements
+3. **Performance Optimization** → Identify performance improvement opportunities
+4. **Architecture Evolution** → Plan structural improvements and advanced patterns
+5. **Integration Feedback** → Review integration branch feedback for framework improvements
+
+#### **Development Branch Work Planning**
+1. **Framework Features** → Plan new capabilities, protocols, and architectural improvements
+2. **API Development** → Plan API design improvements and interface enhancements
+3. **Performance Work** → Plan optimization strategies and performance improvements
+4. **Testing Infrastructure** → Plan framework testing and validation improvements
+5. **Code Quality** → Plan refactoring and structural improvements
+
+### **Integration Branch Planning Process**
+
+#### **Validation Assessment**
+1. **Framework Testing Needs** → Identify framework capabilities needing validation
+2. **Developer Experience Gaps** → Find areas where framework usage could be improved
+3. **Integration Patterns** → Assess optimal framework usage patterns and examples
+4. **Performance Validation** → Plan real-world performance testing and measurement
+5. **Test App Enhancement** → Identify test application improvement opportunities
+
+#### **Integration Branch Work Planning**
+1. **Validation Scenarios** → Plan comprehensive framework capability testing
+2. **Developer Experience** → Plan API ergonomics testing and usability improvements
+3. **Integration Examples** → Plan optimal usage pattern development and documentation
+4. **Performance Testing** → Plan real-world performance validation and measurement
+5. **Test App Development** → Plan test application features and validation scenarios
+
+## 🎯 Branch Planning Priorities
+
+### **Main Branch Planning Priorities**
+1. **Proposal Management** → Maintain efficient proposal workflow and strategic direction
+2. **Documentation Organization** → Keep documentation well-structured and accessible
+3. **ROADMAP Coordination** → Maintain healthy roadmap and cross-branch coordination
+4. **Archive Management** → Properly organize historical work and maintain accessibility
+5. **Strategic Planning** → Coordinate long-term framework development direction
+
+### **Development Branch Planning Priorities**
+1. **Framework Capabilities** → Plan development of new features and enhancements
+2. **API Excellence** → Plan API design improvements and developer experience
+3. **Performance Optimization** → Plan optimization strategies and performance improvements
+4. **Architecture Quality** → Plan structural improvements and advanced patterns
+5. **Testing Infrastructure** → Plan framework testing and validation capabilities
+
+### **Integration Branch Planning Priorities**
+1. **Comprehensive Validation** → Plan thorough testing of framework capabilities
+2. **Developer Experience** → Plan usability testing and integration pattern development
+3. **Real-World Testing** → Plan performance validation and real-world usage scenarios
+4. **Integration Examples** → Plan optimal usage pattern development and examples
+5. **Test App Quality** → Plan test application improvements and validation scenarios
+
+## 🔧 Branch Coordination Templates
+
+### **Main Branch Planning Template**
 ```markdown
 ## Main Branch Planning
 
-### Organization Focus
-- **Documentation**: [Areas needing cleanup and archival]
-- **Structure**: [Organizational improvements needed]
-- **Archive**: [Completed work to archive]
-- **File Scope**: /Documentation/ and organizational structure
+### Strategic Priorities
+- **Proposals**: [Current proposal status and needs]
+- **Documentation**: [Organization and improvement priorities]
+- **ROADMAP**: [Coordination and health maintenance needs]
+- **Archives**: [Historical work organization priorities]
 
-### Refactor Tasks
-1. **Archive**: [Move completed documentation to archives]
-2. **Organize**: [Restructure for better navigation]  
-3. **Prepare**: [Ready environment for next development phases]
-
-### Branch Coordination
-- **Wait for Quiet**: [Ensure development and integration branches are stable]
-- **Merge Integration**: [Plan when to merge other branches]
-- **Conflict Resolution**: [Handle any merge conflicts]
+### Coordination Needs
+- **Development Branch**: [Support needed for framework development]
+- **Integration Branch**: [Support needed for validation and testing]
+- **Cross-Branch**: [Coordination requirements for major milestones]
 
 ### Success Criteria
-- [ ] Documentation well-organized and navigable
-- [ ] Completed work properly archived
-- [ ] Structure supports parallel development
-- [ ] Cross-references validated
-- [ ] Ready for new development/integration work
+- [ ] Proposal workflow is efficient and strategic
+- [ ] Documentation is well-organized and accessible
+- [ ] ROADMAP coordinates branches effectively
+- [ ] Historical work is properly archived
 ```
 
-## 🤖 Multi-Terminal Automated Planning Process
+### **Development Branch Planning Template**
+```markdown
+## Development Branch Planning
+
+### Framework Priorities
+- **Capabilities**: [New features and enhancements needed]
+- **APIs**: [Interface improvements and developer experience]
+- **Performance**: [Optimization opportunities and targets]
+- **Architecture**: [Structural improvements and patterns]
+
+### Implementation Tasks
+- **High Priority**: [Critical framework development needs]
+- **Medium Priority**: [Important enhancements and improvements]
+- **Future Work**: [Planned capabilities and enhancements]
+
+### Success Criteria
+- [ ] Framework capabilities meet development targets
+- [ ] APIs provide excellent developer experience
+- [ ] Performance targets are achieved
+- [ ] Architecture supports long-term goals
+```
+
+### **Integration Branch Planning Template**
+```markdown
+## Integration Branch Planning
+
+### Validation Priorities
+- **Framework Testing**: [Capabilities needing validation]
+- **Developer Experience**: [Usability testing and improvement]
+- **Integration Patterns**: [Optimal usage pattern development]
+- **Performance**: [Real-world performance validation]
+
+### Testing Tasks
+- **Validation Scenarios**: [Framework capability testing]
+- **Integration Examples**: [Usage pattern development]
+- **Performance Testing**: [Real-world performance measurement]
+- **Test App Features**: [Application development and validation]
+
+### Success Criteria
+- [ ] Framework capabilities are thoroughly validated
+- [ ] Developer experience is excellent
+- [ ] Integration patterns are optimal
+- [ ] Real-world performance meets targets
+```
+
+## 🚀 Planning Success Metrics
+
+### **Cross-Branch Coordination**
+- **Clear Responsibilities**: Each branch has focused scope without overlap
+- **Efficient Communication**: Branches coordinate effectively through ROADMAP.md
+- **Independent Progress**: Branches can work simultaneously without conflicts
+- **Strategic Alignment**: All branches support overall framework goals
+- **Quality Maintenance**: All branches maintain high code and documentation quality
+
+### **Planning Effectiveness**
+- **Realistic Scope**: Branch planning creates achievable work plans
+- **Priority Alignment**: Branch priorities support framework strategic goals
+- **Resource Optimization**: Effort is efficiently distributed across branches
+- **Progress Tracking**: Branch progress is clearly visible and coordinated
+- **Continuous Improvement**: Planning improves based on branch feedback and results
+
+### **Framework Development Velocity**
+- **Parallel Development**: Branches work simultaneously on complementary efforts
+- **Focused Expertise**: Each branch develops specialized knowledge and capability
+- **Reduced Conflicts**: Clear scope boundaries prevent coordination overhead
+- **Quality Assurance**: Specialized refactoring maintains code quality in each branch
+- **Strategic Coherence**: All branch work contributes to cohesive framework evolution
+
+## 🤖 Automated Branch-Aware Planning
 
 **Planning Command**: `@PLAN`
-**Action**: Automatically detect current terminal and execute terminal-appropriate planning with cross-terminal coordination
+**Action**: Automatically detect current branch and execute contextual planning with methodology integration
 
-**Automated Workflow**:
-1. **Detect Current Terminal** → Determine context (Terminal 1: main, Terminal 2: development, Terminal 3: integration)
-2. **Check Other Terminal Status** → Read ROADMAP.md Terminal Status section to assess other terminal activity
-3. **Assess Terminal Compatibility** → Determine if current terminal can work alongside other active terminals
-4. **Update Progress** → Mark completed tasks as ✅ in roadmap with terminal coordination
-5. **Plan Terminal Work** → Identify tasks for current terminal context with file scope isolation
-6. **Update Terminal Status** → Announce current terminal work to other terminals via ROADMAP.md
-7. **Coordinate Cross-Terminal** → Ensure Terminal 1 waits for quiet, Terminal 2+3 can work in parallel
-8. **Document Results** → Record planning decisions and multi-terminal coordination strategy
+**Branch Detection & Planning Workflow**:
+```bash
+# Development Branch Context
+if on development branch:
+    methodology = @DEVELOP.md  # General development principles and approaches
+    work_details = /AxiomFramework/Documentation/  # Specific development tasks and tracking
+    focus = "Framework development, APIs, performance, testing infrastructure"
 
-**Terminal Context Integration**:
-- **Terminal 2 (Development)** → Plan framework enhancement work in /AxiomFramework/Sources/
-- **Terminal 3 (Integration)** → Plan AxiomTestApp validation work in /AxiomTestApp/
-- **Terminal 1 (Main)** → Plan documentation organization ONLY when Terminal 2 and Terminal 3 are both IDLE
+# Integration Branch Context  
+elif on integration branch:
+    methodology = @INTEGRATE.md  # General integration principles and approaches
+    work_details = /AxiomTestApp/Documentation/  # Specific integration tasks and tracking
+    focus = "Framework validation, developer experience, integration patterns"
 
-**ROADMAP.md as Multi-Terminal Communication Hub**:
-- ONLY PLAN.md updates ROADMAP.md sprint status and priorities
-- ALL terminals use ROADMAP.md Terminal Status for real-time coordination
-- Terminal coordination managed through unified roadmap system
-- Progress tracking and terminal status maintained in central location for cross-terminal awareness
-
-## 📈 Planning Success Metrics
-
-### **Planning Quality**
-- **Task Alignment**: Chosen tasks address current priorities
-- **Dependency Management**: Prerequisites satisfied before planning
-- **Realistic Scope**: Tasks achievable within cycle timeframe
-- **Strategic Focus**: Planning supports long-term framework goals
-
-### **Roadmap Accuracy**
-- **Current Status**: ROADMAP.md reflects actual development state
-- **Progress Tracking**: Completed work properly marked as ✅
-- **Priority Organization**: Active tasks clearly identified
-- **Future Planning**: Queued work logically sequenced
-
-### **Cycle Coordination**
-- **Smooth Transitions**: Cycles flow naturally from planning
-- **Context Preservation**: Important information carries forward
-- **Learning Integration**: Discoveries influence future planning
-- **Development Velocity**: Planning accelerates rather than slows progress
-
-## 🔄 Example Multi-Terminal Coordination Flows
-
-### **Parallel Terminal 2 + Terminal 3 Flow**
-```
-1. Terminal 2 (Development) works on framework features in /AxiomFramework/Sources/
-2. Terminal 3 (Integration) simultaneously works on AxiomTestApp validation in /AxiomTestApp/
-3. Both terminals update ROADMAP.md Terminal Status to show ACTIVE work
-4. Both terminals coordinate file scope to avoid conflicts
-5. Both terminals work independently until user decides to merge
-6. Terminal 1 (Main) remains WAITING until both terminals go IDLE
+# Main Branch Context
+elif on main branch:
+    methodology = "Strategic planning and proposal generation"  # Strategic coordination and technical enhancement proposals
+    work_details = "/Proposals/, Documentation folders, ROADMAP.md"  # Strategic work and proposal tracking
+    focus = "Technical proposal generation, proposal management, documentation organization, roadmap coordination"
 ```
 
-### **Terminal 3 Discovery → Terminal 2 Coordination Flow**  
-```
-1. Terminal 3 discovers framework limitations in AxiomTestApp testing
-2. Terminal 3 updates ROADMAP.md with findings and sets status to communicate with Terminal 2
-3. Terminal 2 reads Terminal 3 findings and plans framework fixes
-4. Terminal 2 implements fixes while Terminal 3 continues testing in parallel
-5. Both terminals coordinate through ROADMAP.md status updates
-6. Real-time parallel work until fixes address Terminal 3 needs
-```
+**Automated Planning Execution**:
+1. **Branch Detection** → Determine current git branch (main, development, integration)
+2. **Methodology Loading** → Reference appropriate methodology guide (@DEVELOP.md or @INTEGRATE.md)
+3. **Work Assessment** → Review current work in branch-specific Documentation/ folders and ROADMAP.md
+4. **Priority Planning** → Plan next priorities using methodology guidance and current context
+5. **Documentation Updates** → Update work details in appropriate Documentation/ folders
+6. **ROADMAP Coordination** → Update ROADMAP.md with branch-specific progress and plans
+7. **Cross-Branch Awareness** → Ensure planning coordinates with other branch activities
 
-### **Terminal 1 Refactor Opportunity Flow**
-```
-1. Terminal 2 and Terminal 3 both complete their work and go IDLE
-2. Terminal 1 checks ROADMAP.md Terminal Status to confirm both terminals are IDLE
-3. Terminal 1 plans refactor/organization work and updates status to ACTIVE
-4. Terminal 1 works on documentation organization and archival
-5. Terminal 1 completes work and goes back to WAITING
-6. Terminal 2 and Terminal 3 can resume ACTIVE work when needed
-```
-
-## 🎯 Strategic Planning Considerations
-
-### **Framework Maturity Phases**
-- **Foundation Phase** ✅ COMPLETE → Focus on stability and validation
-- **Enhancement Phase** 🔄 CURRENT → Focus on developer experience and advanced features
-- **Maturity Phase** ⏳ FUTURE → Focus on community and ecosystem
-
-### **Long-term Strategic Alignment**
-- **Performance Targets**: Ensure all planning supports performance goals
-- **Developer Experience**: Prioritize usability and API ergonomics
-- **Intelligence Features**: Build toward predictive architecture capabilities
-- **Community Readiness**: Prepare for external developer adoption
-
-### **Risk Management in Planning**
-- **Technical Debt**: Balance new features with code quality
-- **Scope Creep**: Maintain focus on core framework value
-- **Integration Complexity**: Ensure real-world usage stays simple
-- **Performance Regression**: Validate performance with each cycle
+**Command Integration Model**:
+- **@PLAN** (development branch) + **@DEVELOP.md** → Framework development planning with general methodology
+- **@PLAN** (integration branch) + **@INTEGRATE.md** → Integration testing planning with general methodology
+- **@PLAN** (main branch) → Strategic planning, technical proposal generation, and documentation organization
+- **@APPROVE** → Proposal review and integration system (works with proposals generated by @PLAN main branch)
+- **Work Details** → Stored in appropriate `/Documentation/` folders and tracked in `ROADMAP.md`
+- **Proposals** → Generated by @PLAN (main branch) and managed through @APPROVE workflow
+- **Progress Coordination** → All branches update `ROADMAP.md` for cross-branch awareness
 
 ---
 
-**PLANNING STATUS**: Comprehensive multi-terminal coordination system for three simultaneous Claude Code terminals  
-**ROADMAP INTEGRATION**: Single source of truth for all terminal development planning with real-time Terminal Status coordination  
-**AUTOMATED EXECUTION**: Ready for `@PLAN` command with ultrathink and terminal detection across three active terminals  
-**STRATEGIC INTEGRATION**: Coordinates with `@PROPOSE` for continuous improvement across all terminals and branches  
-**TERMINAL COORDINATION**: Seamless workflow between Terminal 1 (main), Terminal 2 (development), Terminal 3 (integration) with parallel work support, real-time status communication, and conflict prevention through ROADMAP.md coordination hub
+**PLANNING STATUS**: Intelligent branch-aware planning engine with integrated proposal generation ✅  
+**BRANCH INTELLIGENCE**: Automatically detects branch context and adapts planning behavior  
+**METHODOLOGY INTEGRATION**: Works with @DEVELOP.md and @INTEGRATE.md for general guidance  
+**PROPOSAL GENERATION**: Technical enhancement proposal generation when called in main branch  
+**WORK STORAGE**: Specific plans stored in appropriate Documentation/ folders and ROADMAP.md  
+**DEVELOPMENT PLANNING**: Framework development planning when called in development branch  
+**INTEGRATION PLANNING**: Integration testing planning when called in integration branch  
+**STRATEGIC PLANNING**: Proposal generation, coordination, and documentation planning when called in main branch  
+**AUTOMATION READY**: Supports `@PLAN` command with intelligent branch detection and contextual execution
+
+**Use @PLAN in any branch for intelligent, contextual planning that automatically adapts to your current development focus and generates technical enhancement proposals when needed.**
