@@ -8,7 +8,7 @@ Application development planning command that creates proposals for application 
 **Action**: Enter ultrathink mode and execute application development planning workflow
 
 ### Usage Modes
-- **`@PLAN`** → Create application development proposal in AxiomTestApp/Proposals/Active/
+- **`@PLAN`** → Create application development proposal in AxiomExampleApp/Proposals/Active/
 - **`@PLAN plan`** → Plan application development tasks and create proposal
 - **`@PLAN validate`** → Plan application validation and create testing proposal
 - **`@PLAN enhance`** → Plan application enhancements and user experience improvements
@@ -70,27 +70,32 @@ All ApplicationDevelopment commands follow this workflow:
 
 ## Application Proposal Creation Process
 
-### Application Proposals (AxiomTestApp/Proposals/Active/)
+### Application Proposals (AxiomExampleApp/Proposals/)
 **Focus**: Test application development, framework integration validation, user experience implementation
-**Directory**: `/Users/tojkuv/Documents/GitHub/Axiom/AxiomTestApp/Proposals/Active/`
+**Directories**: 
+- Active/: Application proposals under development
+- WaitingApproval/: Application proposals ready for user review
+- Archive/: Completed application proposals
 **Implementation**: Implemented through ApplicationDevelopment/DEVELOP.md
 **Progress Tracking**: Tracked in ApplicationDevelopment/TRACKING.md
 
 ## Application Proposal Lifecycle Management
 
 ### Application Proposal States
-- **Active**: Application proposal created in Active/ directory, ready for user review
+- **Active**: Application proposal created in Active/ directory, under development
+- **Waiting Approval**: Application proposal moved to WaitingApproval/ directory, ready for user review
 - **Under Revision**: User requests changes, application proposal updated in Active/ directory
 - **Approved**: User approves application proposal, ready for ApplicationDevelopment/DEVELOP.md implementation
 - **In Development**: ApplicationDevelopment/DEVELOP.md implementing proposal, progress tracked in TRACKING.md
 - **Completed**: Application implementation complete, proposal archived to Archive/ directory
 
 ### Application Workflow Integration
-1. **ApplicationDevelopment/@PLAN** → Creates application proposal in AxiomTestApp/Proposals/Active/
-2. **User Review** → User reviews and optionally revises application proposal
-3. **User Approval** → User approves application proposal for implementation
-4. **ApplicationDevelopment/@DEVELOP** → Implements application proposal, tracks progress in TRACKING.md
-5. **ApplicationDevelopment/@CHECKPOINT** → Completes application implementation, archives proposal
+1. **ApplicationDevelopment/@PLAN** → Creates application proposal in AxiomExampleApp/Proposals/Active/
+2. **Proposal Completion** → Application proposal moved to AxiomExampleApp/Proposals/WaitingApproval/
+3. **User Review** → User reviews and optionally revises application proposal
+4. **User Approval** → User approves application proposal for implementation
+5. **ApplicationDevelopment/@DEVELOP** → Implements application proposal, tracks progress in TRACKING.md
+6. **ApplicationDevelopment/@CHECKPOINT** → Completes application implementation, archives proposal
 
 ## Application Planning Command Execution
 
@@ -103,7 +108,7 @@ All ApplicationDevelopment commands follow this workflow:
 3. **Application Context Analysis** → Analyze existing application implementation and identify development needs
 4. **Requirements Assessment** → Understand application development objectives and constraints
 5. **Technical Planning** → Design application technical approach and implementation strategy
-6. **Application Proposal Creation** → Create structured application proposal in AxiomTestApp/Proposals/Active/
+6. **Application Proposal Creation** → Create structured application proposal in AxiomExampleApp/Proposals/Active/
 7. **Review Preparation** → Prepare application proposal for user review and potential revision
 
 **Application Planning Execution Examples**:
@@ -140,7 +145,7 @@ All ApplicationDevelopment commands follow this workflow:
 
 ## Application Planning Coordination
 
-**Proposal Creation**: Creates application proposals in AxiomTestApp/Proposals/Active/ directory
+**Proposal Creation**: Creates application proposals in AxiomExampleApp/Proposals/Active/ directory, moves to WaitingApproval/ when ready for review
 **User Interaction**: Application proposals designed for user review, revision, and approval
 **Development Integration**: Application proposals implemented through ApplicationDevelopment/DEVELOP.md
 **Progress Monitoring**: Application implementation progress tracked through ApplicationDevelopment/TRACKING.md
@@ -150,7 +155,7 @@ All ApplicationDevelopment commands follow this workflow:
 
 **APPLICATION PLANNING COMMAND STATUS**: Application development planning command with proposal creation and management
 **CORE FOCUS**: Strategic application proposal creation for application development  
-**PROPOSAL CREATION**: Creates structured application proposals in AxiomTestApp/Proposals/Active/
+**PROPOSAL CREATION**: Creates structured application proposals in AxiomExampleApp/Proposals/Active/
 **USER WORKFLOW**: Application proposals for user review, revision, and approval before implementation
 **INTEGRATION**: Workflow integration with ApplicationDevelopment/DEVELOP.md and TRACKING progress monitoring
 

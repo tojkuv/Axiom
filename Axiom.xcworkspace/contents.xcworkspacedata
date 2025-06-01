@@ -5,6 +5,6 @@
       location = "group:AxiomFramework">
    </FileRef>
    <FileRef
-      location = "group:AxiomTestApp/ExampleApp.xcodeproj">
+      location = "group:AxiomExampleApp/ExampleApp.xcodeproj">
    </FileRef>
 </Workspace>

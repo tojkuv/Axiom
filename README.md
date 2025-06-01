@@ -60,7 +60,7 @@ Axiom/ (this directory)
 │   ├── Sources/Axiom/            ← Framework implementation
 │   ├── Tests/                    ← Test suite
 │   └── Documentation/            ← Technical specifications
-├── AxiomTestApp/                 ← iOS test application
+├── AxiomExampleApp/              ← iOS example application
 │   ├── ExampleApp.xcodeproj      ← iOS app project
 │   ├── ExampleApp/               ← SwiftUI app using framework
 │   └── Documentation/            ← Integration guides
@@ -79,8 +79,8 @@ Axiom/ (this directory)
 # Open the workspace for development
 open Axiom.xcworkspace
 
-# Select AxiomTestApp scheme and run in simulator
-# Test application demonstrates framework integration
+# Select AxiomExampleApp scheme and run in simulator
+# Example application demonstrates framework integration
 ```
 
 ### Option 2: Framework Development
@@ -135,7 +135,7 @@ struct MyView: AxiomView {
 
 ## Test Application
 
-### AxiomTestApp Implementation
+### AxiomExampleApp Implementation
 The included iOS application demonstrates:
 - **AxiomClient Integration**: Actor-based state management with observer pattern
 - **Intelligence System**: Natural language architectural query interface  
@@ -160,7 +160,7 @@ The included iOS application demonstrates:
 - **Test Suite** - Unit and integration tests
 - **Technical Documentation** - API specifications and implementation guides
 
-### AxiomTestApp/ - iOS Test Application
+### AxiomExampleApp/ - iOS Example Application
 - **iOS Application** - Runnable application demonstrating framework usage
 - **Framework Integration** - External consumer usage patterns
 - **Modular Structure** - Organized development and testing structure
@@ -278,4 +278,4 @@ The integrated workspace structure provides:
 
 ---
 
-**Getting Started**: `open Axiom.xcworkspace` → Run AxiomTestApp → Explore framework integration
+**Getting Started**: `open Axiom.xcworkspace` → Run AxiomExampleApp → Explore framework integration

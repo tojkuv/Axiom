@@ -70,16 +70,20 @@ All FrameworkDevelopment commands follow this workflow:
 
 ## Framework Proposal Creation Process
 
-### Framework Proposals (AxiomFramework/Proposals/Active/)
+### Framework Proposals (AxiomFramework/Proposals/)
 **Focus**: Core framework development, architecture enhancements, capability implementation
-**Directory**: `/Users/tojkuv/Documents/GitHub/Axiom/AxiomFramework/Proposals/Active/`
+**Directories**: 
+- Active/: Framework proposals under development
+- WaitingApproval/: Framework proposals ready for user review
+- Archive/: Completed framework proposals
 **Implementation**: Implemented through FrameworkDevelopment/DEVELOP.md
 **Progress Tracking**: Tracked in FrameworkDevelopment/TRACKING.md
 
 ## Framework Proposal Lifecycle Management
 
 ### Framework Proposal States
-- **Active**: Framework proposal created in Active/ directory, ready for user review
+- **Active**: Framework proposal created in Active/ directory, under development
+- **Waiting Approval**: Framework proposal moved to WaitingApproval/ directory, ready for user review
 - **Under Revision**: User requests changes, framework proposal updated in Active/ directory
 - **Approved**: User approves framework proposal, ready for FrameworkDevelopment/DEVELOP.md implementation
 - **In Development**: FrameworkDevelopment/DEVELOP.md implementing proposal, progress tracked in TRACKING.md
@@ -87,10 +91,11 @@ All FrameworkDevelopment commands follow this workflow:
 
 ### Framework Workflow Integration
 1. **FrameworkDevelopment/@PLAN** → Creates framework proposal in AxiomFramework/Proposals/Active/
-2. **User Review** → User reviews and optionally revises framework proposal
-3. **User Approval** → User approves framework proposal for implementation
-4. **FrameworkDevelopment/@DEVELOP** → Implements framework proposal, tracks progress in TRACKING.md
-5. **FrameworkDevelopment/@CHECKPOINT** → Completes framework implementation, archives proposal
+2. **Proposal Completion** → Framework proposal moved to AxiomFramework/Proposals/WaitingApproval/
+3. **User Review** → User reviews and optionally revises framework proposal
+4. **User Approval** → User approves framework proposal for implementation
+5. **FrameworkDevelopment/@DEVELOP** → Implements framework proposal, tracks progress in TRACKING.md
+6. **FrameworkDevelopment/@CHECKPOINT** → Completes framework implementation, archives proposal
 
 ## Framework Planning Command Execution
 
@@ -140,7 +145,7 @@ All FrameworkDevelopment commands follow this workflow:
 
 ## Framework Planning Coordination
 
-**Proposal Creation**: Creates framework proposals in AxiomFramework/Proposals/Active/ directory
+**Proposal Creation**: Creates framework proposals in AxiomFramework/Proposals/Active/ directory, moves to WaitingApproval/ when ready for review
 **User Interaction**: Framework proposals designed for user review, revision, and approval
 **Development Integration**: Framework proposals implemented through FrameworkDevelopment/DEVELOP.md
 **Progress Monitoring**: Framework implementation progress tracked through FrameworkDevelopment/TRACKING.md
