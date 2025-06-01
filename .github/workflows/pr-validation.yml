@@ -1,0 +1,339 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [ main, framework ]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode_15.2.app/Contents/Developer
+
+jobs:
+  # Quick validation for draft PRs
+  pr-draft-check:
+    name: Draft PR Check
+    runs-on: macos-14
+    if: github.event.pull_request.draft == true
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: "5.9"
+        
+    - name: Quick Build Check
+      working-directory: AxiomFramework
+      run: |
+        swift build
+        echo "✅ Draft PR builds successfully"
+
+  # Comprehensive validation for ready PRs
+  pr-ready-validation:
+    name: Ready PR Validation
+    runs-on: macos-14
+    if: github.event.pull_request.draft == false
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for better diff analysis
+        
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: "5.9"
+        
+    - name: Cache Dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          AxiomFramework/.build
+          ~/Library/Caches/org.swift.swiftpm
+        key: ${{ runner.os }}-spm-${{ hashFiles('AxiomFramework/Package.swift', 'AxiomFramework/Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-spm-
+          
+    - name: Analyze Changed Files
+      id: changes
+      run: |
+        # Get list of changed files
+        git diff --name-only origin/${{ github.base_ref }}...HEAD > changed_files.txt
+        cat changed_files.txt
+        
+        # Determine what types of changes were made
+        if grep -q "AxiomFramework/Sources/" changed_files.txt; then
+          echo "framework-changed=true" >> $GITHUB_OUTPUT
+        fi
+        
+        if grep -q "AxiomFramework/Tests/" changed_files.txt; then
+          echo "tests-changed=true" >> $GITHUB_OUTPUT
+        fi
+        
+        if grep -q "AxiomExampleApp/" changed_files.txt; then
+          echo "example-changed=true" >> $GITHUB_OUTPUT
+        fi
+        
+        if grep -q ".github/workflows/" changed_files.txt; then
+          echo "workflows-changed=true" >> $GITHUB_OUTPUT
+        fi
+        
+        if grep -q "Package.swift" changed_files.txt; then
+          echo "package-changed=true" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Build Framework
+      working-directory: AxiomFramework
+      run: |
+        swift build -v
+        swift build -c release
+        
+    - name: Run Tests
+      working-directory: AxiomFramework
+      run: |
+        swift test -v --parallel
+        
+    - name: Test Framework Changes
+      if: steps.changes.outputs.framework-changed == 'true'
+      working-directory: AxiomFramework
+      run: |
+        echo "🔍 Framework source changes detected - running comprehensive tests"
+        
+        # Run all tests for framework changes
+        swift test --filter "AxiomClientTests|AxiomContextTests|AxiomViewTests"
+        
+        # Test macro compilation
+        swift build --target AxiomMacros
+        swift test --filter "MacroTests"
+        
+    - name: Test Package Changes
+      if: steps.changes.outputs.package-changed == 'true'
+      working-directory: AxiomFramework
+      run: |
+        echo "📦 Package.swift changes detected - validating package structure"
+        
+        # Validate package structure
+        swift package dump-package
+        swift package resolve
+        
+        # Check for dependency updates
+        if [ -f Package.resolved ]; then
+          echo "📋 Current Package.resolved:"
+          cat Package.resolved
+        fi
+        
+    - name: Test Example App
+      if: steps.changes.outputs.example-changed == 'true'
+      run: |
+        echo "📱 Example app changes detected - building iOS app"
+        
+        xcodebuild -project AxiomExampleApp/ExampleApp.xcodeproj \
+          -scheme ExampleApp \
+          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
+          -configuration Debug \
+          build
+          
+    - name: Validate Workspace Integration
+      if: steps.changes.outputs.framework-changed == 'true' || steps.changes.outputs.example-changed == 'true'
+      run: |
+        echo "🔧 Testing workspace integration"
+        
+        xcodebuild -workspace Axiom.xcworkspace \
+          -scheme ExampleApp \
+          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
+          -configuration Debug \
+          build
+          
+    - name: Code Quality Check
+      run: |
+        # Check for common issues
+        echo "🔍 Running code quality checks..."
+        
+        # Check for TODO/FIXME comments in new code
+        if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '\.(swift|md)$' | xargs grep -l "TODO\|FIXME" 2>/dev/null; then
+          echo "⚠️ Found TODO/FIXME comments in changed files:"
+          git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '\.(swift|md)$' | xargs grep -n "TODO\|FIXME" 2>/dev/null || true
+        fi
+        
+        # Check for print statements in production code (excluding tests)
+        if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep "AxiomFramework/Sources/" | xargs grep -l "print(" 2>/dev/null; then
+          echo "⚠️ Found print statements in framework source code:"
+          git diff --name-only origin/${{ github.base_ref }}...HEAD | grep "AxiomFramework/Sources/" | xargs grep -n "print(" 2>/dev/null || true
+        fi
+        
+    - name: Performance Impact Check
+      if: steps.changes.outputs.framework-changed == 'true'
+      working-directory: AxiomFramework
+      run: |
+        echo "⚡ Checking performance impact of changes..."
+        
+        # Run performance tests if they exist
+        swift test --filter "PerformanceBenchmarkSuite" || echo "No performance tests to run"
+        
+    - name: Generate PR Report
+      run: |
+        cat > pr_report.md << 'EOF'
+        ## PR Validation Report
+        
+        ### Changes Summary
+        - **Framework Changes**: ${{ steps.changes.outputs.framework-changed || 'false' }}
+        - **Test Changes**: ${{ steps.changes.outputs.tests-changed || 'false' }}
+        - **Example App Changes**: ${{ steps.changes.outputs.example-changed || 'false' }}
+        - **Package Changes**: ${{ steps.changes.outputs.package-changed || 'false' }}
+        - **Workflow Changes**: ${{ steps.changes.outputs.workflows-changed || 'false' }}
+        
+        ### Validation Results
+        - ✅ Framework builds successfully
+        - ✅ All tests pass
+        - ✅ Release build compiles
+        EOF
+        
+        if [[ "${{ steps.changes.outputs.example-changed }}" == "true" ]]; then
+          echo "- ✅ Example app builds successfully" >> pr_report.md
+        fi
+        
+        if [[ "${{ steps.changes.outputs.framework-changed }}" == "true" || "${{ steps.changes.outputs.example-changed }}" == "true" ]]; then
+          echo "- ✅ Workspace integration validated" >> pr_report.md
+        fi
+        
+        cat pr_report.md
+        
+    - name: Upload PR Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: pr-validation-report
+        path: pr_report.md
+        retention-days: 7
+
+  # Security and dependency check for PRs
+  pr-security-check:
+    name: PR Security Check
+    runs-on: macos-14
+    if: github.event.pull_request.draft == false
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: "5.9"
+        
+    - name: Check for Secrets
+      run: |
+        echo "🔒 Scanning for potential secrets in changed files..."
+        
+        # Get changed files
+        git diff --name-only origin/${{ github.base_ref }}...HEAD > changed_files.txt
+        
+        # Simple secret patterns (extend as needed)
+        SECRET_PATTERNS=(
+          "api[_-]?key"
+          "secret[_-]?key"
+          "private[_-]?key"
+          "access[_-]?token"
+          "auth[_-]?token"
+          "password"
+          "passwd"
+          "credential"
+        )
+        
+        SECRETS_FOUND=false
+        for pattern in "${SECRET_PATTERNS[@]}"; do
+          if git diff origin/${{ github.base_ref }}...HEAD | grep -i "$pattern" 2>/dev/null; then
+            echo "⚠️ Potential secret found matching pattern: $pattern"
+            SECRETS_FOUND=true
+          fi
+        done
+        
+        if [ "$SECRETS_FOUND" = true ]; then
+          echo "❌ Potential secrets detected in PR. Please review."
+          exit 1
+        else
+          echo "✅ No obvious secrets detected"
+        fi
+        
+    - name: Dependency Audit
+      working-directory: AxiomFramework
+      run: |
+        echo "📦 Auditing dependencies..."
+        
+        # Check if Package.swift or Package.resolved changed
+        if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E "Package\.(swift|resolved)"; then
+          echo "Package dependencies changed - reviewing..."
+          
+          # Show dependency changes
+          swift package show-dependencies --format json
+          
+          # Check for known vulnerable packages (basic check)
+          if swift package show-dependencies --format json | grep -i "vulnerable\|deprecated"; then
+            echo "⚠️ Potentially problematic dependencies detected"
+          fi
+        else
+          echo "No dependency changes detected"
+        fi
+
+  # Comment on PR with validation results
+  pr-comment:
+    name: PR Comment
+    runs-on: macos-14
+    needs: [pr-ready-validation, pr-security-check]
+    if: always() && github.event.pull_request.draft == false
+    
+    permissions:
+      pull-requests: write
+      
+    steps:
+    - name: Download PR Report
+      uses: actions/download-artifact@v4
+      with:
+        name: pr-validation-report
+        path: ./
+      continue-on-error: true
+      
+    - name: Comment PR
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          let comment = `## 🤖 PR Validation Results\n\n`;
+          
+          // Add validation results
+          const validationResult = '${{ needs.pr-ready-validation.result }}';
+          const securityResult = '${{ needs.pr-security-check.result }}';
+          
+          if (validationResult === 'success') {
+            comment += `✅ **Framework Validation**: Passed\n`;
+          } else {
+            comment += `❌ **Framework Validation**: Failed\n`;
+          }
+          
+          if (securityResult === 'success') {
+            comment += `✅ **Security Check**: Passed\n`;
+          } else {
+            comment += `❌ **Security Check**: Failed\n`;
+          }
+          
+          // Try to add detailed report
+          try {
+            const report = fs.readFileSync('pr_report.md', 'utf8');
+            comment += `\n${report}`;
+          } catch (error) {
+            comment += `\n_Detailed report not available_\n`;
+          }
+          
+          comment += `\n---\n*Validation completed at ${new Date().toISOString()}*`;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });

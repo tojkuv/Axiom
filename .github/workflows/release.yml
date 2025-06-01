@@ -1,0 +1,280 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.0.0)'
+        required: true
+        type: string
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode_15.2.app/Contents/Developer
+
+jobs:
+  # Validate Release Readiness
+  validate-release:
+    name: Validate Release
+    runs-on: macos-14
+    
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Determine Version
+      id: version
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+        else
+          # Extract version from tag
+          echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: "5.9"
+        
+    - name: Validate Framework Build
+      working-directory: AxiomFramework
+      run: |
+        swift build -c release
+        swift test
+        
+    - name: Validate Example App
+      run: |
+        xcodebuild -project AxiomExampleApp/ExampleApp.xcodeproj \
+          -scheme ExampleApp \
+          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.2' \
+          -configuration Release \
+          build
+          
+    - name: Generate Documentation
+      working-directory: AxiomFramework
+      run: |
+        swift package generate-documentation --target Axiom
+        
+  # Create Release Assets
+  build-release-assets:
+    name: Build Release Assets
+    runs-on: macos-14
+    needs: validate-release
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: "5.9"
+        
+    - name: Build Universal Framework
+      working-directory: AxiomFramework
+      run: |
+        # Build for multiple architectures
+        swift build -c release --arch arm64 --arch x86_64
+        
+        # Create distribution directory
+        mkdir -p dist/AxiomFramework
+        
+        # Copy framework artifacts
+        cp -R .build/release/ dist/AxiomFramework/
+        
+        # Copy essential files
+        cp Package.swift dist/AxiomFramework/
+        cp README.md dist/AxiomFramework/ 2>/dev/null || echo "README.md not found"
+        cp ../README.md dist/AxiomFramework/ 2>/dev/null || echo "Root README.md not found"
+        
+    - name: Create Example App Archive
+      run: |
+        mkdir -p dist/AxiomExampleApp
+        
+        # Archive example app
+        xcodebuild -project AxiomExampleApp/ExampleApp.xcodeproj \
+          -scheme ExampleApp \
+          -destination 'generic/platform=iOS' \
+          -configuration Release \
+          archive \
+          -archivePath dist/AxiomExampleApp/ExampleApp.xcarchive
+          
+    - name: Package Documentation
+      working-directory: AxiomFramework
+      run: |
+        # Generate and package documentation
+        swift package generate-documentation --target Axiom || echo "Documentation generation failed"
+        
+        if [ -d ".build/plugins/Swift-DocC/outputs" ]; then
+          mkdir -p ../dist/Documentation
+          cp -R .build/plugins/Swift-DocC/outputs/ ../dist/Documentation/
+        fi
+        
+    - name: Create Release Archive
+      run: |
+        cd dist
+        tar -czf axiom-framework-v${{ needs.validate-release.outputs.version }}.tar.gz AxiomFramework/
+        zip -r axiom-example-app-v${{ needs.validate-release.outputs.version }}.zip AxiomExampleApp/
+        
+        if [ -d "Documentation" ]; then
+          tar -czf axiom-documentation-v${{ needs.validate-release.outputs.version }}.tar.gz Documentation/
+        fi
+        
+    - name: Generate Checksums
+      run: |
+        cd dist
+        shasum -a 256 *.tar.gz *.zip > checksums.txt
+        cat checksums.txt
+        
+    - name: Upload Release Assets
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-assets-v${{ needs.validate-release.outputs.version }}
+        path: |
+          dist/*.tar.gz
+          dist/*.zip
+          dist/checksums.txt
+        retention-days: 90
+
+  # Create GitHub Release
+  create-github-release:
+    name: Create GitHub Release
+    runs-on: macos-14
+    needs: [validate-release, build-release-assets]
+    
+    permissions:
+      contents: write
+      
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Download Release Assets
+      uses: actions/download-artifact@v4
+      with:
+        name: release-assets-v${{ needs.validate-release.outputs.version }}
+        path: release-assets/
+        
+    - name: Generate Release Notes
+      id: release-notes
+      run: |
+        cat > release_notes.md << 'EOF'
+        ## Axiom Framework v${{ needs.validate-release.outputs.version }}
+        
+        ### Features
+        - **Actor-Based State Management**: Thread-safe state management with SwiftUI integration
+        - **Intelligence System**: AI-powered architectural analysis and optimization
+        - **SwiftUI Integration**: Reactive binding with 1:1 view-context relationships
+        - **Runtime Capabilities**: Dynamic capability validation system
+        - **Performance Monitoring**: Integrated metrics collection and analysis
+        - **Streamlined APIs**: Reduced boilerplate through builder patterns
+        
+        ### Package Contents
+        - **Framework Package**: Core Axiom framework (Swift Package Manager compatible)
+        - **Example Application**: iOS app demonstrating framework integration
+        - **Documentation**: Complete API documentation and guides
+        
+        ### Requirements
+        - iOS 16.0+
+        - Swift 5.9+
+        - Xcode 15.0+
+        
+        ### Installation
+        
+        #### Swift Package Manager
+        ```swift
+        dependencies: [
+            .package(url: "https://github.com/your-org/axiom-framework.git", from: "${{ needs.validate-release.outputs.version }}")
+        ]
+        ```
+        
+        #### Manual Installation
+        1. Download `axiom-framework-v${{ needs.validate-release.outputs.version }}.tar.gz`
+        2. Extract and add to your Xcode project
+        3. Import `Axiom` in your Swift files
+        
+        ### Verification
+        - **Framework Checksum**: See `checksums.txt` for package verification
+        - **Example App**: Demonstrates complete framework integration
+        - **Documentation**: Available in documentation package
+        
+        For detailed usage instructions, see the included example application and documentation.
+        EOF
+        
+        echo "notes-file=release_notes.md" >> $GITHUB_OUTPUT
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ needs.validate-release.outputs.version }}
+        name: Axiom Framework v${{ needs.validate-release.outputs.version }}
+        body_path: ${{ steps.release-notes.outputs.notes-file }}
+        draft: false
+        prerelease: false
+        files: |
+          release-assets/*.tar.gz
+          release-assets/*.zip
+          release-assets/checksums.txt
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+  # Post-Release Validation
+  post-release-validation:
+    name: Post-Release Validation
+    runs-on: macos-14
+    needs: [validate-release, create-github-release]
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Test SPM Integration
+      run: |
+        # Create temporary project to test SPM integration
+        mkdir -p /tmp/spm-test
+        cd /tmp/spm-test
+        
+        # Create a minimal Package.swift that depends on the release
+        cat > Package.swift << EOF
+        // swift-tools-version: 5.9
+        import PackageDescription
+        
+        let package = Package(
+            name: "AxiomTest",
+            platforms: [.iOS(.v16)],
+            dependencies: [
+                .package(path: "${{ github.workspace }}/AxiomFramework")
+            ],
+            targets: [
+                .target(
+                    name: "AxiomTest",
+                    dependencies: ["Axiom"]
+                )
+            ]
+        )
+        EOF
+        
+        # Create minimal source
+        mkdir -p Sources/AxiomTest
+        cat > Sources/AxiomTest/AxiomTest.swift << EOF
+        import Axiom
+        
+        public func testAxiomImport() {
+            print("Axiom framework imported successfully")
+        }
+        EOF
+        
+        # Test build
+        swift build
+        echo "✅ SPM integration test passed"
+        
+    - name: Deployment Success Notification
+      run: |
+        echo "🎉 Axiom Framework v${{ needs.validate-release.outputs.version }} released successfully!"
+        echo "📦 Release assets available on GitHub Releases"
+        echo "🔗 Release URL: https://github.com/${{ github.repository }}/releases/tag/v${{ needs.validate-release.outputs.version }}"
