@@ -7,7 +7,7 @@
 **When human sends**: `@PLAN [mode] [options]`
 **Action**: Automatically enter ultrathink mode and execute unified proposal lifecycle management
 
-**Workstation Guidelines**: All command executions follow workstation standards defined in `@Commands/WORKSPACE.md`
+**Workstation Guidelines**: All command executions follow workstation standards defined in `@WORKSPACE.md`
 
 ## 🎯 Unified Command Modes
 
@@ -200,7 +200,7 @@ Draft → Active → Under Revision → Ready for Approval → Approved → Inte
 - **@WORKSPACE.md**: Workstation guidelines and command coordination
 - **ROADMAP.md**: Live coordination dashboard
 
-**Workstation Integration**: All operations follow workstation standards defined in `@Commands/WORKSPACE.md` for consistency and reliability
+**Workstation Integration**: All operations follow workstation standards defined in `@WORKSPACE.md` for consistency and reliability
 
 ## 🎯 Success Criteria
 
@@ -225,7 +225,7 @@ Draft → Active → Under Revision → Ready for Approval → Approved → Inte
 ## 🤖 Automated Execution Flow
 
 **Command**: `@PLAN [mode] [arguments]`
-**Workstation Compliance**: All executions follow `@Commands/WORKSPACE.md` guidelines
+**Workstation Compliance**: All executions follow `@WORKSPACE.md` guidelines
 **Action**: Intelligent proposal lifecycle management with unified workflow
 
 **Execution Process**:

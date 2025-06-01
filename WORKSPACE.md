@@ -6,7 +6,7 @@
 
 **Primary Role**: Central reference for workstation standards, command guidelines, and operational protocols for the Axiom Framework command system
 
-**Referenced By**: All @Commands/ files follow workstation standards defined in this document for consistency, reliability, and operational excellence
+**Referenced By**: All command files follow workstation standards defined in this document for consistency, reliability, and operational excellence
 
 ## 🤖 **Mandatory Ultrathink Mode**
 
