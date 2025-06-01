@@ -111,14 +111,20 @@ case "$TARGET_WORKFLOW" in
         echo "✅ Committing development progress..."
         git add .
         CURRENT_DATE=$(date '+%Y-%m-%d %H:%M')
-        git commit -m "🔧 Development checkpoint: $CURRENT_DATE
+        
+        # Use heredoc for proper multiline commit message
+        COMMIT_MESSAGE=$(cat <<EOF
+🔧 Development checkpoint: $CURRENT_DATE
 
 📦 Framework enhancements and feature development
 🎯 Ready for main branch merge
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
-Co-Authored-By: Claude <noreply@anthropic.com>"
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)
+        git commit -m "$COMMIT_MESSAGE"
     else
         echo "✅ No uncommitted changes to commit on development branch"
     fi
@@ -147,7 +153,10 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
     
     echo "🚀 Merging development into main..."
     MERGE_DATE=$(date '+%Y-%m-%d')
-    if ! git merge development --no-ff -m "🔧 Merge development cycle: $MERGE_DATE
+    
+    # Use heredoc for proper multiline commit message
+    MERGE_MESSAGE=$(cat <<EOF
+🔧 Merge development cycle: $MERGE_DATE
 
 ✅ Development work completed and validated
 📦 Framework enhancements integrated
@@ -155,7 +164,12 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
-Co-Authored-By: Claude <noreply@anthropic.com>"; then
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)
+    
+    # Perform merge with proper error handling
+    if ! git merge development --no-ff -m "$MERGE_MESSAGE"; then
         echo ""
         echo "🚨 MERGE CONFLICT DETECTED!"
         echo "❌ Automatic checkpoint halted - this should not happen with our workflows"
@@ -181,6 +195,25 @@ Co-Authored-By: Claude <noreply@anthropic.com>"; then
         echo "🛑 Checkpoint process stopped. Please resolve conflicts and retry."
         exit 1
     fi
+    
+    # Validate merge included expected changes
+    echo "🔍 Validating merge contents..."
+    if [ ! -d "FrameworkDevelopment" ] || [ ! -d "ApplicationDevelopment" ]; then
+        echo ""
+        echo "🚨 MERGE VALIDATION FAILED!"
+        echo "❌ Expected directory structure missing after merge"
+        echo "📋 Expected directories: FrameworkDevelopment/, ApplicationDevelopment/"
+        echo "📋 Current structure:"
+        ls -la | grep -E "^d"
+        echo ""
+        echo "🆘 HUMAN CONSULTATION REQUIRED"
+        echo "💡 This indicates the merge didn't properly include development changes"
+        echo "💡 Manual investigation and re-merge may be required"
+        echo ""
+        echo "🛑 Checkpoint process stopped. Manual intervention needed."
+        exit 1
+    fi
+    echo "✅ Merge validation successful - directory structure preserved"
     
     # Push updated main
     echo "📤 Pushing updated main..."
@@ -251,7 +284,10 @@ Co-Authored-By: Claude <noreply@anthropic.com>"; then
         echo "✅ Committing integration validation..."
         git add .
         CURRENT_DATE=$(date '+%Y-%m-%d %H:%M')
-        git commit -m "🧪 Integration checkpoint: $CURRENT_DATE
+        
+        # Use heredoc for proper multiline commit message
+        COMMIT_MESSAGE=$(cat <<EOF
+🧪 Integration checkpoint: $CURRENT_DATE
 
 ✅ Real-world validation completed
 📊 Performance metrics captured
@@ -259,7 +295,10 @@ Co-Authored-By: Claude <noreply@anthropic.com>"; then
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
-Co-Authored-By: Claude <noreply@anthropic.com>"
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)
+        git commit -m "$COMMIT_MESSAGE"
     else
         echo "✅ No uncommitted changes to commit on integration branch"
     fi
@@ -288,7 +327,10 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
     
     echo "🚀 Merging integration into main..."
     MERGE_DATE=$(date '+%Y-%m-%d')
-    if ! git merge integration --no-ff -m "🧪 Merge integration cycle: $MERGE_DATE
+    
+    # Use heredoc for proper multiline commit message
+    MERGE_MESSAGE=$(cat <<EOF
+🧪 Merge integration cycle: $MERGE_DATE
 
 ✅ Integration validation completed
 📊 Performance metrics validated
@@ -296,7 +338,12 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
-Co-Authored-By: Claude <noreply@anthropic.com>"; then
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)
+    
+    # Perform merge with proper error handling
+    if ! git merge integration --no-ff -m "$MERGE_MESSAGE"; then
         echo ""
         echo "🚨 MERGE CONFLICT DETECTED!"
         echo "❌ Automatic checkpoint halted - this should not happen with our workflows"
@@ -387,14 +434,20 @@ Co-Authored-By: Claude <noreply@anthropic.com>"; then
         echo "✅ Committing main branch progress ($CHANGES_COUNT files changed)..."
         git add .
         CURRENT_DATE=$(date '+%Y-%m-%d %H:%M')
-        git commit -m "🎯 Main branch checkpoint: $CURRENT_DATE
+        
+        # Use heredoc for proper multiline commit message
+        COMMIT_MESSAGE=$(cat <<EOF
+🎯 Main branch checkpoint: $CURRENT_DATE
 
 📋 Project status update and coordination
 🚀 Strategic planning and documentation
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
-Co-Authored-By: Claude <noreply@anthropic.com>"
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)
+        git commit -m "$COMMIT_MESSAGE"
         
         # Push to main
         echo "🚀 Pushing to main..."
@@ -487,13 +540,19 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
         echo "🎯 Creating standard checkpoint..."
         git add .
         CURRENT_DATE=$(date '+%Y-%m-%d %H:%M')
-        git commit -m "📌 Checkpoint on $CURRENT_BRANCH: $CURRENT_DATE
+        
+        # Use heredoc for proper multiline commit message
+        COMMIT_MESSAGE=$(cat <<EOF
+📌 Checkpoint on $CURRENT_BRANCH: $CURRENT_DATE
 
 🔄 Branch-specific progress update
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
-Co-Authored-By: Claude <noreply@anthropic.com>"
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)
+        git commit -m "$COMMIT_MESSAGE"
         
         git push origin "$CURRENT_BRANCH" -u
         echo "✅ Standard checkpoint complete"
