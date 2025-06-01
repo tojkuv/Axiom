@@ -111,25 +111,19 @@ Work commands operate on current branch without version control:
 **CRITICAL**: PLAN commands work on current branch state - NO git operations
 
 ```bash
-# Branch switching - Create fresh application branch before starting work
-echo "🔄 Creating fresh application branch..."
+# Branch switching - Switch to application branch before starting work
+echo "🔄 Switching to application branch..."
 ORIGINAL_BRANCH=$(git branch --show-current)
-echo "📍 Current branch: $ORIGINAL_BRANCH"
-
-# Delete existing application branch if it exists
-if git show-ref --verify --quiet refs/heads/application; then
-    echo "🗑️ Deleting existing application branch..."
-    if [ "$ORIGINAL_BRANCH" = "application" ]; then
-        git checkout main
+if [ "$ORIGINAL_BRANCH" != "application" ]; then
+    if git show-ref --verify --quiet refs/heads/application; then
+        git checkout application
+    else
+        git checkout -b application
     fi
-    git branch -D application 2>/dev/null || true
-    git push origin --delete application 2>/dev/null || true
+    echo "✅ Switched to application branch"
+else
+    echo "✅ Already on application branch"
 fi
-
-# Create fresh application branch
-echo "🌱 Creating fresh application branch..."
-git checkout -b application
-echo "✅ Fresh application branch created and active"
 
 # Planning workflow (NO git operations)
 echo "🎯 Application Planning Execution"
@@ -145,8 +139,15 @@ echo "🎯 Planning ready - proceeding on application branch"
 4. **Technical Planning** → Design application technical approach and implementation strategy
 5. **Application Proposal Creation** → Create structured application proposal in AxiomExampleApp/Proposals/Active/
 6. **Review Preparation** → Prepare application proposal for user review and potential revision
+7. **Branch Cleanup** → Switch back to main branch after completing all tasks
 **No Git Operations**: All version control handled by @CHECKPOINT commands only
-**Branch Management**: Work remains on application branch for @CHECKPOINT integration
+
+```bash
+# Switch back to main branch after completing all tasks
+echo "🔄 Switching back to main branch..."
+git checkout main
+echo "✅ Returned to main branch"
+```
 
 **Application Planning Execution Examples**:
 - `@PLAN` → Create application development proposal

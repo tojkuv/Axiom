@@ -153,25 +153,19 @@ Refactoring workflow (NO git operations):
 **CRITICAL**: REFACTOR commands work on current branch state - NO git operations
 
 ```bash
-# Branch switching - Create fresh framework branch before starting work
-echo "🔄 Creating fresh framework branch..."
+# Branch switching - Switch to framework branch before starting work
+echo "🔄 Switching to framework branch..."
 ORIGINAL_BRANCH=$(git branch --show-current)
-echo "📍 Current branch: $ORIGINAL_BRANCH"
-
-# Delete existing framework branch if it exists
-if git show-ref --verify --quiet refs/heads/framework; then
-    echo "🗑️ Deleting existing framework branch..."
-    if [ "$ORIGINAL_BRANCH" = "framework" ]; then
-        git checkout main
+if [ "$ORIGINAL_BRANCH" != "framework" ]; then
+    if git show-ref --verify --quiet refs/heads/framework; then
+        git checkout framework
+    else
+        git checkout -b framework
     fi
-    git branch -D framework 2>/dev/null || true
-    git push origin --delete framework 2>/dev/null || true
+    echo "✅ Switched to framework branch"
+else
+    echo "✅ Already on framework branch"
 fi
-
-# Create fresh framework branch
-echo "🌱 Creating fresh framework branch..."
-git checkout -b framework
-echo "✅ Fresh framework branch created and active"
 
 # Refactoring workflow (NO git operations)
 echo "🎯 Framework Refactoring Execution"
@@ -188,8 +182,15 @@ echo "🎯 Refactoring ready - proceeding on framework branch"
 5. **Documentation Updates** → Update structure documentation and refactoring reports
 6. **TRACKING.md Quality Update** → Update structural improvements in FrameworkProtocols/TRACKING.md
 7. **Coordination Updates** → Provide refactoring results and structural improvement assessment
+8. **Branch Cleanup** → Switch back to main branch after completing all tasks
 **No Git Operations**: All version control handled by @CHECKPOINT commands only
-**Branch Management**: Work remains on framework branch for @CHECKPOINT integration
+
+```bash
+# Switch back to main branch after completing all tasks
+echo "🔄 Switching back to main branch..."
+git checkout main
+echo "✅ Returned to main branch"
+```
 
 **Refactoring Execution Examples**:
 - `@REFACTOR plan` → Plan refactoring priorities and structural improvement strategy

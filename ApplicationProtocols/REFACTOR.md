@@ -153,25 +153,19 @@ Refactoring workflow (NO git operations):
 **CRITICAL**: REFACTOR commands work on current branch state - NO git operations
 
 ```bash
-# Branch switching - Create fresh application branch before starting work
-echo "🔄 Creating fresh application branch..."
+# Branch switching - Switch to application branch before starting work
+echo "🔄 Switching to application branch..."
 ORIGINAL_BRANCH=$(git branch --show-current)
-echo "📍 Current branch: $ORIGINAL_BRANCH"
-
-# Delete existing application branch if it exists
-if git show-ref --verify --quiet refs/heads/application; then
-    echo "🗑️ Deleting existing application branch..."
-    if [ "$ORIGINAL_BRANCH" = "application" ]; then
-        git checkout main
+if [ "$ORIGINAL_BRANCH" != "application" ]; then
+    if git show-ref --verify --quiet refs/heads/application; then
+        git checkout application
+    else
+        git checkout -b application
     fi
-    git branch -D application 2>/dev/null || true
-    git push origin --delete application 2>/dev/null || true
+    echo "✅ Switched to application branch"
+else
+    echo "✅ Already on application branch"
 fi
-
-# Create fresh application branch
-echo "🌱 Creating fresh application branch..."
-git checkout -b application
-echo "✅ Fresh application branch created and active"
 
 # Refactoring workflow (NO git operations)
 echo "🎯 Application Refactoring Execution"
@@ -188,8 +182,15 @@ echo "🎯 Refactoring ready - proceeding on application branch"
 5. **Documentation Updates** → Update application structure documentation and refactoring reports
 6. **TRACKING.md Quality Update** → Update structural improvements in ApplicationProtocols/TRACKING.md
 7. **Coordination Updates** → Provide application refactoring results and structural improvement assessment
+8. **Branch Cleanup** → Switch back to main branch after completing all tasks
 **No Git Operations**: All version control handled by @CHECKPOINT commands only
-**Branch Management**: Work remains on application branch for @CHECKPOINT integration
+
+```bash
+# Switch back to main branch after completing all tasks
+echo "🔄 Switching back to main branch..."
+git checkout main
+echo "✅ Returned to main branch"
+```
 
 **Application Refactoring Execution Examples**:
 - `@REFACTOR plan` → Plan application refactoring priorities and structural improvement strategy
