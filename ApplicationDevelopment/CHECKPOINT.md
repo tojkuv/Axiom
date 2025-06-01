@@ -1,17 +1,17 @@
-# @CHECKPOINT.md - Framework Development Checkpoint System
+# @CHECKPOINT.md - Application Development Checkpoint System
 
-## ⚡ Framework-Focused Checkpoint Management
+## ⚡ Application-Focused Checkpoint Management
 
-This command provides intelligent checkpoint management for framework development workflows, focusing on core framework implementation and development branch management.
+This command provides intelligent checkpoint management for application development workflows, focusing on integration testing and application branch management.
 
 ### 🎯 **Usage Modes**
 - **`@CHECKPOINT.md`** → Auto-detect current branch and execute appropriate workflow
 - **`@CHECKPOINT.md m`** → Force main branch checkpoint workflow (regardless of current branch)
-- **`@CHECKPOINT.md d`** → Force development branch checkpoint workflow (regardless of current branch)
+- **`@CHECKPOINT.md i`** → Force integration branch checkpoint workflow (regardless of current branch)
 
 ### 🧠 **Branch Focus**
-**Framework Development Context**: Primarily works with development branch for framework core implementation
-**Development Branch**: Framework development, core feature implementation, architecture evolution
+**Application Development Context**: Primarily works with integration branch for application testing and validation
+**Integration Branch**: Application development, test app improvements, real-world validation
 **Main Branch**: Strategic coordination and documentation updates
 
 ### 🛡️ Safety Features
@@ -23,23 +23,23 @@ This command provides intelligent checkpoint management for framework developmen
 
 ### 🔍 Branch Detection & Smart Actions
 
-**Development Branch (`development`):**
-- 🔄 Switch to development branch (if using forced mode)
-- ✅ Commit development changes with intelligent commit message (framework work only, no ROADMAP.md)
-- 🔄 Merge completed work into `main`
-- 🌱 Create fresh `development` branch for next cycle
+**Integration Branch (`integration`):**  
+- 🔄 Switch to integration branch (if using forced mode)
+- ✅ Commit integration validation results (application testing work, no ROADMAP.md)
+- 🔄 Merge validated work into `main`
+- 🌱 Create fresh `integration` branch for next cycle
 
 **Main Branch (`main`):**
 - ✅ Commit current progress (including ROADMAP.md updates from @PLAN.md)
 - 📤 Push changes to main
-- 🔧 Update development branch with latest main
+- 🧪 Update integration branch with latest main
 - 🔄 Synchronize all branches with main changes
 
 ---
 
 ## 🤖 Execution
 
-**Claude, execute this framework-focused checkpoint process:**
+**Claude, execute this application-focused checkpoint process:**
 
 1. **Parse Branch Flag & Execute Appropriate Workflow**
 
@@ -55,13 +55,13 @@ if [ -n "$BRANCH_FLAG" ]; then
             TARGET_WORKFLOW="main"
             echo "🎯 Forced main branch checkpoint workflow"
             ;;
-        "d"|"development")
-            TARGET_WORKFLOW="development"
-            echo "🎯 Forced development branch checkpoint workflow"
+        "i"|"integration")
+            TARGET_WORKFLOW="integration"
+            echo "🎯 Forced integration branch checkpoint workflow"
             ;;
         *)
             echo "❌ Invalid branch flag: $BRANCH_FLAG"
-            echo "💡 Valid flags: m (main), d (development)"
+            echo "💡 Valid flags: m (main), i (integration)"
             echo "📋 Or use @CHECKPOINT.md without flags for auto-detection"
             exit 1
             ;;
@@ -81,27 +81,28 @@ git status --short
 
 # 4. Execute workflow based on target (auto-detected or forced)
 case "$TARGET_WORKFLOW" in
-  "development")
-    echo "🔧 DEVELOPMENT BRANCH CHECKPOINT - MERGE & RESTART"
+  "integration")
+    echo "🧪 INTEGRATION BRANCH CHECKPOINT - MERGE & RESTART"
     
-    # Switch to development branch first to check for its changes
-    if [ "$CURRENT_BRANCH" != "development" ]; then
-        echo "🔄 Switching to development branch to check for changes..."
-        git checkout development
+    # Switch to integration branch first to check for its changes
+    if [ "$CURRENT_BRANCH" != "integration" ]; then
+        echo "🔄 Switching to integration branch to check for changes..."
+        git checkout integration
     fi
     
-    # Check for uncommitted changes on development branch
+    # Check for uncommitted changes on integration branch
     if [ -n "$(git status --porcelain)" ]; then
-        # Commit changes with intelligent message
-        echo "✅ Committing development progress..."
+        # Commit integration results
+        echo "✅ Committing integration validation..."
         git add .
         CURRENT_DATE=$(date '+%Y-%m-%d %H:%M')
         
         # Use heredoc for proper multiline commit message
         COMMIT_MESSAGE=$(cat <<EOF
-🔧 Development checkpoint: $CURRENT_DATE
+🧪 Integration checkpoint: $CURRENT_DATE
 
-📦 Framework enhancements and feature development
+✅ Application testing and validation completed
+📊 Performance metrics captured
 🎯 Ready for main branch merge
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
@@ -111,41 +112,41 @@ EOF
 )
         git commit -m "$COMMIT_MESSAGE"
     else
-        echo "✅ No uncommitted changes to commit on development branch"
+        echo "✅ No uncommitted changes to commit on integration branch"
     fi
     
     # Fetch latest main
     echo "🔄 Fetching latest main..."
     git fetch origin main
     
-    # Check if development has changes to merge (avoid empty merges)
+    # Check if integration has changes to merge (avoid empty merges)
     git checkout main
     git pull origin main
     
-    echo "🔍 Checking if development has new changes..."
-    if git merge-tree $(git merge-base main development) main development | grep -q "^"; then
+    echo "🔍 Checking if integration has new changes..."
+    if git merge-tree $(git merge-base main integration) main integration | grep -q "^"; then
         echo "📝 Changes detected - proceeding with merge"
     else
-        echo "✅ No changes to merge - development already integrated"
-        echo "🌱 Creating fresh development branch..."
-        git branch -D development 2>/dev/null || true
-        git push origin --delete development 2>/dev/null || true
-        git checkout -b development
-        git push origin development -u
-        echo "✅ Development cycle complete (no merge needed)!"
+        echo "✅ No changes to merge - integration already integrated"
+        echo "🌱 Creating fresh integration branch..."
+        git branch -D integration 2>/dev/null || true
+        git push origin --delete integration 2>/dev/null || true
+        git checkout -b integration
+        git push origin integration -u
+        echo "✅ Integration cycle complete (no merge needed)!"
         exit 0
     fi
     
-    echo "🚀 Merging development into main..."
+    echo "🚀 Merging integration into main..."
     MERGE_DATE=$(date '+%Y-%m-%d')
     
     # Use heredoc for proper multiline commit message
     MERGE_MESSAGE=$(cat <<EOF
-🔧 Merge development cycle: $MERGE_DATE
+🧪 Merge integration cycle: $MERGE_DATE
 
-✅ Development work completed and validated
-📦 Framework enhancements integrated
-🎯 Ready for next development cycle
+✅ Application validation completed
+📊 Performance metrics validated
+🎯 Ready for next integration cycle
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
@@ -154,21 +155,21 @@ EOF
 )
     
     # Perform merge with proper error handling
-    if ! git merge development --no-ff -m "$MERGE_MESSAGE"; then
+    if ! git merge integration --no-ff -m "$MERGE_MESSAGE"; then
         echo ""
         echo "🚨 MERGE CONFLICT DETECTED!"
         echo "❌ Automatic checkpoint halted - this should not happen with our workflows"
         echo ""
         echo "🤔 Possible causes:"
         echo "   • Unexpected changes made directly to main branch"
-        echo "   • Manual modifications to development branch history"
+        echo "   • Manual modifications to integration branch history"
         echo "   • External changes not following Axiom workflow"
         echo ""
         echo "🆘 HUMAN CONSULTATION REQUIRED"
         echo "📋 Current status:"
-        echo "   • Development branch has been committed"
+        echo "   • Integration branch has been committed"
         echo "   • Main branch is checked out"
-        echo "   • Merge conflict exists between development and main"
+        echo "   • Merge conflict exists between integration and main"
         echo ""
         echo "💡 Manual resolution steps:"
         echo "   1. Run: git status (to see conflicted files)"
@@ -181,25 +182,6 @@ EOF
         exit 1
     fi
     
-    # Validate merge included expected changes
-    echo "🔍 Validating merge contents..."
-    if [ ! -d "FrameworkDevelopment" ] || [ ! -d "ApplicationDevelopment" ]; then
-        echo ""
-        echo "🚨 MERGE VALIDATION FAILED!"
-        echo "❌ Expected directory structure missing after merge"
-        echo "📋 Expected directories: FrameworkDevelopment/, ApplicationDevelopment/"
-        echo "📋 Current structure:"
-        ls -la | grep -E "^d"
-        echo ""
-        echo "🆘 HUMAN CONSULTATION REQUIRED"
-        echo "💡 This indicates the merge didn't properly include development changes"
-        echo "💡 Manual investigation and re-merge may be required"
-        echo ""
-        echo "🛑 Checkpoint process stopped. Manual intervention needed."
-        exit 1
-    fi
-    echo "✅ Merge validation successful - directory structure preserved"
-    
     # Push updated main
     echo "📤 Pushing updated main..."
     git push origin main
@@ -208,18 +190,18 @@ EOF
     echo "🔄 Returning to main..."
     git checkout main
     
-    # Delete old development branch
-    echo "🗑️ Cleaning up old development branch..."
-    git branch -D development
-    git push origin --delete development
+    # Delete old integration branch
+    echo "🗑️ Cleaning up old integration branch..."
+    git branch -D integration
+    git push origin --delete integration
     
-    # Create fresh development branch
-    echo "🌱 Creating fresh development branch..."
-    git checkout -b development
-    git push origin development -u
+    # Create fresh integration branch
+    echo "🌱 Creating fresh integration branch..."
+    git checkout -b integration
+    git push origin integration -u
     
-    echo "✅ Development cycle complete!"
-    echo "🎯 Fresh development branch ready for next cycle"
+    echo "✅ Integration cycle complete!"
+    echo "🎯 Fresh integration branch ready for next cycle"
     ;;
     
   "main")
@@ -237,7 +219,7 @@ EOF
         COMMIT_MESSAGE=$(cat <<EOF
 🎯 Main branch checkpoint: $CURRENT_DATE
 
-📋 Framework development coordination
+📋 Application development coordination
 🚀 Strategic planning and documentation
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
@@ -255,37 +237,37 @@ EOF
         echo "📋 Proceeding with branch synchronization only..."
     fi
     
-    # Update development branch with latest main
-    echo "🔧 Updating development branch with latest main..."
-    if git show-ref --verify --quiet refs/remotes/origin/development; then
-        git fetch origin development
-        git checkout development
+    # Update integration branch with latest main  
+    echo "🧪 Updating integration branch with latest main..."
+    if git show-ref --verify --quiet refs/remotes/origin/integration; then
+        git fetch origin integration
+        git checkout integration
         if ! git pull origin main; then
             echo ""
-            echo "🚨 CONFLICT UPDATING DEVELOPMENT BRANCH!"
+            echo "🚨 CONFLICT UPDATING INTEGRATION BRANCH!"
             echo "❌ Cross-branch update failed - manual resolution required"
             echo ""
             echo "🆘 HUMAN CONSULTATION REQUIRED"
             echo "📋 Current status:"
             echo "   • Main branch changes have been committed and pushed"
-            echo "   • Development branch is checked out"
-            echo "   • Conflict exists when pulling main into development"
+            echo "   • Integration branch is checked out"
+            echo "   • Conflict exists when pulling main into integration"
             echo ""
             echo "💡 Manual resolution steps:"
             echo "   1. Run: git status (to see conflicted files)"
             echo "   2. Edit conflicted files to resolve conflicts"
             echo "   3. Run: git add <resolved-files>"
             echo "   4. Run: git commit (to complete the merge)"
-            echo "   5. Run: git push origin development"
+            echo "   5. Run: git push origin integration"
             echo "   6. Then re-run: @CHECKPOINT.md (to continue automation)"
             echo ""
             echo "🛑 Checkpoint process stopped. Please resolve conflicts and retry."
             exit 1
         fi
-        git push origin development
-        echo "✅ Development branch updated with latest main"
+        git push origin integration
+        echo "✅ Integration branch updated with latest main"
     else
-        echo "🌱 Development branch doesn't exist remotely"
+        echo "🌱 Integration branch doesn't exist remotely"
     fi
     
     # Switch back to main
@@ -293,7 +275,7 @@ EOF
     git checkout main
     
     echo "✅ Main branch checkpoint complete"
-    echo "🔄 Development branch synchronized with latest main changes"
+    echo "🔄 Integration branch synchronized with latest main changes"
     echo "📋 No PR needed (already on main)"
     ;;
     
@@ -310,7 +292,7 @@ EOF
         COMMIT_MESSAGE=$(cat <<EOF
 📌 Checkpoint on $CURRENT_BRANCH: $CURRENT_DATE
 
-🔄 Framework development progress update
+🔄 Application development progress update
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
@@ -344,12 +326,12 @@ echo "🕐 Time: $(date)"
 @CHECKPOINT.md  # Auto-detects current branch and executes appropriate workflow
 ```
 
-### **Development Workflow** (Auto or Forced)
+### **Integration Workflow** (Auto or Forced)
 ```bash
-# While working on framework features
-@CHECKPOINT.md     # Auto-detects development branch
-@CHECKPOINT.md d   # Forces development workflow from any branch
-                   # → Commits, merges to main, creates fresh development
+# After application testing and validation
+@CHECKPOINT.md     # Auto-detects integration branch
+@CHECKPOINT.md i   # Forces integration workflow from any branch
+                   # → Commits results, merges to main, creates fresh integration
 ```
 
 ### **Main Branch Coordination** (Auto or Forced)
@@ -357,7 +339,7 @@ echo "🕐 Time: $(date)"
 # Strategic planning and coordination
 @CHECKPOINT.md     # Auto-detects main branch
 @CHECKPOINT.md m   # Forces main workflow from any branch
-                   # → Commits status, pushes to main, updates development branch
+                   # → Commits status, pushes to main, updates integration branch
 ```
 
 ---
@@ -368,10 +350,10 @@ echo "🕐 Time: $(date)"
 - **🎯 Forced Workflow Execution**: Execute specific branch workflows regardless of current branch
 - **📝 Intelligent Commit Messages**: Context-aware commit descriptions  
 - **🔄 Smart Merge & Restart**: Merges completed work to main and creates fresh branches
-- **🔄 Development Synchronization**: Development branch automatically synchronizes with latest main changes
+- **🔄 Integration Synchronization**: Integration branch automatically synchronizes with latest main changes
 - **🚨 Conflict Detection & Human Consultation**: Halts automation and provides guidance for conflicts
-- **🌱 Automated Branch Cycling**: Complete cycle automation for development workflow
+- **🌱 Automated Branch Cycling**: Complete cycle automation for integration testing
 - **📊 Status Tracking**: Maintains project coordination across branches
-- **⚡ Framework-Focused Operation**: Optimized for core framework development and implementation
+- **⚡ Application-Focused Operation**: Optimized for application development and testing workflows
 
-**Perfect for Axiom framework development workflow with seamless core implementation and testing!**
+**Perfect for Axiom application development workflow with seamless integration testing and validation!**
