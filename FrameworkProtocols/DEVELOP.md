@@ -19,18 +19,19 @@ Framework development command with methodology, requirements, and execution proc
 **Quality Standards**: High test coverage with comprehensive success rates
 **Integration**: Integration with @PLAN, @CHECKPOINT, and @REFACTOR workflows
 
-### 🔄 **Test-Driven Development Git Workflow**
-All FrameworkDevelopment commands follow this TDD-enforced workflow:
-1. **Branch Setup**: Switch to `framework` branch (create if doesn't exist)
-2. **Update**: Pull latest changes from remote `framework` branch
-3. **Test-First Development**: Write failing tests before any implementation work
-4. **Implementation**: Execute implementation to make tests pass
-5. **Test Validation**: MANDATORY - All tests must pass before any commits
-6. **Commit**: Commit changes to `framework` branch with descriptive messages
-7. **Pre-Merge Validation**: MANDATORY - Run complete test suite before merge
-8. **Integration**: Merge `framework` branch into `main` branch ONLY if all tests pass
-9. **Deployment**: Push `main` branch to remote repository
-10. **Cycle Reset**: Delete old `framework` branch and create fresh one for next cycle
+### 🔄 **Test-Driven Development Workflow Architecture**
+**IMPORTANT**: DEVELOP commands NEVER perform git operations (commit/push/merge)
+**Version Control**: Only @CHECKPOINT commands handle all git operations
+**Work Philosophy**: DEVELOP implements code → Multiple DEVELOP/REFACTOR cycles → @CHECKPOINT commits and merges
+
+TDD-enforced development workflow (NO git operations):
+1. **Test-First Development**: Write failing tests before any implementation work
+2. **Implementation**: Execute implementation to make tests pass
+3. **Test Validation**: MANDATORY - All tests must pass before any work completion
+4. **Quality Gate Validation**: ABSOLUTE REQUIREMENT - 100% test success rate
+5. **Documentation Updates**: Update technical documentation and API references
+6. **TRACKING.md Progress Update**: Update implementation progress tracking
+**No Git Operations**: DEVELOP commands never commit, push, or merge
 
 ## Framework Development Philosophy
 
@@ -190,12 +191,12 @@ fi
 **Command**: `@DEVELOP [plan|build|test|optimize]`
 **Action**: Execute comprehensive development workflow with methodology enforcement
 
-### 🔄 **Branch Verification and Setup**
+### 🔄 **Test-Driven Development Execution Process**
 
-**Before executing any development work, execute this branch verification:**
+**CRITICAL**: DEVELOP commands work on current branch state - NO git operations
 
 ```bash
-# 1. MANDATORY: Verify all tests pass on current branch before any work
+# Test-driven development workflow (NO git operations)
 echo "🧪 MANDATORY: Running complete test suite validation..."
 cd AxiomFramework
 if ! swift test; then
@@ -204,69 +205,25 @@ if ! swift test; then
     echo "🔧 Required action: Fix failing tests before proceeding"
     exit 1
 fi
-echo "✅ Test suite passed - safe to proceed"
+echo "✅ Test suite passed - safe to proceed with TDD framework development"
+echo "📍 Working on current branch: $(git branch --show-current)"
+echo "⚠️ Version control managed by @CHECKPOINT only"
 cd ..
-
-# 2. Check current branch and switch to framework branch if needed
-CURRENT_BRANCH=$(git branch --show-current)
-echo "🎯 Current branch: $CURRENT_BRANCH"
-
-if [ "$CURRENT_BRANCH" != "framework" ]; then
-    echo "🔄 Switching from $CURRENT_BRANCH to framework branch..."
-    
-    # Check if framework branch exists
-    if git show-ref --verify --quiet refs/heads/framework; then
-        echo "📍 Framework branch exists locally, switching..."
-        git checkout framework
-    elif git show-ref --verify --quiet refs/remotes/origin/framework; then
-        echo "📍 Framework branch exists remotely, checking out..."
-        git checkout -b framework origin/framework
-    else
-        echo "🌱 Creating new framework branch..."
-        git checkout -b framework
-        git push origin framework -u
-    fi
-    
-    echo "✅ Now on framework branch"
-else
-    echo "✅ Already on framework branch"
-fi
-
-# 3. Update framework branch with latest changes
-echo "🔄 Updating framework branch..."
-git fetch origin framework 2>/dev/null || true
-git pull origin framework 2>/dev/null || echo "📍 No remote updates available"
-
-# 4. MANDATORY: Verify all tests pass after branch update
-echo "🧪 MANDATORY: Re-validating test suite after branch update..."
-cd AxiomFramework
-if ! swift test; then
-    echo "❌ CRITICAL: Tests failing after branch update"
-    echo "🚨 BLOCKING: Development cannot proceed with failing tests"
-    echo "🔧 Required action: Fix failing tests before any development work"
-    exit 1
-fi
-echo "✅ All tests passing - framework development ready"
-cd ..
-
-echo "🎯 Branch verification and test validation complete - ready for TDD framework development"
 ```
 
 **Test-Driven Automated Execution Process**:
-1. **Branch Verification** → Switch to `framework` branch and update with latest changes
-2. **Environment Validation** → Verify clean working tree, framework dependencies
-3. **Test Suite Validation** → MANDATORY - Run complete test suite and verify 100% pass rate
-4. **Planning Integration** → Reference current TRACKING development priorities and @PLAN outputs
-5. **TDD Methodology Enforcement** → Apply test-driven development principles and architectural constraints
-6. **Test-First Development** → Write failing tests before any implementation work
-7. **Implementation Cycle** → Implement minimal code to make tests pass
-8. **Test Validation** → MANDATORY - All tests must pass before any commits
-9. **Build and Test Cycle** → Execute swift build, swift test with coverage requirements
-10. **Quality Gate Validation** → ABSOLUTE REQUIREMENT - 100% test success rate before any progression
-11. **Documentation Updates** → Update technical documentation and API references
-12. **TRACKING.md Progress Update** → Update implementation progress in FrameworkDevelopment/TRACKING.md
-13. **Pre-Merge Test Validation** → MANDATORY - Complete test suite must pass before merge to main
-14. **Coordination Updates** → Provide progress updates and next steps
+1. **Test Suite Validation** → MANDATORY - Run complete test suite and verify 100% pass rate
+2. **Planning Integration** → Reference current TRACKING development priorities and @PLAN outputs
+3. **TDD Methodology Enforcement** → Apply test-driven development principles and architectural constraints
+4. **Test-First Development** → Write failing tests before any implementation work
+5. **Implementation Cycle** → Implement minimal code to make tests pass
+6. **Test Validation** → MANDATORY - All tests must pass before work completion
+7. **Build and Test Cycle** → Execute swift build, swift test with coverage requirements
+8. **Quality Gate Validation** → ABSOLUTE REQUIREMENT - 100% test success rate before any progression
+9. **Documentation Updates** → Update technical documentation and API references
+10. **TRACKING.md Progress Update** → Update implementation progress in FrameworkProtocols/TRACKING.md
+11. **Coordination Updates** → Provide progress updates and next steps
+**No Git Operations**: All version control handled by @CHECKPOINT commands only
 
 **Test-Driven Development Execution Examples**:
 - `@DEVELOP plan` → Plan development priorities with test-first approach

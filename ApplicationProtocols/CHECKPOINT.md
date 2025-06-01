@@ -15,7 +15,7 @@ This command provides intelligent checkpoint management for application developm
 **Main Branch**: Strategic coordination and documentation updates
 
 ### 🔄 **Standardized Git Workflow**
-All ApplicationDevelopment commands follow this workflow:
+All ApplicationProtocols commands follow this workflow:
 1. **Branch Setup**: Switch to `application` branch (create if doesn't exist)
 2. **Update**: Pull latest changes from remote `application` branch
 3. **Development**: Execute command-specific development work
@@ -213,7 +213,7 @@ EOF
     # Update TRACKING.md with completion status
     echo "📊 Updating TRACKING.md with merge completion..."
     COMPLETION_DATE=$(date '+%Y-%m-%d')
-    sed -i '' "s/\*\*Last Updated\*\*:.*/\*\*Last Updated\*\*: $COMPLETION_DATE | \*\*Status\*\*: Application cycle completed - merged to main/" ApplicationDevelopment/TRACKING.md
+    sed -i '' "s/\*\*Last Updated\*\*:.*/\*\*Last Updated\*\*: $COMPLETION_DATE | \*\*Status\*\*: Application cycle completed - merged to main/" ApplicationProtocols/TRACKING.md
     
     echo "✅ Application cycle complete!"
     echo "🎯 Fresh application branch ready for next cycle"

@@ -9,7 +9,7 @@ Proposal progress tracking for framework core implementation and infrastructure
 **Objective**: Monitor proposal implementation progress and development findings
 
 ### 🔄 **Standardized Git Workflow**
-All FrameworkDevelopment commands follow this workflow:
+All FrameworkProtocols commands follow this workflow:
 1. **Branch Setup**: Switch to `framework` branch (create if doesn't exist)
 2. **Update**: Pull latest changes from remote `framework` branch
 3. **Development**: Execute command-specific development work
@@ -108,11 +108,11 @@ All FrameworkDevelopment commands follow this workflow:
 ### **Command Execution Cycle**
 ```bash
 # Standard Development Cycle (5 Steps)
-1. FrameworkDevelopment/PLAN.md      # Read TRACKING.md priorities → Create proposals
-2. FrameworkDevelopment/DEVELOP.md   # Implement proposals → Update TRACKING.md progress
-3. FrameworkDevelopment/CHECKPOINT.md # Merge to main → Update TRACKING.md completion
-4. FrameworkDevelopment/REFACTOR.md  # Structural improvements → Update TRACKING.md quality
-5. FrameworkDevelopment/CHECKPOINT.md # Final merge → Fresh cycle → Update TRACKING.md
+1. FrameworkProtocols/PLAN.md      # Read TRACKING.md priorities → Create proposals
+2. FrameworkProtocols/DEVELOP.md   # Implement proposals → Update TRACKING.md progress
+3. FrameworkProtocols/CHECKPOINT.md # Merge to main → Update TRACKING.md completion
+4. FrameworkProtocols/REFACTOR.md  # Structural improvements → Update TRACKING.md quality
+5. FrameworkProtocols/CHECKPOINT.md # Final merge → Fresh cycle → Update TRACKING.md
 ```
 
 ### **Command Separation of Concerns**
@@ -146,4 +146,4 @@ All commands integrate with TRACKING.md:
 
 **Framework Development Tracking** - Proposal progress tracking for iOS framework with intelligent system analysis capabilities
 
-**Last Updated**: 2025-05-31 | **Current Proposal**: [No active proposal] | **Progress**: [Development findings and considerations tracked here]
+**Last Updated**: 2025-06-01 | **Status**: Framework cycle completed - merged to main

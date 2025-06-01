@@ -15,7 +15,7 @@ This command provides intelligent checkpoint management for framework developmen
 **Main Branch**: Strategic coordination and documentation updates
 
 ### 🔄 **Standardized Git Workflow**
-All FrameworkDevelopment commands follow this workflow:
+All FrameworkProtocols commands follow this workflow:
 1. **Branch Setup**: Switch to `framework` branch (create if doesn't exist)
 2. **Update**: Pull latest changes from remote `framework` branch
 3. **Development**: Execute command-specific development work
@@ -193,11 +193,11 @@ EOF
     
     # Validate merge included expected changes
     echo "🔍 Validating merge contents..."
-    if [ ! -d "FrameworkDevelopment" ] || [ ! -d "ApplicationDevelopment" ]; then
+    if [ ! -d "FrameworkProtocols" ] || [ ! -d "ApplicationProtocols" ]; then
         echo ""
         echo "🚨 MERGE VALIDATION FAILED!"
         echo "❌ Expected directory structure missing after merge"
-        echo "📋 Expected directories: FrameworkDevelopment/, ApplicationDevelopment/"
+        echo "📋 Expected directories: FrameworkProtocols/, ApplicationProtocols/"
         echo "📋 Current structure:"
         ls -la | grep -E "^d"
         echo ""
@@ -231,7 +231,7 @@ EOF
     # Update TRACKING.md with completion status
     echo "📊 Updating TRACKING.md with merge completion..."
     COMPLETION_DATE=$(date '+%Y-%m-%d')
-    sed -i '' "s/\*\*Last Updated\*\*:.*/\*\*Last Updated\*\*: $COMPLETION_DATE | \*\*Status\*\*: Framework cycle completed - merged to main/" FrameworkDevelopment/TRACKING.md
+    sed -i '' "s/\*\*Last Updated\*\*:.*/\*\*Last Updated\*\*: $COMPLETION_DATE | \*\*Status\*\*: Framework cycle completed - merged to main/" FrameworkProtocols/TRACKING.md
     
     echo "✅ Framework cycle complete!"
     echo "🎯 Fresh framework branch ready for next cycle"

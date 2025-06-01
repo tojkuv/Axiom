@@ -19,15 +19,18 @@ Framework refactoring command with methodology, requirements, and execution proc
 **Quality Standards**: Structural integrity with zero functionality changes
 **Integration**: Integration with @PLAN, @CHECKPOINT, and framework development workflows
 
-### 🔄 **Standardized Git Workflow**
-All FrameworkDevelopment commands follow this workflow:
-1. **Branch Setup**: Switch to `framework` branch (create if doesn't exist)
-2. **Update**: Pull latest changes from remote `framework` branch
-3. **Development**: Execute command-specific development work
-4. **Commit**: Commit changes to `framework` branch with descriptive messages
-5. **Integration**: Merge `framework` branch into `main` branch
-6. **Deployment**: Push `main` branch to remote repository
-7. **Cycle Reset**: Delete old `framework` branch and create fresh one for next cycle
+### 🔄 **Refactoring Workflow Architecture**
+**IMPORTANT**: REFACTOR commands NEVER perform git operations (commit/push/merge)
+**Version Control**: Only @CHECKPOINT commands handle all git operations
+**Work Philosophy**: REFACTOR improves structure → Multiple REFACTOR cycles → @CHECKPOINT commits and merges
+
+Refactoring workflow (NO git operations):
+1. **Analysis**: Analyze existing code structure and identify improvement opportunities
+2. **Refactoring**: Execute structural improvements and organization
+3. **Validation**: Ensure 100% functionality preservation
+4. **Documentation**: Update structure documentation and refactoring reports
+5. **TRACKING.md Quality Update**: Update structural improvements tracking
+**No Git Operations**: REFACTOR commands never commit, push, or merge
 
 ## Framework Refactoring Philosophy
 
@@ -145,54 +148,27 @@ All FrameworkDevelopment commands follow this workflow:
 **Command**: `@REFACTOR [plan|organize|cleanup|optimize]`
 **Action**: Execute comprehensive refactoring workflow with methodology enforcement
 
-### 🔄 **Branch Verification and Setup**
+### 🔄 **Refactoring Execution Process**
 
-**Before executing any refactoring work, execute this branch verification:**
+**CRITICAL**: REFACTOR commands work on current branch state - NO git operations
 
 ```bash
-# 1. Check current branch and switch to framework branch if needed
-CURRENT_BRANCH=$(git branch --show-current)
-echo "🎯 Current branch: $CURRENT_BRANCH"
-
-if [ "$CURRENT_BRANCH" != "framework" ]; then
-    echo "🔄 Switching from $CURRENT_BRANCH to framework branch..."
-    
-    # Check if framework branch exists
-    if git show-ref --verify --quiet refs/heads/framework; then
-        echo "📍 Framework branch exists locally, switching..."
-        git checkout framework
-    elif git show-ref --verify --quiet refs/remotes/origin/framework; then
-        echo "📍 Framework branch exists remotely, checking out..."
-        git checkout -b framework origin/framework
-    else
-        echo "🌱 Creating new framework branch..."
-        git checkout -b framework
-        git push origin framework -u
-    fi
-    
-    echo "✅ Now on framework branch"
-else
-    echo "✅ Already on framework branch"
-fi
-
-# 2. Update framework branch with latest changes
-echo "🔄 Updating framework branch..."
-git fetch origin framework 2>/dev/null || true
-git pull origin framework 2>/dev/null || echo "📍 No remote updates available"
-
-echo "🎯 Branch verification complete - ready for framework refactoring"
+# Refactoring workflow (NO git operations)
+echo "🎯 Framework Refactoring Execution"
+echo "📍 Working on current branch: $(git branch --show-current)"
+echo "⚠️ Version control managed by @CHECKPOINT only"
+echo "🎯 Refactoring ready - no branch switching required"
 ```
 
 **Automated Execution Process**:
-1. **Branch Verification** → Switch to `framework` branch and update with latest changes
-2. **Environment Validation** → Verify clean working tree, backup current state, validate dependencies
-3. **Planning Integration** → Reference current refactoring priorities and @PLAN outputs
-4. **Methodology Enforcement** → Apply refactoring principles and structural integrity requirements
-5. **Organization and Cleanup Cycle** → Execute structural improvements, cleanup, and optimization
-6. **Quality Validation** → Ensure 100% functionality preservation, structural improvement verification
-7. **Documentation Updates** → Update structure documentation and refactoring reports
-8. **TRACKING.md Quality Update** → Update structural improvements in FrameworkDevelopment/TRACKING.md
-9. **Coordination Updates** → Provide refactoring results and structural improvement assessment
+1. **Planning Integration** → Reference current refactoring priorities and @PLAN outputs
+2. **Methodology Enforcement** → Apply refactoring principles and structural integrity requirements
+3. **Organization and Cleanup Cycle** → Execute structural improvements, cleanup, and optimization
+4. **Quality Validation** → Ensure 100% functionality preservation, structural improvement verification
+5. **Documentation Updates** → Update structure documentation and refactoring reports
+6. **TRACKING.md Quality Update** → Update structural improvements in FrameworkProtocols/TRACKING.md
+7. **Coordination Updates** → Provide refactoring results and structural improvement assessment
+**No Git Operations**: All version control handled by @CHECKPOINT commands only
 
 **Refactoring Execution Examples**:
 - `@REFACTOR plan` → Plan refactoring priorities and structural improvement strategy

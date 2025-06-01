@@ -64,8 +64,8 @@ Axiom/ (this directory)
 │   ├── ExampleApp.xcodeproj      ← iOS app project
 │   ├── ExampleApp/               ← SwiftUI app using framework
 │   └── Documentation/            ← Integration guides
-├── ApplicationDevelopment/       ← Application development workflows
-├── FrameworkDevelopment/         ← Framework development workflows
+├── ApplicationProtocols/         ← Application development workflows
+├── FrameworkProtocols/           ← Framework development workflows
 ├── ROADMAP.md                    ← Development planning and progress
 ├── DEVELOP.md                    ← Framework development guide
 ├── INTEGRATE.md                  ← Integration testing guide
@@ -184,34 +184,34 @@ open Axiom.xcworkspace
 ### Dual-Track Development System
 Development coordination with automated planning and workflow management
 
-#### FrameworkDevelopment/ - Core Development
-- **DEVELOP Cycle** → Framework implementation (`FrameworkDevelopment/DEVELOP.md`)
-- **INTEGRATE Cycle** → Integration validation (`FrameworkDevelopment/INTEGRATE.md`)
-- **REFACTOR Cycle** → Code organization (`FrameworkDevelopment/REFACTOR.md`)
-- **CHECKPOINT** → Version control coordination (`FrameworkDevelopment/CHECKPOINT.md`)
+#### FrameworkProtocols/ - Core Development
+- **DEVELOP Cycle** → Framework implementation (`FrameworkProtocols/DEVELOP.md`)
+- **INTEGRATE Cycle** → Integration validation (`FrameworkProtocols/INTEGRATE.md`)
+- **REFACTOR Cycle** → Code organization (`FrameworkProtocols/REFACTOR.md`)
+- **CHECKPOINT** → Version control coordination (`FrameworkProtocols/CHECKPOINT.md`)
 
-#### ApplicationDevelopment/ - Application Development
-- **FEATURE Cycle** → Application feature development (`ApplicationDevelopment/FEATURE.md`)
-- **DEPLOY Cycle** → Application deployment (`ApplicationDevelopment/DEPLOY.md`)
-- **MAINTAIN Cycle** → Application maintenance (`ApplicationDevelopment/MAINTAIN.md`)
-- **SHIP** → Application release coordination (`ApplicationDevelopment/SHIP.md`)
+#### ApplicationProtocols/ - Application Development
+- **FEATURE Cycle** → Application feature development (`ApplicationProtocols/FEATURE.md`)
+- **DEPLOY Cycle** → Application deployment (`ApplicationProtocols/DEPLOY.md`)
+- **MAINTAIN Cycle** → Application maintenance (`ApplicationProtocols/MAINTAIN.md`)
+- **SHIP** → Application release coordination (`ApplicationProtocols/SHIP.md`)
 
 #### Strategic Coordination
 - **Planning System** → Automated proposal generation and workflow coordination
 - **Documentation Management** → Technical enhancement proposals and status tracking
 
 ```bash
-# Framework Development Workflow (FrameworkDevelopment/)
-FrameworkDevelopment/DEVELOP.md      # Framework implementation
-FrameworkDevelopment/INTEGRATE.md    # Integration validation
-FrameworkDevelopment/REFACTOR.md     # Code organization
-FrameworkDevelopment/CHECKPOINT.md   # Version control coordination
+# Framework Development Workflow (FrameworkProtocols/)
+FrameworkProtocols/DEVELOP.md        # Framework implementation
+FrameworkProtocols/INTEGRATE.md      # Integration validation
+FrameworkProtocols/REFACTOR.md       # Code organization
+FrameworkProtocols/CHECKPOINT.md     # Version control coordination
 
-# Application Development Workflow (ApplicationDevelopment/)
-ApplicationDevelopment/FEATURE.md    # Application feature development
-ApplicationDevelopment/DEPLOY.md     # Application deployment
-ApplicationDevelopment/MAINTAIN.md   # Maintenance and optimization
-ApplicationDevelopment/SHIP.md       # Release coordination
+# Application Development Workflow (ApplicationProtocols/)
+ApplicationProtocols/FEATURE.md      # Application feature development
+ApplicationProtocols/DEPLOY.md       # Application deployment
+ApplicationProtocols/MAINTAIN.md     # Maintenance and optimization
+ApplicationProtocols/SHIP.md         # Release coordination
 ```
 
 ### Development Cycle

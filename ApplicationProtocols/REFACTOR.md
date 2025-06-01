@@ -19,15 +19,18 @@ Application refactoring command with methodology, requirements, and execution pr
 **Quality Standards**: Structural integrity with zero functionality changes
 **Integration**: Integration with @PLAN, @CHECKPOINT, and application development workflows
 
-### 🔄 **Standardized Git Workflow**
-All ApplicationDevelopment commands follow this workflow:
-1. **Branch Setup**: Switch to `application` branch (create if doesn't exist)
-2. **Update**: Pull latest changes from remote `application` branch
-3. **Development**: Execute command-specific development work
-4. **Commit**: Commit changes to `application` branch with descriptive messages
-5. **Integration**: Merge `application` branch into `main` branch
-6. **Deployment**: Push `main` branch to remote repository
-7. **Cycle Reset**: Delete old `application` branch and create fresh one for next cycle
+### 🔄 **Refactoring Workflow Architecture**
+**IMPORTANT**: REFACTOR commands NEVER perform git operations (commit/push/merge)
+**Version Control**: Only @CHECKPOINT commands handle all git operations
+**Work Philosophy**: REFACTOR improves structure → Multiple REFACTOR cycles → @CHECKPOINT commits and merges
+
+Refactoring workflow (NO git operations):
+1. **Analysis**: Analyze existing application structure and identify improvement opportunities
+2. **Refactoring**: Execute structural improvements and organization
+3. **Validation**: Ensure 100% functionality preservation
+4. **Documentation**: Update application structure documentation and refactoring reports
+5. **TRACKING.md Quality Update**: Update structural improvements tracking
+**No Git Operations**: REFACTOR commands never commit, push, or merge
 
 ## Application Refactoring Philosophy
 
@@ -145,54 +148,27 @@ All ApplicationDevelopment commands follow this workflow:
 **Command**: `@REFACTOR [plan|organize|cleanup|optimize]`
 **Action**: Execute comprehensive application refactoring workflow with methodology enforcement
 
-### 🔄 **Branch Verification and Setup**
+### 🔄 **Refactoring Execution Process**
 
-**Before executing any refactoring work, execute this branch verification:**
+**CRITICAL**: REFACTOR commands work on current branch state - NO git operations
 
 ```bash
-# 1. Check current branch and switch to application branch if needed
-CURRENT_BRANCH=$(git branch --show-current)
-echo "🎯 Current branch: $CURRENT_BRANCH"
-
-if [ "$CURRENT_BRANCH" != "application" ]; then
-    echo "🔄 Switching from $CURRENT_BRANCH to application branch..."
-    
-    # Check if application branch exists
-    if git show-ref --verify --quiet refs/heads/application; then
-        echo "📍 Application branch exists locally, switching..."
-        git checkout application
-    elif git show-ref --verify --quiet refs/remotes/origin/application; then
-        echo "📍 Application branch exists remotely, checking out..."
-        git checkout -b application origin/application
-    else
-        echo "🌱 Creating new application branch..."
-        git checkout -b application
-        git push origin application -u
-    fi
-    
-    echo "✅ Now on application branch"
-else
-    echo "✅ Already on application branch"
-fi
-
-# 2. Update application branch with latest changes
-echo "🔄 Updating application branch..."
-git fetch origin application 2>/dev/null || true
-git pull origin application 2>/dev/null || echo "📍 No remote updates available"
-
-echo "🎯 Branch verification complete - ready for application refactoring"
+# Refactoring workflow (NO git operations)
+echo "🎯 Application Refactoring Execution"
+echo "📍 Working on current branch: $(git branch --show-current)"
+echo "⚠️ Version control managed by @CHECKPOINT only"
+echo "🎯 Refactoring ready - no branch switching required"
 ```
 
 **Automated Execution Process**:
-1. **Branch Verification** → Switch to `application` branch and update with latest changes
-2. **Environment Validation** → Verify clean working tree, backup current state, validate application dependencies
-3. **Planning Integration** → Reference current application refactoring priorities and @PLAN outputs
-4. **Methodology Enforcement** → Apply application refactoring principles and structural integrity requirements
-5. **Organization and Cleanup Cycle** → Execute application structural improvements, cleanup, and optimization
-6. **Quality Validation** → Ensure functionality preservation, structural improvement verification
-7. **Documentation Updates** → Update application structure documentation and refactoring reports
-8. **TRACKING.md Quality Update** → Update structural improvements in ApplicationDevelopment/TRACKING.md
-9. **Coordination Updates** → Provide application refactoring results and structural improvement assessment
+1. **Planning Integration** → Reference current application refactoring priorities and @PLAN outputs
+2. **Methodology Enforcement** → Apply application refactoring principles and structural integrity requirements
+3. **Organization and Cleanup Cycle** → Execute application structural improvements, cleanup, and optimization
+4. **Quality Validation** → Ensure functionality preservation, structural improvement verification
+5. **Documentation Updates** → Update application structure documentation and refactoring reports
+6. **TRACKING.md Quality Update** → Update structural improvements in ApplicationProtocols/TRACKING.md
+7. **Coordination Updates** → Provide application refactoring results and structural improvement assessment
+**No Git Operations**: All version control handled by @CHECKPOINT commands only
 
 **Application Refactoring Execution Examples**:
 - `@REFACTOR plan` → Plan application refactoring priorities and structural improvement strategy

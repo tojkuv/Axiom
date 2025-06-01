@@ -17,23 +17,25 @@ Framework development planning command that creates proposals for framework impl
 **Planning Focus**: Framework development proposal creation and strategic planning
 **Branch Requirement**: Must be executed from framework branch for framework development
 **Proposal Creation**: Creates structured framework proposals for user review and revision
-**Development Integration**: Proposals are implemented through FrameworkDevelopment/DEVELOP.md after user approval
+**Development Integration**: Proposals are implemented through FrameworkProtocols/DEVELOP.md after user approval
 
-### 🔄 **Standardized Git Workflow**
-All FrameworkDevelopment commands follow this workflow:
-1. **Branch Setup**: Switch to `framework` branch (create if doesn't exist)
-2. **Update**: Pull latest changes from remote `framework` branch
-3. **Development**: Execute command-specific development work
-4. **Commit**: Commit changes to `framework` branch with descriptive messages
-5. **Integration**: Merge `framework` branch into `main` branch
-6. **Deployment**: Push `main` branch to remote repository
-7. **Cycle Reset**: Delete old `framework` branch and create fresh one for next cycle
+### 🔄 **Development Workflow Architecture**
+**IMPORTANT**: PLAN commands NEVER perform git operations (commit/push/merge)
+**Version Control**: Only @CHECKPOINT commands handle all git operations
+**Work Philosophy**: PLAN creates proposals → Multiple PLAN/DEVELOP/REFACTOR cycles → @CHECKPOINT commits and merges
+
+Work commands operate on current branch without version control:
+1. **Analysis**: Read current TRACKING.md priorities and framework status
+2. **Planning**: Create framework development proposals
+3. **Proposal Management**: Move proposals through lifecycle stages
+4. **Documentation**: Update proposal status and planning coordination
+**No Git Operations**: PLAN commands never commit, push, or merge
 
 ## Framework Development Planning Philosophy
 
 **Core Principle**: Framework planning creates detailed proposals for framework development that can be reviewed, revised, and approved by users before implementation begins.
 
-**Proposal Workflow**: @PLAN creates framework proposals → User reviews/revises → FrameworkDevelopment/DEVELOP.md implements → Progress tracked in FrameworkDevelopment/TRACKING.md
+**Proposal Workflow**: @PLAN creates framework proposals → User reviews/revises → FrameworkProtocols/DEVELOP.md implements → Progress tracked in FrameworkProtocols/TRACKING.md
 
 ### 🎯 **Clear Separation of Concerns**
 - **PLAN**: Reads TRACKING.md priorities → Creates proposals → NO implementation
@@ -47,7 +49,7 @@ All FrameworkDevelopment commands follow this workflow:
 ## Framework Planning Methodology
 
 ### Phase 1: Framework Analysis
-1. **TRACKING.md Review** → Read current priorities, progress, and next actions from FrameworkDevelopment/TRACKING.md
+1. **TRACKING.md Review** → Read current priorities, progress, and next actions from FrameworkProtocols/TRACKING.md
 2. **Current Framework Assessment** → Analyze current framework implementation status and needs
 3. **Requirements Analysis** → Understand framework development objectives and constraints
 4. **Technical Assessment** → Evaluate framework technical approaches and implementation strategies
@@ -76,8 +78,8 @@ All FrameworkDevelopment commands follow this workflow:
 - Active/: Framework proposals under development
 - WaitingApproval/: Framework proposals ready for user review
 - Archive/: Completed framework proposals
-**Implementation**: Implemented through FrameworkDevelopment/DEVELOP.md
-**Progress Tracking**: Tracked in FrameworkDevelopment/TRACKING.md
+**Implementation**: Implemented through FrameworkProtocols/DEVELOP.md
+**Progress Tracking**: Tracked in FrameworkProtocols/TRACKING.md
 
 ## Framework Proposal Lifecycle Management
 
@@ -85,69 +87,43 @@ All FrameworkDevelopment commands follow this workflow:
 - **Active**: Framework proposal created in Active/ directory, under development
 - **Waiting Approval**: Framework proposal moved to WaitingApproval/ directory, ready for user review
 - **Under Revision**: User requests changes, framework proposal updated in Active/ directory
-- **Approved**: User approves framework proposal, ready for FrameworkDevelopment/DEVELOP.md implementation
-- **In Development**: FrameworkDevelopment/DEVELOP.md implementing proposal, progress tracked in TRACKING.md
+- **Approved**: User approves framework proposal, ready for FrameworkProtocols/DEVELOP.md implementation
+- **In Development**: FrameworkProtocols/DEVELOP.md implementing proposal, progress tracked in TRACKING.md
 - **Completed**: Framework implementation complete, proposal archived to Archive/ directory
 
 ### Framework Workflow Integration
-1. **FrameworkDevelopment/@PLAN** → Creates framework proposal in AxiomFramework/Proposals/Active/
+1. **FrameworkProtocols/@PLAN** → Creates framework proposal in AxiomFramework/Proposals/Active/
 2. **Proposal Completion** → Framework proposal moved to AxiomFramework/Proposals/WaitingApproval/
 3. **User Review** → User reviews and optionally revises framework proposal
 4. **User Approval** → User approves framework proposal for implementation
-5. **FrameworkDevelopment/@DEVELOP** → Implements framework proposal, tracks progress in TRACKING.md
-6. **FrameworkDevelopment/@CHECKPOINT** → Completes framework implementation, archives proposal
+5. **FrameworkProtocols/@DEVELOP** → Implements framework proposal, tracks progress in TRACKING.md
+6. **FrameworkProtocols/@CHECKPOINT** → Completes framework implementation, archives proposal
 
 ## Framework Planning Command Execution
 
 **Command**: `@PLAN [plan|analyze|enhance]`
 **Action**: Execute comprehensive framework planning workflow with proposal creation
 
-### 🔄 **Branch Verification and Setup**
+### 🔄 **Planning Execution Process**
 
-**Before executing any planning work, execute this branch verification:**
+**CRITICAL**: PLAN commands work on current branch state - NO git operations
 
 ```bash
-# 1. Check current branch and switch to framework branch if needed
-CURRENT_BRANCH=$(git branch --show-current)
-echo "🎯 Current branch: $CURRENT_BRANCH"
-
-if [ "$CURRENT_BRANCH" != "framework" ]; then
-    echo "🔄 Switching from $CURRENT_BRANCH to framework branch..."
-    
-    # Check if framework branch exists
-    if git show-ref --verify --quiet refs/heads/framework; then
-        echo "📍 Framework branch exists locally, switching..."
-        git checkout framework
-    elif git show-ref --verify --quiet refs/remotes/origin/framework; then
-        echo "📍 Framework branch exists remotely, checking out..."
-        git checkout -b framework origin/framework
-    else
-        echo "🌱 Creating new framework branch..."
-        git checkout -b framework
-        git push origin framework -u
-    fi
-    
-    echo "✅ Now on framework branch"
-else
-    echo "✅ Already on framework branch"
-fi
-
-# 2. Update framework branch with latest changes
-echo "🔄 Updating framework branch..."
-git fetch origin framework 2>/dev/null || true
-git pull origin framework 2>/dev/null || echo "📍 No remote updates available"
-
-echo "🎯 Branch verification complete - ready for framework planning"
+# Planning workflow (NO git operations)
+echo "🎯 Framework Planning Execution"
+echo "📍 Working on current branch: $(git branch --show-current)"
+echo "⚠️  Version control managed by @CHECKPOINT only"
+echo "🎯 Planning ready - no branch switching required"
 ```
 
 **Automated Execution Process**:
-1. **Branch Verification** → Switch to `framework` branch and update with latest changes
-2. **TRACKING.md Priority Analysis** → Read current priorities and status from FrameworkDevelopment/TRACKING.md
-3. **Framework Context Analysis** → Analyze existing framework implementation and identify development needs
-4. **Requirements Assessment** → Understand framework development objectives and constraints
-5. **Technical Planning** → Design framework technical approach and implementation strategy
-6. **Framework Proposal Creation** → Create structured framework proposal in AxiomFramework/Proposals/Active/
-7. **Review Preparation** → Prepare framework proposal for user review and potential revision
+1. **TRACKING.md Priority Analysis** → Read current priorities and status from FrameworkProtocols/TRACKING.md
+2. **Framework Context Analysis** → Analyze existing framework implementation and identify development needs
+3. **Requirements Assessment** → Understand framework development objectives and constraints
+4. **Technical Planning** → Design framework technical approach and implementation strategy
+5. **Framework Proposal Creation** → Create structured framework proposal in AxiomFramework/Proposals/Active/
+6. **Review Preparation** → Prepare framework proposal for user review and potential revision
+**No Git Operations**: All version control handled by @CHECKPOINT commands only
 
 **Framework Planning Execution Examples**:
 - `@PLAN` → Create framework development proposal
@@ -176,8 +152,8 @@ echo "🎯 Branch verification complete - ready for framework planning"
 ## Framework Planning Workflow Integration
 
 **Planning Purpose**: Strategic framework proposal creation for structured development
-**Implementation Separation**: FrameworkDevelopment/DEVELOP.md implements proposals, never edits them
-**Progress Tracking**: FrameworkDevelopment/TRACKING.md monitors framework proposal implementation progress
+**Implementation Separation**: FrameworkProtocols/DEVELOP.md implements proposals, never edits them
+**Progress Tracking**: FrameworkProtocols/TRACKING.md monitors framework proposal implementation progress
 **Archive Management**: Completed framework proposals archived for reference and documentation
 **User Control**: Users review, revise, and approve framework proposals before implementation
 
@@ -185,8 +161,8 @@ echo "🎯 Branch verification complete - ready for framework planning"
 
 **Proposal Creation**: Creates framework proposals in AxiomFramework/Proposals/Active/ directory, moves to WaitingApproval/ when ready for review
 **User Interaction**: Framework proposals designed for user review, revision, and approval
-**Development Integration**: Framework proposals implemented through FrameworkDevelopment/DEVELOP.md
-**Progress Monitoring**: Framework implementation progress tracked through FrameworkDevelopment/TRACKING.md
+**Development Integration**: Framework proposals implemented through FrameworkProtocols/DEVELOP.md
+**Progress Monitoring**: Framework implementation progress tracked through FrameworkProtocols/TRACKING.md
 **Archive Management**: Completed framework proposals archived for future reference
 
 ---
@@ -195,6 +171,6 @@ echo "🎯 Branch verification complete - ready for framework planning"
 **CORE FOCUS**: Strategic framework proposal creation for framework development  
 **PROPOSAL CREATION**: Creates structured framework proposals in AxiomFramework/Proposals/Active/
 **USER WORKFLOW**: Framework proposals for user review, revision, and approval before implementation
-**INTEGRATION**: Workflow integration with FrameworkDevelopment/DEVELOP.md and TRACKING progress monitoring
+**INTEGRATION**: Workflow integration with FrameworkProtocols/DEVELOP.md and TRACKING progress monitoring
 
-**Use FrameworkDevelopment/@PLAN for strategic framework development planning with structured proposal creation and user approval workflow.**
+**Use FrameworkProtocols/@PLAN for strategic framework development planning with structured proposal creation and user approval workflow.**

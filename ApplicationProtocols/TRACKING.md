@@ -9,7 +9,7 @@ Proposal progress tracking for test application and framework integration valida
 **Objective**: Monitor proposal implementation progress and development findings
 
 ### 🔄 **Standardized Git Workflow**
-All ApplicationDevelopment commands follow this workflow:
+All ApplicationProtocols commands follow this workflow:
 1. **Branch Setup**: Switch to `application` branch (create if doesn't exist)
 2. **Update**: Pull latest changes from remote `application` branch
 3. **Development**: Execute command-specific development work
@@ -116,11 +116,11 @@ All ApplicationDevelopment commands follow this workflow:
 ### **Command Execution Cycle**
 ```bash
 # Standard Development Cycle (5 Steps)
-1. ApplicationDevelopment/PLAN.md      # Read TRACKING.md priorities → Create proposals
-2. ApplicationDevelopment/DEVELOP.md   # Implement proposals → Update TRACKING.md progress
-3. ApplicationDevelopment/CHECKPOINT.md # Merge to main → Update TRACKING.md completion
-4. ApplicationDevelopment/REFACTOR.md  # Structural improvements → Update TRACKING.md quality
-5. ApplicationDevelopment/CHECKPOINT.md # Final merge → Fresh cycle → Update TRACKING.md
+1. ApplicationProtocols/PLAN.md      # Read TRACKING.md priorities → Create proposals
+2. ApplicationProtocols/DEVELOP.md   # Implement proposals → Update TRACKING.md progress
+3. ApplicationProtocols/CHECKPOINT.md # Merge to main → Update TRACKING.md completion
+4. ApplicationProtocols/REFACTOR.md  # Structural improvements → Update TRACKING.md quality
+5. ApplicationProtocols/CHECKPOINT.md # Final merge → Fresh cycle → Update TRACKING.md
 ```
 
 ### **Command Separation of Concerns**
