@@ -591,41 +591,19 @@ struct ViewIntegrationTests {
     // MARK: - SwiftUI Type Safety Tests
     
     @Test("SwiftUI compile-time type safety")
+    @MainActor
     func testCompileTimeTypeSafety() throws {
         // This test validates compile-time type relationships
         
-        // Valid view-context relationship should compile
-        struct ValidTestView: AxiomView {
-            typealias Context = TestSwiftUIContext
-            @ObservedObject var context: TestSwiftUIContext
-            
-            var body: some View {
-                Text("Valid")
-            }
-        }
-        
-        struct ValidTestContext: AxiomContext {
-            typealias View = ValidTestView
-            typealias Clients = TestSwiftUIClientContainer
-            
-            let clients: TestSwiftUIClientContainer = TestSwiftUIClientContainer()
-            let intelligence: any AxiomIntelligence = MockSwiftUIIntelligence()
-            
-            func onAppear() async {}
-            func onDisappear() async {}
-            func onClientStateChange<T: AxiomClient>(_ client: T) async {}
-            func handleError(_ error: any AxiomError) async {}
-            func trackAnalyticsEvent(_ event: String, parameters: [String: Any]) async {}
-        }
+        // Verify existing valid view-context relationship compiles
+        let context = TestSwiftUIContext()
+        let view = TestSwiftUIView(context: context)
         
         // Verify type relationships
-        #expect(ValidTestView.Context.self == ValidTestContext.self)
-        #expect(ValidTestContext.View.self == ValidTestView.self)
+        #expect(TestSwiftUIView.Context.self == TestSwiftUIContext.self)
+        #expect(TestSwiftUIContext.View.self == TestSwiftUIView.self)
         
-        // Create instances to verify runtime compatibility
-        let context = ValidTestContext()
-        let view = ValidTestView(context: context)
-        
+        // Verify runtime compatibility 
         #expect(view.context === context)
     }
     
@@ -743,12 +721,3 @@ struct ViewIntegrationTests {
     }
 }
 
-// MARK: - Weak Observer Support
-
-struct WeakObserver {
-    weak var observer: AnyObject?
-    
-    init(_ observer: AnyObject) {
-        self.observer = observer
-    }
-}
