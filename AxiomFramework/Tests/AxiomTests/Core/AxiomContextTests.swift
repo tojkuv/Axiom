@@ -540,15 +540,6 @@ func testObservableObjectBehavior() async throws {
 
 // MARK: - Supporting Test Infrastructure
 
-/// Weak reference wrapper for observers
-struct WeakObserver {
-    weak var observer: AnyObject?
-    
-    init(_ observer: AnyObject) {
-        self.observer = observer
-    }
-}
-
 // MARK: - AxiomContext Performance Tests
 
 @Test("AxiomContext resource access performance")

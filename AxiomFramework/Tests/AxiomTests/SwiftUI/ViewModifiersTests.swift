@@ -377,7 +377,7 @@ struct ViewModifiersTests {
                 }
                 .onDisappear {
                     let renderDuration = ContinuousClock.now - renderStartTime
-                    let milliseconds = Double(renderDuration.nanoseconds) / 1_000_000.0
+                    let milliseconds = (renderDuration / .seconds(1)) * 1000.0
                     context.recordPerformanceMetric(metricName, value: milliseconds)
                 }
         }
@@ -429,29 +429,6 @@ struct ViewModifiersTests {
         }
     }
     
-    // MARK: - View Extension for Modifiers
-    
-    extension View {
-        func axiomThemed(context: ViewModifierTestContext) -> some View {
-            self.modifier(AxiomThemedModifier(context: context))
-        }
-        
-        func axiomAccessible(context: ViewModifierTestContext) -> some View {
-            self.modifier(AxiomAccessibilityModifier(context: context))
-        }
-        
-        func axiomPerformanceTracked(_ metricName: String, context: ViewModifierTestContext) -> some View {
-            self.modifier(AxiomPerformanceTrackingModifier(metricName: metricName, context: context))
-        }
-        
-        func axiomAnimated(context: ViewModifierTestContext) -> some View {
-            self.modifier(AxiomAnimatedModifier(context: context))
-        }
-        
-        func axiomResponsive(context: ViewModifierTestContext) -> some View {
-            self.modifier(AxiomResponsiveModifier(context: context))
-        }
-    }
     
     // MARK: - ViewModifier Tests
     
@@ -461,13 +438,13 @@ struct ViewModifiersTests {
         let context = ViewModifierTestContext()
         
         // Create test view with modifiers
-        let testView = Text("Test")
+        let _ = Text("Test")
             .axiomThemed(context: context)
             .axiomAccessible(context: context)
             .axiomPerformanceTracked("test_metric", context: context)
         
         // Verify view can be composed (compilation test)
-        #expect(testView is some View)
+        // Verify testView compiles as a SwiftUI view
         
         // Verify context integration
         #expect(context.themeState.primaryColor == "blue")
@@ -497,7 +474,8 @@ struct ViewModifiersTests {
         }
         
         let duration = ContinuousClock.now - startTime
-        let viewsPerSecond = Double(modifierCount) / duration.seconds
+        let durationSeconds = Double(duration.components.seconds) + Double(duration.components.attoseconds) / 1e18
+        let viewsPerSecond = Double(modifierCount) / durationSeconds
         
         print("📊 ViewModifier Performance:")
         print("   Views created: \(modifierCount)")
@@ -556,11 +534,11 @@ struct ViewModifiersTests {
         #expect(context.accessibilityState.reduceMotion == true)
         
         // Create view with accessibility modifier
-        let accessibleView = Text("Accessible Test")
+        let _ = Text("Accessible Test")
             .axiomAccessible(context: context)
         
         // Verify view creation (compilation test for accessibility integration)
-        #expect(accessibleView is some View)
+        // Verify accessibleView compiles as a SwiftUI view
     }
     
     @Test("ViewModifier chain performance optimization")
@@ -593,14 +571,17 @@ struct ViewModifiersTests {
         print("📊 ViewModifier Chain Performance:")
         for (index, duration) in chainPerformance.enumerated() {
             let length = index + 1
-            let nanosPerModifier = duration.nanoseconds / UInt64(length)
+            let totalNanos = UInt64(duration.components.seconds) * 1_000_000_000 + UInt64(duration.components.attoseconds / 1_000_000_000)
+            let nanosPerModifier = totalNanos / UInt64(length)
             print("   Chain \(length): \(duration) (\(nanosPerModifier)ns per modifier)")
         }
         
         // Verify performance doesn't degrade exponentially
         let firstChain = chainPerformance[0]
         let lastChain = chainPerformance[chainLength - 1]
-        let performanceRatio = Double(lastChain.nanoseconds) / Double(firstChain.nanoseconds)
+        let lastNanos = UInt64(lastChain.components.seconds) * 1_000_000_000 + UInt64(lastChain.components.attoseconds / 1_000_000_000)
+        let firstNanos = UInt64(firstChain.components.seconds) * 1_000_000_000 + UInt64(firstChain.components.attoseconds / 1_000_000_000)
+        let performanceRatio = Double(lastNanos) / Double(firstNanos)
         
         // Performance should scale roughly linearly, not exponentially
         #expect(performanceRatio < Double(chainLength * 2), "Modifier chain performance degrades too much: \(String(format: "%.1f", performanceRatio))x")
@@ -647,6 +628,7 @@ struct ViewModifiersTests {
     }
     
     @Test("ViewModifier type safety validation")
+    @MainActor
     func testViewModifierTypeSafety() throws {
         let context = ViewModifierTestContext()
         
@@ -658,9 +640,9 @@ struct ViewModifiersTests {
         
         // Verify type relationships
         #expect(basicText is Text)
-        #expect(themedText is some View)
-        #expect(accessibleText is some View)
-        #expect(trackedText is some View)
+        // Verify themedText compiles as a SwiftUI view
+        // Verify accessibleText compiles as a SwiftUI view
+        // Verify trackedText compiles as a SwiftUI view
         
         // Test modifier composition order independence
         let order1 = Text("Order Test 1")
@@ -672,8 +654,8 @@ struct ViewModifiersTests {
             .axiomThemed(context: context)
         
         // Both should compile and be valid views
-        #expect(order1 is some View)
-        #expect(order2 is some View)
+        // Verify order1 compiles as a SwiftUI view
+        // Verify order2 compiles as a SwiftUI view
     }
     
     @Test("ViewModifier context integration validation")
@@ -713,33 +695,31 @@ struct ViewModifiersTests {
                 .axiomAccessible(context: context)
         }
         
-        #expect(integratedView is some View)
+        // Verify integratedView compiles as a SwiftUI view
     }
 }
 
-// MARK: - Memory Tracker
+// MARK: - View Extension for Modifiers
 
-struct MemoryTracker {
-    static func currentUsage() -> Int {
-        var info = mach_task_basic_info()
-        var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size)/4
-        
-        let result = withUnsafeMutablePointer(to: &info) {
-            $0.withMemoryRebound(to: integer_t.self, capacity: 1) {
-                task_info(mach_task_self_, task_flavor_t(MACH_TASK_BASIC_INFO), $0, &count)
-            }
-        }
-        
-        return result == KERN_SUCCESS ? Int(info.resident_size) : 0
+extension View {
+    func axiomThemed(context: ViewModifiersTests.ViewModifierTestContext) -> some View {
+        self.modifier(ViewModifiersTests.AxiomThemedModifier(context: context))
     }
-}
-
-// MARK: - Weak Observer
-
-struct WeakObserver {
-    weak var observer: AnyObject?
     
-    init(_ observer: AnyObject) {
-        self.observer = observer
+    func axiomAccessible(context: ViewModifiersTests.ViewModifierTestContext) -> some View {
+        self.modifier(ViewModifiersTests.AxiomAccessibilityModifier(context: context))
+    }
+    
+    func axiomPerformanceTracked(_ metricName: String, context: ViewModifiersTests.ViewModifierTestContext) -> some View {
+        self.modifier(ViewModifiersTests.AxiomPerformanceTrackingModifier(metricName: metricName, context: context))
+    }
+    
+    func axiomAnimated(context: ViewModifiersTests.ViewModifierTestContext) -> some View {
+        self.modifier(ViewModifiersTests.AxiomAnimatedModifier(context: context))
+    }
+    
+    func axiomResponsive(context: ViewModifiersTests.ViewModifierTestContext) -> some View {
+        self.modifier(ViewModifiersTests.AxiomResponsiveModifier(context: context))
     }
 }
+

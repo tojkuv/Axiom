@@ -551,7 +551,8 @@ struct ContextBindingTests {
         try await Task.sleep(for: .milliseconds(200))
         
         let duration = ContinuousClock.now - startTime
-        let updatesPerSecond = Double(updateCount) / duration.seconds
+        let durationSeconds = Double(duration.components.seconds) + Double(duration.components.attoseconds) / 1e18
+        let updatesPerSecond = Double(updateCount) / durationSeconds
         
         cancellable.cancel()
         
@@ -803,29 +804,4 @@ struct ContextBindingTests {
     }
 }
 
-// MARK: - Memory Tracker Utility
 
-struct MemoryTracker {
-    static func currentUsage() -> Int {
-        var info = mach_task_basic_info()
-        var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size)/4
-        
-        let result = withUnsafeMutablePointer(to: &info) {
-            $0.withMemoryRebound(to: integer_t.self, capacity: 1) {
-                task_info(mach_task_self_, task_flavor_t(MACH_TASK_BASIC_INFO), $0, &count)
-            }
-        }
-        
-        return result == KERN_SUCCESS ? Int(info.resident_size) : 0
-    }
-}
-
-// MARK: - Weak Observer
-
-struct WeakObserver {
-    weak var observer: AnyObject?
-    
-    init(_ observer: AnyObject) {
-        self.observer = observer
-    }
-}

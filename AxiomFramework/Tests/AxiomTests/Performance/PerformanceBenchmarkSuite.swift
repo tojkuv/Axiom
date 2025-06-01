@@ -32,21 +32,6 @@ struct PerformanceBenchmarkSuite {
         }
     }
     
-    /// Memory tracking utility
-    struct MemoryTracker {
-        static func currentUsage() -> Int {
-            var info = mach_task_basic_info()
-            var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size)/4
-            
-            let result = withUnsafeMutablePointer(to: &info) {
-                $0.withMemoryRebound(to: integer_t.self, capacity: 1) {
-                    task_info(mach_task_self_, task_flavor_t(MACH_TASK_BASIC_INFO), $0, &count)
-                }
-            }
-            
-            return result == KERN_SUCCESS ? Int(info.resident_size) : 0
-        }
-    }
     
     // MARK: - Test Clients for Performance Testing
     
@@ -206,7 +191,9 @@ struct PerformanceBenchmarkSuite {
         }
         
         // Calculate performance improvement
-        let improvementRatio = Double(tcaDuration.nanoseconds) / Double(axiomDuration.nanoseconds)
+        let tcaNanos = UInt64(tcaDuration.components.seconds) * 1_000_000_000 + UInt64(tcaDuration.components.attoseconds / 1_000_000_000)
+        let axiomNanos = UInt64(axiomDuration.components.seconds) * 1_000_000_000 + UInt64(axiomDuration.components.attoseconds / 1_000_000_000)
+        let improvementRatio = Double(tcaNanos) / Double(axiomNanos)
         
         print("📊 State Access Performance:")
         print("   Axiom: \(axiomDuration)")
@@ -243,7 +230,9 @@ struct PerformanceBenchmarkSuite {
             }
         }
         
-        let improvementRatio = Double(tcaDuration.nanoseconds) / Double(axiomDuration.nanoseconds)
+        let tcaNanos = UInt64(tcaDuration.components.seconds) * 1_000_000_000 + UInt64(tcaDuration.components.attoseconds / 1_000_000_000)
+        let axiomNanos = UInt64(axiomDuration.components.seconds) * 1_000_000_000 + UInt64(axiomDuration.components.attoseconds / 1_000_000_000)
+        let improvementRatio = Double(tcaNanos) / Double(axiomNanos)
         
         print("📊 State Update Performance:")
         print("   Axiom: \(axiomDuration)")
@@ -302,7 +291,8 @@ struct PerformanceBenchmarkSuite {
             }
         }
         
-        let averageTime = duration.nanoseconds / UInt64(iterations)
+        let totalNanos = UInt64(duration.components.seconds) * 1_000_000_000 + UInt64(duration.components.attoseconds / 1_000_000_000)
+        let averageTime = totalNanos / UInt64(iterations)
         let averageMs = Double(averageTime) / 1_000_000.0
         
         print("📊 Capability Validation Performance:")
@@ -343,7 +333,8 @@ struct PerformanceBenchmarkSuite {
         }
         
         let totalOperations = clientCount * operationsPerClient
-        let operationsPerSecond = Double(totalOperations) / duration.seconds
+        let durationSeconds = Double(duration.components.seconds) + Double(duration.components.attoseconds) / 1e18
+        let operationsPerSecond = Double(totalOperations) / durationSeconds
         
         print("📊 Actor Scheduling Performance:")
         print("   Clients: \(clientCount)")
@@ -392,7 +383,8 @@ struct PerformanceBenchmarkSuite {
         }
         
         let totalOperations = accessCount + updateCount
-        let operationsPerSecond = Double(totalOperations) / duration.seconds
+        let durationSeconds = Double(duration.components.seconds) + Double(duration.components.attoseconds) / 1e18
+        let operationsPerSecond = Double(totalOperations) / durationSeconds
         
         print("📊 Concurrent Access Performance:")
         print("   Reads: \(accessCount)")
@@ -438,7 +430,9 @@ struct PerformanceBenchmarkSuite {
             }
         }
         
-        let performanceRatio = Double(currentDuration.nanoseconds) / Double(baselineDuration.nanoseconds)
+        let currentSeconds = Double(currentDuration.components.seconds) + Double(currentDuration.components.attoseconds) / 1e18
+        let baselineSeconds = Double(baselineDuration.components.seconds) + Double(baselineDuration.components.attoseconds) / 1e18
+        let performanceRatio = currentSeconds / baselineSeconds
         
         print("📊 Performance Regression Check:")
         print("   Baseline: \(baselineDuration)")
@@ -494,15 +488,6 @@ struct PerformanceBenchmarkSuite {
 }
 
 // MARK: - Supporting Types
-
-/// Weak reference wrapper for observer management
-struct WeakObserver {
-    weak var observer: AnyObject?
-    
-    init(_ observer: AnyObject) {
-        self.observer = observer
-    }
-}
 
 /// Performance benchmark results for tracking and comparison
 struct PerformanceBenchmarkResults {
