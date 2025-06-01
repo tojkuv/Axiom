@@ -19,6 +19,16 @@ Application development command with methodology, requirements, and execution pr
 **Quality Standards**: High test coverage with comprehensive success rates
 **Integration**: Integration with @PLAN, @CHECKPOINT, and application development workflows
 
+### 🔄 **Standardized Git Workflow**
+All ApplicationDevelopment commands follow this workflow:
+1. **Branch Setup**: Switch to `application` branch (create if doesn't exist)
+2. **Update**: Pull latest changes from remote `application` branch
+3. **Development**: Execute command-specific development work
+4. **Commit**: Commit changes to `application` branch with descriptive messages
+5. **Integration**: Merge `application` branch into `main` branch
+6. **Deployment**: Push `main` branch to remote repository
+7. **Cycle Reset**: Delete old `application` branch and create fresh one for next cycle
+
 ## Application Development Philosophy
 
 **Core Principle**: Application development focuses on building test applications that demonstrate framework capabilities through practical implementation and user experience validation.
@@ -138,13 +148,14 @@ Application development command with methodology, requirements, and execution pr
 **Action**: Execute comprehensive application development workflow with methodology enforcement
 
 **Automated Execution Process**:
-1. **Environment Validation** → Verify integration branch, clean working tree, application dependencies
+1. **Environment Validation** → Verify application branch, clean working tree, application dependencies
 2. **Planning Integration** → Reference current TRACKING application priorities and @PLAN outputs
 3. **Methodology Enforcement** → Apply application development principles and framework integration patterns
 4. **Build and Test Cycle** → Execute application build, test with coverage requirements
 5. **Quality Validation** → Ensure high test success rates, performance targets, framework integration compliance
 6. **Documentation Updates** → Update application documentation and integration guides
-7. **Coordination Updates** → Provide progress updates and framework validation results
+7. **TRACKING.md Progress Update** → Update implementation progress in ApplicationDevelopment/TRACKING.md
+8. **Coordination Updates** → Provide progress updates and framework validation results
 
 **Application Development Execution Examples**:
 - `@DEVELOP plan` → Plan application development priorities and task breakdown
@@ -168,7 +179,7 @@ Application development command with methodology, requirements, and execution pr
 
 ## Application Development Coordination
 
-**Branch Focus**: Application development and framework integration validation in integration branch
+**Branch Focus**: Application development and framework integration validation in application branch
 **Work Storage**: Application development work tracked in `/AxiomTestApp/Documentation/` only
 **Planning Integration**: @PLAN command provides contextual application development planning
 **Coordination**: Application development operation with framework validation and progress coordination

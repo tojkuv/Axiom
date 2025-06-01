@@ -8,6 +8,16 @@ Proposal progress tracking for test application and framework integration valida
 **Scope**: AxiomTestApp features, user experience, validation scenarios
 **Objective**: Monitor proposal implementation progress and development findings
 
+### 🔄 **Standardized Git Workflow**
+All ApplicationDevelopment commands follow this workflow:
+1. **Branch Setup**: Switch to `application` branch (create if doesn't exist)
+2. **Update**: Pull latest changes from remote `application` branch
+3. **Development**: Execute command-specific development work
+4. **Commit**: Commit changes to `application` branch with descriptive messages
+5. **Integration**: Merge `application` branch into `main` branch
+6. **Deployment**: Push `main` branch to remote repository
+7. **Cycle Reset**: Delete old `application` branch and create fresh one for next cycle
+
 ## Current Application Status
 
 ### AxiomTestApp Implementation
@@ -103,20 +113,28 @@ Proposal progress tracking for test application and framework integration valida
 
 ## 🔄 **Application Development Workflow**
 
-### **Application Development Commands**
+### **Command Execution Cycle**
 ```bash
-ApplicationDevelopment/FEATURE.md    # Feature development
-ApplicationDevelopment/DEPLOY.md     # Deployment and release
-ApplicationDevelopment/MAINTAIN.md   # Maintenance and optimization
-ApplicationDevelopment/SHIP.md       # App Store preparation
+# Standard Development Cycle (5 Steps)
+1. ApplicationDevelopment/PLAN.md      # Read TRACKING.md priorities → Create proposals
+2. ApplicationDevelopment/DEVELOP.md   # Implement proposals → Update TRACKING.md progress
+3. ApplicationDevelopment/CHECKPOINT.md # Merge to main → Update TRACKING.md completion
+4. ApplicationDevelopment/REFACTOR.md  # Structural improvements → Update TRACKING.md quality
+5. ApplicationDevelopment/CHECKPOINT.md # Final merge → Fresh cycle → Update TRACKING.md
 ```
 
-### **Development Process**
-1. **Feature Planning**: Identify user experience improvements
-2. **Implementation**: Develop features using Axiom framework patterns
-3. **Testing**: Comprehensive testing including user experience validation
-4. **Validation**: Real-world scenario testing and performance validation
-5. **Documentation**: Update usage examples and integration guides
+### **Command Separation of Concerns**
+- **PLAN**: Reads TRACKING.md current priorities → Creates structured application proposals
+- **DEVELOP**: Implements proposals → Updates TRACKING.md with implementation progress
+- **CHECKPOINT**: Git workflow management → Updates TRACKING.md with merge completion
+- **REFACTOR**: Code organization improvements → Updates TRACKING.md with quality metrics
+- **TRACKING**: Central progress coordination → Updated by all commands
+
+### **TRACKING.md Integration**
+All commands integrate with TRACKING.md:
+- **Read Operations**: PLAN.md reads current priorities and focuses development
+- **Write Operations**: DEVELOP.md, CHECKPOINT.md, REFACTOR.md update progress and completion
+- **Coordination**: TRACKING.md maintains current state across all development sessions
 
 ## 🎯 **Current Sprint Planning**
 

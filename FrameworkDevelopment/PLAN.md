@@ -15,9 +15,19 @@ Framework development planning command that creates proposals for framework impl
 
 ### Framework Planning Scope
 **Planning Focus**: Framework development proposal creation and strategic planning
-**Branch Requirement**: Must be executed from development branch for framework development
+**Branch Requirement**: Must be executed from framework branch for framework development
 **Proposal Creation**: Creates structured framework proposals for user review and revision
 **Development Integration**: Proposals are implemented through FrameworkDevelopment/DEVELOP.md after user approval
+
+### 🔄 **Standardized Git Workflow**
+All FrameworkDevelopment commands follow this workflow:
+1. **Branch Setup**: Switch to `framework` branch (create if doesn't exist)
+2. **Update**: Pull latest changes from remote `framework` branch
+3. **Development**: Execute command-specific development work
+4. **Commit**: Commit changes to `framework` branch with descriptive messages
+5. **Integration**: Merge `framework` branch into `main` branch
+6. **Deployment**: Push `main` branch to remote repository
+7. **Cycle Reset**: Delete old `framework` branch and create fresh one for next cycle
 
 ## Framework Development Planning Philosophy
 
@@ -25,18 +35,24 @@ Framework development planning command that creates proposals for framework impl
 
 **Proposal Workflow**: @PLAN creates framework proposals → User reviews/revises → FrameworkDevelopment/DEVELOP.md implements → Progress tracked in FrameworkDevelopment/TRACKING.md
 
-**Separation of Concerns**: Planning creates framework proposals, DEVELOP implements them, TRACKING monitors progress
+### 🎯 **Clear Separation of Concerns**
+- **PLAN**: Reads TRACKING.md priorities → Creates proposals → NO implementation
+- **DEVELOP**: Implements proposals → Updates TRACKING.md progress → NO planning
+- **CHECKPOINT**: Git workflow → Updates TRACKING.md completion → NO development
+- **REFACTOR**: Code organization → Updates TRACKING.md quality → NO functionality changes
+- **TRACKING**: Central progress store → Updated by all commands → NO command execution
 
 **Quality Standards**: Framework proposals include comprehensive technical specifications, implementation approaches, and success criteria
 
 ## Framework Planning Methodology
 
 ### Phase 1: Framework Analysis
-1. **Current Framework Assessment** → Analyze current framework implementation status and needs
-2. **Requirements Analysis** → Understand framework development objectives and constraints
-3. **Technical Assessment** → Evaluate framework technical approaches and implementation strategies
-4. **Architecture Planning** → Assess framework architecture changes and resource requirements
-5. **Success Criteria Definition** → Define measurable framework outcomes and validation criteria
+1. **TRACKING.md Review** → Read current priorities, progress, and next actions from FrameworkDevelopment/TRACKING.md
+2. **Current Framework Assessment** → Analyze current framework implementation status and needs
+3. **Requirements Analysis** → Understand framework development objectives and constraints
+4. **Technical Assessment** → Evaluate framework technical approaches and implementation strategies
+5. **Architecture Planning** → Assess framework architecture changes and resource requirements
+6. **Success Criteria Definition** → Define measurable framework outcomes and validation criteria
 
 ### Phase 2: Framework Proposal Creation
 1. **Technical Specification** → Create detailed framework technical approach and architecture
@@ -82,12 +98,13 @@ Framework development planning command that creates proposals for framework impl
 **Action**: Execute comprehensive framework planning workflow with proposal creation
 
 **Automated Execution Process**:
-1. **Branch Validation** → Ensure current branch is development branch (required for framework development)
-2. **Framework Context Analysis** → Analyze existing framework implementation and identify development needs
-3. **Requirements Assessment** → Understand framework development objectives and constraints
-4. **Technical Planning** → Design framework technical approach and implementation strategy
-5. **Framework Proposal Creation** → Create structured framework proposal in AxiomFramework/Proposals/Active/
-6. **Review Preparation** → Prepare framework proposal for user review and potential revision
+1. **Branch Validation** → Ensure current branch is framework branch (required for framework development)
+2. **TRACKING.md Priority Analysis** → Read current priorities and status from FrameworkDevelopment/TRACKING.md
+3. **Framework Context Analysis** → Analyze existing framework implementation and identify development needs
+4. **Requirements Assessment** → Understand framework development objectives and constraints
+5. **Technical Planning** → Design framework technical approach and implementation strategy
+6. **Framework Proposal Creation** → Create structured framework proposal in AxiomFramework/Proposals/Active/
+7. **Review Preparation** → Prepare framework proposal for user review and potential revision
 
 **Framework Planning Execution Examples**:
 - `@PLAN` → Create framework development proposal

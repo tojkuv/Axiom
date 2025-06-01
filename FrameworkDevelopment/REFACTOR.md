@@ -19,6 +19,16 @@ Framework refactoring command with methodology, requirements, and execution proc
 **Quality Standards**: Structural integrity with zero functionality changes
 **Integration**: Integration with @PLAN, @CHECKPOINT, and framework development workflows
 
+### 🔄 **Standardized Git Workflow**
+All FrameworkDevelopment commands follow this workflow:
+1. **Branch Setup**: Switch to `framework` branch (create if doesn't exist)
+2. **Update**: Pull latest changes from remote `framework` branch
+3. **Development**: Execute command-specific development work
+4. **Commit**: Commit changes to `framework` branch with descriptive messages
+5. **Integration**: Merge `framework` branch into `main` branch
+6. **Deployment**: Push `main` branch to remote repository
+7. **Cycle Reset**: Delete old `framework` branch and create fresh one for next cycle
+
 ## Framework Refactoring Philosophy
 
 **Core Principle**: Framework refactoring improves framework code structure, organization, and maintainability without changing functionality, creating a clean foundation that accelerates framework development and prevents technical debt accumulation.
@@ -142,7 +152,8 @@ Framework refactoring command with methodology, requirements, and execution proc
 4. **Organization and Cleanup Cycle** → Execute structural improvements, cleanup, and optimization
 5. **Quality Validation** → Ensure 100% functionality preservation, structural improvement verification
 6. **Documentation Updates** → Update structure documentation and refactoring reports
-7. **Coordination Updates** → Provide refactoring results and structural improvement assessment
+7. **TRACKING.md Quality Update** → Update structural improvements in FrameworkDevelopment/TRACKING.md
+8. **Coordination Updates** → Provide refactoring results and structural improvement assessment
 
 **Refactoring Execution Examples**:
 - `@REFACTOR plan` → Plan refactoring priorities and structural improvement strategy

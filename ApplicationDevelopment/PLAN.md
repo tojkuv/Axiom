@@ -15,9 +15,19 @@ Application development planning command that creates proposals for application 
 
 ### Application Planning Scope
 **Planning Focus**: Application development proposal creation and strategic planning
-**Branch Requirement**: Must be executed from integration branch for application development
+**Branch Requirement**: Must be executed from application branch for application development
 **Proposal Creation**: Creates structured application proposals for user review and revision
 **Development Integration**: Proposals are implemented through ApplicationDevelopment/DEVELOP.md after user approval
+
+### 🔄 **Standardized Git Workflow**
+All ApplicationDevelopment commands follow this workflow:
+1. **Branch Setup**: Switch to `application` branch (create if doesn't exist)
+2. **Update**: Pull latest changes from remote `application` branch
+3. **Development**: Execute command-specific development work
+4. **Commit**: Commit changes to `application` branch with descriptive messages
+5. **Integration**: Merge `application` branch into `main` branch
+6. **Deployment**: Push `main` branch to remote repository
+7. **Cycle Reset**: Delete old `application` branch and create fresh one for next cycle
 
 ## Application Development Planning Philosophy
 
@@ -25,18 +35,24 @@ Application development planning command that creates proposals for application 
 
 **Proposal Workflow**: @PLAN creates application proposals → User reviews/revises → ApplicationDevelopment/DEVELOP.md implements → Progress tracked in ApplicationDevelopment/TRACKING.md
 
-**Separation of Concerns**: Planning creates application proposals, DEVELOP implements them, TRACKING monitors progress
+### 🎯 **Clear Separation of Concerns**
+- **PLAN**: Reads TRACKING.md priorities → Creates proposals → NO implementation
+- **DEVELOP**: Implements proposals → Updates TRACKING.md progress → NO planning
+- **CHECKPOINT**: Git workflow → Updates TRACKING.md completion → NO development
+- **REFACTOR**: Code organization → Updates TRACKING.md quality → NO functionality changes
+- **TRACKING**: Central progress store → Updated by all commands → NO command execution
 
 **Quality Standards**: Application proposals include comprehensive technical specifications, implementation approaches, and success criteria
 
 ## Application Planning Methodology
 
 ### Phase 1: Application Analysis
-1. **Current Application Assessment** → Analyze current application implementation status and needs
-2. **Requirements Analysis** → Understand application development objectives and constraints
-3. **Technical Assessment** → Evaluate application technical approaches and implementation strategies
-4. **User Experience Planning** → Assess application user experience changes and resource requirements
-5. **Success Criteria Definition** → Define measurable application outcomes and validation criteria
+1. **TRACKING.md Review** → Read current priorities, progress, and next actions from ApplicationDevelopment/TRACKING.md
+2. **Current Application Assessment** → Analyze current application implementation status and needs
+3. **Requirements Analysis** → Understand application development objectives and constraints
+4. **Technical Assessment** → Evaluate application technical approaches and implementation strategies
+5. **User Experience Planning** → Assess application user experience changes and resource requirements
+6. **Success Criteria Definition** → Define measurable application outcomes and validation criteria
 
 ### Phase 2: Application Proposal Creation
 1. **Technical Specification** → Create detailed application technical approach and architecture
@@ -82,12 +98,13 @@ Application development planning command that creates proposals for application 
 **Action**: Execute comprehensive application planning workflow with proposal creation
 
 **Automated Execution Process**:
-1. **Branch Validation** → Ensure current branch is integration branch (required for application development)
-2. **Application Context Analysis** → Analyze existing application implementation and identify development needs
-3. **Requirements Assessment** → Understand application development objectives and constraints
-4. **Technical Planning** → Design application technical approach and implementation strategy
-5. **Application Proposal Creation** → Create structured application proposal in AxiomTestApp/Proposals/Active/
-6. **Review Preparation** → Prepare application proposal for user review and potential revision
+1. **Branch Validation** → Ensure current branch is application branch (required for application development)
+2. **TRACKING.md Priority Analysis** → Read current priorities and status from ApplicationDevelopment/TRACKING.md
+3. **Application Context Analysis** → Analyze existing application implementation and identify development needs
+4. **Requirements Assessment** → Understand application development objectives and constraints
+5. **Technical Planning** → Design application technical approach and implementation strategy
+6. **Application Proposal Creation** → Create structured application proposal in AxiomTestApp/Proposals/Active/
+7. **Review Preparation** → Prepare application proposal for user review and potential revision
 
 **Application Planning Execution Examples**:
 - `@PLAN` → Create application development proposal

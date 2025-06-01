@@ -19,6 +19,16 @@ Framework development command with methodology, requirements, and execution proc
 **Quality Standards**: High test coverage with comprehensive success rates
 **Integration**: Integration with @PLAN, @CHECKPOINT, and @REFACTOR workflows
 
+### 🔄 **Standardized Git Workflow**
+All FrameworkDevelopment commands follow this workflow:
+1. **Branch Setup**: Switch to `framework` branch (create if doesn't exist)
+2. **Update**: Pull latest changes from remote `framework` branch
+3. **Development**: Execute command-specific development work
+4. **Commit**: Commit changes to `framework` branch with descriptive messages
+5. **Integration**: Merge `framework` branch into `main` branch
+6. **Deployment**: Push `main` branch to remote repository
+7. **Cycle Reset**: Delete old `framework` branch and create fresh one for next cycle
+
 ## Framework Development Philosophy
 
 **Core Principle**: Framework development focuses on building iOS development capabilities that integrate architectural analysis with intelligent system features.
@@ -138,13 +148,14 @@ Framework development command with methodology, requirements, and execution proc
 **Action**: Execute comprehensive development workflow with methodology enforcement
 
 **Automated Execution Process**:
-1. **Environment Validation** → Verify development branch, clean working tree, framework dependencies
+1. **Environment Validation** → Verify framework branch, clean working tree, framework dependencies
 2. **Planning Integration** → Reference current TRACKING development priorities and @PLAN outputs
 3. **Methodology Enforcement** → Apply development principles and architectural constraints
 4. **Build and Test Cycle** → Execute swift build, swift test with coverage requirements
 5. **Quality Validation** → Ensure high test success rates, performance targets, architectural compliance
 6. **Documentation Updates** → Update technical documentation and API references
-7. **Coordination Updates** → Provide progress updates and next steps
+7. **TRACKING.md Progress Update** → Update implementation progress in FrameworkDevelopment/TRACKING.md
+8. **Coordination Updates** → Provide progress updates and next steps
 
 **Development Execution Examples**:
 - `@DEVELOP plan` → Plan development priorities and task breakdown

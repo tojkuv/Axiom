@@ -7,12 +7,22 @@ This command provides intelligent checkpoint management for framework developmen
 ### 🎯 **Usage Modes**
 - **`@CHECKPOINT.md`** → Auto-detect current branch and execute appropriate workflow
 - **`@CHECKPOINT.md m`** → Force main branch checkpoint workflow (regardless of current branch)
-- **`@CHECKPOINT.md d`** → Force development branch checkpoint workflow (regardless of current branch)
+- **`@CHECKPOINT.md f`** → Force framework branch checkpoint workflow (regardless of current branch)
 
 ### 🧠 **Branch Focus**
-**Framework Development Context**: Primarily works with development branch for framework core implementation
-**Development Branch**: Framework development, core feature implementation, architecture evolution
+**Framework Development Context**: Primarily works with framework branch for framework core implementation
+**Framework Branch**: Framework development, core feature implementation, architecture evolution
 **Main Branch**: Strategic coordination and documentation updates
+
+### 🔄 **Standardized Git Workflow**
+All FrameworkDevelopment commands follow this workflow:
+1. **Branch Setup**: Switch to `framework` branch (create if doesn't exist)
+2. **Update**: Pull latest changes from remote `framework` branch
+3. **Development**: Execute command-specific development work
+4. **Commit**: Commit changes to `framework` branch with descriptive messages
+5. **Integration**: Merge `framework` branch into `main` branch
+6. **Deployment**: Push `main` branch to remote repository
+7. **Cycle Reset**: Delete old `framework` branch and create fresh one for next cycle
 
 ### 🛡️ Safety Features
 - **Safe Merge Operations**: Uses --no-ff for clean merge history
@@ -23,16 +33,16 @@ This command provides intelligent checkpoint management for framework developmen
 
 ### 🔍 Branch Detection & Smart Actions
 
-**Development Branch (`development`):**
-- 🔄 Switch to development branch (if using forced mode)
-- ✅ Commit development changes with intelligent commit message (framework work only, no ROADMAP.md)
+**Framework Branch (`framework`):**
+- 🔄 Switch to framework branch (if using forced mode)
+- ✅ Commit framework changes with intelligent commit message (framework work only, no ROADMAP.md)
 - 🔄 Merge completed work into `main`
-- 🌱 Create fresh `development` branch for next cycle
+- 🌱 Create fresh `framework` branch for next cycle
 
 **Main Branch (`main`):**
 - ✅ Commit current progress (including ROADMAP.md updates from @PLAN.md)
 - 📤 Push changes to main
-- 🔧 Update development branch with latest main
+- 🔧 Update framework branch with latest main
 - 🔄 Synchronize all branches with main changes
 
 ---
@@ -55,13 +65,13 @@ if [ -n "$BRANCH_FLAG" ]; then
             TARGET_WORKFLOW="main"
             echo "🎯 Forced main branch checkpoint workflow"
             ;;
-        "d"|"development")
-            TARGET_WORKFLOW="development"
-            echo "🎯 Forced development branch checkpoint workflow"
+        "f"|"framework")
+            TARGET_WORKFLOW="framework"
+            echo "🎯 Forced framework branch checkpoint workflow"
             ;;
         *)
             echo "❌ Invalid branch flag: $BRANCH_FLAG"
-            echo "💡 Valid flags: m (main), d (development)"
+            echo "💡 Valid flags: m (main), f (framework)"
             echo "📋 Or use @CHECKPOINT.md without flags for auto-detection"
             exit 1
             ;;
@@ -81,25 +91,25 @@ git status --short
 
 # 4. Execute workflow based on target (auto-detected or forced)
 case "$TARGET_WORKFLOW" in
-  "development")
-    echo "🔧 DEVELOPMENT BRANCH CHECKPOINT - MERGE & RESTART"
+  "framework")
+    echo "🔧 FRAMEWORK BRANCH CHECKPOINT - MERGE & RESTART"
     
-    # Switch to development branch first to check for its changes
-    if [ "$CURRENT_BRANCH" != "development" ]; then
-        echo "🔄 Switching to development branch to check for changes..."
-        git checkout development
+    # Switch to framework branch first to check for its changes
+    if [ "$CURRENT_BRANCH" != "framework" ]; then
+        echo "🔄 Switching to framework branch to check for changes..."
+        git checkout framework
     fi
     
-    # Check for uncommitted changes on development branch
+    # Check for uncommitted changes on framework branch
     if [ -n "$(git status --porcelain)" ]; then
         # Commit changes with intelligent message
-        echo "✅ Committing development progress..."
+        echo "✅ Committing framework progress..."
         git add .
         CURRENT_DATE=$(date '+%Y-%m-%d %H:%M')
         
         # Use heredoc for proper multiline commit message
         COMMIT_MESSAGE=$(cat <<EOF
-🔧 Development checkpoint: $CURRENT_DATE
+🔧 Framework checkpoint: $CURRENT_DATE
 
 📦 Framework enhancements and feature development
 🎯 Ready for main branch merge
@@ -111,41 +121,41 @@ EOF
 )
         git commit -m "$COMMIT_MESSAGE"
     else
-        echo "✅ No uncommitted changes to commit on development branch"
+        echo "✅ No uncommitted changes to commit on framework branch"
     fi
     
     # Fetch latest main
     echo "🔄 Fetching latest main..."
     git fetch origin main
     
-    # Check if development has changes to merge (avoid empty merges)
+    # Check if framework has changes to merge (avoid empty merges)
     git checkout main
     git pull origin main
     
-    echo "🔍 Checking if development has new changes..."
-    if git merge-tree $(git merge-base main development) main development | grep -q "^"; then
+    echo "🔍 Checking if framework has new changes..."
+    if git merge-tree $(git merge-base main framework) main framework | grep -q "^"; then
         echo "📝 Changes detected - proceeding with merge"
     else
-        echo "✅ No changes to merge - development already integrated"
-        echo "🌱 Creating fresh development branch..."
-        git branch -D development 2>/dev/null || true
-        git push origin --delete development 2>/dev/null || true
-        git checkout -b development
-        git push origin development -u
-        echo "✅ Development cycle complete (no merge needed)!"
+        echo "✅ No changes to merge - framework already integrated"
+        echo "🌱 Creating fresh framework branch..."
+        git branch -D framework 2>/dev/null || true
+        git push origin --delete framework 2>/dev/null || true
+        git checkout -b framework
+        git push origin framework -u
+        echo "✅ Framework cycle complete (no merge needed)!"
         exit 0
     fi
     
-    echo "🚀 Merging development into main..."
+    echo "🚀 Merging framework into main..."
     MERGE_DATE=$(date '+%Y-%m-%d')
     
     # Use heredoc for proper multiline commit message
     MERGE_MESSAGE=$(cat <<EOF
-🔧 Merge development cycle: $MERGE_DATE
+🔧 Merge framework cycle: $MERGE_DATE
 
-✅ Development work completed and validated
+✅ Framework work completed and validated
 📦 Framework enhancements integrated
-🎯 Ready for next development cycle
+🎯 Ready for next framework cycle
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
@@ -154,21 +164,21 @@ EOF
 )
     
     # Perform merge with proper error handling
-    if ! git merge development --no-ff -m "$MERGE_MESSAGE"; then
+    if ! git merge framework --no-ff -m "$MERGE_MESSAGE"; then
         echo ""
         echo "🚨 MERGE CONFLICT DETECTED!"
         echo "❌ Automatic checkpoint halted - this should not happen with our workflows"
         echo ""
         echo "🤔 Possible causes:"
         echo "   • Unexpected changes made directly to main branch"
-        echo "   • Manual modifications to development branch history"
+        echo "   • Manual modifications to framework branch history"
         echo "   • External changes not following Axiom workflow"
         echo ""
         echo "🆘 HUMAN CONSULTATION REQUIRED"
         echo "📋 Current status:"
-        echo "   • Development branch has been committed"
+        echo "   • Framework branch has been committed"
         echo "   • Main branch is checked out"
-        echo "   • Merge conflict exists between development and main"
+        echo "   • Merge conflict exists between framework and main"
         echo ""
         echo "💡 Manual resolution steps:"
         echo "   1. Run: git status (to see conflicted files)"
@@ -208,18 +218,24 @@ EOF
     echo "🔄 Returning to main..."
     git checkout main
     
-    # Delete old development branch
-    echo "🗑️ Cleaning up old development branch..."
-    git branch -D development
-    git push origin --delete development
+    # Delete old framework branch
+    echo "🗑️ Cleaning up old framework branch..."
+    git branch -D framework
+    git push origin --delete framework
     
-    # Create fresh development branch
-    echo "🌱 Creating fresh development branch..."
-    git checkout -b development
-    git push origin development -u
+    # Create fresh framework branch
+    echo "🌱 Creating fresh framework branch..."
+    git checkout -b framework
+    git push origin framework -u
     
-    echo "✅ Development cycle complete!"
-    echo "🎯 Fresh development branch ready for next cycle"
+    # Update TRACKING.md with completion status
+    echo "📊 Updating TRACKING.md with merge completion..."
+    COMPLETION_DATE=$(date '+%Y-%m-%d')
+    sed -i '' "s/\*\*Last Updated\*\*:.*/\*\*Last Updated\*\*: $COMPLETION_DATE | \*\*Status\*\*: Framework cycle completed - merged to main/" FrameworkDevelopment/TRACKING.md
+    
+    echo "✅ Framework cycle complete!"
+    echo "🎯 Fresh framework branch ready for next cycle"
+    echo "📊 TRACKING.md updated with completion status"
     ;;
     
   "main")
@@ -255,37 +271,37 @@ EOF
         echo "📋 Proceeding with branch synchronization only..."
     fi
     
-    # Update development branch with latest main
-    echo "🔧 Updating development branch with latest main..."
-    if git show-ref --verify --quiet refs/remotes/origin/development; then
-        git fetch origin development
-        git checkout development
+    # Update framework branch with latest main
+    echo "🔧 Updating framework branch with latest main..."
+    if git show-ref --verify --quiet refs/remotes/origin/framework; then
+        git fetch origin framework
+        git checkout framework
         if ! git pull origin main; then
             echo ""
-            echo "🚨 CONFLICT UPDATING DEVELOPMENT BRANCH!"
+            echo "🚨 CONFLICT UPDATING FRAMEWORK BRANCH!"
             echo "❌ Cross-branch update failed - manual resolution required"
             echo ""
             echo "🆘 HUMAN CONSULTATION REQUIRED"
             echo "📋 Current status:"
             echo "   • Main branch changes have been committed and pushed"
-            echo "   • Development branch is checked out"
-            echo "   • Conflict exists when pulling main into development"
+            echo "   • Framework branch is checked out"
+            echo "   • Conflict exists when pulling main into framework"
             echo ""
             echo "💡 Manual resolution steps:"
             echo "   1. Run: git status (to see conflicted files)"
             echo "   2. Edit conflicted files to resolve conflicts"
             echo "   3. Run: git add <resolved-files>"
             echo "   4. Run: git commit (to complete the merge)"
-            echo "   5. Run: git push origin development"
+            echo "   5. Run: git push origin framework"
             echo "   6. Then re-run: @CHECKPOINT.md (to continue automation)"
             echo ""
             echo "🛑 Checkpoint process stopped. Please resolve conflicts and retry."
             exit 1
         fi
-        git push origin development
-        echo "✅ Development branch updated with latest main"
+        git push origin framework
+        echo "✅ Framework branch updated with latest main"
     else
-        echo "🌱 Development branch doesn't exist remotely"
+        echo "🌱 Framework branch doesn't exist remotely"
     fi
     
     # Switch back to main
@@ -293,7 +309,7 @@ EOF
     git checkout main
     
     echo "✅ Main branch checkpoint complete"
-    echo "🔄 Development branch synchronized with latest main changes"
+    echo "🔄 Framework branch synchronized with latest main changes"
     echo "📋 No PR needed (already on main)"
     ;;
     
@@ -344,12 +360,12 @@ echo "🕐 Time: $(date)"
 @CHECKPOINT.md  # Auto-detects current branch and executes appropriate workflow
 ```
 
-### **Development Workflow** (Auto or Forced)
+### **Framework Workflow** (Auto or Forced)
 ```bash
 # While working on framework features
-@CHECKPOINT.md     # Auto-detects development branch
-@CHECKPOINT.md d   # Forces development workflow from any branch
-                   # → Commits, merges to main, creates fresh development
+@CHECKPOINT.md     # Auto-detects framework branch
+@CHECKPOINT.md f   # Forces framework workflow from any branch
+                   # → Commits, merges to main, creates fresh framework
 ```
 
 ### **Main Branch Coordination** (Auto or Forced)
@@ -357,7 +373,7 @@ echo "🕐 Time: $(date)"
 # Strategic planning and coordination
 @CHECKPOINT.md     # Auto-detects main branch
 @CHECKPOINT.md m   # Forces main workflow from any branch
-                   # → Commits status, pushes to main, updates development branch
+                   # → Commits status, pushes to main, updates framework branch
 ```
 
 ---
@@ -368,9 +384,9 @@ echo "🕐 Time: $(date)"
 - **🎯 Forced Workflow Execution**: Execute specific branch workflows regardless of current branch
 - **📝 Intelligent Commit Messages**: Context-aware commit descriptions  
 - **🔄 Smart Merge & Restart**: Merges completed work to main and creates fresh branches
-- **🔄 Development Synchronization**: Development branch automatically synchronizes with latest main changes
+- **🔄 Framework Synchronization**: Framework branch automatically synchronizes with latest main changes
 - **🚨 Conflict Detection & Human Consultation**: Halts automation and provides guidance for conflicts
-- **🌱 Automated Branch Cycling**: Complete cycle automation for development workflow
+- **🌱 Automated Branch Cycling**: Complete cycle automation for framework workflow
 - **📊 Status Tracking**: Maintains project coordination across branches
 - **⚡ Framework-Focused Operation**: Optimized for core framework development and implementation
 

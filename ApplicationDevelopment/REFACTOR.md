@@ -19,6 +19,16 @@ Application refactoring command with methodology, requirements, and execution pr
 **Quality Standards**: Structural integrity with zero functionality changes
 **Integration**: Integration with @PLAN, @CHECKPOINT, and application development workflows
 
+### 🔄 **Standardized Git Workflow**
+All ApplicationDevelopment commands follow this workflow:
+1. **Branch Setup**: Switch to `application` branch (create if doesn't exist)
+2. **Update**: Pull latest changes from remote `application` branch
+3. **Development**: Execute command-specific development work
+4. **Commit**: Commit changes to `application` branch with descriptive messages
+5. **Integration**: Merge `application` branch into `main` branch
+6. **Deployment**: Push `main` branch to remote repository
+7. **Cycle Reset**: Delete old `application` branch and create fresh one for next cycle
+
 ## Application Refactoring Philosophy
 
 **Core Principle**: Application refactoring improves application code structure, organization, and maintainability without changing functionality, creating a clean foundation that accelerates application development and prevents technical debt accumulation.
@@ -142,7 +152,8 @@ Application refactoring command with methodology, requirements, and execution pr
 4. **Organization and Cleanup Cycle** → Execute application structural improvements, cleanup, and optimization
 5. **Quality Validation** → Ensure functionality preservation, structural improvement verification
 6. **Documentation Updates** → Update application structure documentation and refactoring reports
-7. **Coordination Updates** → Provide application refactoring results and structural improvement assessment
+7. **TRACKING.md Quality Update** → Update structural improvements in ApplicationDevelopment/TRACKING.md
+8. **Coordination Updates** → Provide application refactoring results and structural improvement assessment
 
 **Application Refactoring Execution Examples**:
 - `@REFACTOR plan` → Plan application refactoring priorities and structural improvement strategy

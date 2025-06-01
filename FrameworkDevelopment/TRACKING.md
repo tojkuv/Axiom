@@ -8,6 +8,16 @@ Proposal progress tracking for framework core implementation and infrastructure
 **Scope**: Framework architecture, capabilities, performance, testing infrastructure
 **Objective**: Monitor proposal implementation progress and development findings
 
+### 🔄 **Standardized Git Workflow**
+All FrameworkDevelopment commands follow this workflow:
+1. **Branch Setup**: Switch to `framework` branch (create if doesn't exist)
+2. **Update**: Pull latest changes from remote `framework` branch
+3. **Development**: Execute command-specific development work
+4. **Commit**: Commit changes to `framework` branch with descriptive messages
+5. **Integration**: Merge `framework` branch into `main` branch
+6. **Deployment**: Push `main` branch to remote repository
+7. **Cycle Reset**: Delete old `framework` branch and create fresh one for next cycle
+
 ## Current Framework Status
 
 ### Core Infrastructure Implementation
@@ -95,20 +105,28 @@ Proposal progress tracking for framework core implementation and infrastructure
 
 ## 🔄 **Development Workflow**
 
-### **Framework Development Commands**
+### **Command Execution Cycle**
 ```bash
-FrameworkDevelopment/DEVELOP.md      # Core framework development
-FrameworkDevelopment/INTEGRATE.md    # Framework validation
-FrameworkDevelopment/REFACTOR.md     # Code organization
-FrameworkDevelopment/CHECKPOINT.md   # Version control
+# Standard Development Cycle (5 Steps)
+1. FrameworkDevelopment/PLAN.md      # Read TRACKING.md priorities → Create proposals
+2. FrameworkDevelopment/DEVELOP.md   # Implement proposals → Update TRACKING.md progress
+3. FrameworkDevelopment/CHECKPOINT.md # Merge to main → Update TRACKING.md completion
+4. FrameworkDevelopment/REFACTOR.md  # Structural improvements → Update TRACKING.md quality
+5. FrameworkDevelopment/CHECKPOINT.md # Final merge → Fresh cycle → Update TRACKING.md
 ```
 
-### Development Process
-1. **Enhancement Planning**: Identify framework improvement opportunities
-2. **Implementation**: Develop framework capabilities using established patterns
-3. **Testing**: Comprehensive testing with high coverage targets
-4. **Validation**: Test framework in test applications
-5. **Documentation**: Update technical specifications and guides
+### **Command Separation of Concerns**
+- **PLAN**: Reads TRACKING.md current priorities → Creates structured development proposals
+- **DEVELOP**: Implements proposals → Updates TRACKING.md with implementation progress
+- **CHECKPOINT**: Git workflow management → Updates TRACKING.md with merge completion
+- **REFACTOR**: Code organization improvements → Updates TRACKING.md with quality metrics
+- **TRACKING**: Central progress coordination → Updated by all commands
+
+### **TRACKING.md Integration**
+All commands integrate with TRACKING.md:
+- **Read Operations**: PLAN.md reads current priorities and focuses development
+- **Write Operations**: DEVELOP.md, CHECKPOINT.md, REFACTOR.md update progress and completion
+- **Coordination**: TRACKING.md maintains current state across all development sessions
 
 ## Next Actions
 
