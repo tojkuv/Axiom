@@ -19,25 +19,32 @@ Framework development command with methodology, requirements, and execution proc
 **Quality Standards**: High test coverage with comprehensive success rates
 **Integration**: Integration with @PLAN, @CHECKPOINT, and @REFACTOR workflows
 
-### 🔄 **Standardized Git Workflow**
-All FrameworkDevelopment commands follow this workflow:
+### 🔄 **Test-Driven Development Git Workflow**
+All FrameworkDevelopment commands follow this TDD-enforced workflow:
 1. **Branch Setup**: Switch to `framework` branch (create if doesn't exist)
 2. **Update**: Pull latest changes from remote `framework` branch
-3. **Development**: Execute command-specific development work
-4. **Commit**: Commit changes to `framework` branch with descriptive messages
-5. **Integration**: Merge `framework` branch into `main` branch
-6. **Deployment**: Push `main` branch to remote repository
-7. **Cycle Reset**: Delete old `framework` branch and create fresh one for next cycle
+3. **Test-First Development**: Write failing tests before any implementation work
+4. **Implementation**: Execute implementation to make tests pass
+5. **Test Validation**: MANDATORY - All tests must pass before any commits
+6. **Commit**: Commit changes to `framework` branch with descriptive messages
+7. **Pre-Merge Validation**: MANDATORY - Run complete test suite before merge
+8. **Integration**: Merge `framework` branch into `main` branch ONLY if all tests pass
+9. **Deployment**: Push `main` branch to remote repository
+10. **Cycle Reset**: Delete old `framework` branch and create fresh one for next cycle
 
 ## Framework Development Philosophy
 
 **Core Principle**: Framework development focuses on building iOS development capabilities that integrate architectural analysis with intelligent system features.
 
+**Test-Driven Development Philosophy**: ALL framework development MUST follow TDD methodology - tests written first, implementation follows, refactoring with passing tests.
+
 **Quality Standards**: Framework components maintain architectural integrity, meet performance targets, provide good developer experience, and integrate with framework capabilities.
 
-**Testing Requirements**: Framework development targets high test coverage with comprehensive test success rates. See `AxiomFramework/Documentation/Testing/TESTING_STRATEGY.md` for testing requirements and standards.
+**Testing Requirements**: Framework development targets 100% test success rate with comprehensive test coverage. See `AxiomFramework/Documentation/Testing/TESTING_STRATEGY.md` for testing requirements and standards.
 
 **Development Focus**: Framework development implements capabilities that enhance iOS development through AI integration, predictive analysis, and intelligent automation features.
+
+**Code Integrity**: ZERO TOLERANCE for broken tests in main branch - development process designed to prevent test failures from reaching production.
 
 ## Framework Development Principles
 
@@ -82,11 +89,13 @@ All FrameworkDevelopment commands follow this workflow:
 4. **Capability Development** → Build runtime capability validation and management systems
 5. **Intelligence Integration** → Integrate AI and ML capabilities into framework operations
 
-### Phase 3: Testing and Validation
-**Testing Requirements**: Comprehensive testing with high test success rates
+### Phase 3: Test-Driven Development and Validation
+**TDD Requirements**: ALL development must follow test-driven development methodology
+**Testing Standards**: 100% test success rate - NO EXCEPTIONS for commits to main branch
 **Testing Strategy**: Multi-layered validation including unit, integration, performance, AI/ML, security, and concurrency testing
 **Standards**: Detailed testing requirements in `AxiomFramework/Documentation/Testing/TESTING_STRATEGY.md`
-**Development Rule**: Test failures require resolution before development progress
+**CRITICAL RULE**: Test failures COMPLETELY BLOCK all development progress until resolved
+**TDD Process**: Write failing tests → Implement minimal code → Make tests pass → Refactor → Repeat
 
 ### **Phase 4: Documentation and Polish**
 1. **API Documentation** → Document all public interfaces with comprehensive examples
@@ -127,12 +136,46 @@ All FrameworkDevelopment commands follow this workflow:
 **Testing Standards**: Testing specifications available in `AxiomFramework/Documentation/Testing/TESTING_STRATEGY.md`
 **Integration**: Testing requirements integrated into development workflow
 
-## Test Requirements
+## 🚨 MANDATORY Test Requirements
 
-**Testing Standards**: High test success rates required for development progress
-**Development Process**: Test failures require resolution before continuing development
-**Resolution Process**: Stop → identify cause → fix failure → verify tests pass → continue
+**ABSOLUTE REQUIREMENT**: 100% test success rate for ANY commit to main branch - NO EXCEPTIONS
+**TDD ENFORCEMENT**: All development MUST follow test-driven development methodology
+**BLOCKING BEHAVIOR**: Test failures IMMEDIATELY halt ALL development work until resolved
+**Quality Gate**: NO code reaches main branch without passing ALL tests
+**Resolution Process**: STOP EVERYTHING → identify cause → fix failure → verify ALL tests pass → continue
+**Pre-Commit Validation**: Every commit MUST run complete test suite
+**Pre-Merge Validation**: Every merge to main MUST pass complete test suite
 **Standards**: Testing requirements in `AxiomFramework/Documentation/Testing/TESTING_STRATEGY.md`
+
+## 🔬 Test-Driven Development Methodology
+
+**TDD Cycle (RED-GREEN-REFACTOR)**:
+1. **RED**: Write a failing test that describes the desired functionality
+2. **GREEN**: Write the minimal code necessary to make the test pass
+3. **REFACTOR**: Improve the code while keeping all tests passing
+4. **REPEAT**: Continue cycle for each new feature or change
+
+**TDD Enforcement Rules**:
+- **NEVER write production code without a failing test first**
+- **NEVER write more test code than sufficient to make a test fail**
+- **NEVER write more production code than sufficient to make the test pass**
+- **ALL tests must pass before ANY commit to framework branch**
+- **ALL tests must pass before ANY merge to main branch**
+
+**Quality Gate Automation**:
+```bash
+# Pre-commit hook (automatically enforced)
+if ! swift test; then
+    echo "❌ COMMIT BLOCKED: Tests must pass before commit"
+    exit 1
+fi
+
+# Pre-merge validation (automatically enforced)
+if ! swift test; then
+    echo "❌ MERGE BLOCKED: Tests must pass before merge to main"
+    exit 1
+fi
+```
 
 ## Development Success Criteria
 
@@ -152,7 +195,19 @@ All FrameworkDevelopment commands follow this workflow:
 **Before executing any development work, execute this branch verification:**
 
 ```bash
-# 1. Check current branch and switch to framework branch if needed
+# 1. MANDATORY: Verify all tests pass on current branch before any work
+echo "🧪 MANDATORY: Running complete test suite validation..."
+cd AxiomFramework
+if ! swift test; then
+    echo "❌ CRITICAL: Tests are failing on current branch"
+    echo "🚨 BLOCKING: All development work MUST stop until tests pass"
+    echo "🔧 Required action: Fix failing tests before proceeding"
+    exit 1
+fi
+echo "✅ Test suite passed - safe to proceed"
+cd ..
+
+# 2. Check current branch and switch to framework branch if needed
 CURRENT_BRANCH=$(git branch --show-current)
 echo "🎯 Current branch: $CURRENT_BRANCH"
 
@@ -177,36 +232,56 @@ else
     echo "✅ Already on framework branch"
 fi
 
-# 2. Update framework branch with latest changes
+# 3. Update framework branch with latest changes
 echo "🔄 Updating framework branch..."
 git fetch origin framework 2>/dev/null || true
 git pull origin framework 2>/dev/null || echo "📍 No remote updates available"
 
-echo "🎯 Branch verification complete - ready for framework development"
+# 4. MANDATORY: Verify all tests pass after branch update
+echo "🧪 MANDATORY: Re-validating test suite after branch update..."
+cd AxiomFramework
+if ! swift test; then
+    echo "❌ CRITICAL: Tests failing after branch update"
+    echo "🚨 BLOCKING: Development cannot proceed with failing tests"
+    echo "🔧 Required action: Fix failing tests before any development work"
+    exit 1
+fi
+echo "✅ All tests passing - framework development ready"
+cd ..
+
+echo "🎯 Branch verification and test validation complete - ready for TDD framework development"
 ```
 
-**Automated Execution Process**:
+**Test-Driven Automated Execution Process**:
 1. **Branch Verification** → Switch to `framework` branch and update with latest changes
 2. **Environment Validation** → Verify clean working tree, framework dependencies
-3. **Planning Integration** → Reference current TRACKING development priorities and @PLAN outputs
-4. **Methodology Enforcement** → Apply development principles and architectural constraints
-5. **Build and Test Cycle** → Execute swift build, swift test with coverage requirements
-6. **Quality Validation** → Ensure high test success rates, performance targets, architectural compliance
-7. **Documentation Updates** → Update technical documentation and API references
-8. **TRACKING.md Progress Update** → Update implementation progress in FrameworkDevelopment/TRACKING.md
-9. **Coordination Updates** → Provide progress updates and next steps
+3. **Test Suite Validation** → MANDATORY - Run complete test suite and verify 100% pass rate
+4. **Planning Integration** → Reference current TRACKING development priorities and @PLAN outputs
+5. **TDD Methodology Enforcement** → Apply test-driven development principles and architectural constraints
+6. **Test-First Development** → Write failing tests before any implementation work
+7. **Implementation Cycle** → Implement minimal code to make tests pass
+8. **Test Validation** → MANDATORY - All tests must pass before any commits
+9. **Build and Test Cycle** → Execute swift build, swift test with coverage requirements
+10. **Quality Gate Validation** → ABSOLUTE REQUIREMENT - 100% test success rate before any progression
+11. **Documentation Updates** → Update technical documentation and API references
+12. **TRACKING.md Progress Update** → Update implementation progress in FrameworkDevelopment/TRACKING.md
+13. **Pre-Merge Test Validation** → MANDATORY - Complete test suite must pass before merge to main
+14. **Coordination Updates** → Provide progress updates and next steps
 
-**Development Execution Examples**:
-- `@DEVELOP plan` → Plan development priorities and task breakdown
-- `@DEVELOP build` → Execute full build, test, and validation cycle
-- `@DEVELOP test` → Run comprehensive testing with coverage analysis
-- `@DEVELOP optimize` → Performance analysis and optimization cycle
+**Test-Driven Development Execution Examples**:
+- `@DEVELOP plan` → Plan development priorities with test-first approach
+- `@DEVELOP build` → Execute TDD cycle: write tests → implement → validate
+- `@DEVELOP test` → Run comprehensive testing with 100% pass requirement
+- `@DEVELOP optimize` → Performance optimization with test-driven validation
 
 ## 🔄 Development Workflow Integration
 
 **Planning**: Integrates with @PLAN for development task planning and priority coordination
-**Execution**: Complete implementation → testing → optimization → documentation cycle
-**Critical Rule**: Any test failure immediately blocks all development work until resolved
+**TDD Execution**: Test-first development → implementation → validation → optimization → documentation cycle
+**ABSOLUTE RULE**: ANY test failure IMMEDIATELY blocks ALL development work until resolved
+**Quality Gate**: NO code progression without 100% test success rate
+**Pre-Commit Requirement**: ALL commits must pass complete test suite
+**Pre-Merge Requirement**: ALL merges to main must pass complete test suite
 **Documentation**: Work details tracked in `/AxiomFramework/Documentation/` only
 **Coordination**: Seamless integration with @CHECKPOINT for development cycle completion
 
@@ -230,7 +305,9 @@ echo "🎯 Branch verification complete - ready for framework development"
 **DEVELOPMENT COMMAND STATUS**: Development command with methodology, requirements, and execution procedures
 **CORE FOCUS**: Framework development with automated workflow implementation  
 **AUTOMATION**: Supports `@DEVELOP [plan|build|test|optimize]` with execution procedures  
-**TESTING REQUIREMENTS**: High test coverage and comprehensive test success rates required  
+**TESTING REQUIREMENTS**: 100% test success rate and comprehensive test coverage required - NO EXCEPTIONS  
+**TDD ENFORCEMENT**: Test-driven development methodology mandatory for all framework development  
+**QUALITY GATES**: Automated test validation prevents broken code from reaching main branch  
 **INTEGRATION**: Workflow integration with @PLAN, @CHECKPOINT, and development coordination
 
-**Use @DEVELOP for framework development with automated methodology implementation and execution.**
+**Use @DEVELOP for test-driven framework development with automated methodology implementation and execution.**
