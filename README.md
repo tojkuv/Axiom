@@ -184,24 +184,43 @@ open Axiom.xcworkspace
 - ✅ **Industry Standard**: Same approach used by Apple frameworks
 - ✅ **Modular Testing**: Isolated feature testing in organized structure
 
-### **Four-Command Development System** 🔄
+### **Dual-Track Development System** 🔄
 **Strategic development coordination with automated planning and continuous improvement**
 
-- **DEVELOP Cycle** → Framework core enhancement (`@DEVELOP.md`)
-- **INTEGRATE Cycle** → Real-world validation (`@INTEGRATE.md`)
-- **REFACTOR Cycle** → Organization & preparation (`@REFACTOR.md`)
-- **PLAN Coordination** → Automated cycle planning (`@PLAN d|i|r`)
+#### **FrameworkDevelopment/** - For Axiom Core Developers
+- **DEVELOP Cycle** → Framework core enhancement (`FrameworkDevelopment/DEVELOP.md`)
+- **INTEGRATE Cycle** → Real-world validation (`FrameworkDevelopment/INTEGRATE.md`)
+- **REFACTOR Cycle** → Organization & preparation (`FrameworkDevelopment/REFACTOR.md`)
+- **CHECKPOINT** → Version control coordination (`FrameworkDevelopment/CHECKPOINT.md`)
+
+#### **ApplicationDevelopment/** - For Axiom Framework Users
+- **FEATURE Cycle** → Application feature development (`ApplicationDevelopment/FEATURE.md`)
+- **DEPLOY Cycle** → Application deployment & release (`ApplicationDevelopment/DEPLOY.md`)
+- **MAINTAIN Cycle** → Application maintenance & optimization (`ApplicationDevelopment/MAINTAIN.md`)
+- **SHIP** → Application shipping & version control (`ApplicationDevelopment/SHIP.md`)
+
+#### **Strategic Coordination**
+- **COGNITIVE SYNTHESIS** → Automated proposal generation (`@PLAN d|i|r|f`)
 - **PROPOSE Strategy** → Technical enhancement proposals via `@PLAN` (main branch)
 
 ```bash
-# Example strategic workflow
-@DEVELOP.md      # Implement new framework features
-@PLAN i          # Plan integration testing  
-@INTEGRATE.md    # Validate in real iOS app
-@PLAN r          # Plan documentation organization
-@REFACTOR.md     # Archive and prepare next phase
-@PLAN (main)     # Strategic planning and technical enhancement proposals
-@PLAN d          # Plan next development cycle
+# Framework Development Workflow (FrameworkDevelopment/)
+FrameworkDevelopment/DEVELOP.md      # Implement new framework features
+@PLAN i                              # Synthesize integration testing approach  
+FrameworkDevelopment/INTEGRATE.md    # Validate in real iOS app
+@PLAN r                              # Synthesize documentation organization
+FrameworkDevelopment/REFACTOR.md     # Archive and prepare next phase
+FrameworkDevelopment/CHECKPOINT.md   # Version control coordination
+
+# Application Development Workflow (ApplicationDevelopment/)
+ApplicationDevelopment/FEATURE.md    # Develop new application features
+@PLAN d                              # Synthesize deployment strategy
+ApplicationDevelopment/DEPLOY.md     # Deploy to staging/production
+ApplicationDevelopment/MAINTAIN.md   # Ongoing maintenance and optimization
+ApplicationDevelopment/SHIP.md       # Version and ship to App Store
+
+# Strategic Planning
+@PLAN (main)     # Strategic cognitive synthesis and technical enhancement proposals
 ```
 
 ### **Live Development Cycle**
