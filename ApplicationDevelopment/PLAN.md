@@ -1,0 +1,140 @@
+# @PLAN.md - Axiom Application Development Planning Command
+
+Application development planning command that creates proposals for application implementation
+
+## Automated Mode Trigger
+
+**When human sends**: `@PLAN [optional-args]`
+**Action**: Enter ultrathink mode and execute application development planning workflow
+
+### Usage Modes
+- **`@PLAN`** → Create application development proposal in AxiomTestApp/Proposals/Active/
+- **`@PLAN plan`** → Plan application development tasks and create proposal
+- **`@PLAN validate`** → Plan application validation and create testing proposal
+- **`@PLAN enhance`** → Plan application enhancements and user experience improvements
+
+### Application Planning Scope
+**Planning Focus**: Application development proposal creation and strategic planning
+**Branch Requirement**: Must be executed from integration branch for application development
+**Proposal Creation**: Creates structured application proposals for user review and revision
+**Development Integration**: Proposals are implemented through ApplicationDevelopment/DEVELOP.md after user approval
+
+## Application Development Planning Philosophy
+
+**Core Principle**: Application planning creates detailed proposals for application development that can be reviewed, revised, and approved by users before implementation begins.
+
+**Proposal Workflow**: @PLAN creates application proposals → User reviews/revises → ApplicationDevelopment/DEVELOP.md implements → Progress tracked in ApplicationDevelopment/TRACKING.md
+
+**Separation of Concerns**: Planning creates application proposals, DEVELOP implements them, TRACKING monitors progress
+
+**Quality Standards**: Application proposals include comprehensive technical specifications, implementation approaches, and success criteria
+
+## Application Planning Methodology
+
+### Phase 1: Application Analysis
+1. **Current Application Assessment** → Analyze current application implementation status and needs
+2. **Requirements Analysis** → Understand application development objectives and constraints
+3. **Technical Assessment** → Evaluate application technical approaches and implementation strategies
+4. **User Experience Planning** → Assess application user experience changes and resource requirements
+5. **Success Criteria Definition** → Define measurable application outcomes and validation criteria
+
+### Phase 2: Application Proposal Creation
+1. **Technical Specification** → Create detailed application technical approach and architecture
+2. **Implementation Planning** → Plan application development phases and implementation steps
+3. **Testing Strategy** → Define application testing approach and validation procedures
+4. **Documentation Planning** → Plan application documentation updates and requirements
+5. **Integration Strategy** → Define integration with existing application codebase and framework
+
+### Phase 3: Application Proposal Documentation
+1. **Structured Format** → Create application proposal using established format and sections
+2. **Technical Details** → Include comprehensive application technical specifications and approaches
+3. **Implementation Roadmap** → Provide clear application implementation steps and phases
+4. **Success Metrics** → Define measurable application success criteria and validation approaches
+5. **Review Preparation** → Prepare application proposal for user review and potential revision
+
+## Application Proposal Creation Process
+
+### Application Proposals (AxiomTestApp/Proposals/Active/)
+**Focus**: Test application development, framework integration validation, user experience implementation
+**Directory**: `/Users/tojkuv/Documents/GitHub/Axiom/AxiomTestApp/Proposals/Active/`
+**Implementation**: Implemented through ApplicationDevelopment/DEVELOP.md
+**Progress Tracking**: Tracked in ApplicationDevelopment/TRACKING.md
+
+## Application Proposal Lifecycle Management
+
+### Application Proposal States
+- **Active**: Application proposal created in Active/ directory, ready for user review
+- **Under Revision**: User requests changes, application proposal updated in Active/ directory
+- **Approved**: User approves application proposal, ready for ApplicationDevelopment/DEVELOP.md implementation
+- **In Development**: ApplicationDevelopment/DEVELOP.md implementing proposal, progress tracked in TRACKING.md
+- **Completed**: Application implementation complete, proposal archived to Archive/ directory
+
+### Application Workflow Integration
+1. **ApplicationDevelopment/@PLAN** → Creates application proposal in AxiomTestApp/Proposals/Active/
+2. **User Review** → User reviews and optionally revises application proposal
+3. **User Approval** → User approves application proposal for implementation
+4. **ApplicationDevelopment/@DEVELOP** → Implements application proposal, tracks progress in TRACKING.md
+5. **ApplicationDevelopment/@CHECKPOINT** → Completes application implementation, archives proposal
+
+## Application Planning Command Execution
+
+**Command**: `@PLAN [plan|validate|enhance]`
+**Action**: Execute comprehensive application planning workflow with proposal creation
+
+**Automated Execution Process**:
+1. **Branch Validation** → Ensure current branch is integration branch (required for application development)
+2. **Application Context Analysis** → Analyze existing application implementation and identify development needs
+3. **Requirements Assessment** → Understand application development objectives and constraints
+4. **Technical Planning** → Design application technical approach and implementation strategy
+5. **Application Proposal Creation** → Create structured application proposal in AxiomTestApp/Proposals/Active/
+6. **Review Preparation** → Prepare application proposal for user review and potential revision
+
+**Application Planning Execution Examples**:
+- `@PLAN` → Create application development proposal
+- `@PLAN plan` → Plan application development tasks and create proposal
+- `@PLAN validate` → Plan application validation and create testing proposal
+- `@PLAN enhance` → Plan application enhancements and user experience improvements
+
+## Application Proposal Format Standards
+
+### Application Proposal Structure
+- **Title**: Clear, descriptive application proposal title
+- **Summary**: Brief overview of application proposal objectives and approach
+- **Technical Specification**: Detailed application technical approach and architecture
+- **Implementation Plan**: Step-by-step application implementation phases and procedures
+- **Testing Strategy**: Comprehensive application testing approach and validation procedures
+- **Success Criteria**: Measurable application outcomes and validation criteria
+- **Integration Notes**: Application integration considerations and dependencies
+
+### Application Quality Standards
+- **Comprehensive Coverage**: All aspects of application development approach covered
+- **Technical Depth**: Sufficient technical detail for application implementation
+- **Clear Implementation Steps**: Actionable application implementation procedures
+- **Validation Approach**: Clear application testing and validation strategy
+- **Measurable Outcomes**: Specific application success criteria and metrics
+
+## Application Planning Workflow Integration
+
+**Planning Purpose**: Strategic application proposal creation for structured development
+**Implementation Separation**: ApplicationDevelopment/DEVELOP.md implements proposals, never edits them
+**Progress Tracking**: ApplicationDevelopment/TRACKING.md monitors application proposal implementation progress
+**Archive Management**: Completed application proposals archived for reference and documentation
+**User Control**: Users review, revise, and approve application proposals before implementation
+
+## Application Planning Coordination
+
+**Proposal Creation**: Creates application proposals in AxiomTestApp/Proposals/Active/ directory
+**User Interaction**: Application proposals designed for user review, revision, and approval
+**Development Integration**: Application proposals implemented through ApplicationDevelopment/DEVELOP.md
+**Progress Monitoring**: Application implementation progress tracked through ApplicationDevelopment/TRACKING.md
+**Archive Management**: Completed application proposals archived for future reference
+
+---
+
+**APPLICATION PLANNING COMMAND STATUS**: Application development planning command with proposal creation and management
+**CORE FOCUS**: Strategic application proposal creation for application development  
+**PROPOSAL CREATION**: Creates structured application proposals in AxiomTestApp/Proposals/Active/
+**USER WORKFLOW**: Application proposals for user review, revision, and approval before implementation
+**INTEGRATION**: Workflow integration with ApplicationDevelopment/DEVELOP.md and TRACKING progress monitoring
+
+**Use ApplicationDevelopment/@PLAN for strategic application development planning with structured proposal creation and user approval workflow.**

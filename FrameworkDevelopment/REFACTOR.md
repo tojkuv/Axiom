@@ -1,33 +1,33 @@
 # @REFACTOR.md - Axiom Framework Refactoring Command
 
-**Complete refactoring command with methodology, requirements, and execution loop**
+Framework refactoring command with methodology, requirements, and execution procedures
 
-## 🤖 Automated Mode Trigger
+## Automated Mode Trigger
 
 **When human sends**: `@REFACTOR [optional-args]`
-**Action**: Automatically enter ultrathink mode and execute comprehensive refactoring workflow
+**Action**: Enter ultrathink mode and execute framework refactoring workflow
 
-### 🎯 **Usage Modes**
-- **`@REFACTOR`** → Auto-detect current context and execute refactoring workflow
-- **`@REFACTOR plan`** → Plan refactoring tasks and priorities
-- **`@REFACTOR organize`** → Execute comprehensive organization and cleanup cycle
-- **`@REFACTOR cleanup`** → Remove technical debt and improve code quality
-- **`@REFACTOR optimize`** → Performance optimization and structural improvements
+### Usage Modes
+- **`@REFACTOR`** → Auto-detect current context and execute framework refactoring workflow
+- **`@REFACTOR plan`** → Plan framework refactoring tasks and priorities
+- **`@REFACTOR organize`** → Execute framework organization and cleanup cycle
+- **`@REFACTOR cleanup`** → Remove framework technical debt and improve code quality
+- **`@REFACTOR optimize`** → Framework performance optimization and structural improvements
 
-### 🧠 **Refactoring Command Intelligence**
-**Refactoring Focus**: Comprehensive code organization, structural improvements, and technical debt elimination
-**Quality Enforcement**: Mandatory 100% structural integrity with zero functionality changes
-**Integration**: Seamless integration with @PLAN, @CHECKPOINT, and development workflows
+### Framework Refactoring Scope
+**Refactoring Focus**: Framework code organization, structural improvements, and technical debt elimination
+**Quality Standards**: Structural integrity with zero functionality changes
+**Integration**: Integration with @PLAN, @CHECKPOINT, and framework development workflows
 
-## 🎯 Refactoring Philosophy
+## Framework Refactoring Philosophy
 
-**Core Principle**: Refactoring improves code structure, organization, and maintainability without changing functionality, creating a clean foundation that accelerates development and prevents technical debt accumulation.
+**Core Principle**: Framework refactoring improves framework code structure, organization, and maintainability without changing functionality, creating a clean foundation that accelerates framework development and prevents technical debt accumulation.
 
-**Quality Standards**: Every refactoring operation must preserve existing functionality while significantly improving code organization, reducing complexity, and enhancing maintainability.
+**Quality Standards**: Framework refactoring operations preserve existing functionality while improving framework code organization, reducing complexity, and enhancing maintainability.
 
-**MANDATORY INTEGRITY REQUIREMENT**: All refactoring MUST maintain 100% functionality preservation with zero behavioral changes. See `Documentation/Refactoring/REFACTORING_STRATEGY.md` for comprehensive refactoring requirements and standards.
+**Integrity Requirements**: Framework refactoring maintains functionality preservation with zero behavioral changes. See `AxiomFramework/Documentation/Refactoring/REFACTORING_STRATEGY.md` for refactoring requirements and standards.
 
-**Structural Excellence**: Refactoring focuses on creating optimal code organization that supports long-term development velocity and architectural evolution.
+**Structural Excellence**: Framework refactoring focuses on creating optimal framework code organization that supports long-term development velocity and architectural evolution.
 
 ## 🏗️ Refactoring Principles
 
@@ -168,19 +168,17 @@
 ## 🤖 Refactoring Coordination
 
 **Branch Focus**: Intelligent branch-aware refactoring with context-specific optimization
-**Work Storage**: Refactoring work tracked in `/Documentation/Refactoring/` only
-**ROADMAP Updates**: NO - ROADMAP.md updates handled by @CHECKPOINT.md when merging to main
-**Planning Integration**: @PLAN command provides contextual refactoring planning
-**Coordination**: Independent refactoring operation with cross-branch progress sharing
+**Work Storage**: Framework refactoring work tracked in `/AxiomFramework/Documentation/Refactoring/` only
+**TRACKING Updates**: NO - TRACKING.md updates handled by @CHECKPOINT.md when merging to main
+**Planning Integration**: @PLAN command provides contextual framework refactoring planning
+**Coordination**: Framework refactoring operation with cross-branch progress sharing
 
 ---
 
----
+**FRAMEWORK REFACTORING COMMAND STATUS**: Framework refactoring command with methodology, requirements, and execution procedures
+**CORE FOCUS**: Framework refactoring with automated workflow implementation  
+**AUTOMATION**: Supports `@REFACTOR [plan|organize|cleanup|optimize]` with execution procedures  
+**INTEGRITY REQUIREMENTS**: Functionality preservation with zero behavioral changes required  
+**INTEGRATION**: Workflow integration with @PLAN, @CHECKPOINT, and framework refactoring coordination
 
-**REFACTORING COMMAND STATUS**: Complete refactoring command with methodology, requirements, and execution ✅  
-**CORE FOCUS**: Executable refactoring with automated workflow enforcement  
-**AUTOMATION**: Supports `@REFACTOR [plan|organize|cleanup|optimize]` with intelligent execution loops  
-**INTEGRITY REQUIREMENTS**: MANDATORY 100% functionality preservation - NO EXCEPTIONS  
-**INTEGRATION**: Seamless workflow integration with @PLAN, @CHECKPOINT, and refactoring coordination
-
-**Use @REFACTOR for complete structural improvement with automated methodology enforcement and execution.**
+**Use @REFACTOR for framework structural improvement with automated methodology implementation and execution.**
