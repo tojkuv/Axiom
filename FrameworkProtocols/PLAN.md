@@ -111,19 +111,25 @@ Work commands operate on current branch without version control:
 **CRITICAL**: PLAN commands work on current branch state - NO git operations
 
 ```bash
-# Branch switching - Switch to framework branch before starting work
-echo "🔄 Switching to framework branch..."
+# Branch switching - Create fresh framework branch before starting work
+echo "🔄 Creating fresh framework branch..."
 ORIGINAL_BRANCH=$(git branch --show-current)
-if [ "$ORIGINAL_BRANCH" != "framework" ]; then
-    if git show-ref --verify --quiet refs/heads/framework; then
-        git checkout framework
-    else
-        git checkout -b framework
+echo "📍 Current branch: $ORIGINAL_BRANCH"
+
+# Delete existing framework branch if it exists
+if git show-ref --verify --quiet refs/heads/framework; then
+    echo "🗑️ Deleting existing framework branch..."
+    if [ "$ORIGINAL_BRANCH" = "framework" ]; then
+        git checkout main
     fi
-    echo "✅ Switched to framework branch"
-else
-    echo "✅ Already on framework branch"
+    git branch -D framework 2>/dev/null || true
+    git push origin --delete framework 2>/dev/null || true
 fi
+
+# Create fresh framework branch
+echo "🌱 Creating fresh framework branch..."
+git checkout -b framework
+echo "✅ Fresh framework branch created and active"
 
 # Planning workflow (NO git operations)
 echo "🎯 Framework Planning Execution"
@@ -139,15 +145,8 @@ echo "🎯 Planning ready - proceeding on framework branch"
 4. **Technical Planning** → Design framework technical approach and implementation strategy
 5. **Framework Proposal Creation** → Create structured framework proposal in AxiomFramework/Proposals/Active/
 6. **Review Preparation** → Prepare framework proposal for user review and potential revision
-7. **Branch Cleanup** → Switch back to main branch after completing all tasks
 **No Git Operations**: All version control handled by @CHECKPOINT commands only
-
-```bash
-# Switch back to main branch after completing all tasks
-echo "🔄 Switching back to main branch..."
-git checkout main
-echo "✅ Returned to main branch"
-```
+**Branch Management**: Work remains on framework branch for @CHECKPOINT integration
 
 **Framework Planning Execution Examples**:
 - `@PLAN` → Create framework development proposal

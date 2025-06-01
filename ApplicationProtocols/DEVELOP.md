@@ -196,19 +196,25 @@ fi
 **CRITICAL**: DEVELOP commands work on current branch state - NO git operations
 
 ```bash
-# Branch switching - Switch to application branch before starting work
-echo "🔄 Switching to application branch..."
+# Branch switching - Create fresh application branch before starting work
+echo "🔄 Creating fresh application branch..."
 ORIGINAL_BRANCH=$(git branch --show-current)
-if [ "$ORIGINAL_BRANCH" != "application" ]; then
-    if git show-ref --verify --quiet refs/heads/application; then
-        git checkout application
-    else
-        git checkout -b application
+echo "📍 Current branch: $ORIGINAL_BRANCH"
+
+# Delete existing application branch if it exists
+if git show-ref --verify --quiet refs/heads/application; then
+    echo "🗑️ Deleting existing application branch..."
+    if [ "$ORIGINAL_BRANCH" = "application" ]; then
+        git checkout main
     fi
-    echo "✅ Switched to application branch"
-else
-    echo "✅ Already on application branch"
+    git branch -D application 2>/dev/null || true
+    git push origin --delete application 2>/dev/null || true
 fi
+
+# Create fresh application branch
+echo "🌱 Creating fresh application branch..."
+git checkout -b application
+echo "✅ Fresh application branch created and active"
 
 # Test-driven development workflow (NO git operations)
 echo "🧪 MANDATORY: Running complete test suite validation..."
@@ -217,10 +223,9 @@ if ! xcodebuild test -scheme ExampleApp -destination 'platform=iOS Simulator,nam
     echo "❌ CRITICAL: Tests are failing on current branch"
     echo "🚨 BLOCKING: All development work MUST stop until tests pass"
     echo "🔧 Required action: Fix failing tests before proceeding"
-    # Switch back to main before exiting
+    # Stay on application branch even on failure for debugging
     cd ..
-    echo "🔄 Switching back to main branch due to failure..."
-    git checkout main
+    echo "❗ Staying on application branch for debugging"
     exit 1
 fi
 echo "✅ Test suite passed - safe to proceed with TDD application development"
@@ -241,15 +246,8 @@ cd ..
 9. **Documentation Updates** → Update application documentation and integration guides
 10. **TRACKING.md Progress Update** → Update implementation progress in ApplicationProtocols/TRACKING.md
 11. **Coordination Updates** → Provide progress updates and framework validation results
-12. **Branch Cleanup** → Switch back to main branch after completing all tasks
 **No Git Operations**: All version control handled by @CHECKPOINT commands only
-
-```bash
-# Switch back to main branch after completing all tasks
-echo "🔄 Switching back to main branch..."
-git checkout main
-echo "✅ Returned to main branch"
-```
+**Branch Management**: Work remains on application branch for @CHECKPOINT integration
 
 **Test-Driven Application Development Execution Examples**:
 - `@DEVELOP plan` → Plan application development priorities with test-first approach
