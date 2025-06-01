@@ -33,7 +33,7 @@ Work commands operate on current branch without version control:
 
 ## Framework Development Planning Philosophy
 
-**Core Principle**: Framework planning creates detailed proposals for framework development that can be reviewed, revised, and approved by users before implementation begins.
+**Core Principle**: Framework planning creates detailed technical proposals for framework development that can be reviewed, revised, and approved by users before implementation begins. Proposals focus exclusively on technical implementation details.
 
 **Proposal Workflow**: @PLAN creates framework proposals → User reviews/revises → FrameworkProtocols/DEVELOP.md implements → Progress tracked in FrameworkProtocols/TRACKING.md
 
@@ -46,15 +46,17 @@ Work commands operate on current branch without version control:
 
 **Quality Standards**: Framework proposals include comprehensive technical specifications, implementation approaches, and success criteria
 
+**Technical Focus Only**: Proposals strictly focus on technical implementation details. No consideration of non-technical aspects (community involvement, adoption, marketing, business strategy, user engagement, etc.)
+
 ## Framework Planning Methodology
 
 ### Phase 1: Framework Analysis
 1. **TRACKING.md Review** → Read current priorities, progress, and next actions from FrameworkProtocols/TRACKING.md
 2. **Current Framework Assessment** → Analyze current framework implementation status and needs
-3. **Requirements Analysis** → Understand framework development objectives and constraints
+3. **Technical Requirements Analysis** → Understand technical objectives and implementation constraints only
 4. **Technical Assessment** → Evaluate framework technical approaches and implementation strategies
-5. **Architecture Planning** → Assess framework architecture changes and resource requirements
-6. **Success Criteria Definition** → Define measurable framework outcomes and validation criteria
+5. **Technical Architecture Planning** → Assess technical framework architecture changes and implementation requirements
+6. **Technical Success Criteria Definition** → Define measurable technical outcomes and validation criteria (performance, functionality, architecture compliance)
 
 ### Phase 2: Framework Proposal Creation
 1. **Technical Specification** → Create detailed framework technical approach and architecture
@@ -109,11 +111,25 @@ Work commands operate on current branch without version control:
 **CRITICAL**: PLAN commands work on current branch state - NO git operations
 
 ```bash
+# Branch switching - Switch to framework branch before starting work
+echo "🔄 Switching to framework branch..."
+ORIGINAL_BRANCH=$(git branch --show-current)
+if [ "$ORIGINAL_BRANCH" != "framework" ]; then
+    if git show-ref --verify --quiet refs/heads/framework; then
+        git checkout framework
+    else
+        git checkout -b framework
+    fi
+    echo "✅ Switched to framework branch"
+else
+    echo "✅ Already on framework branch"
+fi
+
 # Planning workflow (NO git operations)
 echo "🎯 Framework Planning Execution"
 echo "📍 Working on current branch: $(git branch --show-current)"
-echo "⚠️  Version control managed by @CHECKPOINT only"
-echo "🎯 Planning ready - no branch switching required"
+echo "⚠️ Version control managed by @CHECKPOINT only"
+echo "🎯 Planning ready - proceeding on framework branch"
 ```
 
 **Automated Execution Process**:
@@ -123,7 +139,15 @@ echo "🎯 Planning ready - no branch switching required"
 4. **Technical Planning** → Design framework technical approach and implementation strategy
 5. **Framework Proposal Creation** → Create structured framework proposal in AxiomFramework/Proposals/Active/
 6. **Review Preparation** → Prepare framework proposal for user review and potential revision
+7. **Branch Cleanup** → Switch back to main branch after completing all tasks
 **No Git Operations**: All version control handled by @CHECKPOINT commands only
+
+```bash
+# Switch back to main branch after completing all tasks
+echo "🔄 Switching back to main branch..."
+git checkout main
+echo "✅ Returned to main branch"
+```
 
 **Framework Planning Execution Examples**:
 - `@PLAN` → Create framework development proposal
@@ -143,11 +167,11 @@ echo "🎯 Planning ready - no branch switching required"
 - **Integration Notes**: Framework integration considerations and dependencies
 
 ### Framework Quality Standards
-- **Comprehensive Coverage**: All aspects of framework development approach covered
+- **Technical Coverage Only**: All technical aspects of framework development approach covered (no business, marketing, or adoption considerations)
 - **Technical Depth**: Sufficient technical detail for framework implementation
-- **Clear Implementation Steps**: Actionable framework implementation procedures
-- **Validation Approach**: Clear framework testing and validation strategy
-- **Measurable Outcomes**: Specific framework success criteria and metrics
+- **Clear Implementation Steps**: Actionable technical implementation procedures only
+- **Technical Validation Approach**: Clear technical testing and validation strategy (performance, functionality, integration)
+- **Technical Metrics Only**: Specific technical success criteria and metrics (no user engagement, adoption, or business metrics)
 
 ## Framework Planning Workflow Integration
 

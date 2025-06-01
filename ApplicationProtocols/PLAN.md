@@ -33,7 +33,7 @@ Work commands operate on current branch without version control:
 
 ## Application Development Planning Philosophy
 
-**Core Principle**: Application planning creates detailed proposals for application development that can be reviewed, revised, and approved by users before implementation begins.
+**Core Principle**: Application planning creates detailed technical proposals for application development that can be reviewed, revised, and approved by users before implementation begins. Proposals focus exclusively on technical implementation details.
 
 **Proposal Workflow**: @PLAN creates application proposals → User reviews/revises → ApplicationProtocols/DEVELOP.md implements → Progress tracked in ApplicationProtocols/TRACKING.md
 
@@ -46,15 +46,17 @@ Work commands operate on current branch without version control:
 
 **Quality Standards**: Application proposals include comprehensive technical specifications, implementation approaches, and success criteria
 
+**Technical Focus Only**: Proposals strictly focus on technical implementation details. No consideration of non-technical aspects (community involvement, adoption, marketing, business strategy, user engagement, etc.)
+
 ## Application Planning Methodology
 
 ### Phase 1: Application Analysis
 1. **TRACKING.md Review** → Read current priorities, progress, and next actions from ApplicationProtocols/TRACKING.md
 2. **Current Application Assessment** → Analyze current application implementation status and needs
-3. **Requirements Analysis** → Understand application development objectives and constraints
+3. **Technical Requirements Analysis** → Understand technical objectives and implementation constraints only
 4. **Technical Assessment** → Evaluate application technical approaches and implementation strategies
-5. **User Experience Planning** → Assess application user experience changes and resource requirements
-6. **Success Criteria Definition** → Define measurable application outcomes and validation criteria
+5. **Technical User Interface Planning** → Assess technical implementation of user interface components and interactions
+6. **Technical Success Criteria Definition** → Define measurable technical outcomes and validation criteria (performance, functionality, architecture compliance)
 
 ### Phase 2: Application Proposal Creation
 1. **Technical Specification** → Create detailed application technical approach and architecture
@@ -109,11 +111,25 @@ Work commands operate on current branch without version control:
 **CRITICAL**: PLAN commands work on current branch state - NO git operations
 
 ```bash
+# Branch switching - Switch to application branch before starting work
+echo "🔄 Switching to application branch..."
+ORIGINAL_BRANCH=$(git branch --show-current)
+if [ "$ORIGINAL_BRANCH" != "application" ]; then
+    if git show-ref --verify --quiet refs/heads/application; then
+        git checkout application
+    else
+        git checkout -b application
+    fi
+    echo "✅ Switched to application branch"
+else
+    echo "✅ Already on application branch"
+fi
+
 # Planning workflow (NO git operations)
 echo "🎯 Application Planning Execution"
 echo "📍 Working on current branch: $(git branch --show-current)"
 echo "⚠️ Version control managed by @CHECKPOINT only"
-echo "🎯 Planning ready - no branch switching required"
+echo "🎯 Planning ready - proceeding on application branch"
 ```
 
 **Automated Execution Process**:
@@ -123,7 +139,15 @@ echo "🎯 Planning ready - no branch switching required"
 4. **Technical Planning** → Design application technical approach and implementation strategy
 5. **Application Proposal Creation** → Create structured application proposal in AxiomExampleApp/Proposals/Active/
 6. **Review Preparation** → Prepare application proposal for user review and potential revision
+7. **Branch Cleanup** → Switch back to main branch after completing all tasks
 **No Git Operations**: All version control handled by @CHECKPOINT commands only
+
+```bash
+# Switch back to main branch after completing all tasks
+echo "🔄 Switching back to main branch..."
+git checkout main
+echo "✅ Returned to main branch"
+```
 
 **Application Planning Execution Examples**:
 - `@PLAN` → Create application development proposal
@@ -143,11 +167,11 @@ echo "🎯 Planning ready - no branch switching required"
 - **Integration Notes**: Application integration considerations and dependencies
 
 ### Application Quality Standards
-- **Comprehensive Coverage**: All aspects of application development approach covered
+- **Technical Coverage Only**: All technical aspects of application development approach covered (no business, marketing, or adoption considerations)
 - **Technical Depth**: Sufficient technical detail for application implementation
-- **Clear Implementation Steps**: Actionable application implementation procedures
-- **Validation Approach**: Clear application testing and validation strategy
-- **Measurable Outcomes**: Specific application success criteria and metrics
+- **Clear Implementation Steps**: Actionable technical implementation procedures only
+- **Technical Validation Approach**: Clear technical testing and validation strategy (performance, functionality, integration)
+- **Technical Metrics Only**: Specific technical success criteria and metrics (no user engagement, adoption, or business metrics)
 
 ## Application Planning Workflow Integration
 

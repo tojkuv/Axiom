@@ -196,6 +196,20 @@ fi
 **CRITICAL**: DEVELOP commands work on current branch state - NO git operations
 
 ```bash
+# Branch switching - Switch to application branch before starting work
+echo "🔄 Switching to application branch..."
+ORIGINAL_BRANCH=$(git branch --show-current)
+if [ "$ORIGINAL_BRANCH" != "application" ]; then
+    if git show-ref --verify --quiet refs/heads/application; then
+        git checkout application
+    else
+        git checkout -b application
+    fi
+    echo "✅ Switched to application branch"
+else
+    echo "✅ Already on application branch"
+fi
+
 # Test-driven development workflow (NO git operations)
 echo "🧪 MANDATORY: Running complete test suite validation..."
 cd AxiomExampleApp
@@ -203,6 +217,10 @@ if ! xcodebuild test -scheme ExampleApp -destination 'platform=iOS Simulator,nam
     echo "❌ CRITICAL: Tests are failing on current branch"
     echo "🚨 BLOCKING: All development work MUST stop until tests pass"
     echo "🔧 Required action: Fix failing tests before proceeding"
+    # Switch back to main before exiting
+    cd ..
+    echo "🔄 Switching back to main branch due to failure..."
+    git checkout main
     exit 1
 fi
 echo "✅ Test suite passed - safe to proceed with TDD application development"
@@ -223,7 +241,15 @@ cd ..
 9. **Documentation Updates** → Update application documentation and integration guides
 10. **TRACKING.md Progress Update** → Update implementation progress in ApplicationProtocols/TRACKING.md
 11. **Coordination Updates** → Provide progress updates and framework validation results
+12. **Branch Cleanup** → Switch back to main branch after completing all tasks
 **No Git Operations**: All version control handled by @CHECKPOINT commands only
+
+```bash
+# Switch back to main branch after completing all tasks
+echo "🔄 Switching back to main branch..."
+git checkout main
+echo "✅ Returned to main branch"
+```
 
 **Test-Driven Application Development Execution Examples**:
 - `@DEVELOP plan` → Plan application development priorities with test-first approach

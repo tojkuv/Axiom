@@ -54,6 +54,17 @@ All FrameworkProtocols commands follow this workflow:
 1. **Parse Branch Flag & Execute Appropriate Workflow**
 
 ```bash
+# 0. Switch to framework branch before starting (unless forced to different workflow)
+if [ -z "$1" ]; then
+    echo "🔄 No branch flag provided - switching to framework branch..."
+    if git show-ref --verify --quiet refs/heads/framework; then
+        git checkout framework
+    else
+        git checkout -b framework
+    fi
+    echo "✅ Switched to framework branch for default workflow"
+fi
+
 # 1. Parse branch flag argument
 BRANCH_FLAG="$1"
 CURRENT_BRANCH=$(git branch --show-current)

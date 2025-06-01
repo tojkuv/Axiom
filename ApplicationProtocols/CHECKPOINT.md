@@ -54,6 +54,17 @@ All ApplicationProtocols commands follow this workflow:
 1. **Parse Branch Flag & Execute Appropriate Workflow**
 
 ```bash
+# 0. Switch to application branch before starting (unless forced to different workflow)
+if [ -z "$1" ]; then
+    echo "🔄 No branch flag provided - switching to application branch..."
+    if git show-ref --verify --quiet refs/heads/application; then
+        git checkout application
+    else
+        git checkout -b application
+    fi
+    echo "✅ Switched to application branch for default workflow"
+fi
+
 # 1. Parse branch flag argument
 BRANCH_FLAG="$1"
 CURRENT_BRANCH=$(git branch --show-current)

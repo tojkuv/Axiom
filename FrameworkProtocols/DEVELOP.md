@@ -196,6 +196,20 @@ fi
 **CRITICAL**: DEVELOP commands work on current branch state - NO git operations
 
 ```bash
+# Branch switching - Switch to framework branch before starting work
+echo "🔄 Switching to framework branch..."
+ORIGINAL_BRANCH=$(git branch --show-current)
+if [ "$ORIGINAL_BRANCH" != "framework" ]; then
+    if git show-ref --verify --quiet refs/heads/framework; then
+        git checkout framework
+    else
+        git checkout -b framework
+    fi
+    echo "✅ Switched to framework branch"
+else
+    echo "✅ Already on framework branch"
+fi
+
 # Test-driven development workflow (NO git operations)
 echo "🧪 MANDATORY: Running complete test suite validation..."
 cd AxiomFramework
@@ -203,6 +217,10 @@ if ! swift test; then
     echo "❌ CRITICAL: Tests are failing on current branch"
     echo "🚨 BLOCKING: All development work MUST stop until tests pass"
     echo "🔧 Required action: Fix failing tests before proceeding"
+    # Switch back to main before exiting
+    cd ..
+    echo "🔄 Switching back to main branch due to failure..."
+    git checkout main
     exit 1
 fi
 echo "✅ Test suite passed - safe to proceed with TDD framework development"
@@ -223,7 +241,15 @@ cd ..
 9. **Documentation Updates** → Update technical documentation and API references
 10. **TRACKING.md Progress Update** → Update implementation progress in FrameworkProtocols/TRACKING.md
 11. **Coordination Updates** → Provide progress updates and next steps
+12. **Branch Cleanup** → Switch back to main branch after completing all tasks
 **No Git Operations**: All version control handled by @CHECKPOINT commands only
+
+```bash
+# Switch back to main branch after completing all tasks
+echo "🔄 Switching back to main branch..."
+git checkout main
+echo "✅ Returned to main branch"
+```
 
 **Test-Driven Development Execution Examples**:
 - `@DEVELOP plan` → Plan development priorities with test-first approach
