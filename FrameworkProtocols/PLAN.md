@@ -50,6 +50,8 @@ Work commands operate on current branch without version control:
 
 **Technical Focus Only**: Proposals strictly focus on technical implementation for AI agent coding. Framework design prioritizes machine readability, consistent patterns, and deterministic behavior optimized for automated development workflows.
 
+**MVP Development Stage**: Framework is currently in MVP stage - breaking changes are acceptable and backwards compatibility is not required. This enables clean implementations without legacy constraints.
+
 ## Framework Planning Methodology
 
 ### Phase 1: Framework Analysis
@@ -136,8 +138,9 @@ echo "🎯 Planning ready - proceeding in framework workspace"
 ### Create Mode (`@PLAN create`)
 1. **TRACKING.md Analysis** → Read current priorities from FrameworkProtocols/TRACKING.md
 2. **Requirements Assessment** → Analyze framework development needs
-3. **Proposal Creation** → Create structured proposal in AxiomFramework/Proposals/Unapproved/
-4. **Ready for Review** → Proposal immediately available for user review
+3. **MVP Consideration** → Breaking changes acceptable - focus on clean implementation
+4. **Proposal Creation** → Create structured proposal in AxiomFramework/Proposals/Unapproved/
+5. **Ready for Review** → Proposal immediately available for user review
 
 ### Approve Mode (`@PLAN approve`)
 1. **Scan Unapproved/** → List proposals awaiting approval
@@ -178,6 +181,7 @@ echo "🎯 Planning ready - proceeding in framework workspace"
 - **Testing Coverage**: Comprehensive validation strategy
 - **Performance Metrics**: Measurable optimization targets
 - **Integration Planning**: Compatible with existing framework
+- **MVP Approach**: Breaking changes acceptable - no backwards compatibility required
 
 ## Framework Proposal Approval Process
 
@@ -187,6 +191,7 @@ echo "🎯 Planning ready - proceeding in framework workspace"
 - **Testing Strategy**: Comprehensive validation approach
 - **Performance Requirements**: Defined and measurable
 - **Framework Compatibility**: Aligns with framework design
+- **MVP Considerations**: Breaking changes acceptable for clean implementation
 
 ### Approval Workflow
 1. **Scan Unapproved/** → List pending proposals
