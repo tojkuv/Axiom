@@ -32,7 +32,7 @@ Work commands operate on current branch without version control:
 
 ## Framework Development Planning Philosophy
 
-**Core Principle**: Framework planning creates detailed technical proposals for a type-safe, concurrency-safe, performant, deterministic framework designed for AI agent coding. The framework emphasizes actor-based isolation, low boilerplate through code generation, capabilities permissions safety, and consistent patterns throughout.
+**Core Principle**: Framework planning manages the complete lifecycle of technical proposals - from creation through approval to resolution. This protocol handles proposal workflow management, not framework architecture decisions.
 
 **Proposal Workflow**: @PLAN creates framework proposals → User reviews/revises → FrameworkProtocols/@APPROVE accepts proposals → FrameworkProtocols/DEVELOP.md implements → Progress tracked in FrameworkProtocols/TRACKING.md
 
@@ -44,30 +44,28 @@ Work commands operate on current branch without version control:
 - **REFACTOR**: Code organization → Updates TRACKING.md quality → NO functionality changes
 - **TRACKING**: Central progress store → Updated by all commands → NO command execution
 
-**Quality Standards**: Framework proposals ensure type safety, concurrency safety through actors, performance optimization, deterministic behavior, minimal boilerplate, capabilities permissions enforcement, and consistent patterns
+**Quality Standards**: Framework proposals include comprehensive technical specifications, clear implementation paths, and measurable success criteria
 
 **Technical Focus Only**: Proposals strictly focus on technical implementation for AI agent coding. Framework design prioritizes machine readability, consistent patterns, and deterministic behavior optimized for automated development workflows.
 
 ## Framework Planning Methodology
 
 ### Phase 1: Framework Analysis
-1. **TRACKING.md Review** → Read current priorities, progress, and next actions from FrameworkProtocols/TRACKING.md
-2. **Type Safety Assessment** → Analyze compile-time type safety guarantees and validation
-3. **Concurrency Safety Analysis** → Evaluate actor-based isolation and thread safety patterns
-4. **Performance Requirements** → Define performance targets and optimization strategies
-5. **Determinism Validation** → Ensure predictable, reproducible behavior without side effects
-6. **Boilerplate Reduction Planning** → Identify code generation opportunities to minimize repetitive code
-7. **Capabilities Permissions** → Plan runtime capability validation with compile-time hints
-8. **Pattern Consistency** → Ensure uniform patterns across framework components
+1. **TRACKING.md Review** → Read current priorities and progress
+2. **Framework Assessment** → Analyze current implementation state
+3. **Requirements Analysis** → Identify development needs and gaps
+4. **Technical Planning** → Define implementation approach
+5. **Resource Planning** → Estimate development effort
+6. **Risk Assessment** → Identify potential challenges
 
-### Phase 2: Framework Proposal Creation (7 Constraints)
-1. **View-Context Binding** → Design 1:1 bidirectional relationships
-2. **Context Orchestration** → Plan read-only state access patterns
-3. **Client Isolation** → Ensure single ownership with actor safety
-4. **Capability System** → Design compile-time hints + runtime validation
-5. **Domain Models** → Plan 1:1 client ownership with value objects
-6. **Cross-Domain Rules** → Define context-only orchestration patterns
-7. **Unidirectional Flow** → Enforce Views→Contexts→Clients→Capabilities→System
+### Phase 2: Framework Proposal Creation
+1. **Technical Specification** → Define implementation approach and architecture
+2. **Type Safety Design** → Plan compile-time validation and guarantees
+3. **Concurrency Strategy** → Design actor-based isolation patterns
+4. **Performance Targets** → Set measurable optimization goals
+5. **Code Generation** → Plan boilerplate reduction strategies
+6. **Testing Approach** → Define comprehensive validation procedures
+7. **Integration Planning** → Ensure compatibility with existing framework
 
 ### Phase 3: Framework Proposal Finalization
 1. **Structured Format** → Create framework proposal using established format and sections
@@ -171,15 +169,15 @@ echo "🎯 Planning ready - proceeding in framework workspace"
 ## Framework Proposal Approval Process
 
 ### Approval Criteria (`@PLAN approve`)
-- **Architectural Compliance**: Adherence to 7 core constraints
 - **Technical Completeness**: All specifications defined
 - **Implementation Readiness**: Clear development path
 - **Testing Strategy**: Comprehensive validation approach
 - **Performance Requirements**: Defined and measurable
+- **Framework Compatibility**: Aligns with framework design
 
 ### Approval Workflow
 1. **Scan WaitingApproval/** → List pending proposals
-2. **Validate Architecture** → Ensure 7 constraints maintained
+2. **Validate Completeness** → Ensure ready for implementation
 3. **Update TRACKING.md** → Add to development priorities
 4. **Set Implementation Order** → Based on dependencies
 5. **Prepare for Development** → Ready for DEVELOP.md
@@ -190,7 +188,7 @@ echo "🎯 Planning ready - proceeding in framework workspace"
 - **Implementation Complete**: All phases finished
 - **Tests Passing**: Required success rate achieved
 - **Performance Met**: Benchmarks satisfied
-- **Architecture Preserved**: 7 constraints maintained
+- **Quality Standards**: Framework requirements met
 - **Documentation Current**: Via DOCUMENT.md
 
 ### Resolution Workflow
@@ -221,9 +219,9 @@ echo "🎯 Planning ready - proceeding in framework workspace"
 ---
 
 **FRAMEWORK PLANNING COMMAND STATUS**: Complete proposal lifecycle management (create/approve/resolve)
-**CORE FOCUS**: Type-safe, concurrency-safe, performant, deterministic, actor-based framework
-**ARCHITECTURAL CONSTRAINTS**: Maintains 7 core constraints for AI agent coding optimization
-**LIFECYCLE MANAGEMENT**: Creates, approves, and resolves proposals through unified command
+**CORE FOCUS**: Proposal workflow management - creation, approval, and resolution
+**PROPOSAL LIFECYCLE**: Unified command for all proposal states and transitions
+**LIFECYCLE MANAGEMENT**: Handles Active/, WaitingApproval/, and Archive/ directories
 **INTEGRATION**: Direct integration with DEVELOP.md and TRACKING.md for seamless workflow
 
 **Use FrameworkProtocols/@PLAN for complete proposal lifecycle management - creation, approval, and resolution.**
