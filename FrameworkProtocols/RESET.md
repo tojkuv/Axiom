@@ -12,6 +12,8 @@ Framework development reset command that creates fresh development environment f
 - **`@RESET clean`** → Clean reset with complete framework branch deletion and recreation
 - **`@RESET fresh`** → Fresh framework development start with clean environment
 - **`@RESET restart`** → Restart framework development cycle with fresh branch
+- **`@RESET worktree`** → Reset worktree-based development environment (recommended for parallel development)
+- **`@RESET worktree-clean`** → Complete worktree reset with fresh environment creation
 
 ### Framework Reset Scope
 **Reset Focus**: Framework development environment reset and fresh branch creation
@@ -171,6 +173,73 @@ echo "✅ Framework development environment reset complete"
 - **Environment Validation**: Validated clean framework development environment setup
 - **Integration Testing**: Tested framework reset integration with development workflows
 - **Team Synchronization**: Coordinated framework reset with development team workflows
+
+## Worktree Reset Process (Recommended for Parallel Development)
+
+### 🔄 **Worktree Reset Execution Process**
+
+**Command**: `@RESET worktree` or `@RESET worktree-clean`
+**Action**: Reset worktree-based development environment for parallel framework and application development
+
+```bash
+# Worktree-based reset implementation
+echo "🏗️ Worktree Development Environment Reset"
+echo "📍 Repository: $(pwd)"
+
+# 1. Remove existing worktrees
+echo "🧹 Cleaning existing worktrees..."
+git worktree remove --force framework-workspace 2>/dev/null || echo "No framework workspace found"
+git worktree remove --force application-workspace 2>/dev/null || echo "No application workspace found"
+
+# 2. Reset development branches
+echo "🗑️ Resetting development branches..."
+git checkout main 2>/dev/null || true
+
+# Delete local branches
+git branch -D framework 2>/dev/null || echo "No local framework branch"
+git branch -D application 2>/dev/null || echo "No local application branch"
+
+# Delete remote branches (if worktree-clean mode)
+if [ "$1" = "worktree-clean" ]; then
+    git push origin --delete framework 2>/dev/null || echo "No remote framework branch"
+    git push origin --delete application 2>/dev/null || echo "No remote application branch"
+fi
+
+# 3. Create fresh development branches
+echo "🌱 Creating fresh development branches..."
+git checkout -b framework
+git push origin framework
+git checkout -b application  
+git push origin application
+git checkout main
+
+# 4. Create fresh worktrees
+echo "🏗️ Creating fresh development worktrees..."
+git worktree add framework-workspace framework
+git worktree add application-workspace application
+
+# 5. Setup real-time integration
+echo "🔗 Setting up real-time framework integration..."
+ln -sf ../framework-workspace/AxiomFramework application-workspace/AxiomFramework-dev
+
+# 6. Create workspace status tracking
+echo "📊 Setting up workspace status tracking..."
+echo "Framework workspace created: $(date)" > framework-workspace/.workspace-status
+echo "Application workspace created: $(date)" > application-workspace/.workspace-status
+
+echo ""
+echo "✅ Worktree development environment reset complete"
+echo "📍 Framework workspace: framework-workspace/ (branch: framework)"
+echo "📍 Application workspace: application-workspace/ (branch: application)"
+echo "🔗 Real-time integration: application-workspace/AxiomFramework-dev → framework-workspace/AxiomFramework"
+echo "🚀 Ready for parallel framework and application development"
+```
+
+### **Worktree Reset Benefits**
+- **Parallel Development**: Enables simultaneous framework and application development
+- **Real-time Integration**: Framework changes immediately available to application via symlinks
+- **Context Preservation**: Each workspace maintains development context without branch switching
+- **Clean Environment**: Fresh development environment with proper worktree isolation
 
 ---
 

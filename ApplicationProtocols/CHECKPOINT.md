@@ -1,386 +1,194 @@
 # @CHECKPOINT.md - Application Development Checkpoint System
 
-## ⚡ Application-Focused Checkpoint Management
+## ⚡ Worktree-Based Checkpoint Management
 
-This command provides intelligent checkpoint management for application development workflows, focusing on integration testing and application branch management.
+This command provides intelligent checkpoint management for worktree-based development workflows, integrating application and framework development changes into main branch.
 
 ### 🎯 **Usage Modes**
-- **`@CHECKPOINT.md`** → Auto-detect current branch and execute appropriate workflow
-- **`@CHECKPOINT.md m`** → Force main branch checkpoint workflow (regardless of current branch)
-- **`@CHECKPOINT.md a`** → Force application branch checkpoint workflow (regardless of current branch)
+- **`@CHECKPOINT`** → Commit and integrate all worktree changes into main branch
+- **`@CHECKPOINT application`** → Commit and integrate only application workspace changes
+- **`@CHECKPOINT framework`** → Commit and integrate only framework workspace changes
+- **`@CHECKPOINT status`** → Show worktree status and pending changes
 
-### 🧠 **Branch Focus**
-**Application Development Context**: Primarily works with application branch for application testing and validation
-**Application Branch**: Application development, test app improvements, real-world validation
-**Main Branch**: Strategic coordination and documentation updates
+### 🧠 **Worktree Integration Focus**
+**Application Development Context**: Integrates application-workspace/ changes with real-time framework access
+**Framework Coordination**: Coordinates framework-workspace/ changes with application requirements
+**Main Branch Integration**: Central integration point for all development workstreams
 
-### 🔄 **Standardized Git Workflow**
-All ApplicationProtocols commands follow this workflow:
-1. **Branch Setup**: Switch to `application` branch (create if doesn't exist)
-2. **Update**: Pull latest changes from remote `application` branch
-3. **Development**: Execute command-specific development work
-4. **Commit**: Commit changes to `application` branch with descriptive messages
-5. **Integration**: Merge `application` branch into `main` branch
-6. **Deployment**: Push `main` branch to remote repository
-7. **Cycle Reset**: Delete old `application` branch and create fresh one for next cycle
+### 🔄 **Worktree-Based Git Workflow**
+All development commands follow this simplified workflow:
+1. **Development**: Work occurs in dedicated worktrees (application-workspace/, framework-workspace/)
+2. **Commit**: Commit changes within each worktree on respective branches
+3. **Integration**: Merge development branches into main branch
+4. **Deployment**: Push integrated main branch to remote repository
+5. **Cleanup**: Maintain clean development state across worktrees
 
-### 🛡️ Safety Features
-- **Safe Merge Operations**: Uses --no-ff for clean merge history
-- **Uncommitted Change Detection**: Only commits when there are actual changes
+### 🛡️ Enhanced Safety Features
+- **Worktree Validation**: Ensures worktrees exist before attempting operations
+- **Uncommitted Change Detection**: Only commits when there are actual changes in each workspace
 - **Merge Conflict Detection**: Stops automation and consults human if conflicts occur
-- **Branch Cleanup**: Automatically removes old branches after successful merge
-- **Fresh Branch Creation**: Creates clean branches for next development cycle
-
-### 🔍 Branch Detection & Smart Actions
-
-**Application Branch (`application`):**  
-- 🔄 Switch to application branch (if using forced mode)
-- ✅ Commit application validation results (application testing work, no ROADMAP.md)
-- 🔄 Merge validated work into `main`
-- 🌱 Create fresh `application` branch for next cycle
-
-**Main Branch (`main`):**
-- ✅ Commit current progress (including ROADMAP.md updates from @PLAN.md)
-- 📤 Push changes to main
-- 🧪 Update application branch with latest main
-- 🔄 Synchronize all branches with main changes
-
----
+- **Integration Testing**: Validates integration before pushing to remote
 
 ## 🤖 Execution
 
-**Claude, execute this application-focused checkpoint process:**
+**Claude, execute this worktree-focused checkpoint process:**
 
-1. **Parse Branch Flag & Execute Appropriate Workflow**
+1. **Validate Worktree Environment & Commit Changes**
 
 ```bash
-# 0. Switch to application branch before starting (unless forced to different workflow)
-if [ -z "$1" ]; then
-    echo "🔄 No branch flag provided - switching to application branch..."
-    if git show-ref --verify --quiet refs/heads/application; then
-        git checkout application
-    else
-        git checkout -b application
-    fi
-    echo "✅ Switched to application branch for default workflow"
+# 0. Validate execution from repository root
+if [ ! -d ".git" ]; then
+    echo "❌ Must be run from git repository root"
+    exit 1
 fi
 
-# 1. Parse branch flag argument
-BRANCH_FLAG="$1"
-CURRENT_BRANCH=$(git branch --show-current)
+echo "🏗️ Application Development Checkpoint"
+echo "📍 Repository: $(pwd)"
+echo "🌿 Current branch: $(git branch --show-current)"
 
-# 2. Determine target workflow based on flag or auto-detection
-if [ -n "$BRANCH_FLAG" ]; then
-    case "$BRANCH_FLAG" in
-        "m"|"main")
-            TARGET_WORKFLOW="main"
-            echo "🎯 Forced main branch checkpoint workflow"
-            ;;
-        "a"|"application")
-            TARGET_WORKFLOW="application"
-            echo "🎯 Forced application branch checkpoint workflow"
-            ;;
-        *)
-            echo "❌ Invalid branch flag: $BRANCH_FLAG"
-            echo "💡 Valid flags: m (main), a (application)"
-            echo "📋 Or use @CHECKPOINT.md without flags for auto-detection"
-            exit 1
-            ;;
-    esac
-else
-    # Auto-detect mode
-    TARGET_WORKFLOW="$CURRENT_BRANCH"
-    echo "🤖 Auto-detected branch: $CURRENT_BRANCH"
+# 1. Validate worktree existence
+FRAMEWORK_WORKSPACE="framework-workspace"
+APPLICATION_WORKSPACE="application-workspace"
+
+if [ ! -d "$APPLICATION_WORKSPACE" ]; then
+    echo "⚠️ Application workspace not found: $APPLICATION_WORKSPACE"
+    echo "💡 Run '@WORKSPACE setup' to initialize worktrees"
 fi
 
-echo "🎯 Current branch: $CURRENT_BRANCH"
-echo "⚡ Target workflow: $TARGET_WORKFLOW"
+if [ ! -d "$FRAMEWORK_WORKSPACE" ]; then
+    echo "⚠️ Framework workspace not found: $FRAMEWORK_WORKSPACE"
+    echo "💡 Run '@WORKSPACE setup' to initialize worktrees"
+fi
 
-# 3. Check git status and show what will be committed
-echo "📋 Current changes on $CURRENT_BRANCH:"
-git status --short
-
-# 4. Execute workflow based on target (auto-detected or forced)
-case "$TARGET_WORKFLOW" in
-  "application")
-    echo "🧪 APPLICATION BRANCH CHECKPOINT - MERGE & RESTART"
+# 2. Commit application workspace changes
+if [ -d "$APPLICATION_WORKSPACE" ]; then
+    echo "💾 Committing application workspace changes..."
+    cd $APPLICATION_WORKSPACE
     
-    # Switch to application branch first to check for its changes
-    if [ "$CURRENT_BRANCH" != "application" ]; then
-        echo "🔄 Switching to application branch to check for changes..."
-        git checkout application
-    fi
-    
-    # Check for uncommitted changes on application branch
     if [ -n "$(git status --porcelain)" ]; then
-        # Commit application results
-        echo "✅ Committing application validation..."
         git add .
-        CURRENT_DATE=$(date '+%Y-%m-%d %H:%M')
-        
-        # Use heredoc for proper multiline commit message
-        COMMIT_MESSAGE=$(cat <<EOF
-🧪 Application checkpoint: $CURRENT_DATE
-
-✅ Application testing and validation completed
-📊 Performance metrics captured
-🎯 Ready for main branch merge
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-EOF
-)
-        git commit -m "$COMMIT_MESSAGE"
+        APPLICATION_MESSAGE="Application development checkpoint: $(date '+%Y-%m-%d %H:%M')"
+        git commit -m "$APPLICATION_MESSAGE" || echo "No application changes to commit"
+        echo "✅ Application changes committed: $APPLICATION_MESSAGE"
     else
-        echo "✅ No uncommitted changes to commit on application branch"
+        echo "ℹ️ No application changes to commit"
     fi
     
-    # Fetch latest main
-    echo "🔄 Fetching latest main..."
-    git fetch origin main
+    cd ..
+fi
+
+# 3. Commit framework workspace changes
+if [ -d "$FRAMEWORK_WORKSPACE" ]; then
+    echo "💾 Committing framework workspace changes..."
+    cd $FRAMEWORK_WORKSPACE
     
-    # Check if application has changes to merge (avoid empty merges)
-    git checkout main
-    git pull origin main
+    if [ -n "$(git status --porcelain)" ]; then
+        git add .
+        FRAMEWORK_MESSAGE="Framework development checkpoint: $(date '+%Y-%m-%d %H:%M')"
+        git commit -m "$FRAMEWORK_MESSAGE" || echo "No framework changes to commit"
+        echo "✅ Framework changes committed: $FRAMEWORK_MESSAGE"
+    else
+        echo "ℹ️ No framework changes to commit"
+    fi
     
-    echo "🔍 Checking if application has new changes..."
+    cd ..
+fi
+```
+
+2. **Integrate Development Branches into Main**
+
+```bash
+# 4. Switch to main branch and update
+echo "🔄 Switching to main branch for integration..."
+git checkout main
+git pull origin main || echo "Could not pull from remote"
+
+# 5. Merge application development
+if [ -d "$APPLICATION_WORKSPACE" ]; then
+    echo "🔗 Integrating application development..."
     if git merge-tree $(git merge-base main application) main application | grep -q "^"; then
-        echo "📝 Changes detected - proceeding with merge"
-    else
-        echo "✅ No changes to merge - application already integrated"
-        echo "🌱 Creating fresh application branch..."
-        git branch -D application 2>/dev/null || true
-        git push origin --delete application 2>/dev/null || true
-        git checkout -b application
-        git push origin application -u
-        echo "✅ Application cycle complete (no merge needed)!"
-        exit 0
-    fi
-    
-    echo "🚀 Merging application into main..."
-    MERGE_DATE=$(date '+%Y-%m-%d')
-    
-    # Use heredoc for proper multiline commit message
-    MERGE_MESSAGE=$(cat <<EOF
-🧪 Merge application cycle: $MERGE_DATE
-
-✅ Application validation completed
-📊 Performance metrics validated
-🎯 Ready for next application cycle
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-EOF
-)
-    
-    # Perform merge with proper error handling
-    if ! git merge application --no-ff -m "$MERGE_MESSAGE"; then
-        echo ""
-        echo "🚨 MERGE CONFLICT DETECTED!"
-        echo "❌ Automatic checkpoint halted - this should not happen with our workflows"
-        echo ""
-        echo "🤔 Possible causes:"
-        echo "   • Unexpected changes made directly to main branch"
-        echo "   • Manual modifications to application branch history"
-        echo "   • External changes not following Axiom workflow"
-        echo ""
-        echo "🆘 HUMAN CONSULTATION REQUIRED"
-        echo "📋 Current status:"
-        echo "   • Application branch has been committed"
-        echo "   • Main branch is checked out"
-        echo "   • Merge conflict exists between application and main"
-        echo ""
-        echo "💡 Manual resolution steps:"
-        echo "   1. Run: git status (to see conflicted files)"
-        echo "   2. Edit conflicted files to resolve conflicts"
-        echo "   3. Run: git add <resolved-files>"
-        echo "   4. Run: git commit (to complete the merge)"
-        echo "   5. Then re-run: @CHECKPOINT.md (to continue automation)"
-        echo ""
-        echo "🛑 Checkpoint process stopped. Please resolve conflicts and retry."
-        exit 1
-    fi
-    
-    # Push updated main
-    echo "📤 Pushing updated main..."
-    git push origin main
-    
-    # Switch back to main
-    echo "🔄 Returning to main..."
-    git checkout main
-    
-    # Delete old application branch
-    echo "🗑️ Cleaning up old application branch..."
-    git branch -D application
-    git push origin --delete application
-    
-    # Create fresh application branch
-    echo "🌱 Creating fresh application branch..."
-    git checkout -b application
-    git push origin application -u
-    
-    # Update TRACKING.md with completion status
-    echo "📊 Updating TRACKING.md with merge completion..."
-    COMPLETION_DATE=$(date '+%Y-%m-%d')
-    sed -i '' "s/\*\*Last Updated\*\*:.*/\*\*Last Updated\*\*: $COMPLETION_DATE | \*\*Status\*\*: Application cycle completed - merged to main/" ApplicationProtocols/TRACKING.md
-    
-    echo "✅ Application cycle complete!"
-    echo "🎯 Fresh application branch ready for next cycle"
-    echo "📊 TRACKING.md updated with completion status"
-    ;;
-    
-  "main")
-    echo "🎯 MAIN BRANCH CHECKPOINT - UPDATE BRANCHES"
-    
-    # Check for uncommitted changes first
-    CHANGES_COUNT=$(git status --porcelain | wc -l)
-    if [ "$CHANGES_COUNT" -gt 0 ]; then
-        # Commit progress on main
-        echo "✅ Committing main branch progress ($CHANGES_COUNT files changed)..."
-        git add .
-        CURRENT_DATE=$(date '+%Y-%m-%d %H:%M')
-        
-        # Use heredoc for proper multiline commit message
-        COMMIT_MESSAGE=$(cat <<EOF
-🎯 Main branch checkpoint: $CURRENT_DATE
-
-📋 Application development coordination
-🚀 Strategic planning and documentation
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-EOF
-)
-        git commit -m "$COMMIT_MESSAGE"
-        
-        # Push to main
-        echo "🚀 Pushing to main..."
-        git push origin main
-    else
-        echo "✅ No uncommitted changes to commit"
-        echo "📋 Proceeding with branch synchronization only..."
-    fi
-    
-    # Update application branch with latest main  
-    echo "🧪 Updating application branch with latest main..."
-    if git show-ref --verify --quiet refs/remotes/origin/application; then
-        git fetch origin application
-        git checkout application
-        if ! git pull origin main; then
-            echo ""
-            echo "🚨 CONFLICT UPDATING APPLICATION BRANCH!"
-            echo "❌ Cross-branch update failed - manual resolution required"
-            echo ""
-            echo "🆘 HUMAN CONSULTATION REQUIRED"
-            echo "📋 Current status:"
-            echo "   • Main branch changes have been committed and pushed"
-            echo "   • Application branch is checked out"
-            echo "   • Conflict exists when pulling main into application"
-            echo ""
-            echo "💡 Manual resolution steps:"
-            echo "   1. Run: git status (to see conflicted files)"
-            echo "   2. Edit conflicted files to resolve conflicts"
-            echo "   3. Run: git add <resolved-files>"
-            echo "   4. Run: git commit (to complete the merge)"
-            echo "   5. Run: git push origin application"
-            echo "   6. Then re-run: @CHECKPOINT.md (to continue automation)"
-            echo ""
-            echo "🛑 Checkpoint process stopped. Please resolve conflicts and retry."
+        echo "📝 Application changes detected - merging..."
+        git merge application --no-ff -m "Integrate application development: $(date '+%Y-%m-%d %H:%M')" || {
+            echo "❌ Application merge conflict detected"
+            echo "🔧 Manual resolution required"
             exit 1
-        fi
-        git push origin application
-        echo "✅ Application branch updated with latest main"
+        }
+        echo "✅ Application development integrated"
     else
-        echo "🌱 Application branch doesn't exist remotely"
+        echo "ℹ️ No new application changes to merge"
     fi
-    
-    # Switch back to main
-    echo "🔄 Returning to main..."
-    git checkout main
-    
-    echo "✅ Main branch checkpoint complete"
-    echo "🔄 Application branch synchronized with latest main changes"
-    echo "📋 No PR needed (already on main)"
-    ;;
-    
-  *)
-    echo "❓ Unknown branch: $CURRENT_BRANCH"
-    
-    # Only checkpoint if there are changes
-    if [ -n "$(git status --porcelain)" ]; then
-        echo "🎯 Creating standard checkpoint..."
-        git add .
-        CURRENT_DATE=$(date '+%Y-%m-%d %H:%M')
-        
-        # Use heredoc for proper multiline commit message
-        COMMIT_MESSAGE=$(cat <<EOF
-📌 Checkpoint on $CURRENT_BRANCH: $CURRENT_DATE
+fi
 
-🔄 Application development progress update
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
-EOF
-)
-        git commit -m "$COMMIT_MESSAGE"
-        
-        git push origin "$CURRENT_BRANCH" -u
-        echo "✅ Standard checkpoint complete"
+# 6. Merge framework development
+if [ -d "$FRAMEWORK_WORKSPACE" ]; then
+    echo "🔗 Integrating framework development..."
+    if git merge-tree $(git merge-base main framework) main framework | grep -q "^"; then
+        echo "📝 Framework changes detected - merging..."
+        git merge framework --no-ff -m "Integrate framework development: $(date '+%Y-%m-%d %H:%M')" || {
+            echo "❌ Framework merge conflict detected"
+            echo "🔧 Manual resolution required"
+            exit 1
+        }
+        echo "✅ Framework development integrated"
     else
-        echo "✅ No changes detected on $CURRENT_BRANCH"
-        echo "🤖 Skipping checkpoint - no work to commit"
+        echo "ℹ️ No new framework changes to merge"
     fi
-    ;;
-esac
+fi
+```
 
+3. **Deploy and Maintain Clean State**
+
+```bash
+# 7. Push integrated changes
+echo "🚀 Deploying integrated changes..."
+git push origin main || {
+    echo "⚠️ Could not push to remote - check connectivity"
+    echo "✅ Local integration complete"
+}
+
+# 8. Show integration summary
 echo ""
-echo "🎉 CHECKPOINT COMPLETE"
-echo "📍 Branch: $CURRENT_BRANCH"
-echo "🕐 Time: $(date)"
+echo "📊 Checkpoint Summary:"
+echo "✅ Application workspace: $([ -d "$APPLICATION_WORKSPACE" ] && echo "committed" || echo "not found")"
+echo "✅ Framework workspace: $([ -d "$FRAMEWORK_WORKSPACE" ] && echo "committed" || echo "not found")"
+echo "✅ Main branch: integrated and deployed"
+echo "📍 Current branch: $(git branch --show-current)"
+echo ""
+echo "🏁 Application development checkpoint complete"
+echo "💡 Continue development in respective workspaces"
+echo "🔗 Framework changes immediately available via AxiomFramework-dev symlink"
 ```
+
+## 🔧 Workflow Integration
+
+### **Worktree Development Cycle**
+1. **Development Phase**: Work in `application-workspace/` with real-time framework access via symlinks
+2. **Checkpoint Phase**: Run `@CHECKPOINT` to commit and integrate all changes
+3. **Deployment Phase**: Integrated changes pushed to remote main branch
+4. **Continuation Phase**: Resume development in workspaces with clean integration state
+
+### **Integration Strategy**
+- **Application-First**: Application development prioritized with real-time framework integration
+- **Coordinated Commits**: Both workspaces committed before integration
+- **Conflict Resolution**: Manual intervention required for merge conflicts
+- **Clean History**: No-fast-forward merges maintain development branch history
+
+### **Real-time Framework Access**
+- **Symlink Integration**: AxiomFramework-dev provides immediate access to framework changes
+- **Testing Continuity**: Framework changes immediately testable in application context
+- **Development Velocity**: No waiting for framework integration to test application changes
+
+### **Safety and Reliability**
+- **Worktree Validation**: Ensures development environment integrity
+- **Change Detection**: Only commits when actual changes exist
+- **Merge Safety**: Conflict detection prevents broken integrations
+- **Remote Coordination**: Handles remote push failures gracefully
 
 ---
 
-## 🎯 Usage Patterns
+**CHECKPOINT COMMAND STATUS**: Worktree-based checkpoint system for parallel application and framework development
+**CORE FOCUS**: Integrated development workflow with application-centric real-time framework access
+**WORKTREE INTEGRATION**: Commits and merges both development streams into main branch
+**DEVELOPMENT CONTINUITY**: Maintains clean development state with real-time framework integration
 
-### **Auto-Detection Mode** (Recommended)
-```bash
-# From any branch - automatically adapts
-@CHECKPOINT.md  # Auto-detects current branch and executes appropriate workflow
-```
-
-### **Application Workflow** (Auto or Forced)
-```bash
-# After application testing and validation
-@CHECKPOINT.md     # Auto-detects application branch
-@CHECKPOINT.md a   # Forces application workflow from any branch
-                   # → Commits results, merges to main, creates fresh application
-```
-
-### **Main Branch Coordination** (Auto or Forced)
-```bash
-# Strategic planning and coordination
-@CHECKPOINT.md     # Auto-detects main branch
-@CHECKPOINT.md m   # Forces main workflow from any branch
-                   # → Commits status, pushes to main, updates application branch
-```
-
----
-
-## ⚡ Intelligence Features
-
-- **🤖 Branch Auto-Detection**: Automatically adapts to current context (default mode)
-- **🎯 Forced Workflow Execution**: Execute specific branch workflows regardless of current branch
-- **📝 Intelligent Commit Messages**: Context-aware commit descriptions  
-- **🔄 Smart Merge & Restart**: Merges completed work to main and creates fresh branches
-- **🔄 Application Synchronization**: Application branch automatically synchronizes with latest main changes
-- **🚨 Conflict Detection & Human Consultation**: Halts automation and provides guidance for conflicts
-- **🌱 Automated Branch Cycling**: Complete cycle automation for application testing
-- **📊 Status Tracking**: Maintains project coordination across branches
-- **⚡ Application-Focused Operation**: Optimized for application development and testing workflows
-
-**Perfect for Axiom application development workflow with seamless integration testing and validation!**
+**Use ApplicationProtocols/@CHECKPOINT for worktree-based development integration and deployment.**

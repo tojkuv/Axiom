@@ -17,12 +17,12 @@ Application development planning command that creates proposals for application 
 **Planning Focus**: Application development proposal creation and strategic planning
 **Branch Independence**: Works on current branch - no git operations performed
 **Proposal Creation**: Creates structured application proposals for user review and revision
-**Development Integration**: Proposals are implemented through ApplicationProtocols/DEVELOP.md after user approval
+**Development Integration**: Proposals are approved through ApplicationProtocols/APPROVE.md and implemented through ApplicationProtocols/DEVELOP.md
 
 ### 🔄 **Development Workflow Architecture**
 **IMPORTANT**: PLAN commands NEVER perform git operations (commit/push/merge)
 **Version Control**: Only @CHECKPOINT commands handle all git operations
-**Work Philosophy**: PLAN creates proposals → Multiple PLAN/DEVELOP/REFACTOR cycles → @CHECKPOINT commits and merges
+**Work Philosophy**: PLAN creates proposals → @APPROVE accepts proposals → DEVELOP implements → Multiple DEVELOP/REFACTOR cycles → @CHECKPOINT commits and merges
 
 Work commands operate on current branch without version control:
 1. **Analysis**: Read current TRACKING.md priorities and application status
@@ -35,11 +35,12 @@ Work commands operate on current branch without version control:
 
 **Core Principle**: Application planning creates detailed technical proposals for application development that can be reviewed, revised, and approved by users before implementation begins. Proposals focus exclusively on technical implementation details.
 
-**Proposal Workflow**: @PLAN creates application proposals → User reviews/revises → ApplicationProtocols/DEVELOP.md implements → Progress tracked in ApplicationProtocols/TRACKING.md
+**Proposal Workflow**: @PLAN creates application proposals → User reviews/revises → ApplicationProtocols/@APPROVE accepts proposals → ApplicationProtocols/DEVELOP.md implements → Progress tracked in ApplicationProtocols/TRACKING.md
 
 ### 🎯 **Clear Separation of Concerns**
-- **PLAN**: Reads TRACKING.md priorities → Creates proposals → NO implementation
-- **DEVELOP**: Implements proposals → Updates TRACKING.md progress → NO planning
+- **PLAN**: Reads TRACKING.md priorities → Creates proposals → NO approval or implementation
+- **APPROVE**: Accepts proposals → Updates TRACKING.md priorities → NO creation or implementation
+- **DEVELOP**: Implements approved proposals → Updates TRACKING.md progress → NO planning or approval
 - **CHECKPOINT**: Git workflow → Updates TRACKING.md completion → NO development
 - **REFACTOR**: Code organization → Updates TRACKING.md quality → NO functionality changes
 - **TRACKING**: Central progress store → Updated by all commands → NO command execution
@@ -86,10 +87,10 @@ Work commands operate on current branch without version control:
 ## Application Proposal Lifecycle Management
 
 ### Application Proposal States
-- **Active**: Application proposal created in Active/ directory, under development
-- **Waiting Approval**: Application proposal moved to WaitingApproval/ directory, ready for user review
-- **Under Revision**: User requests changes, application proposal updated in Active/ directory
-- **Approved**: User approves application proposal, ready for ApplicationProtocols/DEVELOP.md implementation
+- **Active**: Application proposal created in Active/ directory, under development by @PLAN
+- **Waiting Approval**: Application proposal moved to WaitingApproval/ directory, ready for @APPROVE processing
+- **Under Revision**: User requests changes, application proposal updated in Active/ directory by @PLAN
+- **Approved**: ApplicationProtocols/@APPROVE accepts proposal, ready for ApplicationProtocols/DEVELOP.md implementation
 - **In Development**: ApplicationProtocols/DEVELOP.md implementing proposal, progress tracked in TRACKING.md
 - **Completed**: Application implementation complete, proposal archived to Archive/ directory
 
@@ -97,8 +98,8 @@ Work commands operate on current branch without version control:
 1. **ApplicationProtocols/@PLAN** → Creates application proposal in AxiomExampleApp/Proposals/Active/
 2. **Proposal Completion** → Application proposal moved to AxiomExampleApp/Proposals/WaitingApproval/
 3. **User Review** → User reviews and optionally revises application proposal
-4. **User Approval** → User approves application proposal for implementation
-5. **ApplicationProtocols/@DEVELOP** → Implements application proposal, tracks progress in TRACKING.md
+4. **ApplicationProtocols/@APPROVE** → Accepts application proposal and updates TRACKING.md priorities
+5. **ApplicationProtocols/@DEVELOP** → Implements approved proposal, tracks progress in TRACKING.md
 6. **ApplicationProtocols/@CHECKPOINT** → Completes application implementation, archives proposal
 
 ## Application Planning Command Execution
@@ -111,25 +112,21 @@ Work commands operate on current branch without version control:
 **CRITICAL**: PLAN commands work on current branch state - NO git operations
 
 ```bash
-# Branch switching - Switch to application branch before starting work
-echo "🔄 Switching to application branch..."
-ORIGINAL_BRANCH=$(git branch --show-current)
-if [ "$ORIGINAL_BRANCH" != "application" ]; then
-    if git show-ref --verify --quiet refs/heads/application; then
-        git checkout application
-    else
-        git checkout -b application
-    fi
-    echo "✅ Switched to application branch"
-else
-    echo "✅ Already on application branch"
-fi
+# Navigate to application workspace
+echo "🔄 Entering application development workspace..."
+cd application-workspace/ || {
+    echo "❌ Application workspace not found"
+    echo "💡 Run '@WORKSPACE setup' to initialize worktrees"
+    exit 1
+}
 
 # Planning workflow (NO git operations)
 echo "🎯 Application Planning Execution"
-echo "📍 Working on current branch: $(git branch --show-current)"
+echo "📍 Workspace: $(pwd)"
+echo "🌿 Branch: $(git branch --show-current)"
+echo "🔗 Framework access: AxiomFramework-dev → ../framework-workspace/AxiomFramework"
 echo "⚠️ Version control managed by @CHECKPOINT only"
-echo "🎯 Planning ready - proceeding on application branch"
+echo "🎯 Planning ready - proceeding in application workspace"
 ```
 
 **Automated Execution Process**:
@@ -139,15 +136,8 @@ echo "🎯 Planning ready - proceeding on application branch"
 4. **Technical Planning** → Design application technical approach and implementation strategy
 5. **Application Proposal Creation** → Create structured application proposal in AxiomExampleApp/Proposals/Active/
 6. **Review Preparation** → Prepare application proposal for user review and potential revision
-7. **Branch Cleanup** → Switch back to main branch after completing all tasks
 **No Git Operations**: All version control handled by @CHECKPOINT commands only
 
-```bash
-# Switch back to main branch after completing all tasks
-echo "🔄 Switching back to main branch..."
-git checkout main
-echo "✅ Returned to main branch"
-```
 
 **Application Planning Execution Examples**:
 - `@PLAN` → Create application development proposal
@@ -176,25 +166,27 @@ echo "✅ Returned to main branch"
 ## Application Planning Workflow Integration
 
 **Planning Purpose**: Strategic application proposal creation for structured development
-**Implementation Separation**: ApplicationProtocols/DEVELOP.md implements proposals, never edits them
+**Approval Separation**: ApplicationProtocols/APPROVE.md handles proposal acceptance, never creates proposals
+**Implementation Separation**: ApplicationProtocols/DEVELOP.md implements approved proposals, never creates or approves them
 **Progress Tracking**: ApplicationProtocols/TRACKING.md monitors application proposal implementation progress
 **Archive Management**: Completed application proposals archived for reference and documentation
-**User Control**: Users review, revise, and approve application proposals before implementation
+**User Control**: Users review and revise application proposals before @APPROVE processing
 
 ## Application Planning Coordination
 
 **Proposal Creation**: Creates application proposals in AxiomExampleApp/Proposals/Active/ directory, moves to WaitingApproval/ when ready for review
-**User Interaction**: Application proposals designed for user review, revision, and approval
-**Development Integration**: Application proposals implemented through ApplicationProtocols/DEVELOP.md
+**User Interaction**: Application proposals designed for user review and revision
+**Approval Integration**: Application proposals processed through ApplicationProtocols/@APPROVE for acceptance
+**Development Integration**: Approved application proposals implemented through ApplicationProtocols/DEVELOP.md
 **Progress Monitoring**: Application implementation progress tracked through ApplicationProtocols/TRACKING.md
 **Archive Management**: Completed application proposals archived for future reference
 
 ---
 
-**APPLICATION PLANNING COMMAND STATUS**: Application development planning command with proposal creation and management
+**APPLICATION PLANNING COMMAND STATUS**: Application development planning command with proposal creation and lifecycle management
 **CORE FOCUS**: Strategic application proposal creation for application development  
 **PROPOSAL CREATION**: Creates structured application proposals in AxiomExampleApp/Proposals/Active/
-**USER WORKFLOW**: Application proposals for user review, revision, and approval before implementation
-**INTEGRATION**: Workflow integration with ApplicationProtocols/DEVELOP.md and TRACKING progress monitoring
+**USER WORKFLOW**: Application proposals for user review and revision before @APPROVE processing
+**INTEGRATION**: Workflow integration with ApplicationProtocols/@APPROVE, DEVELOP.md and TRACKING progress monitoring
 
-**Use ApplicationProtocols/@PLAN for strategic application development planning with structured proposal creation and user approval workflow.**
+**Use ApplicationProtocols/@PLAN for strategic application development planning with structured proposal creation and @APPROVE workflow integration.**

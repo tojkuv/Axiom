@@ -153,25 +153,21 @@ Refactoring workflow (NO git operations):
 **CRITICAL**: REFACTOR commands work on current branch state - NO git operations
 
 ```bash
-# Branch switching - Switch to application branch before starting work
-echo "🔄 Switching to application branch..."
-ORIGINAL_BRANCH=$(git branch --show-current)
-if [ "$ORIGINAL_BRANCH" != "application" ]; then
-    if git show-ref --verify --quiet refs/heads/application; then
-        git checkout application
-    else
-        git checkout -b application
-    fi
-    echo "✅ Switched to application branch"
-else
-    echo "✅ Already on application branch"
-fi
+# Navigate to application workspace
+echo "🔄 Entering application development workspace..."
+cd application-workspace/ || {
+    echo "❌ Application workspace not found"
+    echo "💡 Run '@WORKSPACE setup' to initialize worktrees"
+    exit 1
+}
 
 # Refactoring workflow (NO git operations)
 echo "🎯 Application Refactoring Execution"
-echo "📍 Working on current branch: $(git branch --show-current)"
+echo "📍 Workspace: $(pwd)"
+echo "🌿 Branch: $(git branch --show-current)"
+echo "🔗 Framework access: AxiomFramework-dev → ../framework-workspace/AxiomFramework"
 echo "⚠️ Version control managed by @CHECKPOINT only"
-echo "🎯 Refactoring ready - proceeding on application branch"
+echo "🎯 Refactoring ready - proceeding in application workspace"
 ```
 
 **Automated Execution Process**:
@@ -182,15 +178,8 @@ echo "🎯 Refactoring ready - proceeding on application branch"
 5. **Documentation Updates** → Update application structure documentation and refactoring reports
 6. **TRACKING.md Quality Update** → Update structural improvements in ApplicationProtocols/TRACKING.md
 7. **Coordination Updates** → Provide application refactoring results and structural improvement assessment
-8. **Branch Cleanup** → Switch back to main branch after completing all tasks
 **No Git Operations**: All version control handled by @CHECKPOINT commands only
 
-```bash
-# Switch back to main branch after completing all tasks
-echo "🔄 Switching back to main branch..."
-git checkout main
-echo "✅ Returned to main branch"
-```
 
 **Application Refactoring Execution Examples**:
 - `@REFACTOR plan` → Plan application refactoring priorities and structural improvement strategy

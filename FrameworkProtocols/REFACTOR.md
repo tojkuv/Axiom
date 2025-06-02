@@ -153,25 +153,20 @@ Refactoring workflow (NO git operations):
 **CRITICAL**: REFACTOR commands work on current branch state - NO git operations
 
 ```bash
-# Branch switching - Switch to framework branch before starting work
-echo "🔄 Switching to framework branch..."
-ORIGINAL_BRANCH=$(git branch --show-current)
-if [ "$ORIGINAL_BRANCH" != "framework" ]; then
-    if git show-ref --verify --quiet refs/heads/framework; then
-        git checkout framework
-    else
-        git checkout -b framework
-    fi
-    echo "✅ Switched to framework branch"
-else
-    echo "✅ Already on framework branch"
-fi
+# Navigate to framework workspace
+echo "🔄 Entering framework development workspace..."
+cd framework-workspace/ || {
+    echo "❌ Framework workspace not found"
+    echo "💡 Run '@WORKSPACE setup' to initialize worktrees"
+    exit 1
+}
 
 # Refactoring workflow (NO git operations)
 echo "🎯 Framework Refactoring Execution"
-echo "📍 Working on current branch: $(git branch --show-current)"
+echo "📍 Workspace: $(pwd)"
+echo "🌿 Branch: $(git branch --show-current)"
 echo "⚠️ Version control managed by @CHECKPOINT only"
-echo "🎯 Refactoring ready - proceeding on framework branch"
+echo "🎯 Refactoring ready - proceeding in framework workspace"
 ```
 
 **Automated Execution Process**:
@@ -182,15 +177,8 @@ echo "🎯 Refactoring ready - proceeding on framework branch"
 5. **Documentation Updates** → Update structure documentation and refactoring reports
 6. **TRACKING.md Quality Update** → Update structural improvements in FrameworkProtocols/TRACKING.md
 7. **Coordination Updates** → Provide refactoring results and structural improvement assessment
-8. **Branch Cleanup** → Switch back to main branch after completing all tasks
 **No Git Operations**: All version control handled by @CHECKPOINT commands only
 
-```bash
-# Switch back to main branch after completing all tasks
-echo "🔄 Switching back to main branch..."
-git checkout main
-echo "✅ Returned to main branch"
-```
 
 **Refactoring Execution Examples**:
 - `@REFACTOR plan` → Plan refactoring priorities and structural improvement strategy
