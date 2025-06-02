@@ -30,25 +30,25 @@ class UserContext: AxiomContext, ObservableObject {
     let performanceClient: PerformanceClient
     
     // Framework integration
-    let intelligence: AxiomIntelligence
+    let analyzer: FrameworkAnalyzer
     let performanceMonitor: PerformanceMonitor
     
     init(
         userClient: UserClient,
         analyticsClient: AnalyticsClient,
         performanceClient: PerformanceClient,
-        intelligence: AxiomIntelligence,
+        analyzer: FrameworkAnalyzer,
         performanceMonitor: PerformanceMonitor
     ) {
         self.userClient = userClient
         self.analyticsClient = analyticsClient
         self.performanceClient = performanceClient
-        self.intelligence = intelligence
+        self.analyzer = analyzer
         self.performanceMonitor = performanceMonitor
         
         // Register for component analysis
-        intelligence.registerComponent(self)
-        intelligence.startMonitoring(self)
+        analyzer.registerComponent(self)
+        analyzer.startMonitoring(self)
         
         // Start observing client state changes
         Task {
@@ -83,16 +83,16 @@ class UserContext {
 @MainActor
 class UserContext: AxiomContext, ObservableObject {
     let client: UserClient  // Note: renamed from userClient to client
-    let intelligence: AxiomIntelligence
+    let analyzer: FrameworkAnalyzer
     let performanceMonitor: PerformanceMonitor
     
-    init(client: UserClient, intelligence: AxiomIntelligence, performanceMonitor: PerformanceMonitor) {
+    init(client: UserClient, analyzer: FrameworkAnalyzer, performanceMonitor: PerformanceMonitor) {
         self.client = client
-        self.intelligence = intelligence
+        self.analyzer = analyzer
         self.performanceMonitor = performanceMonitor
         
-        intelligence.registerComponent(self)
-        intelligence.startMonitoring(self)
+        analyzer.registerComponent(self)
+        analyzer.startMonitoring(self)
         
         Task {
             await observeStateChanges()
@@ -289,7 +289,7 @@ class ApplicationContext: AxiomContext, ObservableObject {
     let notificationClient: NotificationClient
     
     // Framework integration
-    let intelligence: AxiomIntelligence
+    let analyzer: FrameworkAnalyzer
     let performanceMonitor: PerformanceMonitor
     
     init(
@@ -297,18 +297,18 @@ class ApplicationContext: AxiomContext, ObservableObject {
         orderClient: OrderClient,
         analyticsClient: AnalyticsClient,
         notificationClient: NotificationClient,
-        intelligence: AxiomIntelligence,
+        analyzer: FrameworkAnalyzer,
         performanceMonitor: PerformanceMonitor
     ) {
         self.userClient = userClient
         self.orderClient = orderClient
         self.analyticsClient = analyticsClient
         self.notificationClient = notificationClient
-        self.intelligence = intelligence
+        self.analyzer = analyzer
         self.performanceMonitor = performanceMonitor
         
-        intelligence.registerComponent(self)
-        intelligence.startMonitoring(self)
+        analyzer.registerComponent(self)
+        analyzer.startMonitoring(self)
     }
     
     // Cross-domain coordination methods
@@ -455,24 +455,24 @@ class CompositeContext: AxiomContext, ObservableObject {
     let settingsContext: SettingsContext
     
     // Framework integration
-    let intelligence: AxiomIntelligence
+    let analyzer: FrameworkAnalyzer
     let performanceMonitor: PerformanceMonitor
     
     init(
         userContext: UserContext,
         orderContext: OrderContext,
         settingsContext: SettingsContext,
-        intelligence: AxiomIntelligence,
+        analyzer: FrameworkAnalyzer,
         performanceMonitor: PerformanceMonitor
     ) {
         self.userContext = userContext
         self.orderContext = orderContext
         self.settingsContext = settingsContext
-        self.intelligence = intelligence
+        self.analyzer = analyzer
         self.performanceMonitor = performanceMonitor
         
-        intelligence.registerComponent(self)
-        intelligence.startMonitoring(self)
+        analyzer.registerComponent(self)
+        analyzer.startMonitoring(self)
     }
     
     // Delegate to appropriate sub-contexts
@@ -700,17 +700,17 @@ import XCTest
 final class UserContextTests: XCTestCase {
     var context: UserContext!
     var mockUserClient: MockUserClient!
-    var mockIntelligence: MockAxiomIntelligence!
+    var mockAnalyzer: MockFrameworkAnalyzer!
     var mockPerformanceMonitor: MockPerformanceMonitor!
     
     override func setUp() async throws {
         mockUserClient = MockUserClient()
-        mockIntelligence = MockAxiomIntelligence()
+        mockAnalyzer = MockFrameworkAnalyzer()
         mockPerformanceMonitor = MockPerformanceMonitor()
         
         context = UserContext(
             userClient: mockUserClient,
-            intelligence: mockIntelligence,
+            analyzer: mockAnalyzer,
             performanceMonitor: mockPerformanceMonitor
         )
     }

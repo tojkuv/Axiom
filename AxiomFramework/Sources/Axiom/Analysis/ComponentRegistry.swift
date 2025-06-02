@@ -71,7 +71,7 @@ public actor ComponentRegistryEngine: ComponentRegistering {
     // MARK: Component Discovery
     
     public func discoverComponents() async -> [IntrospectedComponent] {
-        let token = await performanceMonitor.startOperation("discover_components", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("discover_components", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         // Clear existing registry for fresh discovery
@@ -116,7 +116,7 @@ public actor ComponentRegistryEngine: ComponentRegistering {
     // MARK: Component Analysis
     
     public func analyzeComponent(_ componentID: ComponentID) async throws -> ComponentAnalysis {
-        let token = await performanceMonitor.startOperation("analyze_component", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("analyze_component", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         // Check cache first
@@ -145,7 +145,7 @@ public actor ComponentRegistryEngine: ComponentRegistering {
     // MARK: Relationship Mapping
     
     public func mapComponentRelationships() async -> ComponentRelationshipMap {
-        let token = await performanceMonitor.startOperation("map_relationships", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("map_relationships", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         // Return cached map if available and recent
@@ -180,7 +180,7 @@ public actor ComponentRegistryEngine: ComponentRegistering {
     // MARK: Documentation Generation
     
     public func generateDocumentation() async -> ArchitecturalDocumentationSet {
-        let token = await performanceMonitor.startOperation("generate_documentation", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("generate_documentation", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         let allComponents = await componentRegistry.getAllComponents()
@@ -208,7 +208,7 @@ public actor ComponentRegistryEngine: ComponentRegistering {
     // MARK: Architectural Validation
     
     public func validateArchitecturalIntegrity() async -> SystemIntegrityReport {
-        let token = await performanceMonitor.startOperation("validate_integrity", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("validate_integrity", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         let allComponents = await componentRegistry.getAllComponents()
@@ -276,7 +276,7 @@ public actor ComponentRegistryEngine: ComponentRegistering {
     // MARK: Impact Analysis
     
     public func performImpactAnalysis(_ changes: [ProposedChange]) async -> SystemImpactAnalysis {
-        let token = await performanceMonitor.startOperation("impact_analysis", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("impact_analysis", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         var impacts: [ChangeImpact] = []
@@ -313,7 +313,7 @@ public actor ComponentRegistryEngine: ComponentRegistering {
     // MARK: Component Metrics
     
     public func getComponentMetrics() async -> ComponentMetricsReport {
-        let token = await performanceMonitor.startOperation("component_metrics", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("component_metrics", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         let allComponents = await componentRegistry.getAllComponents()

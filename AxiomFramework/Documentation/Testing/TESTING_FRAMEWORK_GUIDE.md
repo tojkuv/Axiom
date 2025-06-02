@@ -157,16 +157,16 @@ class AxiomClientTestCase: XCTestCase {
 @MainActor
 class TestContext: AxiomContext {
     let testClient: TestClient
-    let intelligence: AxiomIntelligence
+    let analyzer: FrameworkAnalyzer
     
     @Published var isLoading = false
     
     init(
         testClient: TestClient,
-        intelligence: AxiomIntelligence = DefaultAxiomIntelligence()
+        analyzer: FrameworkAnalyzer = DefaultFrameworkAnalyzer()
     ) {
         self.testClient = testClient
-        self.intelligence = intelligence
+        self.analyzer = analyzer
     }
 }
 
@@ -302,7 +302,7 @@ class PerformanceTests: XCTestCase {
         let contexts = (0..<100).map { _ in
             TestContext(
                 testClient: TestClient(),
-                intelligence: DefaultAxiomIntelligence()
+                analyzer: DefaultFrameworkAnalyzer()
             )
         }
         
@@ -335,18 +335,18 @@ class PerformanceTests: XCTestCase {
 }
 ```
 
-### Intelligence Query Performance
+### Analysis Query Performance
 
 ```swift
-class IntelligencePerformanceTests: XCTestCase {
-    func testIntelligenceQueryPerformance() async throws {
-        let intelligence = DefaultAxiomIntelligence()
+class AnalysisPerformanceTests: XCTestCase {
+    func testAnalysisQueryPerformance() async throws {
+        let analyzer = DefaultFrameworkAnalyzer()
         let queryCount = 100
         
         let startTime = CFAbsoluteTimeGetCurrent()
         
         for _ in 0..<queryCount {
-            let components = await intelligence.discoverComponents()
+            let components = await analyzer.discoverComponents()
             XCTAssertGreaterThan(components.count, 0)
         }
         

@@ -67,7 +67,7 @@ public actor NaturalLanguageQueryParser: QueryParsing {
     // MARK: Query Parsing
     
     public func parseQuery(_ query: String) async -> ParsedQuery {
-        let token = await performanceMonitor.startOperation("parse_query", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("parse_query", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         // Normalize the query
@@ -95,7 +95,7 @@ public actor NaturalLanguageQueryParser: QueryParsing {
     }
     
     public func suggestQueries(for context: QueryContext) async -> [QuerySuggestion] {
-        let token = await performanceMonitor.startOperation("suggest_queries", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("suggest_queries", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         var suggestions: [QuerySuggestion] = []

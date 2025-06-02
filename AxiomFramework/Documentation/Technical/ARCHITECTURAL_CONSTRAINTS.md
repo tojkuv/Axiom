@@ -352,13 +352,13 @@ actor UserClient: AxiomClient {
         self.capabilities = capabilities
         
         // Automatic registration for component analysis
-        AxiomIntelligence.shared.registerComponent(self)
+        FrameworkAnalyzer.shared.registerComponent(self)
     }
 }
 
 @MainActor
 class UserContext: AxiomContext {
-    init(userClient: UserClient, intelligence: AxiomIntelligence) {
+    init(userClient: UserClient, analyzer: FrameworkAnalyzer) {
         self.userClient = userClient
         self.intelligence = intelligence
         
@@ -418,7 +418,7 @@ actor UserClient: AxiomClient {
 class UserContext: AxiomContext, ObservableObject {
     let userClient: UserClient
     let analyticsClient: AnalyticsClient
-    let intelligence: AxiomIntelligence  // Constraint 8: Component analysis
+    let analyzer: FrameworkAnalyzer  // Constraint 8: Component analysis
     
     // Constraint 6: Cross-domain coordination
     func updateUserWithAnalytics(name: String, email: String) async {

@@ -3,16 +3,16 @@ import Foundation
 // MARK: - Phase 3 Milestone 2: Parallel Processing Engine Implementation
 // TDD GREEN PHASE: Minimal implementation to make tests pass
 
-/// Parallel processing engine for concurrent intelligence operations
+/// Parallel processing engine for concurrent analysis operations
 public actor ParallelProcessingEngine {
     
     private let maxConcurrentOperations: Int
-    private let loadBalancer: IntelligenceLoadBalancer
+    private let loadBalancer: AnalysisLoadBalancer
     private var currentOperations: Int = 0
     
     public init(maxConcurrentOperations: Int = 8) {
         self.maxConcurrentOperations = maxConcurrentOperations
-        self.loadBalancer = IntelligenceLoadBalancer(maxWorkers: maxConcurrentOperations)
+        self.loadBalancer = AnalysisLoadBalancer(maxWorkers: maxConcurrentOperations)
     }
     
     // MARK: - Parallel Component Discovery
@@ -48,16 +48,16 @@ public actor ParallelProcessingEngine {
     
     // MARK: - Concurrent Feature Execution
     
-    public func executeFeaturesConcurrently(_ features: [IntelligenceFeature], intelligence: DefaultAxiomIntelligence) async throws -> [IntelligenceFeatureResult] {
+    public func executeFeaturesConcurrently(_ features: [AnalysisFeature], analyzer: DefaultFrameworkAnalyzer) async throws -> [AnalysisFeatureResult] {
         // For truly concurrent execution, we need to resolve dependencies first
         // Then execute features with satisfied dependencies in parallel
         
-        return try await executeFeaturesConcurrentlyWithDependencies(features, intelligence: intelligence)
+        return try await executeFeaturesConcurrentlyWithDependencies(features, analyzer: analyzer)
     }
     
-    public func executeFeaturesConcurrentlyWithDependencies(_ features: [IntelligenceFeature], intelligence: DefaultAxiomIntelligence) async throws -> [IntelligenceFeatureResult] {
-        var results: [IntelligenceFeatureResult] = []
-        var completed: Set<IntelligenceFeature> = []
+    public func executeFeaturesConcurrentlyWithDependencies(_ features: [AnalysisFeature], analyzer: DefaultFrameworkAnalyzer) async throws -> [AnalysisFeatureResult] {
+        var results: [AnalysisFeatureResult] = []
+        var completed: Set<AnalysisFeature> = []
         var remaining = Set(features)
         
         while !remaining.isEmpty {
@@ -72,14 +72,14 @@ public actor ParallelProcessingEngine {
             }
             
             // Execute all executable features in parallel
-            let batchResults = await withTaskGroup(of: IntelligenceFeatureResult.self) { group in
-                var batchResults: [IntelligenceFeatureResult] = []
+            let batchResults = await withTaskGroup(of: AnalysisFeatureResult.self) { group in
+                var batchResults: [AnalysisFeatureResult] = []
                 
                 for feature in executable {
                     group.addTask {
                         let startTime = Date()
-                        let success = await self.executeFeature(feature, intelligence: intelligence)
-                        return IntelligenceFeatureResult(
+                        let success = await self.executeFeature(feature, analyzer: intelligence)
+                        return AnalysisFeatureResult(
                             feature: feature,
                             success: success,
                             confidence: 0.85,
@@ -109,9 +109,9 @@ public actor ParallelProcessingEngine {
     
     // MARK: - Load Balanced Operations
     
-    public func executeOperationsWithLoadBalancing(_ operations: [IntelligenceOperation]) async throws -> [IntelligenceOperationResult] {
-        return await withTaskGroup(of: IntelligenceOperationResult.self) { group in
-            var results: [IntelligenceOperationResult] = []
+    public func executeOperationsWithLoadBalancing(_ operations: [AnalysisOperation]) async throws -> [AnalysisOperationResult] {
+        return await withTaskGroup(of: AnalysisOperationResult.self) { group in
+            var results: [AnalysisOperationResult] = []
             
             for operation in operations {
                 group.addTask {
@@ -153,14 +153,14 @@ public actor ParallelProcessingEngine {
     
     // MARK: - Complex Query Processing
     
-    public func processComplexQueryWithParallelProcessing(_ query: String, intelligence: DefaultAxiomIntelligence) async throws -> QueryResponse {
+    public func processComplexQueryWithParallelProcessing(_ query: String, analyzer: DefaultFrameworkAnalyzer) async throws -> QueryResponse {
         let startTime = Date()
         
         // Parse query to identify required features
         let requiredFeatures = extractRequiredFeatures(from: query)
         
         // Execute features in parallel
-        let featureResults = try await executeFeaturesConcurrentlyWithDependencies(requiredFeatures, intelligence: intelligence)
+        let featureResults = try await executeFeaturesConcurrentlyWithDependencies(requiredFeatures, analyzer: intelligence)
         
         // Aggregate results
         let confidence = featureResults.map { $0.confidence }.reduce(0, +) / Double(featureResults.count)
@@ -197,7 +197,7 @@ public actor ParallelProcessingEngine {
     
     // MARK: - Private Helper Methods
     
-    private func executeFeature(_ feature: IntelligenceFeature, intelligence: DefaultAxiomIntelligence) async -> Bool {
+    private func executeFeature(_ feature: AnalysisFeature, analyzer: DefaultFrameworkAnalyzer) async -> Bool {
         currentOperations += 1
         defer { Task { await self.decrementOperations() } }
         
@@ -292,9 +292,9 @@ public actor ParallelProcessingEngine {
         }
     }
     
-    private func extractRequiredFeatures(from query: String) -> [IntelligenceFeature] {
+    private func extractRequiredFeatures(from query: String) -> [AnalysisFeature] {
         // Extract genuine framework features based on query content
-        var features: [IntelligenceFeature] = []
+        var features: [AnalysisFeature] = []
         
         if query.contains("component") || query.contains("registry") {
             features.append(.componentRegistry)
@@ -317,7 +317,7 @@ public actor ParallelProcessingEngine {
 
 // MARK: - Load Balancer Implementation
 
-public actor IntelligenceLoadBalancer {
+public actor AnalysisLoadBalancer {
     
     private let workers: [IntelligenceWorker]
     private var currentWorkerIndex: Int = 0
@@ -329,7 +329,7 @@ public actor IntelligenceLoadBalancer {
         self.workers = (0..<maxWorkers).map { IntelligenceWorker(id: $0) }
     }
     
-    public func executeOperation(_ operation: IntelligenceOperation) async -> IntelligenceOperationResult {
+    public func executeOperation(_ operation: AnalysisOperation) async -> AnalysisOperationResult {
         let startTime = Date()
         
         // Round-robin load balancing
@@ -373,7 +373,7 @@ public actor IntelligenceWorker {
         self.id = id
     }
     
-    public func execute(_ operation: IntelligenceOperation) async -> IntelligenceOperationResult {
+    public func execute(_ operation: AnalysisOperation) async -> AnalysisOperationResult {
         isExecuting = true
         defer { isExecuting = false }
         
@@ -385,7 +385,7 @@ public actor IntelligenceWorker {
         
         let duration = Date().timeIntervalSince(startTime)
         
-        return IntelligenceOperationResult(
+        return AnalysisOperationResult(
             operation: operation,
             success: true,
             duration: duration,
@@ -397,7 +397,7 @@ public actor IntelligenceWorker {
         return !isExecuting
     }
     
-    private func operationExecutionTime(for operation: IntelligenceOperation) -> TimeInterval {
+    private func operationExecutionTime(for operation: AnalysisOperation) -> TimeInterval {
         switch operation {
         case .performanceAnalysis:
             return 0.02 // 20ms
@@ -426,14 +426,14 @@ private extension Array {
 // MARK: - Intelligence Support Types for Testing
 
 /// Intelligence feature execution result
-public struct IntelligenceFeatureResult: Sendable {
-    public let feature: IntelligenceFeature
+public struct AnalysisFeatureResult: Sendable {
+    public let feature: AnalysisFeature
     public let success: Bool
     public let confidence: Double
     public let duration: TimeInterval
     public let executedAt: Date
     
-    public init(feature: IntelligenceFeature, success: Bool, confidence: Double, duration: TimeInterval, executedAt: Date) {
+    public init(feature: AnalysisFeature, success: Bool, confidence: Double, duration: TimeInterval, executedAt: Date) {
         self.feature = feature
         self.success = success
         self.confidence = confidence
@@ -443,13 +443,13 @@ public struct IntelligenceFeatureResult: Sendable {
 }
 
 /// Intelligence operation result
-public struct IntelligenceOperationResult: Sendable {
-    public let operation: IntelligenceOperation
+public struct AnalysisOperationResult: Sendable {
+    public let operation: AnalysisOperation
     public let success: Bool
     public let duration: TimeInterval
     public let result: String?
     
-    public init(operation: IntelligenceOperation, success: Bool, duration: TimeInterval, result: String?) {
+    public init(operation: AnalysisOperation, success: Bool, duration: TimeInterval, result: String?) {
         self.operation = operation
         self.success = success
         self.duration = duration
@@ -486,7 +486,7 @@ public struct PatternDetectionMetrics: Sendable {
 }
 
 /// Intelligence operation types for testing
-public enum IntelligenceOperation: CaseIterable, Sendable {
+public enum AnalysisOperation: CaseIterable, Sendable {
     case performanceAnalysis
     case patternDetection
     case componentIntrospection

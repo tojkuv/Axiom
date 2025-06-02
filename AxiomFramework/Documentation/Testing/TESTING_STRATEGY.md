@@ -86,7 +86,7 @@ xcrun llvm-cov show .build/debug/AxiomPackageTests.xctest/Contents/MacOS/AxiomPa
 | AxiomContext | 12 tests | 6 tests | 4 tests |
 | AxiomView | 13 tests | 4 tests | 3 tests |
 | Capability System | 10 tests | 8 tests | 2 tests |
-| Intelligence System | 25 tests | 12 tests | 8 tests |
+| Analysis System | 25 tests | 12 tests | 8 tests |
 | State Management | 8 tests | 6 tests | 6 tests |
 | SwiftUI Integration | 15 tests | 10 tests | 7 tests |
 | Macro System | 39 tests | 15 tests | 5 tests |
@@ -276,13 +276,13 @@ echo "✅ All 136 tests passed successfully"
 
 ```swift
 class PerformanceRegressionTests: XCTestCase {
-    func testIntelligenceQueryPerformanceBaseline() throws {
+    func testAnalysisQueryPerformanceBaseline() throws {
         let baseline: TimeInterval = 0.1 // 100ms baseline
         let tolerance: TimeInterval = 0.01 // 10ms tolerance
         
         measure {
-            let intelligence = DefaultAxiomIntelligence()
-            _ = intelligence.discoverComponents()
+            let analyzer = DefaultFrameworkAnalyzer()
+            _ = analyzer.discoverComponents()
         }
         
         // Validate against baseline
@@ -341,8 +341,8 @@ class QualityGateValidationTests: XCTestCase {
     }
     
     func testPerformanceTargets() async throws {
-        // Intelligence query performance
-        let queryTime = await measureIntelligenceQuery()
+        // Analysis query performance
+        let queryTime = await measureAnalysisQuery()
         XCTAssertLessThan(queryTime, 0.1) // <100ms
         
         // State access performance  

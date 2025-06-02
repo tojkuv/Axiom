@@ -1,33 +1,33 @@
-# Intelligence System Specification
+# Analysis System Specification
 
 Technical specification for the Axiom framework's component analysis and architectural introspection system.
 
 ## Overview
 
-The Axiom Intelligence System provides component analysis capabilities, architectural introspection, and system monitoring. The system enables discovery of application components, validation of architectural constraints, and collection of performance metrics for optimization.
+The Axiom Analysis System provides component analysis capabilities, architectural introspection, and system monitoring. The system enables discovery of application components, validation of architectural constraints, and collection of performance metrics for optimization.
 
 ## System Architecture
 
 ### Core Components
 
-1. **AxiomIntelligence**: Main intelligence coordination interface
+1. **FrameworkAnalyzer**: Main analysis coordination interface
 2. **ComponentRegistry**: Component discovery and metadata management  
 3. **ArchitecturalMetadata**: Architecture analysis and constraint validation
 4. **QueryEngine**: Architectural query processing and analysis
 5. **PatternDetection**: Component pattern recognition and standardization
 6. **PerformanceMonitor**: Real-time performance metrics collection
 
-## AxiomIntelligence Interface
+## FrameworkAnalyzer Interface
 
-### Primary Intelligence Coordination
+### Primary Analysis Coordination
 
 ```swift
-class AxiomIntelligence {
+class FrameworkAnalyzer {
     // Component Analysis
     func analyzeComponents() async -> [ComponentMetadata]
     func introspectArchitecture() async -> ArchitecturalMetadata
     func validateConstraints() async -> [ConstraintValidation]
-    func generateReport() async -> IntelligenceReport
+    func generateReport() async -> AnalysisReport
     
     // Component Registration
     func registerComponent(_ component: Any)
@@ -48,7 +48,7 @@ class AxiomIntelligence {
 ### Implementation Example
 
 ```swift
-class DefaultAxiomIntelligence: AxiomIntelligence {
+class DefaultFrameworkAnalyzer: FrameworkAnalyzer {
     private let componentRegistry: ComponentRegistry
     private let architecturalMetadata: ArchitecturalMetadata
     private let queryEngine: QueryEngine
@@ -166,7 +166,7 @@ enum ComponentType {
     case context
     case view
     case capability
-    case intelligence
+    case analysis
     case performance
     case unknown
 }
@@ -499,7 +499,7 @@ enum PatternType {
 ### Performance Monitoring and Analysis
 
 ```swift
-extension AxiomIntelligence {
+extension FrameworkAnalyzer {
     func collectPerformanceMetrics() async -> [ComponentPerformanceMetrics] {
         let components = componentRegistry.getAllComponents()
         
@@ -570,18 +570,18 @@ struct ComponentPerformanceMetrics {
 }
 ```
 
-## Intelligence Reporting
+## Analysis Reporting
 
 ### Comprehensive System Reports
 
 ```swift
-struct IntelligenceReport {
+struct AnalysisReport {
     let timestamp: Date
     let components: [ComponentMetadata]
     let architecture: ArchitecturalMetadata
     let patterns: [DetectedPattern]
     let performance: [ComponentPerformanceMetrics]
-    let recommendations: [IntelligenceRecommendation]
+    let recommendations: [AnalysisRecommendation]
     
     var summary: ReportSummary {
         return ReportSummary(
@@ -604,7 +604,7 @@ struct IntelligenceReport {
     }
 }
 
-struct IntelligenceRecommendation {
+struct AnalysisRecommendation {
     let type: RecommendationType
     let priority: RecommendationPriority
     let description: String
@@ -631,46 +631,46 @@ enum RecommendationPriority {
 
 ## Usage Examples
 
-### Basic Intelligence Integration
+### Basic Analysis Integration
 
 ```swift
 // Context integration
 @MainActor
 class UserContext: AxiomContext {
-    let intelligence: AxiomIntelligence
+    let analysis: FrameworkAnalyzer
     
-    init(client: UserClient, intelligence: AxiomIntelligence) {
+    init(client: UserClient, analysis: FrameworkAnalyzer) {
         self.client = client
-        self.intelligence = intelligence
+        self.analysis = analysis
         
         // Register for component analysis
-        intelligence.registerComponent(self)
-        intelligence.startMonitoring(self)
+        analysis.registerComponent(self)
+        analysis.startMonitoring(self)
     }
     
-    func generateArchitecturalReport() async -> IntelligenceReport {
-        return await intelligence.generateReport()
+    func generateArchitecturalReport() async -> AnalysisReport {
+        return await analysis.generateReport()
     }
 }
 
 // Application-level analysis
-class ApplicationIntelligence {
-    let intelligence: AxiomIntelligence
+class ApplicationAnalysis {
+    let analysis: FrameworkAnalyzer
     
-    func performFullAnalysis() async -> IntelligenceReport {
+    func performFullAnalysis() async -> AnalysisReport {
         // Analyze all registered components
-        let components = await intelligence.analyzeComponents()
+        let components = await analysis.analyzeComponents()
         
         // Validate architectural constraints
-        let constraints = await intelligence.validateConstraints()
+        let constraints = await analysis.validateConstraints()
         
         // Detect patterns and anti-patterns
-        let patterns = await intelligence.detectPatterns()
+        let patterns = await analysis.detectPatterns()
         
         // Collect performance metrics
-        let performance = await intelligence.collectPerformanceMetrics()
+        let performance = await analysis.collectPerformanceMetrics()
         
-        return IntelligenceReport(
+        return AnalysisReport(
             timestamp: Date(),
             components: components,
             architecture: ArchitecturalMetadata(constraints: constraints),
@@ -684,4 +684,4 @@ class ApplicationIntelligence {
 
 ---
 
-**Intelligence System Specification** - Complete technical specification for component analysis, architectural introspection, pattern detection, and performance monitoring capabilities
+**Analysis System Specification** - Complete technical specification for component analysis, architectural introspection, pattern detection, and performance monitoring capabilities

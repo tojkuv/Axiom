@@ -233,16 +233,16 @@ public struct PerformanceMonitoringModifier: ViewModifier {
 
 // MARK: - Intelligence Integration Modifier
 
-/// Enhanced intelligence features integration
-public struct IntelligenceEnabledModifier: ViewModifier {
-    let features: Set<IntelligenceFeature>
-    let configuration: IntelligenceConfiguration
+/// Enhanced analysis features integration
+public struct AnalysisEnabledModifier: ViewModifier {
+    let features: Set<AnalysisFeature>
+    let configuration: AnalysisConfiguration
     
     @Environment(\.axiomContext) private var context
-    @State private var intelligence: (any AxiomIntelligence)?
+    @State private var analyzer: (any FrameworkAnalyzer)?
     // AI theater removed: Natural language queries were keyword matching theater
     
-    public struct IntelligenceConfiguration {
+    public struct AnalysisConfiguration {
         public let enableComponentRegistry: Bool
         public let enablePerformanceMonitoring: Bool
         public let enableCapabilityValidation: Bool
@@ -259,8 +259,8 @@ public struct IntelligenceEnabledModifier: ViewModifier {
     }
     
     public init(
-        features: Set<IntelligenceFeature>,
-        configuration: IntelligenceConfiguration = IntelligenceConfiguration()
+        features: Set<AnalysisFeature>,
+        configuration: AnalysisConfiguration = AnalysisConfiguration()
     ) {
         self.features = features
         self.configuration = configuration
@@ -269,20 +269,20 @@ public struct IntelligenceEnabledModifier: ViewModifier {
     public func body(content: Content) -> some View {
         content
             .task {
-                await setupIntelligence()
+                await setupAnalyzer()
             }
             // AI theater removed: Natural language query UI was AI theater
-            // Genuine intelligence features are now available through the enabled features
+            // Genuine analysis features are now available through the enabled features
     }
     
-    private func setupIntelligence() async {
+    private func setupAnalyzer() async {
         guard let context = context else { return }
         
-        intelligence = await GlobalIntelligenceManager.shared.getIntelligence()
+        analyzer = await GlobalFrameworkAnalyzer.shared.getAnalyzer()
         
         // Enable requested features
         for feature in features {
-            await intelligence?.enableFeature(feature)
+            await analyzer?.enableFeature(feature)
         }
     }
     
@@ -411,12 +411,12 @@ public extension View {
         ))
     }
     
-    /// Enables intelligence features with configuration
-    func intelligenceEnabled(
-        _ features: Set<IntelligenceFeature>,
-        configuration: IntelligenceEnabledModifier.IntelligenceConfiguration = .init()
+    /// Enables analysis features with configuration
+    func analysisEnabled(
+        _ features: Set<AnalysisFeature>,
+        configuration: AnalysisEnabledModifier.AnalysisConfiguration = .init()
     ) -> some View {
-        self.modifier(IntelligenceEnabledModifier(
+        self.modifier(AnalysisEnabledModifier(
             features: features,
             configuration: configuration
         ))

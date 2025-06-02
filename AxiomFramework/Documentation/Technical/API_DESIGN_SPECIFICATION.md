@@ -67,7 +67,7 @@ protocol AxiomContext: ObservableObject {
     associatedtype Client: AxiomClient
     
     var client: Client { get }
-    var intelligence: AxiomIntelligence { get }
+    var analyzer: FrameworkAnalyzer { get }
     var performanceMonitor: PerformanceMonitor { get }
     
     func bind<T>(_ keyPath: KeyPath<Client.State, T>) -> Binding<T>
@@ -86,12 +86,12 @@ protocol AxiomContext: ObservableObject {
 @MainActor
 class UserContext: AxiomContext, ObservableObject {
     let client: UserClient
-    let intelligence: AxiomIntelligence
+    let analyzer: FrameworkAnalyzer
     let performanceMonitor: PerformanceMonitor
     
-    init(client: UserClient, intelligence: AxiomIntelligence, performanceMonitor: PerformanceMonitor) {
+    init(client: UserClient, analyzer: FrameworkAnalyzer, performanceMonitor: PerformanceMonitor) {
         self.client = client
-        self.intelligence = intelligence
+        self.analyzer = analyzer
         self.performanceMonitor = performanceMonitor
     }
     
@@ -189,18 +189,18 @@ if await capabilityManager.validate(NetworkCapability.self) {
 }
 ```
 
-## Intelligence System
+## Analysis System
 
-### AxiomIntelligence
+### FrameworkAnalyzer
 
 Component analysis and architectural introspection capabilities.
 
 ```swift
-class AxiomIntelligence {
+class FrameworkAnalyzer {
     func analyzeComponents() async -> [ComponentMetadata]
     func introspectArchitecture() async -> ArchitecturalMetadata
     func validateConstraints() async -> [ConstraintValidation]
-    func generateReport() async -> IntelligenceReport
+    func generateReport() async -> AnalysisReport
     
     // Query system
     func query(_ query: String) async -> QueryResult
@@ -210,14 +210,14 @@ class AxiomIntelligence {
 
 **Usage Pattern**:
 ```swift
-let intelligence = AxiomIntelligence()
+let analyzer = FrameworkAnalyzer()
 
 // Component analysis
-let components = await intelligence.analyzeComponents()
-let architecture = await intelligence.introspectArchitecture()
+let components = await analyzer.analyzeComponents()
+let architecture = await analyzer.introspectArchitecture()
 
 // Constraint validation
-let validations = await intelligence.validateConstraints()
+let validations = await analyzer.validateConstraints()
 for validation in validations {
     if !validation.isValid {
         print("Constraint violation: \(validation.constraint)")
@@ -225,7 +225,7 @@ for validation in validations {
 }
 
 // Pattern detection
-let patterns = await intelligence.detectPatterns()
+let patterns = await analyzer.detectPatterns()
 ```
 
 ## Performance System

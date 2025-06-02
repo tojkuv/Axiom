@@ -3,7 +3,7 @@ import Foundation
 // MARK: - Component Introspection Protocol
 
 /// Protocol for introspecting and analyzing architectural components
-/// This is one of the 8 breakthrough intelligence systems in Axiom
+/// This is one of the core analysis systems in Axiom
 public protocol ComponentIntrospecting: Actor {
     /// Discovers all components in the current architecture
     func discoverComponents() async -> [IntrospectedComponent]
@@ -70,7 +70,7 @@ public actor ComponentIntrospectionEngine: ComponentIntrospecting {
     // MARK: Component Discovery
     
     public func discoverComponents() async -> [IntrospectedComponent] {
-        let token = await performanceMonitor.startOperation("discover_components", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("discover_components", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         // Clear existing registry for fresh discovery
@@ -115,7 +115,7 @@ public actor ComponentIntrospectionEngine: ComponentIntrospecting {
     // MARK: Component Analysis
     
     public func analyzeComponent(_ componentID: ComponentID) async throws -> ComponentAnalysis {
-        let token = await performanceMonitor.startOperation("analyze_component", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("analyze_component", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         // Check cache first
@@ -144,7 +144,7 @@ public actor ComponentIntrospectionEngine: ComponentIntrospecting {
     // MARK: Relationship Mapping
     
     public func mapComponentRelationships() async -> ComponentRelationshipMap {
-        let token = await performanceMonitor.startOperation("map_relationships", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("map_relationships", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         // Return cached map if available and recent
@@ -179,7 +179,7 @@ public actor ComponentIntrospectionEngine: ComponentIntrospecting {
     // MARK: Documentation Generation
     
     public func generateDocumentation() async -> ArchitecturalDocumentationSet {
-        let token = await performanceMonitor.startOperation("generate_documentation", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("generate_documentation", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         let allComponents = await componentRegistry.getAllComponents()
@@ -207,7 +207,7 @@ public actor ComponentIntrospectionEngine: ComponentIntrospecting {
     // MARK: Architectural Validation
     
     public func validateArchitecturalIntegrity() async -> SystemIntegrityReport {
-        let token = await performanceMonitor.startOperation("validate_integrity", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("validate_integrity", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         let allComponents = await componentRegistry.getAllComponents()
@@ -275,7 +275,7 @@ public actor ComponentIntrospectionEngine: ComponentIntrospecting {
     // MARK: Impact Analysis
     
     public func performImpactAnalysis(_ changes: [ProposedChange]) async -> SystemImpactAnalysis {
-        let token = await performanceMonitor.startOperation("impact_analysis", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("impact_analysis", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         var impacts: [ChangeImpact] = []
@@ -312,7 +312,7 @@ public actor ComponentIntrospectionEngine: ComponentIntrospecting {
     // MARK: Component Metrics
     
     public func getComponentMetrics() async -> ComponentMetricsReport {
-        let token = await performanceMonitor.startOperation("component_metrics", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("component_metrics", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         let allComponents = await componentRegistry.getAllComponents()
@@ -432,13 +432,13 @@ public actor ComponentIntrospectionEngine: ComponentIntrospecting {
             architecturalDNA: createCapabilityManagerDNA()
         ))
         
-        // Add intelligence components
+        // Add analysis components
         capabilities.append(IntrospectedComponent(
-            id: ComponentID("axiom-intelligence"),
-            name: "AxiomIntelligence",
-            category: .intelligence,
+            id: ComponentID("axiom-analyzer"),
+            name: "FrameworkAnalyzer",
+            category: .analysis,
             type: "Protocol",
-            architecturalDNA: createIntelligenceSystemDNA()
+            architecturalDNA: createAnalysisSystemDNA()
         ))
         
         return capabilities
@@ -944,13 +944,13 @@ public actor ComponentIntrospectionEngine: ComponentIntrospecting {
         )
     }
     
-    private func createIntelligenceSystemDNA() -> DefaultArchitecturalDNA {
+    private func createAnalysisSystemDNA() -> DefaultArchitecturalDNA {
         DefaultArchitecturalDNA(
-            componentID: ComponentID("axiom-intelligence"),
+            componentID: ComponentID("axiom-analyzer"),
             purpose: ComponentPurpose(
-                category: .intelligence,
-                role: "AI-Powered Architecture Analysis",
-                domain: "Intelligence Systems",
+                category: .analysis,
+                role: "Architecture Analysis and Validation",
+                domain: "Framework Analysis",
                 responsibilities: [
                     "Analyze architectural patterns",
                     "Predict potential issues",

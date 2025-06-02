@@ -15,8 +15,8 @@ public protocol AxiomApplication: ObservableObject {
     /// The capability manager for the entire application
     var capabilityManager: CapabilityManager { get }
     
-    /// The intelligence system for the application
-    var intelligence: AxiomIntelligence { get }
+    /// The analysis system for the application
+    var analyzer: FrameworkAnalyzer { get }
     
     /// The root context factory
     var contextFactory: ContextFactory { get }
@@ -51,8 +51,8 @@ public protocol AxiomApplicationConfiguration: Sendable {
     /// The available capabilities for the application
     var availableCapabilities: Set<Capability> { get }
     
-    /// The enabled intelligence features
-    var intelligenceFeatures: Set<IntelligenceFeature> { get }
+    /// The enabled analysis features
+    var analysisFeatures: Set<AnalysisFeature> { get }
     
     /// The capability validation configuration
     var capabilityValidationConfig: CapabilityValidationConfig { get }
@@ -70,20 +70,20 @@ public protocol AxiomApplicationConfiguration: Sendable {
 public struct DevelopmentConfiguration: Sendable {
     public let enableDebugLogging: Bool
     public let enablePerformanceLogging: Bool
-    public let enableIntelligenceDebugging: Bool
+    public let enableAnalysisDebugging: Bool
     public let enableArchitecturalValidation: Bool
     public let enableConstraintChecking: Bool
     
     public init(
         enableDebugLogging: Bool = false,
         enablePerformanceLogging: Bool = false,
-        enableIntelligenceDebugging: Bool = false,
+        enableAnalysisDebugging: Bool = false,
         enableArchitecturalValidation: Bool = true,
         enableConstraintChecking: Bool = true
     ) {
         self.enableDebugLogging = enableDebugLogging
         self.enablePerformanceLogging = enablePerformanceLogging
-        self.enableIntelligenceDebugging = enableIntelligenceDebugging
+        self.enableAnalysisDebugging = enableAnalysisDebugging
         self.enableArchitecturalValidation = enableArchitecturalValidation
         self.enableConstraintChecking = enableConstraintChecking
     }
@@ -93,7 +93,7 @@ public struct DevelopmentConfiguration: Sendable {
         DevelopmentConfiguration(
             enableDebugLogging: false,
             enablePerformanceLogging: false,
-            enableIntelligenceDebugging: false,
+            enableAnalysisDebugging: false,
             enableArchitecturalValidation: true,
             enableConstraintChecking: true
         )
@@ -104,7 +104,7 @@ public struct DevelopmentConfiguration: Sendable {
         DevelopmentConfiguration(
             enableDebugLogging: true,
             enablePerformanceLogging: true,
-            enableIntelligenceDebugging: true,
+            enableAnalysisDebugging: true,
             enableArchitecturalValidation: true,
             enableConstraintChecking: true
         )
@@ -121,20 +121,20 @@ public struct DevelopmentConfiguration: Sendable {
 /// Default implementation of AxiomApplicationConfiguration
 public struct DefaultAxiomApplicationConfiguration: AxiomApplicationConfiguration {
     public let availableCapabilities: Set<Capability>
-    public let intelligenceFeatures: Set<IntelligenceFeature>
+    public let analysisFeatures: Set<AnalysisFeature>
     public let capabilityValidationConfig: CapabilityValidationConfig
     public let performanceConfig: PerformanceConfiguration
     public let developmentConfig: DevelopmentConfiguration
     
     public init(
         availableCapabilities: Set<Capability> = Set(Capability.allCases),
-        intelligenceFeatures: Set<IntelligenceFeature> = [.componentRegistry, .performanceMonitoring],
+        analysisFeatures: Set<AnalysisFeature> = [.componentRegistry, .performanceMonitoring],
         capabilityValidationConfig: CapabilityValidationConfig = .default,
         performanceConfig: PerformanceConfiguration = PerformanceConfiguration(),
         developmentConfig: DevelopmentConfiguration = .default
     ) {
         self.availableCapabilities = availableCapabilities
-        self.intelligenceFeatures = intelligenceFeatures
+        self.analysisFeatures = analysisFeatures
         self.capabilityValidationConfig = capabilityValidationConfig
         self.performanceConfig = performanceConfig
         self.developmentConfig = developmentConfig
@@ -143,7 +143,7 @@ public struct DefaultAxiomApplicationConfiguration: AxiomApplicationConfiguratio
     /// Standard production configuration
     public static var production: DefaultAxiomApplicationConfiguration {
         DefaultAxiomApplicationConfiguration(
-            intelligenceFeatures: [.componentRegistry, .performanceMonitoring, .capabilityValidation],
+            analysisFeatures: [.componentRegistry, .performanceMonitoring, .capabilityValidation],
             performanceConfig: PerformanceConfiguration(samplingRate: 0.1, enableAlerts: true),
             developmentConfig: .production
         )
@@ -152,7 +152,7 @@ public struct DefaultAxiomApplicationConfiguration: AxiomApplicationConfiguratio
     /// Development configuration with enhanced debugging
     public static var development: DefaultAxiomApplicationConfiguration {
         DefaultAxiomApplicationConfiguration(
-            intelligenceFeatures: Set(IntelligenceFeature.allCases),
+            analysisFeatures: Set(AnalysisFeature.allCases),
             performanceConfig: PerformanceConfiguration(),
             developmentConfig: .development
         )
@@ -167,7 +167,7 @@ public protocol ContextFactory: Sendable {
     func createContext<T: AxiomContext>(
         _ contextType: T.Type,
         capabilityManager: CapabilityManager,
-        intelligence: AxiomIntelligence
+        analyzer: FrameworkAnalyzer
     ) async throws -> T
     
     /// Configures a context with cross-cutting concerns
@@ -241,7 +241,7 @@ public actor DefaultContextFactory: ContextFactory {
     public func createContext<T: AxiomContext>(
         _ contextType: T.Type,
         capabilityManager: CapabilityManager,
-        intelligence: AxiomIntelligence
+        analyzer: FrameworkAnalyzer
     ) async throws -> T {
         // For this basic implementation, we'll create a simplified context
         // In a full implementation, this would do sophisticated dependency injection
@@ -276,7 +276,7 @@ public class DefaultAxiomApplication<AppConfig: AxiomApplicationConfiguration, R
     
     public let configuration: AppConfiguration
     public let capabilityManager: CapabilityManager
-    public let intelligence: AxiomIntelligence
+    public let analyzer: FrameworkAnalyzer
     public let contextFactory: ContextFactory
     
     private let lifecycleManager: ApplicationLifecycleManager
@@ -293,8 +293,8 @@ public class DefaultAxiomApplication<AppConfig: AxiomApplicationConfiguration, R
         self.capabilityManager = CapabilityManager(config: configuration.capabilityValidationConfig)
         await self.capabilityManager.configure(availableCapabilities: configuration.availableCapabilities)
         
-        // Initialize intelligence system with configuration
-        self.intelligence = await GlobalIntelligenceManager.shared.getIntelligence()
+        // Initialize analysis system with configuration
+        self.analyzer = await GlobalFrameworkAnalyzer.shared.getAnalyzer()
         
         // Initialize lifecycle and performance monitoring
         self.lifecycleManager = ApplicationLifecycleManager()
@@ -310,8 +310,8 @@ public class DefaultAxiomApplication<AppConfig: AxiomApplicationConfiguration, R
             // Initialize capability manager
             try await capabilityManager.initialize()
             
-            // Initialize intelligence system
-            try await GlobalIntelligenceManager.shared.initialize()
+            // Initialize analysis system
+            try await GlobalFrameworkAnalyzer.shared.initialize()
             
             // Initialize performance monitoring
             await performanceMonitor.start()
@@ -327,7 +327,7 @@ public class DefaultAxiomApplication<AppConfig: AxiomApplicationConfiguration, R
             currentState = .running
             
             // Record successful launch for intelligence
-            await GlobalIntelligenceManager.shared.recordApplicationEvent(ApplicationEvent(type: .stateAccess, metadata: ["event": "launched"]))
+            await GlobalFrameworkAnalyzer.shared.recordApplicationEvent(ApplicationEvent(type: .stateAccess, metadata: ["event": "launched"]))
             
         } catch {
             currentState = .error
@@ -343,9 +343,9 @@ public class DefaultAxiomApplication<AppConfig: AxiomApplicationConfiguration, R
         await performanceMonitor.suspendNonCriticalMonitoring()
         
         // Save critical state
-        await GlobalIntelligenceManager.shared.saveState()
+        await GlobalFrameworkAnalyzer.shared.saveState()
         
-        await GlobalIntelligenceManager.shared.recordApplicationEvent(ApplicationEvent(type: .stateUpdate, metadata: ["event": "backgrounded"]))
+        await GlobalFrameworkAnalyzer.shared.recordApplicationEvent(ApplicationEvent(type: .stateUpdate, metadata: ["event": "backgrounded"]))
     }
     
     public func onForeground() async {
@@ -357,17 +357,17 @@ public class DefaultAxiomApplication<AppConfig: AxiomApplicationConfiguration, R
         // Refresh capabilities if needed
         await capabilityManager.refreshCapabilities()
         
-        await GlobalIntelligenceManager.shared.recordApplicationEvent(ApplicationEvent(type: .stateUpdate, metadata: ["event": "foregrounded"]))
+        await GlobalFrameworkAnalyzer.shared.recordApplicationEvent(ApplicationEvent(type: .stateUpdate, metadata: ["event": "foregrounded"]))
     }
     
     public func onTerminate() async {
         currentState = .terminating
         
         // Graceful shutdown sequence
-        await GlobalIntelligenceManager.shared.saveState()
+        await GlobalFrameworkAnalyzer.shared.saveState()
         await performanceMonitor.finalizeMetrics()
         await capabilityManager.shutdown()
-        await GlobalIntelligenceManager.shared.shutdown()
+        await GlobalFrameworkAnalyzer.shared.shutdown()
         
         currentState = .terminated
     }
@@ -382,7 +382,7 @@ public class DefaultAxiomApplication<AppConfig: AxiomApplicationConfiguration, R
         let context = try await contextFactory.createContext(
             RootContext.self,
             capabilityManager: capabilityManager,
-            intelligence: intelligence
+            analyzer: analyzer
         )
         
         await manageContext(context)
@@ -391,8 +391,8 @@ public class DefaultAxiomApplication<AppConfig: AxiomApplicationConfiguration, R
     }
     
     public func manageContext<T: AxiomContext>(_ context: T) async {
-        // Register context with intelligence system
-        await GlobalIntelligenceManager.shared.registerComponent(context)
+        // Register context with analysis system
+        await GlobalFrameworkAnalyzer.shared.registerComponent(context)
         
         // Set up performance monitoring for context
         await performanceMonitor.monitorContext(context)
@@ -408,8 +408,8 @@ public class DefaultAxiomApplication<AppConfig: AxiomApplicationConfiguration, R
     private func handleContextError<T: AxiomContext>(_ error: any AxiomError, from context: T) async {
         lastError = error
         
-        // Report to intelligence system for learning
-        await GlobalIntelligenceManager.shared.recordError(error, context: String(describing: T.self))
+        // Report to analysis system for learning
+        await GlobalFrameworkAnalyzer.shared.recordError(error, context: String(describing: T.self))
         
         // Attempt recovery if possible
         if !error.recoveryActions.isEmpty {
@@ -533,16 +533,16 @@ extension Set where Element == Capability {
     }
 }
 
-extension Set where Element == IntelligenceFeature {
-    public static var foundation: Set<IntelligenceFeature> {
+extension Set where Element == AnalysisFeature {
+    public static var foundation: Set<AnalysisFeature> {
         [.componentRegistry, .performanceMonitoring]
     }
     
-    public static var production: Set<IntelligenceFeature> {
+    public static var production: Set<AnalysisFeature> {
         foundation.union([.capabilityValidation])
     }
     
-    public static var development: Set<IntelligenceFeature> {
-        Set(IntelligenceFeature.allCases)
+    public static var development: Set<AnalysisFeature> {
+        Set(AnalysisFeature.allCases)
     }
 }

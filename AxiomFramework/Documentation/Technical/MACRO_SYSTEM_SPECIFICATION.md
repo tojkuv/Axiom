@@ -12,7 +12,7 @@ The Axiom Macro System provides compile-time code generation to reduce boilerpla
 
 1. **Macro Infrastructure**: Foundation for macro composition and coordination
 2. **Core Macros**: @Client, @Context, @View for primary component generation
-3. **Advanced Macros**: @Capabilities, @ObservableState, @Intelligence for enhanced features
+3. **Advanced Macros**: @Capabilities, @ObservableState, @Analysis for enhanced features
 4. **Macro Composition**: Framework for combining multiple macros safely
 5. **Enhanced Diagnostics**: Context-aware validation and error reporting
 
@@ -39,7 +39,7 @@ enum MacroCapability {
     case generateBindings
     case generateObservability
     case generateCapabilityRegistration
-    case generateIntelligenceIntegration
+    case generateAnalysisIntegration
     case generatePerformanceMonitoring
     case generateErrorHandling
 }
@@ -189,10 +189,10 @@ class UserContext {
 @MainActor
 class UserContext: AxiomContext, ObservableObject {
     let client: UserClient
-    let intelligence: AxiomIntelligence
+    let analyzer: FrameworkAnalyzer
     let performanceMonitor: PerformanceMonitor
     
-    init(client: UserClient, intelligence: AxiomIntelligence, performanceMonitor: PerformanceMonitor) {
+    init(client: UserClient, analyzer: FrameworkAnalyzer, performanceMonitor: PerformanceMonitor) {
         self.client = client
         self.intelligence = intelligence
         self.performanceMonitor = performanceMonitor
@@ -356,16 +356,16 @@ extension UserState {
 }
 ```
 
-### @Intelligence Macro
+### @Analysis Macro
 
 Generates intelligence integration with feature configuration.
 
 ```swift
 @attached(member, names: arbitrary)
-public macro Intelligence(features: [String]) = #externalMacro(module: "AxiomMacros", type: "IntelligenceMacro")
+public macro Analysis(features: [String]) = #externalMacro(module: "AxiomMacros", type: "AnalysisMacro")
 
 // Usage
-@Intelligence(features: ["component_analysis", "pattern_detection", "performance_monitoring"])
+@Analysis(features: ["component_analysis", "pattern_detection", "performance_monitoring"])
 class ApplicationContext: AxiomContext {
     // Implementation
 }
@@ -378,7 +378,7 @@ extension ApplicationContext {
         "performance_monitoring"
     ]
     
-    func enableIntelligenceFeatures() {
+    func enableAnalysisFeatures() {
         for feature in intelligenceFeatures {
             intelligence.enableFeature(feature)
         }
@@ -386,14 +386,14 @@ extension ApplicationContext {
     
     func queryComponentAnalysis(_ query: String) async -> ComponentAnalysisResult {
         guard intelligenceFeatures.contains("component_analysis") else {
-            throw IntelligenceError.featureNotEnabled("component_analysis")
+            throw AnalysisError.featureNotEnabled("component_analysis")
         }
         return await intelligence.queryComponentAnalysis(query)
     }
     
     func queryPatternDetection(_ query: String) async -> PatternDetectionResult {
         guard intelligenceFeatures.contains("pattern_detection") else {
-            throw IntelligenceError.featureNotEnabled("pattern_detection")
+            throw AnalysisError.featureNotEnabled("pattern_detection")
         }
         return await intelligence.queryPatternDetection(query)
     }

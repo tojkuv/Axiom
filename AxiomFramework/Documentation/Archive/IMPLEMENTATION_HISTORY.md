@@ -129,14 +129,14 @@ actor UserClient: AxiomClient {
 - UI update latency: <16ms (60fps compatible)
 - Memory efficiency: Minimal overhead for binding layer
 
-#### Intelligence System Foundation
+#### Analysis System Foundation
 **Achievement**: Component analysis and framework intelligence
 - Component discovery and registration system
 - Performance monitoring and metrics collection
 - Architectural constraint validation
 - Development assistance capabilities
 
-**Intelligence Capabilities:**
+**Analysis Capabilities:**
 - Component registry with metadata tracking
 - Performance monitoring with statistical analysis
 - Constraint validation and violation detection
@@ -154,7 +154,7 @@ actor UserClient: AxiomClient {
 - Solution: Hybrid system with automatic optimization selection
 - Result: Best of both worlds - fast known capabilities, flexible unknown ones
 
-**Challenge: Intelligence System Scope**
+**Challenge: Analysis System Scope**
 - Problem: Avoiding AI theater while providing genuine value
 - Solution: Focus on concrete, measurable capabilities
 - Result: Honest capability representation with real developer benefits
@@ -170,7 +170,7 @@ actor UserClient: AxiomClient {
 #### Macro System Implementation
 **Achievement**: Comprehensive code generation with composition framework
 - `@Client`, `@Context`, `@View` macros for basic code generation
-- `@Capabilities`, `@ObservableState`, `@Intelligence` for advanced features
+- `@Capabilities`, `@ObservableState`, `@Analysis` for advanced features
 - Macro composition framework with conflict resolution
 - Enhanced diagnostic system with context-aware validation
 
@@ -195,7 +195,7 @@ struct UserState {
 - Performance monitoring dashboard with real-time metrics
 
 **Performance Achievements:**
-- Intelligence queries: <100ms (target achieved)
+- Analysis queries: <100ms (target achieved)
 - State access: 0.000490ms average (87.9x improvement vs TCA)
 - Memory usage: 12MB baseline (20% under 15MB target)
 - Parallel processing: 8x concurrent operations
@@ -290,19 +290,19 @@ struct UserState {
 **Baseline Establishment:**
 - State access: ~20ms (unoptimized)
 - Memory usage: ~40MB baseline
-- Intelligence queries: ~500ms
+- Analysis queries: ~500ms
 
 #### Optimization Phase 1 (Core Features)
 **First Optimization Cycle:**
 - State access: ~5ms (4x improvement)
 - Memory usage: ~25MB baseline (37% improvement)
-- Intelligence queries: ~200ms (2.5x improvement)
+- Analysis queries: ~200ms (2.5x improvement)
 
 #### Optimization Phase 2 (Advanced Capabilities)
 **Final Optimization Cycle:**
 - State access: 0.000490ms (87.9x vs TCA, 40,000x vs initial)
 - Memory usage: 12MB baseline (20% under target)
-- Intelligence queries: <100ms (target achieved)
+- Analysis queries: <100ms (target achieved)
 
 ### Performance Optimization Techniques
 

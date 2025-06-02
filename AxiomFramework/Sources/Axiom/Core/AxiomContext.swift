@@ -13,8 +13,8 @@ public protocol AxiomContext: ObservableObject {
     /// The clients managed by this context
     var clients: Clients { get }
     
-    /// The intelligence system for this context
-    var intelligence: AxiomIntelligence { get }
+    /// The analysis system for this context
+    var analyzer: FrameworkAnalyzer { get }
     
     // MARK: Resource Access
     
@@ -60,6 +60,11 @@ public class DefaultContextState: ObservableObject {
 // MARK: - AxiomContext Extensions
 
 extension AxiomContext {
+    /// Backward compatibility property for intelligence -> analyzer migration
+    public var intelligence: AxiomIntelligence {
+        analyzer
+    }
+    
     /// Configures error handling for the context
     public func configureErrorHandling(_ handler: @escaping (any AxiomError) async -> Void) async {
         // Configure automatic error handling

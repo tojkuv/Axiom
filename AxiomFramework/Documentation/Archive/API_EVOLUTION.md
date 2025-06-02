@@ -36,7 +36,7 @@ protocol AxiomContext: ObservableObject {
     associatedtype Client: AxiomClient
     
     var client: Client { get }
-    var intelligence: AxiomIntelligence { get }
+    var analyzer: FrameworkAnalyzer { get }
     var performanceMonitor: PerformanceMonitor { get }
     
     func bind<T>(_ keyPath: KeyPath<Client.State, T>) -> Binding<T>
@@ -108,10 +108,10 @@ protocol Capability {
 }
 ```
 
-**Intelligence System API:**
+**Analysis System API:**
 ```swift
 // v1.1.0: Framework intelligence and analysis
-protocol AxiomIntelligence {
+protocol FrameworkAnalyzer {
     func registerComponent<T>(_ component: T)
     func discoverComponents() async -> [Component]
     func analyzePerformance() async -> PerformanceAnalysis
@@ -125,7 +125,7 @@ protocol AxiomIntelligence {
 1. No breaking changes - all v1.0.0 code continues to work
 2. Optional adoption of new state observation APIs
 3. Enhanced capability validation can be adopted incrementally
-4. Intelligence system integration is optional
+4. Analysis system integration is optional
 
 **New Features Adoption:**
 ```swift
@@ -177,7 +177,7 @@ public macro Capabilities(_ capabilities: [CapabilityType]) = #externalMacro(mod
 public macro ObservableState() = #externalMacro(module: "AxiomMacros", type: "ObservableStateMacro")
 
 @attached(member, names: arbitrary)
-public macro Intelligence(features: [String]) = #externalMacro(module: "AxiomMacros", type: "IntelligenceMacro")
+public macro Analysis(features: [String]) = #externalMacro(module: "AxiomMacros", type: "AnalysisMacro")
 ```
 
 **Macro Composition Framework:**
@@ -281,7 +281,7 @@ struct UserState {
 
 **Planned Evolution Areas:**
 - Performance monitoring APIs may be enhanced in future versions
-- Intelligence system APIs may evolve based on usage patterns
+- Analysis system APIs may evolve based on usage patterns
 - Macro system may expand with new composition capabilities
 
 **Stability Commitment:**
@@ -498,7 +498,7 @@ The macro system represents a major evolution in the framework's developer exper
 **Advanced Macros:**
 - `@Capabilities` - Compile-time capability declaration
 - `@ObservableState` - State change notification generation
-- `@Intelligence` - Intelligence feature configuration
+- `@Analysis` - Analysis feature configuration
 
 ### Macro Composition Framework
 
@@ -585,14 +585,14 @@ protocol AxiomCacheManager {
 }
 ```
 
-#### Version 1.4.0 - Advanced Intelligence (Planned)
+#### Version 1.4.0 - Advanced Analysis (Planned)
 **Target**: Enhanced framework intelligence and analysis
 **Timeline**: Future minor release
 
 **Planned Additions:**
 ```swift
 // Planned v1.4.0: Advanced intelligence capabilities
-protocol AxiomAdvancedIntelligence {
+protocol AxiomAdvancedAnalysis {
     func analyzeCodePatterns() async -> [PatternAnalysis]
     func suggestOptimizations() async -> [OptimizationSuggestion]
     func detectArchitecturalAntipatterns() async -> [AntipatternDetection]
@@ -642,7 +642,7 @@ protocol AxiomAdvancedIntelligence {
 
 #### Future Principles (v2.x and beyond)
 1. **Cross-Platform**: Consistent APIs across iOS, macOS, and other platforms
-2. **Intelligence**: AI-assisted development and optimization capabilities
+2. **Analysis**: Component analysis and optimization capabilities
 3. **Automation**: Reduced boilerplate through advanced code generation
 4. **Observability**: Comprehensive monitoring and debugging capabilities
 5. **Evolution**: APIs designed for graceful evolution and extension

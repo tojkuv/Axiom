@@ -424,7 +424,7 @@ public enum PerformanceCategory: String, CaseIterable, Sendable {
     case transactionCommit = "transaction_commit"
     case transactionRollback = "transaction_rollback"
     case capabilityValidation = "capability_validation"
-    case intelligenceQuery = "intelligence_query"
+    case analysisQuery = "analysis_query"
     case patternDetection = "pattern_detection"
     case domainValidation = "domain_validation"
     case contextCreation = "context_creation"
@@ -508,7 +508,7 @@ public struct PerformanceThresholds {
             maxMemoryUsage: 512 * 1024 // 512KB
         )
         
-        thresholds[.intelligenceQuery] = CategoryThreshold(
+        thresholds[.analysisQuery] = CategoryThreshold(
             maxDuration: 0.100, // 100ms (target from roadmap)
             p95Threshold: 0.075, // 75ms
             expectedThroughput: 10.0, // ops/sec
@@ -887,20 +887,22 @@ public struct PerformanceTrend: Sendable {
 
 /// AI-powered optimization insight
 public struct OptimizationInsight: Sendable {
-    public let type: OptimizationType
+    public let type: InsightType
     public let target: String
     public let confidence: Double
     public let description: String
     public let estimatedImpact: String
     
-    public enum OptimizationType: String, CaseIterable, Sendable {
+    public enum InsightType: String, CaseIterable, Sendable {
         case cachingOpportunity = "caching"
         case thresholdAdjustment = "threshold"
         case resourceAllocation = "resource"
+        case memoryOptimization = "memory"
+        case algorithmOptimization = "algorithm"
     }
     
     public init(
-        type: OptimizationType,
+        type: InsightType,
         target: String,
         confidence: Double,
         description: String,
@@ -929,6 +931,8 @@ public struct PerformanceOptimization: Sendable {
         case algorithmic = "algorithmic"
         case resource = "resource"
         case architectural = "architectural"
+        case memory = "memory"
+        case concurrency = "concurrency"
     }
     
     public enum OptimizationPriority: Int, CaseIterable, Sendable {
@@ -1247,6 +1251,10 @@ extension PerformanceMonitor {
                 await applyThresholdOptimization(insight)
             case .resourceAllocation:
                 await applyResourceOptimization(insight)
+            case .memoryOptimization:
+                await applyMemoryOptimization(insight)
+            case .algorithmOptimization:
+                await applyAlgorithmOptimization(insight)
             }
         }
         
@@ -1300,6 +1308,18 @@ extension PerformanceMonitor {
     private func applyResourceOptimization(_ insight: OptimizationInsight) async {
         print("📊 Self-Optimization: Optimizing resource allocation for \(insight.target)")
         // In a real implementation, this would adjust resource allocation
+    }
+    
+    /// Applies memory optimization
+    private func applyMemoryOptimization(_ insight: OptimizationInsight) async {
+        print("💾 Self-Optimization: Optimizing memory usage for \(insight.target)")
+        // In a real implementation, this would optimize memory usage
+    }
+    
+    /// Applies algorithm optimization
+    private func applyAlgorithmOptimization(_ insight: OptimizationInsight) async {
+        print("🧮 Self-Optimization: Optimizing algorithms for \(insight.target)")
+        // In a real implementation, this would optimize algorithms
     }
     
     /// Calculates current average latency across all categories

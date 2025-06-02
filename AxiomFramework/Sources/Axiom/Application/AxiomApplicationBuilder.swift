@@ -56,19 +56,19 @@ public final class AxiomApplicationBuilder: ObservableObject {
         }
     }
     
-    /// Create a context with automatic client and intelligence setup
+    /// Create a context with automatic client and analyzer setup
     public func createContext<T: AxiomContext>(
-        _ factory: @escaping (AxiomIntelligence, CapabilityManager) async throws -> T
+        _ factory: @escaping (FrameworkAnalyzer, CapabilityManager) async throws -> T
     ) async throws -> T {
         
         guard isInitialized else {
             throw ApplicationBuilderError.notInitialized
         }
         
-        let intelligence = await GlobalIntelligenceManager.shared.getIntelligence()
+        let analyzer = await GlobalFrameworkAnalyzer.shared.getAnalyzer()
         let capabilityManager = await GlobalCapabilityManager.shared.getManager()
         
-        return try await factory(intelligence, capabilityManager)
+        return try await factory(analyzer, capabilityManager)
     }
 }
 
@@ -176,7 +176,7 @@ private struct ApplicationLoadingView: View {
                 .font(.largeTitle)
                 .fontWeight(.bold)
             
-            Text("Initializing Intelligence...")
+            Text("Initializing Framework...")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             
@@ -229,56 +229,56 @@ extension AxiomApplicationBuilder {
     /// This demonstrates the simplified pattern for replacing complex manual initialization
     public func createCounterContext<ClientType: AxiomClient, StateType: Sendable>(
         clientFactory: @escaping (CapabilityManager) async throws -> ClientType
-    ) async throws -> (client: ClientType, intelligence: AxiomIntelligence) where ClientType.State == StateType {
+    ) async throws -> (client: ClientType, analyzer: FrameworkAnalyzer) where ClientType.State == StateType {
         
         guard isInitialized else {
             throw ApplicationBuilderError.notInitialized
         }
         
-        let intelligence = await GlobalIntelligenceManager.shared.getIntelligence()
+        let analyzer = await GlobalFrameworkAnalyzer.shared.getAnalyzer()
         let capabilityManager = await GlobalCapabilityManager.shared.getManager()
         
         let client = try await clientFactory(capabilityManager)
         try await client.initialize()
         
-        return (client: client, intelligence: intelligence)
+        return (client: client, analyzer: analyzer)
     }
     
     /// Create a complete user context with automatic setup
     /// Supports sophisticated user domain initialization
     public func createUserContext<ClientType: AxiomClient, StateType: Sendable>(
         clientFactory: @escaping (CapabilityManager) async throws -> ClientType
-    ) async throws -> (client: ClientType, intelligence: AxiomIntelligence) where ClientType.State == StateType {
+    ) async throws -> (client: ClientType, analyzer: FrameworkAnalyzer) where ClientType.State == StateType {
         
         guard isInitialized else {
             throw ApplicationBuilderError.notInitialized
         }
         
-        let intelligence = await GlobalIntelligenceManager.shared.getIntelligence()
+        let analyzer = await GlobalFrameworkAnalyzer.shared.getAnalyzer()
         let capabilityManager = await GlobalCapabilityManager.shared.getManager()
         
         let client = try await clientFactory(capabilityManager)
         try await client.initialize()
         
-        return (client: client, intelligence: intelligence)
+        return (client: client, analyzer: analyzer)
     }
     
     /// Create a complete data context with automatic setup
     /// Supports sophisticated data domain initialization
     public func createDataContext<ClientType: AxiomClient, StateType: Sendable>(
         clientFactory: @escaping (CapabilityManager) async throws -> ClientType
-    ) async throws -> (client: ClientType, intelligence: AxiomIntelligence) where ClientType.State == StateType {
+    ) async throws -> (client: ClientType, analyzer: FrameworkAnalyzer) where ClientType.State == StateType {
         
         guard isInitialized else {
             throw ApplicationBuilderError.notInitialized
         }
         
-        let intelligence = await GlobalIntelligenceManager.shared.getIntelligence()
+        let analyzer = await GlobalFrameworkAnalyzer.shared.getAnalyzer()
         let capabilityManager = await GlobalCapabilityManager.shared.getManager()
         
         let client = try await clientFactory(capabilityManager)
         try await client.initialize()
         
-        return (client: client, intelligence: intelligence)
+        return (client: client, analyzer: analyzer)
     }
 }

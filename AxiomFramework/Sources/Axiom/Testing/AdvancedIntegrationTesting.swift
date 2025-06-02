@@ -173,8 +173,8 @@ public actor AdvancedIntegrationTestingEngine: AdvancedIntegrationTesting {
                 iterationCount: 2000
             ),
             MemoryLeakTest(
-                name: "Intelligence Query Memory Growth",
-                scenario: .intelligenceQueryMemory,
+                name: "Analysis Query Memory Growth",
+                scenario: .analysisQueryMemory,
                 iterationCount: 100
             ),
             MemoryLeakTest(
@@ -497,7 +497,7 @@ public enum MemoryLeakScenario: String, CaseIterable, Sendable {
     case observerReferenceCycles = "observer_reference_cycles"
     case contextLifecycleCycles = "context_lifecycle_cycles"
     case snapshotAccumulation = "snapshot_accumulation"
-    case intelligenceQueryMemory = "intelligence_query_memory"
+    case analysisQueryMemory = "analysis_query_memory"
     case performanceMonitorMemory = "performance_monitor_memory"
 }
 

@@ -244,17 +244,17 @@ actor UserClient: AxiomClient {
 @MainActor
 class UserContext: AxiomContext, ObservableObject {
     let client: UserClient
-    let intelligence: AxiomIntelligence
+    let analyzer: FrameworkAnalyzer
     let performanceMonitor: PerformanceMonitor
     
-    init(client: UserClient, intelligence: AxiomIntelligence, performanceMonitor: PerformanceMonitor) {
+    init(client: UserClient, analyzer: FrameworkAnalyzer, performanceMonitor: PerformanceMonitor) {
         self.client = client
-        self.intelligence = intelligence
+        self.analyzer = analyzer
         self.performanceMonitor = performanceMonitor
         
         // Register for component analysis
-        intelligence.registerComponent(self)
-        intelligence.startMonitoring(self)
+        analyzer.registerComponent(self)
+        analyzer.startMonitoring(self)
     }
     
     func bind<T>(_ keyPath: KeyPath<UserClient.State, T>) -> Binding<T> {
@@ -326,16 +326,16 @@ class UserContext {
 }
 ```
 
-### Intelligence Integration
+### Analysis Integration
 
 ```swift
-// Add intelligence features to your context
+// Add analysis features to your context
 @Context(client: UserClient)
-@Intelligence(features: ["component_analysis", "performance_monitoring"])
+@Analysis(features: ["component_analysis", "performance_monitoring"])
 class UserContext {
     func analyzeUserBehavior() async {
-        let patterns = await intelligence.detectPatterns()
-        let performance = await intelligence.collectPerformanceMetrics()
+        let patterns = await analyzer.detectPatterns()
+        let performance = await analyzer.collectPerformanceMetrics()
         
         // Use insights for optimization
         if performance.averageResponseTime > 100 {
@@ -606,9 +606,9 @@ class NavigationContext {
 
 - Review framework documentation in `Documentation/`
 - Check example implementations in test application
-- Validate architectural constraints through intelligence system
+- Validate architectural constraints through analysis system
 - Use performance monitoring for optimization insights
 
 ---
 
-**Basic Integration Guide** - Complete developer onboarding for iOS architectural framework with intelligent system integration capabilities
+**Basic Integration Guide** - Complete developer onboarding for iOS architectural framework with component analysis capabilities

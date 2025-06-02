@@ -30,7 +30,7 @@ Comprehensive technical documentation for framework architecture:
 - [API Design](Technical/API_DESIGN_SPECIFICATION.md) - Complete API specification
 - [Architectural Constraints](Technical/ARCHITECTURAL_CONSTRAINTS.md) - 8 architectural constraints
 - [Capability System](Technical/CAPABILITY_SYSTEM_SPECIFICATION.md) - Runtime validation system
-- [Intelligence System](Technical/INTELLIGENCE_SYSTEM_SPECIFICATION.md) - Component analysis capabilities
+- [Analysis System](Technical/ANALYSIS_SYSTEM_SPECIFICATION.md) - Component analysis capabilities
 - [Macro System](Technical/MACRO_SYSTEM_SPECIFICATION.md) - Code generation macros
 
 ## Implementation Guides
@@ -49,7 +49,7 @@ Complete API documentation and usage patterns:
 
 - [Core Protocols](Technical/API_DESIGN_SPECIFICATION.md#core-protocols) - AxiomClient, AxiomContext, AxiomView
 - [Capability System](Technical/API_DESIGN_SPECIFICATION.md#capability-system) - CapabilityManager, Capability
-- [Intelligence System](Technical/API_DESIGN_SPECIFICATION.md#intelligence-system) - AxiomIntelligence, ComponentIntrospection
+- [Analysis System](Technical/API_DESIGN_SPECIFICATION.md#analysis-system) - FrameworkAnalyzer, ComponentIntrospection
 - [Performance System](Technical/API_DESIGN_SPECIFICATION.md#performance-system) - PerformanceMonitor
 - [Macro System](Technical/API_DESIGN_SPECIFICATION.md#macro-system) - @Client, @Context, @View
 
@@ -83,7 +83,7 @@ The framework consists of these primary components:
 2. **AxiomContext**: Client orchestration and SwiftUI integration layer  
 3. **AxiomView**: 1:1 view-context relationships with reactive binding
 4. **CapabilityManager**: Runtime validation with compile-time optimization
-5. **AxiomIntelligence**: Component analysis and architectural introspection
+5. **FrameworkAnalyzer**: Component analysis and architectural introspection
 6. **PerformanceMonitor**: Integrated metrics collection and analysis
 
 ### 8 Architectural Constraints
@@ -119,4 +119,4 @@ Documentation improvements and additions are welcome. Please ensure:
 
 ---
 
-**Framework Documentation** - Technical specifications and implementation guides for iOS architectural framework with intelligent system analysis capabilities
+**Framework Documentation** - Technical specifications and implementation guides for iOS architectural framework with component analysis capabilities

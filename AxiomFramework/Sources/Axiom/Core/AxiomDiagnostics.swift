@@ -42,8 +42,8 @@ public actor AxiomDiagnostics {
             return await checkClientHealth()
         case .contextIntegrity:
             return await checkContextIntegrity()
-        case .intelligenceSystem:
-            return await checkIntelligenceSystem()
+        case .analysisSystem:
+            return await checkAnalysisSystem()
         case .performanceMetrics:
             return await checkPerformanceMetrics()
         case .errorRates:
@@ -143,15 +143,15 @@ public actor AxiomDiagnostics {
         )
     }
     
-    private func checkIntelligenceSystem() async -> DiagnosticCheck {
+    private func checkAnalysisSystem() async -> DiagnosticCheck {
         do {
-            let intelligence = await GlobalIntelligenceManager.shared.getIntelligence()
+            let analyzer = await GlobalFrameworkAnalyzer.shared.getAnalyzer()
             
             // Test with component registry access (genuine functionality)
-            let registry = await intelligence.getComponentRegistry()
+            let registry = await analyzer.getComponentRegistry()
             
             return DiagnosticCheck(
-                type: .intelligenceSystem,
+                type: .analysisSystem,
                 status: .passed,
                 message: "Component registry accessible",
                 details: [
@@ -162,7 +162,7 @@ public actor AxiomDiagnostics {
             )
         } catch {
             return DiagnosticCheck(
-                type: .intelligenceSystem,
+                type: .analysisSystem,
                 status: .failed,
                 message: "Intelligence system error: \(error.localizedDescription)",
                 details: ["Error": error.localizedDescription],
@@ -353,7 +353,7 @@ public enum DiagnosticCheckType: String, CaseIterable, Sendable {
     case capabilitySystem = "capability_system"
     case clientHealth = "client_health"
     case contextIntegrity = "context_integrity"
-    case intelligenceSystem = "intelligence_system"
+    case analysisSystem = "analysis_system"
     case performanceMetrics = "performance_metrics"
     case errorRates = "error_rates"
     case memoryUsage = "memory_usage"
@@ -364,7 +364,7 @@ public enum DiagnosticCheckType: String, CaseIterable, Sendable {
         case .capabilitySystem: return "Capability System"
         case .clientHealth: return "Client Health"
         case .contextIntegrity: return "Context Integrity"
-        case .intelligenceSystem: return "Intelligence System"
+        case .analysisSystem: return "Intelligence System"
         case .performanceMetrics: return "Performance Metrics"
         case .errorRates: return "Error Rates"
         case .memoryUsage: return "Memory Usage"

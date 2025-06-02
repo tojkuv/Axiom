@@ -224,7 +224,7 @@ public actor IncrementalAnalysisEngine {
         
         let processingTime = Date().timeIntervalSince(startTime)
         
-        let metrics = AnalysisMetrics(
+        let metrics = AlgorithmAnalysisMetrics(
             processingTime: processingTime,
             componentsAnalyzed: changedComponents.count,
             patternsDetected: max(1, changedComponents.count / 2)
@@ -255,7 +255,7 @@ public actor IncrementalAnalysisEngine {
         
         let processingTime = Date().timeIntervalSince(startTime)
         
-        let metrics = AnalysisMetrics(
+        let metrics = AlgorithmAnalysisMetrics(
             processingTime: processingTime,
             componentsAnalyzed: allComponents.count,
             patternsDetected: allComponents.count * 2
@@ -320,9 +320,9 @@ public struct AnalysisBaseline {
 public struct IncrementalAnalysisResult {
     public let analyzedComponents: [ComponentID]
     public let isIncremental: Bool
-    public let analysisMetrics: AnalysisMetrics
+    public let analysisMetrics: AlgorithmAnalysisMetrics
     
-    public init(analyzedComponents: [ComponentID], isIncremental: Bool, analysisMetrics: AnalysisMetrics) {
+    public init(analyzedComponents: [ComponentID], isIncremental: Bool, analysisMetrics: AlgorithmAnalysisMetrics) {
         self.analyzedComponents = analyzedComponents
         self.isIncremental = isIncremental
         self.analysisMetrics = analysisMetrics
@@ -359,7 +359,7 @@ public struct ComponentState {
     }
 }
 
-public struct AnalysisMetrics {
+public struct AlgorithmAnalysisMetrics {
     public let processingTime: TimeInterval
     public let componentsAnalyzed: Int
     public let patternsDetected: Int
@@ -373,12 +373,12 @@ public struct AnalysisMetrics {
 
 // MARK: - Intelligence Extensions for Memory Optimization
 
-extension DefaultAxiomIntelligence {
+extension DefaultFrameworkAnalyzer {
     
     /// Optimizes memory usage by clearing caches and performing garbage collection
     public func optimizeMemoryUsage() async throws {
         // Clear expired cache items (simulated - would need internal cache access)
-        // In a real implementation, this would be part of the intelligence system's public API
+        // In a real implementation, this would be part of the analysis system's public API
         
         // Simulate memory optimization
         try await Task.sleep(nanoseconds: 10_000_000) // 10ms optimization

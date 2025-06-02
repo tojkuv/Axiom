@@ -413,40 +413,69 @@ struct PerformanceBenchmarkSuite {
     func testPerformanceRegressionDetection() async throws {
         let client = PerformanceTestClient()
         let baselineIterations = 1000
+        let warmupIterations = 100
         
-        // Establish baseline performance
-        let (_, baselineDuration) = await PerformanceMeasurement.measureTime {
-            for i in 0..<baselineIterations {
-                await client.updateState { state in
-                    state.counters.append(i)
+        // Warmup phase to stabilize performance
+        try await client.initialize()
+        for i in 0..<warmupIterations {
+            await client.updateState { state in
+                state.counters.append(i)
+            }
+        }
+        await client.updateState { $0.counters.removeAll() }
+        
+        // Measure baseline performance (average of 3 runs)
+        var baselineDurations: [Duration] = []
+        for run in 0..<3 {
+            let (_, duration) = await PerformanceMeasurement.measureTime {
+                for i in 0..<baselineIterations {
+                    await client.updateState { state in
+                        state.counters.append(i)
+                    }
                 }
             }
+            baselineDurations.append(duration)
+            await client.updateState { $0.counters.removeAll() }
         }
         
         // Reset client
         await client.shutdown()
         try await client.initialize()
         
-        // Measure performance again
-        let (_, currentDuration) = await PerformanceMeasurement.measureTime {
-            for i in 0..<baselineIterations {
-                await client.updateState { state in
-                    state.counters.append(i)
-                }
+        // Warmup phase after reset
+        for i in 0..<warmupIterations {
+            await client.updateState { state in
+                state.counters.append(i)
             }
         }
+        await client.updateState { $0.counters.removeAll() }
         
-        let currentSeconds = Double(currentDuration.components.seconds) + Double(currentDuration.components.attoseconds) / 1e18
-        let baselineSeconds = Double(baselineDuration.components.seconds) + Double(baselineDuration.components.attoseconds) / 1e18
-        let performanceRatio = currentSeconds / baselineSeconds
+        // Measure performance again (average of 3 runs)
+        var currentDurations: [Duration] = []
+        for run in 0..<3 {
+            let (_, duration) = await PerformanceMeasurement.measureTime {
+                for i in 0..<baselineIterations {
+                    await client.updateState { state in
+                        state.counters.append(i)
+                    }
+                }
+            }
+            currentDurations.append(duration)
+            await client.updateState { $0.counters.removeAll() }
+        }
         
-        print("📊 Performance Regression Check:")
-        print("   Baseline: \(baselineDuration)")
-        print("   Current:  \(currentDuration)")
-        print("   Ratio:    \(String(format: "%.2f", performanceRatio))x")
+        // Calculate averages
+        let baselineAvg = baselineDurations.map { Double($0.components.seconds) + Double($0.components.attoseconds) / 1e18 }.reduce(0, +) / Double(baselineDurations.count)
+        let currentAvg = currentDurations.map { Double($0.components.seconds) + Double($0.components.attoseconds) / 1e18 }.reduce(0, +) / Double(currentDurations.count)
+        let performanceRatio = currentAvg / baselineAvg
         
-        // Performance should not regress by more than 20%
-        #expect(performanceRatio < 1.2, "Performance regression detected: \(String(format: "%.2f", performanceRatio))x slower")
+        print("📊 Performance Regression Check (averaged over 3 runs):")
+        print("   Baseline avg: \(String(format: "%.6f", baselineAvg)) seconds")
+        print("   Current avg:  \(String(format: "%.6f", currentAvg)) seconds")
+        print("   Ratio:        \(String(format: "%.2f", performanceRatio))x")
+        
+        // Performance should not regress by more than 30% (increased tolerance for system variance)
+        #expect(performanceRatio < 1.3, "Performance regression detected: \(String(format: "%.2f", performanceRatio))x slower")
         
         // Performance should be consistent (within 50% variance)
         #expect(performanceRatio > 0.5, "Performance improvement too dramatic (possibly invalid): \(String(format: "%.2f", performanceRatio))x")

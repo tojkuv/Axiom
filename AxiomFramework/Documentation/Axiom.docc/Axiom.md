@@ -35,7 +35,7 @@ Framework core protocols and classes for building Axiom applications.
 - ``AxiomContext`` 
 - ``AxiomView``
 - ``CapabilityManager``
-- ``AxiomIntelligence``
+- ``FrameworkAnalyzer``
 - ``PerformanceMonitor``
 
 ### Architecture
@@ -71,14 +71,12 @@ Advanced capabilities for complex application requirements.
 Performance monitoring and optimization capabilities.
 
 - ``PerformanceMonitor``
-- ``ContinuousPerformanceValidator``
 - ``DevicePerformanceProfiler``
-- ``PredictiveBenchmarkingEngine``
 
 ### Testing
 
 Testing utilities and validation framework.
 
-- ``TestingIntelligence``
+- ``TestingAnalyzer``
 - ``AdvancedIntegrationTesting``
 - ``RealWorldTestingEngine``

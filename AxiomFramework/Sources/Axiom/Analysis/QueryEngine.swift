@@ -78,7 +78,7 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
     // MARK: Query Processing
     
     public func processQuery(_ parsedQuery: ParsedQuery) async throws -> QueryResponse {
-        let token = await performanceMonitor.startOperation("process_query", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("process_query", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         // Check cache first if enabled
@@ -121,7 +121,7 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
     }
     
     public func explainComponent(_ componentID: ComponentID) async throws -> ComponentExplanation {
-        let token = await performanceMonitor.startOperation("explain_component", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("explain_component", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         // Get component analysis
@@ -146,7 +146,7 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
     }
     
     public func analyzeImpact(of change: String) async throws -> ImpactAnalysis {
-        let token = await performanceMonitor.startOperation("analyze_impact", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("analyze_impact", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         // Parse the change description to extract details
@@ -180,7 +180,7 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
     }
     
     public func generateComplexityReport(for domain: String?) async throws -> ComplexityReport {
-        let token = await performanceMonitor.startOperation("complexity_report", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("complexity_report", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         // Get component metrics
@@ -217,7 +217,7 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
     }
     
     public func generateRecommendations(for context: RecommendationContext) async throws -> [ArchitecturalRecommendation] {
-        let token = await performanceMonitor.startOperation("generate_recommendations", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("generate_recommendations", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         var recommendations: [ArchitecturalRecommendation] = []
@@ -258,7 +258,7 @@ public actor ArchitecturalQueryEngine: QueryProcessing {
     }
     
     public func getSystemOverview() async throws -> SystemOverview {
-        let token = await performanceMonitor.startOperation("system_overview", category: .intelligenceQuery)
+        let token = await performanceMonitor.startOperation("system_overview", category: .analysisQuery)
         defer { Task { await performanceMonitor.endOperation(token) } }
         
         // Gather comprehensive system information

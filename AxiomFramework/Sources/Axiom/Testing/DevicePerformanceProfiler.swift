@@ -1,5 +1,25 @@
 import Foundation
 
+// Import optimization priority type from PerformanceMonitor
+public typealias OptimizationPriority = PerformanceOptimization.OptimizationPriority
+
+// Missing type definition
+public struct PerformanceAnomaly: Sendable {
+    public let timestamp: Date
+    public let metric: String
+    public let expectedValue: Double
+    public let actualValue: Double
+    public let severity: AnomalySeverity
+    public let description: String
+    
+    public enum AnomalySeverity: String, CaseIterable, Sendable {
+        case low = "low"
+        case medium = "medium"
+        case high = "high"
+        case critical = "critical"
+    }
+}
+
 // MARK: - Device Performance Profiling System
 
 /// Multi-device performance profiling actor for cross-device optimization and energy efficiency validation
@@ -405,6 +425,46 @@ public actor DevicePerformanceProfiler {
                     priority: .high,
                     requirements: ["Response time monitoring", "Async optimization"]
                 ))
+            case .ioBottleneck, .io:
+                optimizations.append(DeviceSpecificOptimization(
+                    type: .ioOptimization,
+                    device: device,
+                    description: "I/O optimization for \(device.rawValue)",
+                    implementation: await generateStorageOptimizationImplementation(device, capabilities),
+                    estimatedImpact: 0.2,
+                    priority: .medium,
+                    requirements: ["I/O profiling", "Async I/O"]
+                ))
+            case .thermal:
+                optimizations.append(DeviceSpecificOptimization(
+                    type: .cpuOptimization,
+                    device: device,
+                    description: "Thermal throttling mitigation for \(device.rawValue)",
+                    implementation: await generateCPUOptimizationImplementation(device, capabilities),
+                    estimatedImpact: 0.15,
+                    priority: .medium,
+                    requirements: ["Thermal monitoring", "CPU frequency scaling"]
+                ))
+            case .concurrencyBottleneck, .concurrency:
+                optimizations.append(DeviceSpecificOptimization(
+                    type: .concurrencyOptimization,
+                    device: device,
+                    description: "Concurrency optimization for \(device.rawValue)",
+                    implementation: await generateConcurrencyOptimizationImplementation(device, capabilities),
+                    estimatedImpact: 0.3,
+                    priority: .high,
+                    requirements: ["Thread profiling", "Actor optimization"]
+                ))
+            case .memoryLeakSuspicion:
+                optimizations.append(DeviceSpecificOptimization(
+                    type: .memoryOptimization,
+                    device: device,
+                    description: "Memory leak mitigation for \(device.rawValue)",
+                    implementation: await generateMemoryOptimizationImplementation(device, capabilities),
+                    estimatedImpact: 0.4,
+                    priority: .critical,
+                    requirements: ["Memory leak detection", "Lifecycle management"]
+                ))
             case .io:
                 optimizations.append(DeviceSpecificOptimization(
                     type: .ioOptimization,
@@ -525,6 +585,10 @@ public actor DevicePerformanceProfiler {
                 optimizationType = .concurrencyOptimization
             case .memoryLeakSuspicion:
                 optimizationType = .memoryOptimization
+            case .ioBottleneck:
+                optimizationType = .ioOptimization
+            case .thermal:
+                optimizationType = .cpuOptimization
             }
             
             optimizations.append(UniversalOptimization(

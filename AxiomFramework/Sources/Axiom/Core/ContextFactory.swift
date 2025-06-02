@@ -13,30 +13,30 @@ public final class SimplifiedContextFactory {
     public static func create<T: AxiomContext>(
         contextType: T.Type,
         clients: T.Clients,
-        intelligence: AxiomIntelligence,
+        analyzer: FrameworkAnalyzer,
         autoBindObservers: Bool = true
     ) async -> T {
         
-        // AI-powered context creation with intelligent setup
-        print("🏗️ Creating context: \(T.self) with AI intelligence")
+        // Framework-powered context creation with intelligent setup
+        print("🏗️ Creating context: \(T.self) with framework analyzer")
         
         // For now, use a generic approach with dynamic initialization
         // In a real implementation, this would use reflection or protocol witnesses
-        if let contextInstance = try? await createContextInstance(contextType, clients: clients, intelligence: intelligence) {
+        if let contextInstance = try? await createContextInstance(contextType, clients: clients, analyzer: analyzer) {
             
             if autoBindObservers {
                 await setupObserverBindings(context: contextInstance, clients: clients)
             }
             
-            // Register with AI intelligence system
-            await intelligence.registerComponent(contextInstance)
+            // Register with framework analyzer
+            await analyzer.registerComponent(contextInstance)
             
-            print("✅ Context \(T.self) created successfully with AI features")
+            print("✅ Context \(T.self) created successfully with framework features")
             return contextInstance
         } else {
             // Fallback to simplified context creation
             print("⚠️ Using fallback context creation for \(T.self)")
-            return await createFallbackContext(contextType, clients: clients, intelligence: intelligence)
+            return await createFallbackContext(contextType, clients: clients, analyzer: analyzer)
         }
     }
     
@@ -49,13 +49,13 @@ public final class SimplifiedContextFactory {
         contextType: ContextType.Type
     ) async throws -> ContextType where ContextType.Clients == SingleClientContainer<ClientType> {
         
-        let intelligence = await GlobalIntelligenceManager.shared.getIntelligence()
+        let analyzer = await GlobalFrameworkAnalyzer.shared.getAnalyzer()
         let clients = SingleClientContainer(client: client)
         
-        // AI-powered single client context creation
+        // Framework-powered single client context creation
         print("🔧 Creating single-client context: \(ContextType.self)")
         
-        if let contextInstance = try? await createSingleClientContextInstance(client: client, contextType: contextType, intelligence: intelligence) {
+        if let contextInstance = try? await createSingleClientContextInstance(client: client, contextType: contextType, analyzer: analyzer) {
             // TODO: Auto-bind observer when client observer system is implemented
             // await client.addObserver(contextInstance)
             
@@ -88,13 +88,13 @@ public struct SingleClientContainer<T: AxiomClient>: ClientDependencies {
 /// Fluent API for building contexts with automatic setup
 @MainActor
 public final class ContextBuilder<T: AxiomContext> {
-    private var intelligence: AxiomIntelligence?
+    private var analyzer: FrameworkAnalyzer?
     private var clients: T.Clients?
     private var autoObservers = true
     
-    /// Set the intelligence system
-    public func intelligence(_ intelligence: AxiomIntelligence) -> Self {
-        self.intelligence = intelligence
+    /// Set the analyzer system
+    public func analyzer(_ analyzer: FrameworkAnalyzer) -> Self {
+        self.analyzer = analyzer
         return self
     }
     
@@ -112,15 +112,15 @@ public final class ContextBuilder<T: AxiomContext> {
     
     /// Build the context with provided configuration
     public func build() async throws -> T {
-        guard let intelligence = intelligence else {
-            throw ContextBuilderError.missingIntelligence
+        guard let analyzer = analyzer else {
+            throw ContextBuilderError.missingAnalyzer
         }
         
         guard let clients = clients else {
             throw ContextBuilderError.missingClients
         }
         
-        // AI-powered context building with fluent API
+        // Framework-powered context building with fluent API
         print("🔨 Building context: \(T.self) with fluent configuration")
         
         // For now, we use a simplified approach since dynamic context creation is complex
@@ -132,7 +132,7 @@ public final class ContextBuilder<T: AxiomContext> {
 // MARK: - Context Builder Errors
 
 public enum ContextBuilderError: AxiomError {
-    case missingIntelligence
+    case missingAnalyzer
     case missingClients
     case initializationFailed(reason: String)
     
@@ -152,8 +152,8 @@ public enum ContextBuilderError: AxiomError {
     
     public var userMessage: String {
         switch self {
-        case .missingIntelligence:
-            return "Intelligence system not configured"
+        case .missingAnalyzer:
+            return "Analyzer system not configured"
         case .missingClients:
             return "Client dependencies not provided"
         case .initializationFailed(let reason):
@@ -188,13 +188,13 @@ public actor ObserverManager {
 
 extension SimplifiedContextFactory {
     
-    /// Creates a context instance using AI-powered initialization
+    /// Creates a context instance using Framework-powered initialization
     private static func createContextInstance<T: AxiomContext>(
         _ contextType: T.Type,
         clients: T.Clients,
-        intelligence: AxiomIntelligence
+        analyzer: AxiomIntelligence
     ) async throws -> T {
-        // This is a simplified implementation that demonstrates the AI-powered approach
+        // This is a simplified implementation that demonstrates the Framework-powered approach
         // In a real implementation, this would use advanced reflection or code generation
         
         // For now, return a basic context instance
@@ -206,7 +206,7 @@ extension SimplifiedContextFactory {
     private static func createFallbackContext<T: AxiomContext>(
         _ contextType: T.Type,
         clients: T.Clients,
-        intelligence: AxiomIntelligence
+        analyzer: AxiomIntelligence
     ) async -> T {
         // Simplified fallback that creates a basic context structure
         // This ensures the framework doesn't crash while we implement full AI features
@@ -220,7 +220,7 @@ extension SimplifiedContextFactory {
             Please use AxiomApplicationBuilder for standard context creation:
             
             let app = AxiomApplicationBuilder()
-                .withIntelligence(intelligence)
+                .withIntelligence(analyzer)
                 .withClients(clients)
                 .build()
             """)
@@ -230,26 +230,26 @@ extension SimplifiedContextFactory {
     private static func createSingleClientContextInstance<ClientType: AxiomClient, ContextType: AxiomContext>(
         client: ClientType,
         contextType: ContextType.Type,
-        intelligence: AxiomIntelligence
+        analyzer: AxiomIntelligence
     ) async throws -> ContextType where ContextType.Clients == SingleClientContainer<ClientType> {
         
         // For single-client contexts, we can provide a more concrete implementation
         let clients = SingleClientContainer(client: client)
         
         // Attempt to create the context with the single client
-        return try await createContextInstance(contextType, clients: clients, intelligence: intelligence)
+        return try await createContextInstance(contextType, clients: clients, analyzer: analyzer)
     }
     
     /// Builds a context instance using the fluent API
     private static func buildContextInstance<T: AxiomContext>(
         contextType: T.Type,
         clients: T.Clients,
-        intelligence: AxiomIntelligence,
+        analyzer: FrameworkAnalyzer,
         autoObservers: Bool
     ) async throws -> T {
         
         // Use the same creation logic as the factory method
-        return try await createContextInstance(contextType, clients: clients, intelligence: intelligence)
+        return try await createContextInstance(contextType, clients: clients, analyzer: analyzer)
     }
     
     /// Sets up observer bindings between context and clients
@@ -257,7 +257,7 @@ extension SimplifiedContextFactory {
         context: T,
         clients: T.Clients
     ) async {
-        print("📡 Setting up AI-powered observer bindings for \(type(of: context))")
+        print("📡 Setting up Framework-powered observer bindings for \(type(of: context))")
         
         // This would use reflection to find all client properties and set up observers
         // For now, we'll provide a placeholder implementation

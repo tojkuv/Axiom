@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - Cache Configuration
 
-/// Configuration for intelligence system caching
+/// Configuration for framework analysis caching
 public struct CacheConfiguration: Sendable {
     /// Maximum number of items to cache
     public let maxSize: Int

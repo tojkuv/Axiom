@@ -12,7 +12,7 @@ The Axiom Framework maintains enterprise-grade performance through rigorous meas
 
 | Metric | Target | Current Achievement | Improvement vs TCA |
 |--------|--------|-------------------|-------------------|
-| Intelligence Queries | <100ms (90th percentile) | <100ms achieved | 5x faster |
+| Analysis Queries | <100ms (90th percentile) | <100ms achieved | 5x faster |
 | State Access | <1ms per operation | 0.000490ms average | 87.9x improvement |
 | State Updates | <5ms per update | 0.043ms average | 72.3x improvement |
 | Memory Baseline | <15MB baseline usage | 12MB achieved | 20% under target |
@@ -43,13 +43,13 @@ class StatePerformanceBenchmark: XCTestCase {
 }
 ```
 
-### Intelligence Query Performance
+### Analysis Query Performance
 
-Intelligence system achieves <100ms query response targets:
+Analysis system achieves <100ms query response targets:
 
 ```swift
-func testIntelligenceQueryPerformanceTargets() async throws {
-    let intelligence = DefaultAxiomIntelligence()
+func testAnalysisQueryPerformanceTargets() async throws {
+    let analyzer = DefaultFrameworkAnalyzer()
     let queryCount = 100
     
     let startTime = CFAbsoluteTimeGetCurrent()
@@ -64,7 +64,7 @@ func testIntelligenceQueryPerformanceTargets() async throws {
     
     // Verify <100ms target achievement
     XCTAssertLessThan(averageQueryTime, 0.1) // <100ms per query
-    print("📊 Intelligence query performance: \(averageQueryTime * 1000)ms average")
+    print("📊 Analysis query performance: \(averageQueryTime * 1000)ms average")
 }
 ```
 
@@ -206,7 +206,7 @@ class MemoryEfficiencyTests: XCTestCase {
         let startMemory = MemoryTracker.currentUsage()
         
         // Create framework components
-        let intelligence = DefaultAxiomIntelligence()
+        let analyzer = DefaultFrameworkAnalyzer()
         let capabilityManager = CapabilityManager()
         let performanceMonitor = PerformanceMonitor()
         
@@ -324,12 +324,12 @@ actor OptimizedClient: AxiomClient {
 }
 ```
 
-### Intelligence System Optimization
+### Analysis System Optimization
 
 #### Caching Strategy
 
 ```swift
-actor IntelligenceCacheOptimization {
+actor AnalysisCacheOptimization {
     private var componentCache: [String: [Component]] = [:]
     private var cacheTimestamps: [String: Date] = [:]
     private let cacheTimeout: TimeInterval = 300 // 5 minutes
@@ -354,7 +354,7 @@ actor IntelligenceCacheOptimization {
 #### Parallel Processing
 
 ```swift
-class ParallelIntelligenceEngine {
+class ParallelAnalysisEngine {
     func discoverComponentsInParallel() async -> [Component] {
         return await withTaskGroup(of: [Component].self) { group in
             // Discover different component types in parallel
