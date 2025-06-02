@@ -172,7 +172,7 @@ public actor BaseAxiomClient<State: Sendable, DomainModelType: DomainModel>: Axi
     // State management
     private var _state: State
     private var _stateVersion: StateVersion
-    private var _observers: Set<AnyHashable> = []
+    private let _observers = ObserverCollection()
     
     // Public properties
     public let capabilities: CapabilityManager
@@ -205,16 +205,18 @@ public actor BaseAxiomClient<State: Sendable, DomainModelType: DomainModel>: Axi
     // MARK: Observer Pattern
     
     public func addObserver<T: AxiomContext>(_ context: T) async {
-        _observers.insert(ObjectIdentifier(context))
+        await _observers.add(context)
     }
     
     public func removeObserver<T: AxiomContext>(_ context: T) async {
-        _observers.remove(ObjectIdentifier(context))
+        await _observers.remove(context)
     }
     
     public func notifyObservers() async {
-        // In a real implementation, this would notify all registered observers
-        // For now, we just track that observers exist
+        // Notify all registered observers of state change
+        await _observers.notifyAll { context in
+            await context.onClientStateChange(self)
+        }
     }
     
     // MARK: Lifecycle
@@ -225,7 +227,7 @@ public actor BaseAxiomClient<State: Sendable, DomainModelType: DomainModel>: Axi
     }
     
     public func shutdown() async {
-        _observers.removeAll()
+        await _observers.removeAll()
     }
 }
 
