@@ -1,6 +1,6 @@
 # Axiom Framework
 
-An architectural framework for iOS development that integrates actor-based state management with intelligent system analysis capabilities.
+An architectural framework for iOS development that integrates actor-based state management with component analysis capabilities.
 
 ## Current Status
 
@@ -15,7 +15,7 @@ open Axiom.xcworkspace  # Integrated workspace with test application
 ```
 
 ### Framework Features
-- **Intelligence Queries**: System analysis through natural language interface
+- **Component Registry**: Architectural component discovery and relationship mapping
 - **Actor State Management**: Thread-safe state management with SwiftUI integration  
 - **SwiftUI Integration**: Reactive binding with defined component relationships
 - **Runtime Capabilities**: Dynamic capability validation system
@@ -24,19 +24,15 @@ open Axiom.xcworkspace  # Integrated workspace with test application
 
 ## Design Philosophy
 
-Axiom facilitates iOS development through architectural analysis capabilities designed for human-AI collaborative workflows.
+Axiom facilitates iOS development through architectural constraint enforcement and component analysis capabilities.
 
-## Intelligence System Components
+## Framework Analysis Components
 
-### System Analysis Features
-1. **Component Introspection** - Architectural analysis and documentation generation
-2. **Intent-Based Evolution** - Architecture adaptation based on specified requirements
-3. **Natural Language Queries** - Architecture exploration through text interface
-4. **Performance Analysis** - Automated performance monitoring and optimization suggestions
-5. **Constraint Validation** - Business rule compliance checking
-6. **Pattern Recognition** - Code pattern identification and standardization
-7. **Development Workflow Management** - Experiment and feature branch coordination
-8. **Predictive Analysis** - Issue identification and prevention recommendations
+### Component Analysis Features
+1. **Component Registry** - Architectural component discovery and relationship mapping
+2. **Performance Analysis** - Automated performance monitoring and metrics collection
+3. **Constraint Validation** - Architectural constraint compliance checking
+4. **Development Workflow Management** - Experiment and feature branch coordination
 
 ## Core Architecture
 
@@ -48,7 +44,7 @@ Axiom facilitates iOS development through architectural analysis capabilities de
 5. **Domain Model Architecture** (1:1 client ownership with value objects)
 6. **Cross-Domain Coordination** (context orchestration only)
 7. **Unidirectional Flow** (Views → Contexts → Clients → Capabilities → System)
-8. **Intelligence System Integration** (analysis and monitoring capabilities)
+8. **Component Analysis Integration** (discovery and monitoring capabilities)
 
 ## Workspace Structure
 
@@ -138,7 +134,7 @@ struct MyView: AxiomView {
 ### AxiomExampleApp Implementation
 The included iOS application demonstrates:
 - **AxiomClient Integration**: Actor-based state management with observer pattern
-- **Intelligence System**: Natural language architectural query interface  
+- **Component Analysis**: Architectural component discovery and relationship mapping  
 - **Context Orchestration**: SwiftUI reactive integration
 - **Performance Monitoring**: Integrated analytics and metrics collection
 - **Capability Validation**: Runtime checking with graceful degradation
@@ -244,7 +240,7 @@ $ open Axiom.xcworkspace
 1. **Actor-Based State**: Thread-safe state management with observer pattern
 2. **Context Orchestration**: Component coordination and SwiftUI integration
 3. **View Binding**: Reactive updates with lifecycle management
-4. **Intelligence Queries**: Natural language architectural query interface
+4. **Component Analysis**: Architectural component discovery and relationship mapping
 5. **Capability Validation**: Runtime validation with graceful degradation
 6. **Performance Monitoring**: Integrated metrics collection and analysis
 7. **API Implementation**: Streamlined development APIs
@@ -253,11 +249,11 @@ $ open Axiom.xcworkspace
 ## Framework Characteristics
 
 ### Technical Capabilities
-- **Architectural Analysis** - System analysis and issue identification
-- **Adaptive Architecture** - Framework adaptation based on requirements  
-- **Natural Language Interface** - Text-based architectural exploration
-- **AI Integration** - Designed for human-AI collaborative development workflows
-- **Predictive Analysis** - Issue identification and prevention recommendations
+- **Architectural Analysis** - Component discovery and relationship mapping
+- **Constraint Enforcement** - Architectural pattern validation and compliance checking
+- **Performance Monitoring** - Real-time metrics collection and analysis
+- **Component Registry** - Centralized component discovery and metadata management
+- **Capability Validation** - Runtime capability checking and graceful degradation
 
 ### Design Approach
 - **iOS/SwiftUI Integration** - Built on established iOS development principles
