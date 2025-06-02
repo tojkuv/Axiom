@@ -45,34 +45,40 @@ public struct ObservableStateMacro: MemberMacro, AxiomMacro {
         }
         let varProperties = extractVariableProperties(from: members)
         
-        // Generate the boilerplate code
-        var generatedMembers: [DeclSyntax] = []
+        // Generate the boilerplate code as a single string with proper formatting
+        var codeString = ""
         
         // Generate the code in sections matching test expectations
-        generatedMembers.append(DeclSyntax("// MARK: - Observable State Properties"))
+        codeString += "\n\n// MARK: - Observable State Properties\n"
+        codeString += "@Published private var _stateVersion: Int = 0\n"
         
-        if let stateVersionProperty = generateStateVersionProperty() {
-            generatedMembers.append(DeclSyntax(stateVersionProperty))
-        }
-        
-        generatedMembers.append(DeclSyntax("// MARK: - State Change Notifications"))
-        
-        if let notifyMethod = generateNotifyStateChangeMethod() {
-            generatedMembers.append(DeclSyntax(notifyMethod))
-        }
+        codeString += "\n// MARK: - State Change Notifications\n"
+        codeString += "private func notifyStateChange() {\n"
+        codeString += "    _stateVersion += 1\n"
+        codeString += "}\n"
         
         // Generate setter methods for var properties (if any exist)
         if !varProperties.isEmpty {
-            generatedMembers.append(DeclSyntax("// MARK: - Observable State Setters"))
+            codeString += "\n// MARK: - Observable State Setters\n"
             
             for property in varProperties {
-                if let setter = generateSetterMethod(for: property, isStruct: isStruct) {
-                    generatedMembers.append(DeclSyntax(setter))
-                }
+                let mutatingKeyword = isStruct ? "mutating " : ""
+                let capitalizedName = property.name.capitalizedFirst
+                let methodName = "set\(capitalizedName)"
+                
+                codeString += "\n\(mutatingKeyword)func \(methodName)(_ newValue: \(property.type)) {\n"
+                codeString += "    if \(property.name) != newValue {\n"
+                codeString += "        \(property.name) = newValue\n"
+                codeString += "        notifyStateChange()\n"
+                codeString += "    }\n"
+                codeString += "}\n"
             }
         }
         
-        return generatedMembers
+        // Ensure proper final formatting
+        codeString = codeString.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        return [DeclSyntax(stringLiteral: codeString)]
     }
     
     // MARK: - Property Extraction

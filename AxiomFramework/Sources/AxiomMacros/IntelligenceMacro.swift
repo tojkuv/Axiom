@@ -78,23 +78,24 @@ public struct IntelligenceMacro: MemberMacro, AxiomMacro {
         // Generate query methods for each feature (if any exist)
         if !features.isEmpty {
             // Add MARK comment for query methods section
-            codeString += "// MARK: - Intelligence Query Methods\n"
+            codeString += "// MARK: - Intelligence Query Methods"
             
             for feature in features {
                 let queryMethod = generateQueryMethod(for: feature)
                 codeString += queryMethod
             }
+            codeString += "\n"  // Add blank line after query methods section
         }
         
         // Add MARK comment for status methods section
-        codeString += "// MARK: - Intelligence Status Methods\n"
+        codeString += "// MARK: - Intelligence Status Methods"
         
         // Generate status methods
         let statusMethods = generateStatusMethods()
         for (index, statusMethod) in statusMethods.enumerated() {
-            codeString += statusMethod
-            if index == 0 && statusMethods.count > 1 {
-                codeString += "\n"  // Add blank line after first method
+            codeString += "\n" + statusMethod
+            if index < statusMethods.count - 1 {
+                codeString += "\n"  // Add blank line between methods
             }
         }
         
@@ -215,11 +216,11 @@ public struct IntelligenceMacro: MemberMacro, AxiomMacro {
         let methodName = "query" + feature.toPascalCase()
         
         return """
+        
         func \(methodName)(_ query: String) async -> String? {
             guard intelligenceFeatures.contains("\(feature)") else { return nil }
             return await intelligence.query(query, feature: "\(feature)")
         }
-        
         """
     }
     

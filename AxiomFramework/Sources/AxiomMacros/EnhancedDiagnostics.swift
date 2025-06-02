@@ -4,6 +4,19 @@ import SwiftSyntaxMacros
 import SwiftDiagnostics
 import Foundation
 
+// MARK: - Simple FixIt Message Implementation
+
+/// Simple FixIt message implementation
+public struct SimpleFixItMessage: FixItMessage {
+    public let fixItID: MessageID
+    public let message: String
+    
+    public init(fixItID: MessageID, message: String) {
+        self.fixItID = fixItID
+        self.message = message
+    }
+}
+
 // MARK: - Enhanced Diagnostic System
 
 /// Enhanced diagnostic system with context awareness and suggestions
@@ -283,8 +296,22 @@ public class EnhancedDiagnosticSystem {
         _ declaration: D,
         _ node: AttributeSyntax
     ) -> [FixIt] {
-        // Generate Fix-Its for declaration type issues
-        return [] // Simplified implementation
+        var fixIts: [FixIt] = []
+        
+        let currentType = getDeclarationType(declaration)
+        let allowedTypes = getAllowedDeclarationTypes(for: macro)
+        
+        // For now, suggest the first allowed type as a FixIt
+        if let preferredType = allowedTypes.first, currentType != preferredType {
+            // Simple comment-based suggestion since we can't easily convert declaration types
+            let fixIt = FixIt(
+                message: SimpleFixItMessage(fixItID: MessageID(domain: "Axiom", id: "declarationType"), message: "Consider using \(preferredType) instead of \(currentType)"),
+                changes: []  // No automatic changes for declaration type conversion
+            )
+            fixIts.append(fixIt)
+        }
+        
+        return fixIts
     }
     
     private func generateProtocolConformanceFixIts<D: DeclSyntaxProtocol>(
@@ -292,25 +319,92 @@ public class EnhancedDiagnosticSystem {
         _ declaration: D,
         _ node: AttributeSyntax
     ) -> [FixIt] {
-        // Generate Fix-Its for protocol conformance
-        // For now, return empty array to focus on core functionality
-        return []
+        var fixIts: [FixIt] = []
+        
+        // Generate FixIt to add protocol conformance to inheritance clause
+        if let structDecl = declaration.as(StructDeclSyntax.self) {
+            // For struct declarations
+            let inheritanceClause: InheritanceClauseSyntax
+            if let existing = structDecl.inheritanceClause {
+                // Add to existing inheritance clause
+                let newType = InheritedTypeSyntax(type: IdentifierTypeSyntax(name: .identifier(protocolName)))
+                let newInheritedTypes = existing.inheritedTypes + [newType]
+                inheritanceClause = InheritanceClauseSyntax(inheritedTypes: newInheritedTypes)
+            } else {
+                // Create new inheritance clause
+                let inheritedType = InheritedTypeSyntax(type: IdentifierTypeSyntax(name: .identifier(protocolName)))
+                inheritanceClause = InheritanceClauseSyntax(inheritedTypes: InheritedTypeListSyntax([inheritedType]))
+            }
+            
+            let fixIt = FixIt(
+                message: SimpleFixItMessage(fixItID: MessageID(domain: "Axiom", id: "protocolConformance"), message: "Add \(protocolName) conformance"),
+                changes: [
+                    FixIt.Change.replace(
+                        oldNode: Syntax(structDecl),
+                        newNode: Syntax(structDecl.with(\.inheritanceClause, inheritanceClause))
+                    )
+                ]
+            )
+            fixIts.append(fixIt)
+        } else if let classDecl = declaration.as(ClassDeclSyntax.self) {
+            // For class declarations
+            let inheritanceClause: InheritanceClauseSyntax
+            if let existing = classDecl.inheritanceClause {
+                // Add to existing inheritance clause
+                let newType = InheritedTypeSyntax(type: IdentifierTypeSyntax(name: .identifier(protocolName)))
+                let newInheritedTypes = existing.inheritedTypes + [newType]
+                inheritanceClause = InheritanceClauseSyntax(inheritedTypes: newInheritedTypes)
+            } else {
+                // Create new inheritance clause
+                let inheritedType = InheritedTypeSyntax(type: IdentifierTypeSyntax(name: .identifier(protocolName)))
+                inheritanceClause = InheritanceClauseSyntax(inheritedTypes: InheritedTypeListSyntax([inheritedType]))
+            }
+            
+            let fixIt = FixIt(
+                message: SimpleFixItMessage(fixItID: MessageID(domain: "Axiom", id: "protocolConformance"), message: "Add \(protocolName) conformance"),
+                changes: [
+                    FixIt.Change.replace(
+                        oldNode: Syntax(classDecl),
+                        newNode: Syntax(classDecl.with(\.inheritanceClause, inheritanceClause))
+                    )
+                ]
+            )
+            fixIts.append(fixIt)
+        }
+        
+        return fixIts
     }
     
     private func generateNamingConflictFixIts(
         _ memberName: String,
         _ node: AttributeSyntax
     ) -> [FixIt] {
-        // Generate Fix-Its for naming conflicts
-        return [] // Simplified implementation
+        var fixIts: [FixIt] = []
+        
+        // Generate FixIt to suggest alternative naming
+        let fixIt = FixIt(
+            message: SimpleFixItMessage(fixItID: MessageID(domain: "Axiom", id: "namingConflict"), message: "Consider renaming '\(memberName)' to avoid conflicts"),
+            changes: []  // No automatic rename changes
+        )
+        fixIts.append(fixIt)
+        
+        return fixIts
     }
     
     private func generateContextIntegrationFixIts<D: DeclSyntaxProtocol>(
         _ declaration: D,
         _ node: AttributeSyntax
     ) -> [FixIt] {
-        // Generate Fix-Its for context integration
-        return [] // Simplified implementation
+        var fixIts: [FixIt] = []
+        
+        // Generate FixIt to suggest adding @Context macro
+        let fixIt = FixIt(
+            message: SimpleFixItMessage(fixItID: MessageID(domain: "Axiom", id: "contextIntegration"), message: "Add @Context macro for better integration"),
+            changes: []  // No automatic macro addition
+        )
+        fixIts.append(fixIt)
+        
+        return fixIts
     }
 }
 
