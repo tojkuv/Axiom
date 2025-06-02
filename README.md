@@ -44,7 +44,6 @@ Axiom facilitates iOS development through architectural constraint enforcement a
 5. **Domain Model Architecture** (1:1 client ownership with value objects)
 6. **Cross-Domain Coordination** (context orchestration only)
 7. **Unidirectional Flow** (Views → Contexts → Clients → Capabilities → System)
-8. **Component Analysis Integration** (discovery and monitoring capabilities)
 
 ## Workspace Structure
 

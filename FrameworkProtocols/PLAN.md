@@ -60,14 +60,14 @@ Work commands operate on current branch without version control:
 7. **Capabilities Permissions** → Plan runtime capability validation with compile-time hints
 8. **Pattern Consistency** → Ensure uniform patterns across framework components
 
-### Phase 2: Framework Proposal Creation
-1. **Type-Safe Architecture** → Design compile-time type validation and safety guarantees
-2. **Actor-Based Concurrency** → Plan actor isolation patterns for thread-safe state management
-3. **Performance Optimization** → Define performance targets and measurement strategies
-4. **Deterministic Implementation** → Ensure predictable behavior without hidden state
-5. **Code Generation Strategy** → Plan macros and builders to reduce boilerplate
-6. **Capabilities System** → Design permissions validation with graceful degradation
-7. **Testing Strategy** → Define comprehensive testing for all safety guarantees
+### Phase 2: Framework Proposal Creation (7 Constraints)
+1. **View-Context Binding** → Design 1:1 bidirectional relationships
+2. **Context Orchestration** → Plan read-only state access patterns
+3. **Client Isolation** → Ensure single ownership with actor safety
+4. **Capability System** → Design compile-time hints + runtime validation
+5. **Domain Models** → Plan 1:1 client ownership with value objects
+6. **Cross-Domain Rules** → Define context-only orchestration patterns
+7. **Unidirectional Flow** → Enforce Views→Contexts→Clients→Capabilities→System
 
 ### Phase 3: Framework Proposal Finalization
 1. **Structured Format** → Create framework proposal using established format and sections
@@ -90,20 +90,21 @@ Work commands operate on current branch without version control:
 ## Framework Proposal Lifecycle Management
 
 ### Framework Proposal States
-- **Active**: Framework proposal created in Active/ directory, under development by @PLAN
-- **Waiting Approval**: Framework proposal moved to WaitingApproval/ directory, ready for @APPROVE processing
-- **Under Revision**: User requests changes, framework proposal updated in Active/ directory by @PLAN
-- **Approved**: FrameworkProtocols/@APPROVE accepts proposal, ready for FrameworkProtocols/DEVELOP.md implementation
-- **In Development**: FrameworkProtocols/DEVELOP.md implementing proposal, progress tracked in TRACKING.md
-- **Completed**: Framework implementation complete, proposal archived to Archive/ directory
+- **Active**: Proposal created in Active/ directory, under development
+- **Waiting Approval**: Proposal in WaitingApproval/ directory, ready for approval
+- **Under Revision**: User requests changes, proposal updated in Active/
+- **Approved**: @PLAN approve accepts proposal, updates TRACKING.md
+- **In Development**: @DEVELOP implementing proposal, progress tracked
+- **Completed**: Implementation complete, @PLAN resolve archives to Archive/
 
 ### Framework Workflow Integration
-1. **FrameworkProtocols/@PLAN** → Creates framework proposal in AxiomFramework/Proposals/Active/
-2. **Proposal Completion** → Framework proposal moved to AxiomFramework/Proposals/WaitingApproval/
-3. **User Review** → User reviews and optionally revises framework proposal
-4. **FrameworkProtocols/@APPROVE** → Accepts framework proposal and updates TRACKING.md priorities
-5. **FrameworkProtocols/@DEVELOP** → Implements approved proposal, tracks progress in TRACKING.md
-6. **FrameworkProtocols/@CHECKPOINT** → Completes framework implementation, archives proposal
+1. **@PLAN create** → Creates framework proposal in AxiomFramework/Proposals/Active/
+2. **User Review** → User reviews and edits proposal in Active/
+3. **Submit for Approval** → Move proposal to WaitingApproval/
+4. **@PLAN approve** → Process proposal, update TRACKING.md priorities
+5. **@DEVELOP** → Implement approved proposal with progress tracking
+6. **@PLAN resolve** → Validate completion and archive to Archive/
+7. **@CHECKPOINT** → Commit completed work to version control
 
 ## Framework Planning Command Execution
 
@@ -167,6 +168,38 @@ echo "🎯 Planning ready - proceeding in framework workspace"
 - **Capabilities Enforcement**: Runtime permissions validation with compile-time optimization
 - **Pattern Consistency**: Uniform patterns enabling reliable AI agent coding
 
+## Framework Proposal Approval Process
+
+### Approval Criteria (`@PLAN approve`)
+- **Architectural Compliance**: Adherence to 7 core constraints
+- **Technical Completeness**: All specifications defined
+- **Implementation Readiness**: Clear development path
+- **Testing Strategy**: Comprehensive validation approach
+- **Performance Requirements**: Defined and measurable
+
+### Approval Workflow
+1. **Scan WaitingApproval/** → List pending proposals
+2. **Validate Architecture** → Ensure 7 constraints maintained
+3. **Update TRACKING.md** → Add to development priorities
+4. **Set Implementation Order** → Based on dependencies
+5. **Prepare for Development** → Ready for DEVELOP.md
+
+## Framework Proposal Resolution Process
+
+### Resolution Criteria (`@PLAN resolve`)
+- **Implementation Complete**: All phases finished
+- **Tests Passing**: Required success rate achieved
+- **Performance Met**: Benchmarks satisfied
+- **Architecture Preserved**: 7 constraints maintained
+- **Documentation Current**: Via DOCUMENT.md
+
+### Resolution Workflow
+1. **Validate Completion** → Check success criteria
+2. **Update TRACKING.md** → Mark as completed
+3. **Archive Proposal** → Move to Archive/
+4. **Document Outcomes** → Record achievements
+5. **Reset for Next Cycle** → Clear active tracking
+
 ## Framework Planning Workflow Integration
 
 **Planning Purpose**: Strategic framework proposal creation for structured development
@@ -187,10 +220,10 @@ echo "🎯 Planning ready - proceeding in framework workspace"
 
 ---
 
-**FRAMEWORK PLANNING COMMAND STATUS**: Framework development planning for type-safe, concurrency-safe, performant, deterministic framework
-**CORE FOCUS**: Actor-based architecture with minimal boilerplate and capabilities permissions for AI agent coding
-**TECHNICAL ATTRIBUTES**: Type safety, concurrency safety, performance, determinism, low boilerplate, capabilities permissions, consistent patterns
-**PROPOSAL CREATION**: Creates structured framework proposals in AxiomFramework/Proposals/Active/
-**INTEGRATION**: Workflow integration with FrameworkProtocols/@APPROVE, DEVELOP.md and TRACKING progress monitoring
+**FRAMEWORK PLANNING COMMAND STATUS**: Complete proposal lifecycle management (create/approve/resolve)
+**CORE FOCUS**: Type-safe, concurrency-safe, performant, deterministic, actor-based framework
+**ARCHITECTURAL CONSTRAINTS**: Maintains 7 core constraints for AI agent coding optimization
+**LIFECYCLE MANAGEMENT**: Creates, approves, and resolves proposals through unified command
+**INTEGRATION**: Direct integration with DEVELOP.md and TRACKING.md for seamless workflow
 
-**Use FrameworkProtocols/@PLAN for strategic framework development planning with structured proposal creation and @APPROVE workflow integration.**
+**Use FrameworkProtocols/@PLAN for complete proposal lifecycle management - creation, approval, and resolution.**
