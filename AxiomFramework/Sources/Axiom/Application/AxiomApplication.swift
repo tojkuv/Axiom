@@ -128,7 +128,7 @@ public struct DefaultAxiomApplicationConfiguration: AxiomApplicationConfiguratio
     
     public init(
         availableCapabilities: Set<Capability> = Set(Capability.allCases),
-        intelligenceFeatures: Set<IntelligenceFeature> = [.architecturalDNA, .emergentPatternDetection],
+        intelligenceFeatures: Set<IntelligenceFeature> = [.componentRegistry, .performanceMonitoring],
         capabilityValidationConfig: CapabilityValidationConfig = .default,
         performanceConfig: PerformanceConfiguration = PerformanceConfiguration(),
         developmentConfig: DevelopmentConfiguration = .default
@@ -143,7 +143,7 @@ public struct DefaultAxiomApplicationConfiguration: AxiomApplicationConfiguratio
     /// Standard production configuration
     public static var production: DefaultAxiomApplicationConfiguration {
         DefaultAxiomApplicationConfiguration(
-            intelligenceFeatures: [.architecturalDNA, .selfOptimizingPerformance, .constraintPropagation],
+            intelligenceFeatures: [.componentRegistry, .performanceMonitoring, .capabilityValidation],
             performanceConfig: PerformanceConfiguration(samplingRate: 0.1, enableAlerts: true),
             developmentConfig: .production
         )
@@ -535,11 +535,11 @@ extension Set where Element == Capability {
 
 extension Set where Element == IntelligenceFeature {
     public static var foundation: Set<IntelligenceFeature> {
-        [.architecturalDNA, .emergentPatternDetection]
+        [.componentRegistry, .performanceMonitoring]
     }
     
     public static var production: Set<IntelligenceFeature> {
-        foundation.union([.selfOptimizingPerformance, .constraintPropagation])
+        foundation.union([.capabilityValidation])
     }
     
     public static var development: Set<IntelligenceFeature> {

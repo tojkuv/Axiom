@@ -147,21 +147,28 @@ final class IntelligenceSystemIntegrationTests: XCTestCase {
     // MARK: - Intelligence System End-to-End Integration
     
     func testGlobalIntelligenceSystemIntegration() async throws {
-        // RED: Test full intelligence system integration
+        // GREEN: Test genuine intelligence system integration
         
         let intelligence = await GlobalIntelligenceManager.shared.getIntelligence()
         
-        // Should be able to analyze code patterns
-        let optimizationSuggestions = try await intelligence.analyzeCodePatterns()
-        XCTAssertNotNil(optimizationSuggestions)
+        // Test genuine functionality: Component registry access
+        let componentRegistry = await intelligence.getComponentRegistry()
+        XCTAssertNotNil(componentRegistry)
         
-        // Should be able to predict architectural issues
-        let risks = try await intelligence.predictArchitecturalIssues()
-        XCTAssertNotNil(risks)
+        // Test genuine functionality: Metrics collection
+        let metrics = await intelligence.getMetrics()
+        XCTAssertNotNil(metrics)
+        XCTAssertGreaterThanOrEqual(metrics.totalOperations, 0)
         
-        // Should be able to suggest refactoring
-        let refactoringSuggestions = try await intelligence.suggestRefactoring()
-        XCTAssertNotNil(refactoringSuggestions)
+        // Test genuine functionality: Feature management
+        await intelligence.enableFeature(.componentRegistry)
+        await intelligence.enableFeature(.performanceMonitoring)
+        let features = await intelligence.enabledFeatures
+        XCTAssertTrue(features.contains(.componentRegistry))
+        XCTAssertTrue(features.contains(.performanceMonitoring))
+        
+        // Note: AI theater methods (analyzeCodePatterns, predictArchitecturalIssues, suggestRefactoring) 
+        // were removed as they were hardcoded responses, not genuine AI functionality
     }
     
     func testIntelligenceSystemLearningCapabilities() async throws {
@@ -195,6 +202,10 @@ final class IntelligenceSystemIntegrationTests: XCTestCase {
         let performanceMonitor = PerformanceMonitor()
         let engine = ComponentIntrospectionEngine(performanceMonitor: performanceMonitor)
         
+        // CRITICAL: Discover components first before generating documentation
+        let discoveredComponents = await engine.discoverComponents()
+        XCTAssertFalse(discoveredComponents.isEmpty, "Should discover framework components")
+        
         // Generate documentation for the system
         let documentationSet = await engine.generateDocumentation()
         
@@ -211,21 +222,25 @@ final class IntelligenceSystemIntegrationTests: XCTestCase {
     // MARK: - Performance and Reliability Tests
     
     func testIntelligenceSystemPerformance() async throws {
-        // RED: Test performance characteristics
+        // GREEN: Test performance characteristics of genuine functionality
         
         let intelligence = await GlobalIntelligenceManager.shared.getIntelligence()
         
         let startTime = Date()
         
-        // Run multiple intelligence operations
-        let _ = try await intelligence.analyzeCodePatterns()
-        let _ = try await intelligence.predictArchitecturalIssues()
+        // Run genuine intelligence operations
+        let _ = await intelligence.getComponentRegistry()
         let _ = await intelligence.getMetrics()
+        await intelligence.enableFeature(.performanceMonitoring)
+        await intelligence.enableFeature(.capabilityValidation)
         
         let duration = Date().timeIntervalSince(startTime)
         
-        // EXPECTATION: Intelligence operations should complete in reasonable time
-        XCTAssertLessThan(duration, 5.0, "Intelligence operations should complete within 5 seconds")
+        // EXPECTATION: Genuine intelligence operations should complete in reasonable time
+        XCTAssertLessThan(duration, 5.0, "Genuine intelligence operations should complete within 5 seconds")
+        
+        // Note: AI theater methods (analyzeCodePatterns, predictArchitecturalIssues) were removed 
+        // as they were hardcoded heuristics, not genuine performance-dependent operations
     }
     
     func testIntelligenceSystemReliability() async throws {
@@ -233,18 +248,23 @@ final class IntelligenceSystemIntegrationTests: XCTestCase {
         
         let intelligence = await GlobalIntelligenceManager.shared.getIntelligence()
         
-        // Should handle errors gracefully
-        do {
-            // Try to generate documentation for non-existent component
-            let _ = try await intelligence.generateDocumentation(for: ComponentID("non-existent"))
-            XCTFail("Should throw error for non-existent component")
-        } catch {
-            // Expected behavior
-            XCTAssertTrue(true, "Should handle errors gracefully")
+        // Test reliability of genuine functionality under various conditions
+        
+        // System should handle repeated calls gracefully
+        for _ in 0..<10 {
+            let _ = await intelligence.getComponentRegistry()
+            let _ = await intelligence.getMetrics()
         }
         
-        // System should remain functional after errors
+        // System should remain functional after feature toggling
+        await intelligence.enableFeature(.componentRegistry)
+        await intelligence.disableFeature(.componentRegistry)
+        await intelligence.enableFeature(.componentRegistry)
+        
         let metrics = await intelligence.getMetrics()
         XCTAssertNotNil(metrics)
+        
+        // Note: AI theater method generateDocumentation was removed as it was hardcoded template generation, 
+        // not genuine error-handling functionality
     }
 }

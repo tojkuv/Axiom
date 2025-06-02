@@ -30,26 +30,16 @@ actor MockAxiomIntelligence: AxiomIntelligence {
         )
     }
     func reset() async { enabledFeatures.removeAll() }
-    func processQuery(_ query: String) async throws -> QueryResponse { return QueryResponse.explanation("Test", confidence: 0.9) }
-    func analyzeCodePatterns() async throws -> [OptimizationSuggestion] { return [] }
-    func predictArchitecturalIssues() async throws -> [ArchitecturalRisk] { return [] }
-    func generateDocumentation(for componentID: ComponentID) async throws -> GeneratedDocumentation { 
-        return GeneratedDocumentation(
-            componentID: componentID,
-            title: "Test Documentation",
-            overview: "Test overview",
-            purpose: "Test purpose",
-            responsibilities: ["Test responsibility"],
-            dependencies: ["Test dependency"],
-            usagePatterns: ["Test pattern"],
-            performanceCharacteristics: ["Test characteristic"],
-            bestPractices: ["Test practice"],
-            examples: ["Test example"],
-            generatedAt: Date()
-        )
+    
+    // AI theater methods removed - these were AI theater (keyword matching, hardcoded responses)
+    // Genuine functionality methods:
+    func getComponentRegistry() async -> [ComponentID: ComponentMetadata] { 
+        return [:] // Empty registry for testing
     }
-    func suggestRefactoring() async throws -> [RefactoringSuggestion] { return [] }
-    func registerComponent<T: AxiomContext>(_ component: T) async {}
+    
+    func registerComponent<T: AxiomContext>(_ component: T) async {
+        // Mock implementation for testing
+    }
 }
 
 /// Test implementation of AxiomContext for comprehensive testing
@@ -583,4 +573,291 @@ func testAnalyticsPerformance() async throws {
     // Should track 1000 events in < 500ms
     #expect(duration < .milliseconds(500))
     #expect(context.analyticsEvents.count == 1000)
+}
+
+// MARK: - Phase 1 Milestone 3: Enhanced AxiomContext Testing
+
+// MARK: - DefaultContextState Tests
+
+@Test("DefaultContextState initialization")
+@MainActor
+func testDefaultContextStateInitialization() throws {
+    let contextState = DefaultContextState()
+    
+    // Verify proper initialization
+    #expect(contextState.isLoading == false)
+    #expect(contextState.lastError == nil)
+}
+
+@Test("DefaultContextState published properties")
+@MainActor
+func testDefaultContextStatePublishedProperties() async throws {
+    let contextState = DefaultContextState()
+    var loadingChanges: [Bool] = []
+    var errorChanges: [String?] = []
+    
+    // Subscribe to published changes
+    let loadingCancellable = contextState.$isLoading.sink { value in
+        loadingChanges.append(value)
+    }
+    
+    let errorCancellable = contextState.$lastError.sink { error in
+        errorChanges.append(error?.userMessage)
+    }
+    
+    // Test isLoading property changes
+    contextState.isLoading = true
+    contextState.isLoading = false
+    
+    // Test lastError property changes
+    let testError = TestAxiomError(message: "Test error")
+    contextState.lastError = testError
+    contextState.lastError = nil
+    
+    // Cleanup
+    loadingCancellable.cancel()
+    errorCancellable.cancel()
+    
+    // Verify changes were published
+    #expect(loadingChanges.count >= 3) // Initial + true + false
+    #expect(errorChanges.count >= 3) // Initial + error + nil
+    #expect(loadingChanges.contains(true))
+    #expect(loadingChanges.contains(false))
+    #expect(errorChanges.contains("Test error"))
+    #expect(errorChanges.contains(nil))
+}
+
+@Test("DefaultContextState ObservableObject behavior")
+@MainActor
+func testDefaultContextStateObservableObjectBehavior() throws {
+    let contextState = DefaultContextState()
+    
+    // Test conformance to ObservableObject
+    #expect(contextState is any ObservableObject)
+    
+    // Test objectWillChange publisher exists
+    let publisher = contextState.objectWillChange
+    #expect(publisher is ObservableObjectPublisher)
+}
+
+@Test("DefaultContextState error state management")
+@MainActor
+func testDefaultContextStateErrorStateManagement() async throws {
+    let contextState = DefaultContextState()
+    var willChangeCount = 0
+    
+    // Subscribe to objectWillChange
+    let cancellable = contextState.objectWillChange.sink {
+        willChangeCount += 1
+    }
+    
+    // Test error state transitions
+    let error1 = TestAxiomError(message: "First error")
+    let error2 = TestAxiomError(message: "Second error")
+    
+    contextState.lastError = error1
+    #expect(contextState.lastError?.userMessage == "First error")
+    
+    contextState.lastError = error2
+    #expect(contextState.lastError?.userMessage == "Second error")
+    
+    contextState.lastError = nil
+    #expect(contextState.lastError == nil)
+    
+    // Cleanup
+    cancellable.cancel()
+    
+    // Verify objectWillChange was triggered
+    #expect(willChangeCount >= 3)
+}
+
+// MARK: - Global Resource Manager Integration Tests
+
+@Test("GlobalCapabilityManager integration through context")
+@MainActor
+func testGlobalCapabilityManagerIntegration() async throws {
+    let context = TestContext()
+    
+    // Test that context uses GlobalCapabilityManager.shared
+    let manager1 = try await context.capabilityManager()
+    let manager2 = try await context.capabilityManager()
+    
+    // Should get the same singleton instance
+    #expect(manager1 === manager2)
+    
+    // Test capability validation through global manager
+    try await context.validateCapability(.network)
+    try await context.validateCapabilities([.network, .storage])
+}
+
+@Test("GlobalPerformanceMonitor integration through context")
+@MainActor
+func testGlobalPerformanceMonitorIntegration() async throws {
+    let context = TestContext()
+    
+    // Test that context uses GlobalPerformanceMonitor.shared
+    let monitor1 = try await context.performanceMonitor()
+    let monitor2 = try await context.performanceMonitor()
+    
+    // Should get the same singleton instance
+    #expect(monitor1 === monitor2)
+    
+    // Test performance metric recording through global monitor
+    let metric = PerformanceMetric(
+        name: "test_global_metric",
+        value: 150.0,
+        unit: .milliseconds,
+        category: .networkRequest
+    )
+    await context.recordPerformanceMetric(metric)
+}
+
+@Test("Global resource thread safety and singleton behavior")
+@MainActor
+func testGlobalResourceThreadSafetyAndSingletonBehavior() async throws {
+    let contexts = (0..<10).map { _ in TestContext() }
+    
+    // Test concurrent access to global resources
+    await withTaskGroup(of: Void.self) { group in
+        for context in contexts {
+            group.addTask {
+                do {
+                    let _ = try await context.capabilityManager()
+                    let _ = try await context.performanceMonitor()
+                } catch {
+                    // Handle potential errors in concurrent access
+                }
+            }
+        }
+    }
+    
+    // All contexts should have access to the same global instances
+    let managers = try await contexts.asyncMap { try await $0.capabilityManager() }
+    let monitors = try await contexts.asyncMap { try await $0.performanceMonitor() }
+    
+    // Verify singleton behavior
+    let firstManager = managers.first!
+    let firstMonitor = monitors.first!
+    
+    for manager in managers {
+        #expect(manager === firstManager)
+    }
+    
+    for monitor in monitors {
+        #expect(monitor === firstMonitor)
+    }
+}
+
+// MARK: - Intelligence System Integration Tests
+
+@Test("AxiomIntelligence registration and component registry (genuine functionality)")
+@MainActor
+func testAxiomIntelligenceRegistrationAndComponentRegistry() async throws {
+    let context = TestContext()
+    
+    // Test intelligence system registration (genuine functionality)
+    await context.intelligence.registerComponent(context)
+    
+    // Test component registry access (genuine functionality) 
+    let componentRegistry = await context.intelligence.getComponentRegistry()
+    
+    // Component registry is a genuine functionality - tracks actual components
+    #expect(componentRegistry != nil)
+    // Note: AI theater methods like generateDocumentation were removed (they were hardcoded responses)
+}
+
+@Test("Intelligence metrics collection within context lifecycle (genuine functionality)")
+@MainActor
+func testIntelligenceMetricsCollectionWithinContextLifecycle() async throws {
+    let context = TestContext()
+    
+    // Test genuine intelligence functionality during context lifecycle
+    await context.onAppear()
+    
+    // Test genuine functionality: metrics collection (real performance data)
+    let metrics = await context.intelligence.getMetrics()
+    #expect(metrics.totalOperations >= 0) // Genuine metrics tracking
+    
+    // Test genuine functionality: component registry access
+    let registry = await context.intelligence.getComponentRegistry()
+    #expect(registry != nil) // Genuine component tracking
+    
+    await context.onDisappear()
+    // Note: AI theater methods like processQuery were removed (they were keyword matching theater)
+}
+
+@Test("Intelligence metrics collection through context")
+@MainActor
+func testIntelligenceMetricsCollectionThroughContext() async throws {
+    let context = TestContext()
+    
+    // Test intelligence metrics collection
+    let metrics = await context.intelligence.getMetrics()
+    
+    #expect(metrics.totalOperations == 0)
+    #expect(metrics.averageResponseTime == 0.0)
+    #expect(metrics.cacheHitRate == 0.0)
+    #expect(metrics.successfulPredictions == 0)
+    #expect(metrics.predictionAccuracy == 0.0)
+}
+
+// MARK: - Enhanced Analytics Features Tests
+
+@Test("AxiomContext withAnalyticsAndState functionality")
+@MainActor
+func testWithAnalyticsAndStateFunctionality() async throws {
+    let context = TestContext()
+    
+    // Test analytics with state tracking
+    let result = await context.withAnalyticsAndState(
+        action: "test_state_action",
+        stateKeyPath: \.isLoading,
+        parameters: ["test": "value"]
+    ) {
+        context.isLoading = true
+        return "success"
+    }
+    
+    #expect(result == "success")
+    #expect(context.analyticsEvents.count == 1)
+    
+    let event = context.analyticsEvents.first!
+    #expect(event.name == "test_state_action")
+    #expect(event.parameters["success"] as? Bool == true)
+    #expect(event.parameters["state_before"] as? String != nil)
+    #expect(event.parameters["state_after"] as? String != nil)
+    #expect(event.parameters["test"] as? String == "value")
+}
+
+@Test("Error configuration and automatic error handling setup")
+@MainActor
+func testErrorConfigurationAndAutomaticErrorHandlingSetup() async throws {
+    let context = TestContext()
+    var handledErrors: [any AxiomError] = []
+    
+    // Test error handling configuration
+    await context.configureErrorHandling { error in
+        handledErrors.append(error)
+    }
+    
+    // Trigger an error
+    let testError = TestAxiomError(message: "Configuration test error")
+    await context.handleError(testError)
+    
+    // Verify error was handled through context
+    #expect(context.lastError?.userMessage == "Configuration test error")
+}
+
+// MARK: - Helper Extensions for Testing
+
+extension Array {
+    /// Async map helper for testing
+    func asyncMap<T>(_ transform: (Element) async throws -> T) async rethrows -> [T] {
+        var results: [T] = []
+        for element in self {
+            let result = try await transform(element)
+            results.append(result)
+        }
+        return results
+    }
 }

@@ -147,15 +147,15 @@ public actor AxiomDiagnostics {
         do {
             let intelligence = await GlobalIntelligenceManager.shared.getIntelligence()
             
-            // Test with a simple query
-            let response = try await intelligence.processQuery("health check")
+            // Test with component registry access (genuine functionality)
+            let registry = await intelligence.getComponentRegistry()
             
             return DiagnosticCheck(
                 type: .intelligenceSystem,
                 status: .passed,
-                message: "Intelligence system responding",
+                message: "Component registry accessible",
                 details: [
-                    "Response confidence": String(format: "%.2f", response.confidence),
+                    "Registered components": "\(registry.count)",
                     "Features enabled": "Basic"
                 ],
                 impact: .low

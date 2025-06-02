@@ -20,9 +20,9 @@ public struct AxiomMacrosPlugin: CompilerPlugin {
         ViewMacro.self,
         ContextMacro.self,
         
-        // Additional macros (to be implemented)
-        // ObservableStateMacro.self,
-        // IntelligenceMacro.self
+        // Additional macros
+        ObservableStateMacro.self,
+        IntelligenceMacro.self
     ]
     
     public init() {}
@@ -42,8 +42,8 @@ public extension AxiomMacrosPlugin {
             "@CrossCutting": "Inject supervised cross-cutting concerns like analytics, logging, and error reporting",
             "@View": "Generate SwiftUI view boilerplate with AxiomContext integration, lifecycle methods, and error handling",
             "@Context": "Comprehensive context orchestration automation - integrates @Client + @CrossCutting + context-specific features for 95% boilerplate reduction",
-            "@ObservableState": "Make state observable with automatic updates (to be implemented)",
-            "@Intelligence": "Enable intelligence features for a component (to be implemented)"
+            "@ObservableState": "Make state observable with automatic updates and change notifications",
+            "@Intelligence": "Enable intelligence features with configuration and capability registration"
         ]
     }
 }

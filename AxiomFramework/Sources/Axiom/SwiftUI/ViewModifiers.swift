@@ -240,24 +240,21 @@ public struct IntelligenceEnabledModifier: ViewModifier {
     
     @Environment(\.axiomContext) private var context
     @State private var intelligence: (any AxiomIntelligence)?
-    @State private var queryResponse: QueryResponse?
+    // AI theater removed: Natural language queries were keyword matching theater
     
     public struct IntelligenceConfiguration {
-        public let enableNaturalLanguage: Bool
-        public let enablePredictions: Bool
-        public let enablePatternDetection: Bool
-        public let confidenceThreshold: Double
+        public let enableComponentRegistry: Bool
+        public let enablePerformanceMonitoring: Bool
+        public let enableCapabilityValidation: Bool
         
         public init(
-            enableNaturalLanguage: Bool = true,
-            enablePredictions: Bool = true,
-            enablePatternDetection: Bool = true,
-            confidenceThreshold: Double = 0.7
+            enableComponentRegistry: Bool = true,
+            enablePerformanceMonitoring: Bool = true,
+            enableCapabilityValidation: Bool = true
         ) {
-            self.enableNaturalLanguage = enableNaturalLanguage
-            self.enablePredictions = enablePredictions
-            self.enablePatternDetection = enablePatternDetection
-            self.confidenceThreshold = confidenceThreshold
+            self.enableComponentRegistry = enableComponentRegistry
+            self.enablePerformanceMonitoring = enablePerformanceMonitoring
+            self.enableCapabilityValidation = enableCapabilityValidation
         }
     }
     
@@ -274,16 +271,8 @@ public struct IntelligenceEnabledModifier: ViewModifier {
             .task {
                 await setupIntelligence()
             }
-            .overlay(alignment: .topTrailing) {
-                if configuration.enableNaturalLanguage {
-                    IntelligenceQueryButton { query in
-                        await processQuery(query)
-                    }
-                }
-            }
-            .sheet(item: $queryResponse) { response in
-                QueryResponseView(response: response)
-            }
+            // AI theater removed: Natural language query UI was AI theater
+            // Genuine intelligence features are now available through the enabled features
     }
     
     private func setupIntelligence() async {
@@ -297,15 +286,8 @@ public struct IntelligenceEnabledModifier: ViewModifier {
         }
     }
     
-    private func processQuery(_ query: String) async {
-        guard let intelligence = intelligence else { return }
-        
-        do {
-            queryResponse = try await intelligence.processQuery(query)
-        } catch {
-            print("[Axiom Intelligence] Query failed: \(error)")
-        }
-    }
+    // AI theater removed: processQuery was AI theater (keyword matching)
+    // Genuine functionality is available through getComponentRegistry() and other genuine methods
 }
 
 /// Button for natural language queries
