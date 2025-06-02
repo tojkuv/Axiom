@@ -8,7 +8,7 @@ Create a polished, opinionated framework where each component type has exactly O
 
 ### Design Philosophy: One Macro + One Protocol Per Component
 
-**Core Principle**: Each framework component type gets exactly ONE macro that handles ALL code generation and exactly ONE protocol that defines the interface. No mixing of macros or protocols, no optional additional macros, no complex combinations.
+**Core Principle**: Each framework component type gets exactly ONE macro that handles ALL code generation and exactly ONE protocol that defines the interface. No mixing of macros or protocols, no optional additional macros, no complex combinations. Additionally, each Client actor owns exactly one State type (1:1 client-state ownership).
 
 **Protocol + Macro Pairing**:
 - **Protocol**: Defines the interface and contract for the component type
@@ -23,35 +23,37 @@ Create a polished, opinionated framework where each component type has exactly O
 - **Makes Framework Opinionated**: Clear, prescriptive development path
 
 ### Current State Assessment
-- **Existing Macros**: @Client, @Context, @View, @Capabilities (basic functionality)
+- **Existing Macros**: @Client, @Context, @Presentation, @Capabilities (basic functionality)
 - **Current Problems**: Multiple ways to configure components, inconsistent patterns
 - **MVP Status**: Framework in MVP stage - breaking changes acceptable for clean design
 - **Over-Engineering**: Many framework components add complexity without MVP value
 
 ## Unified Macro Design
 
-### 1. AxiomClient Protocol + @Client Macro
+### 1. Client Protocol + @Client Macro
 
-**Protocol**: `AxiomClient` - Defines the interface for all actor-based clients
-**Macro**: `@Client` - The ONLY macro for clients. Generates complete implementation conforming to AxiomClient protocol.
+**Protocol**: `Client` - Defines the interface for all actor-based clients
+**Macro**: `@Client` - The ONLY macro for clients. Generates complete implementation conforming to Client protocol.
+
+**Architectural Constraint**: **One Client Owns One State** - Each Client actor has exactly one associated State type (1:1 client-state ownership), ensuring clear actor boundaries and preventing state sharing conflicts.
 
 **Generated Functionality**:
-- Actor implementation with state management
+- Actor implementation with single state ownership
 - Observer pattern with weak references  
 - Memory management integration
 - Performance monitoring hooks
-- Compile-time validation of state structure
+- Compile-time validation of state structure (1:1 ownership enforced)
 - Thread-safety verification
 - Error handling patterns
-- Automatic AxiomClient protocol conformance
+- Automatic Client protocol conformance
 
 ```swift
 @Client
-actor UserClient: AxiomClient {
-    typealias State = UserState
+actor UserClient: Client {
+    typealias State = UserState  // ENFORCED: One client owns one state
     
     // ALL client functionality generated automatically:
-    // - State management conforming to AxiomClient
+    // - Single state ownership conforming to Client
     // - Observer pattern
     // - Memory management
     // - Performance monitoring
@@ -60,10 +62,10 @@ actor UserClient: AxiomClient {
 }
 ```
 
-### 2. AxiomContext Protocol + @Context Macro
+### 2. Context Protocol + @Context Macro
 
-**Protocol**: `AxiomContext` - Defines the interface for all contexts
-**Macro**: `@Context` - The ONLY macro for contexts. Generates complete implementation conforming to AxiomContext protocol.
+**Protocol**: `Context` - Defines the interface for all contexts
+**Macro**: `@Context` - The ONLY macro for contexts. Generates complete implementation conforming to Context protocol.
 
 **Generated Functionality**:
 - Client relationship management
@@ -72,16 +74,16 @@ actor UserClient: AxiomClient {
 - Cross-cutting concern integration
 - Compile-time client validation
 - Context orchestration patterns
-- Automatic AxiomContext protocol conformance
+- Automatic Context protocol conformance
 
 ```swift
 @Context
-class UserContext: AxiomContext {
+class UserContext: Context {
     let userClient: UserClient
     let preferencesClient: PreferencesClient
     
     // ALL context functionality generated automatically:
-    // - Client relationships conforming to AxiomContext
+    // - Client relationships conforming to Context
     // - Read-only access
     // - SwiftUI bindings
     // - Cross-cutting concerns
@@ -89,10 +91,10 @@ class UserContext: AxiomContext {
 }
 ```
 
-### 3. AxiomView Protocol + @View Macro
+### 3. Presentation Protocol + @Presentation Macro
 
-**Protocol**: `AxiomView` - Defines the interface for all SwiftUI views
-**Macro**: `@View` - The ONLY macro for views. Generates complete implementation conforming to AxiomView protocol.
+**Protocol**: `Presentation` - Defines the interface for all SwiftUI presentations
+**Macro**: `@Presentation` - The ONLY macro for presentations. Generates complete implementation conforming to Presentation protocol.
 
 **Generated Functionality**:
 - 1:1 context relationship enforcement
@@ -100,15 +102,15 @@ class UserContext: AxiomContext {
 - Performance optimization
 - UI consistency validation
 - SwiftUI integration patterns
-- Automatic AxiomView protocol conformance
+- Automatic Presentation protocol conformance
 
 ```swift
-@View
-struct UserView: AxiomView {
+@Presentation
+struct UserView: Presentation {
     let context: UserContext
     
-    // ALL view functionality generated automatically:
-    // - Context binding conforming to AxiomView
+    // ALL presentation functionality generated automatically:
+    // - Context binding conforming to Presentation
     // - SwiftUI integration
     // - Performance optimization
     // - UI consistency
@@ -116,10 +118,10 @@ struct UserView: AxiomView {
 }
 ```
 
-### 4. AxiomState Protocol + @State Macro
+### 4. State Protocol + @State Macro
 
-**Protocol**: `AxiomState` - Defines the interface for all state objects
-**Macro**: `@State` - The ONLY macro for state. Generates complete implementation conforming to AxiomState protocol.
+**Protocol**: `State` - Defines the interface for all state objects
+**Macro**: `@State` - The ONLY macro for state. Generates complete implementation conforming to State protocol.
 
 **Generated Functionality**:
 - Immutable value object implementation
@@ -127,17 +129,17 @@ struct UserView: AxiomView {
 - State update patterns
 - Memory optimization
 - Serialization support
-- Automatic AxiomState protocol conformance
+- Automatic State protocol conformance
 
 ```swift
 @State
-struct UserState: AxiomState {
+struct UserState: State {
     let name: String
     let email: String
     let preferences: UserPreferences
     
     // ALL state functionality generated automatically:
-    // - Immutability enforcement conforming to AxiomState
+    // - Immutability enforcement conforming to State
     // - Change detection
     // - Update patterns
     // - Memory optimization
@@ -145,10 +147,10 @@ struct UserState: AxiomState {
 }
 ```
 
-### 5. AxiomCapability Protocol + @Capability Macro
+### 5. Capability Protocol + @Capability Macro
 
-**Protocol**: `AxiomCapability` - Defines the interface for all capabilities
-**Macro**: `@Capability` - The ONLY macro for capabilities. Generates complete implementation conforming to AxiomCapability protocol.
+**Protocol**: `Capability` - Defines the interface for all capabilities
+**Macro**: `@Capability` - The ONLY macro for capabilities. Generates complete implementation conforming to Capability protocol.
 
 **Generated Functionality**:
 - Runtime validation logic
@@ -156,17 +158,52 @@ struct UserState: AxiomState {
 - Graceful degradation patterns
 - Permission checking
 - Error handling
-- Automatic AxiomCapability protocol conformance
+- Automatic Capability protocol conformance
 
 ```swift
 @Capability
-struct LocationCapability: AxiomCapability {
+struct LocationCapability: Capability {
     // ALL capability functionality generated automatically:
-    // - Runtime validation conforming to AxiomCapability
+    // - Runtime validation conforming to Capability
     // - Compile-time optimization
     // - Graceful degradation
     // - Permission checking
     // - Error handling
+}
+```
+
+### 6. Application Protocol + @Application Macro
+
+**Protocol**: `Application` - Defines the interface for application entry points
+**Macro**: `@Application` - The ONLY macro for applications. Generates complete implementation conforming to Application protocol.
+
+**Application Entry Point Responsibility**: **Runtime Management** - The application entry point orchestrates application lifecycle, manages entry view and entry context coordination, and handles runtime application state.
+
+**Generated Functionality**:
+- Application lifecycle management
+- Entry view coordination and setup
+- Entry context initialization and management
+- Runtime application state management
+- Application-wide configuration
+- Dependency injection setup
+- Global error handling
+- Automatic Application protocol conformance
+
+```swift
+@Application
+struct MyApp: Application {
+    // Entry view and context specification
+    typealias EntryView = MainView
+    typealias EntryContext = MainContext
+    
+    // ALL application functionality generated automatically:
+    // - Application lifecycle conforming to Application
+    // - Entry view coordination
+    // - Entry context management
+    // - Runtime state management
+    // - Configuration setup
+    // - Dependency injection
+    // - Global error handling
 }
 ```
 
@@ -201,20 +238,20 @@ struct LocationCapability: AxiomCapability {
 ### MVP-Focused Framework Core
 
 **Retain Only Essential Components**:
-- **Core**: AxiomClient, AxiomContext, basic Types, MemoryManagement, WeakObserver
+- **Core**: Client, Context, basic Types, MemoryManagement, WeakObserver
 - **Capabilities**: Basic Capability, CapabilityManager, CapabilityValidator
-- **SwiftUI**: AxiomView, ContextBinding, ViewIntegration
-- **Errors**: AxiomError, ErrorHandling (simplified)
+- **SwiftUI**: Presentation, ContextBinding, ViewIntegration
+- **Errors**: Error, ErrorHandling (simplified)
 - **Performance**: PerformanceMonitor (basic monitoring only)
 - **Testing**: TestingAnalyzer (simplified functionality)
-- **Application**: AxiomApplication, AxiomApplicationBuilder
+- **Application**: Application, ApplicationBuilder
 
 ### Unified Macro Benefits
 
 **Development Experience**:
 - **No Confusion**: Exactly one protocol + one macro per component type
 - **Consistent Patterns**: All components of same type behave identically
-- **Reduced Learning Curve**: Master 5 protocol/macro pairs instead of complex combinations
+- **Reduced Learning Curve**: Master 6 protocol/macro pairs instead of complex combinations
 - **Error Prevention**: No incorrect protocol or macro usage possible
 - **IDE Support**: Clear code completion and tooling for both protocols and macros
 
@@ -224,6 +261,17 @@ struct LocationCapability: AxiomCapability {
 - **Validation Built-In**: All macros include comprehensive validation and protocol conformance
 - **Performance Optimized**: Generated code optimized for each component type
 - **Architecture Enforced**: 7 architectural constraints enforced automatically through protocol contracts
+
+### Complete Protocol/Macro Pairs Summary
+
+The framework provides exactly **6 protocol/macro pairs** for complete component coverage:
+
+1. **Client Protocol + @Client Macro** - Actor-based state management
+2. **Context Protocol + @Context Macro** - Client orchestration and coordination
+3. **Presentation Protocol + @Presentation Macro** - SwiftUI presentation integration (avoids SwiftUI conflicts)
+4. **State Protocol + @State Macro** - Immutable value objects
+5. **Capability Protocol + @Capability Macro** - Runtime validation and permissions
+6. **Application Protocol + @Application Macro** - Entry point and runtime management
 
 ## Implementation Plan
 
@@ -242,7 +290,7 @@ struct LocationCapability: AxiomCapability {
    - Establish generated code patterns
    - Remove multi-macro complexity
 
-### Phase 2: Core Macro Implementation (6-8 hours)
+### Phase 2: Core Macro Implementation (7-9 hours)
 
 1. **@Client Macro** (2 hours)
    - Complete actor implementation generation
@@ -256,8 +304,8 @@ struct LocationCapability: AxiomCapability {
    - SwiftUI binding generation
    - Cross-cutting concern integration
 
-3. **@View Macro** (1-2 hours)
-   - 1:1 context relationship enforcement
+3. **@Presentation Macro** (1-2 hours)
+   - 1:1 context relationship enforcement (Presentation protocol)
    - SwiftUI integration patterns
    - Performance optimization
    - UI consistency validation
@@ -268,7 +316,13 @@ struct LocationCapability: AxiomCapability {
    - State update pattern generation
    - Memory optimization
 
-### Phase 3: Integration and Polish (3-4 hours)
+5. **@Application Macro** (1-2 hours)
+   - Application lifecycle management
+   - Entry view and context coordination
+   - Runtime application state management
+   - Dependency injection setup
+
+### Phase 3: Integration and Polish (4-5 hours)
 
 1. **@Capability Macro** (1-2 hours)
    - Runtime validation generation
@@ -294,6 +348,7 @@ struct LocationCapability: AxiomCapability {
 - **No Multi-Macro Conflicts**: Verify no macro combination issues exist
 - **Generated Code Testing**: Validate all generated functionality works correctly
 - **Constraint Enforcement**: Verify 7 architectural constraints enforced automatically
+- **1:1 Client-State Ownership**: Validate one client owns one state enforcement
 
 ### Framework Testing
 - **Build Validation**: Framework builds successfully after component removal
@@ -305,6 +360,7 @@ struct LocationCapability: AxiomCapability {
 
 ### Technical Achievements
 - **One Macro Per Component**: Clear, unambiguous macro usage
+- **One Client Owns One State**: Enforced 1:1 client-state ownership preventing sharing conflicts
 - **70%+ Framework Size Reduction**: Massive simplification through component removal
 - **50%+ Boilerplate Reduction**: Generated code eliminates repetitive patterns
 - **Zero Architecture Violations**: Automatic enforcement of 7 constraints
@@ -312,7 +368,7 @@ struct LocationCapability: AxiomCapability {
 - **Faster Build Times**: Significantly fewer files and dependencies
 
 ### Developer Experience
-- **Simplified Learning**: 5 protocol/macro pairs to master instead of complex combinations
+- **Simplified Learning**: 6 protocol/macro pairs to master instead of complex combinations
 - **No Configuration Confusion**: Each protocol + macro pair has clear, single purpose
 - **Consistent Patterns**: All components of same type behave identically
 - **Better Error Messages**: Clear macro failure diagnostics with protocol validation
@@ -347,6 +403,8 @@ struct LocationCapability: AxiomCapability {
 
 ---
 
-**Proposal Status**: Unapproved - Ready for Review and Re-Approval
-**Implementation Estimate**: 14-18 hours across 3 phases (includes major framework cleanup)
+**Proposal Status**: ✅ APPROVED - Ready for Development Implementation
+**Approval Date**: 2025-06-02
+**Implementation Estimate**: 15-20 hours across 3 phases (includes major framework cleanup)
 **Priority**: High - Fundamental framework improvement with massive simplification and polish
+**Next Step**: Execute FrameworkProtocols/@DEVELOP to begin implementation

@@ -50,6 +50,8 @@ Work commands operate on current branch without version control:
 
 **Technical Focus Only**: Proposals strictly focus on technical implementation for AI agent coding. Framework design prioritizes machine readability, consistent patterns, and deterministic behavior optimized for automated development workflows.
 
+**Architectural Constraint Enforcement**: All proposals must respect the fundamental constraint that one client owns one state (1:1 client-state ownership). This ensures clear actor boundaries, prevents state sharing conflicts, and maintains domain model integrity.
+
 **MVP Development Stage**: Framework is currently in MVP stage - breaking changes are acceptable and backwards compatibility is not required. This enables clean implementations without legacy constraints.
 
 ## Framework Planning Methodology
@@ -64,12 +66,13 @@ Work commands operate on current branch without version control:
 
 ### Phase 2: Framework Proposal Creation
 1. **Technical Specification** → Define implementation approach and architecture
-2. **Type Safety Design** → Plan compile-time validation and guarantees
-3. **Concurrency Strategy** → Design actor-based isolation patterns
-4. **Performance Targets** → Set measurable optimization goals
-5. **Code Generation** → Plan boilerplate reduction strategies
-6. **Testing Approach** → Define comprehensive validation procedures
-7. **Integration Planning** → Ensure compatibility with existing framework
+2. **Architectural Constraint Validation** → Ensure one client owns one state (1:1 client-state ownership)
+3. **Type Safety Design** → Plan compile-time validation and guarantees
+4. **Concurrency Strategy** → Design actor-based isolation patterns with single state ownership
+5. **Performance Targets** → Set measurable optimization goals
+6. **Code Generation** → Plan boilerplate reduction strategies
+7. **Testing Approach** → Define comprehensive validation procedures
+8. **Integration Planning** → Ensure compatibility with existing framework
 
 ### Phase 3: Framework Proposal Finalization
 1. **Structured Format** → Create framework proposal using established format and sections
@@ -144,7 +147,7 @@ echo "🎯 Planning ready - proceeding in framework workspace"
 
 ### Approve Mode (`@PLAN approve`)
 1. **Scan Unapproved/** → List proposals awaiting approval
-2. **Validate Proposals** → Ensure technical completeness
+2. **Validate Proposals** → Ensure technical completeness and 1:1 client-state ownership compliance
 3. **Move to Approved/** → Transfer proposal to Approved/ directory
 4. **Update TRACKING.md** → Add to development priorities
 
@@ -177,6 +180,7 @@ echo "🎯 Planning ready - proceeding in framework workspace"
 
 ### Framework Quality Standards
 - **Technical Completeness**: All specifications fully defined
+- **Architectural Compliance**: One client owns one state (1:1 client-state ownership) enforced
 - **Implementation Clarity**: Clear development path outlined
 - **Testing Coverage**: Comprehensive validation strategy
 - **Performance Metrics**: Measurable optimization targets
@@ -187,6 +191,7 @@ echo "🎯 Planning ready - proceeding in framework workspace"
 
 ### Approval Criteria (`@PLAN approve`)
 - **Technical Completeness**: All specifications defined
+- **Architectural Constraint Compliance**: One client owns one state (1:1 client-state ownership) verified
 - **Implementation Readiness**: Clear development path
 - **Testing Strategy**: Comprehensive validation approach
 - **Performance Requirements**: Defined and measurable
