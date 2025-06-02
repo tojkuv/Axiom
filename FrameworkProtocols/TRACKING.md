@@ -37,56 +37,55 @@ All FrameworkProtocols commands follow this workflow:
 
 ## 🎯 Current Development Focus
 
-**Framework Status**: ENHANCED MACRO SYSTEM AND CODE GENERATION - APPROVED ✅  
-**Current Proposal**: Enhanced Macro System and Code Generation (READY FOR DEVELOPMENT)  
+**Framework Status**: UNIFIED MACRO SYSTEM AND FRAMEWORK SIMPLIFICATION - UNAPPROVED 📋  
+**Current Proposal**: Unified Macro System and Framework Simplification (AWAITING RE-APPROVAL)  
 **Previous Proposal**: Framework Implementation Gaps and Cleanup (COMPLETED)  
-**Implementation Progress**: Proposal approved and moved to development queue
+**Implementation Progress**: Proposal revised with "one macro per component" design - awaiting review
 
-### 🚀 APPROVED: Enhanced Macro System and Code Generation
-**Approval Date**: 2025-06-02  
-**Priority**: High - Advanced code generation, boilerplate reduction, and framework cleanup  
-**Implementation Timeline**: 11-15 hours across 3 phases (includes framework implementation removal)  
-**Status**: APPROVED - Ready for development implementation  
-**MVP Approach**: Breaking changes acceptable for clean implementation and over-engineering removal
+### 📋 UNAPPROVED: Unified Macro System and Framework Simplification
+**Revision Date**: 2025-06-02  
+**Priority**: High - One macro per component design with massive framework cleanup  
+**Implementation Timeline**: 14-18 hours across 3 phases (includes 70%+ framework size reduction)  
+**Status**: UNAPPROVED - Awaiting review and re-approval  
+**Design Philosophy**: One macro + one protocol per component for maximum polish and simplicity
 
 ### Development Cycle Progress
-**Phase 1 Status**: PENDING - Framework Cleanup and Core Macro Enhancement (4-5 hours)  
-**Phase 2 Status**: PENDING - New Macro Implementation (4-6 hours)  
-**Phase 3 Status**: PENDING - Advanced Code Generation and Final Cleanup (3-4 hours)  
-**Current State**: Proposal approved, ready for implementation start  
-**Implementation Focus**: Enhanced Macro System with Framework Implementation Removal
+**Phase 1 Status**: PENDING - Framework Cleanup and Macro Foundation (5-6 hours)  
+**Phase 2 Status**: PENDING - Core Macro Implementation (6-8 hours)  
+**Phase 3 Status**: PENDING - Integration and Polish (3-4 hours)  
+**Current State**: Proposal unapproved, awaiting review for "one macro + one protocol per component" design  
+**Implementation Focus**: Unified Macro System with Massive Framework Simplification
 
 #### 📋 Implementation Roadmap
 
-**Phase 1: Framework Cleanup and Core Macro Enhancement** (Priority 1 - 4-5 hours)
-- Framework Implementation Removal: Remove Analysis/, advanced Testing/, State/, and Core/ over-engineered components (1-2 hours)
-- Replace Existing Macros: Complete redesign of @Client, @Context, @View (breaking changes acceptable) (2-3 hours)
-- Compile-time Validation: Implement relationship validation and type safety
-- Architecture Validation: Create compile-time validation for 7 architectural constraints
-- Update Dependencies: Remove imports and dependencies on removed framework components
+**Phase 1: Framework Cleanup and Macro Foundation** (Priority 1 - 5-6 hours)
+- Framework Implementation Removal: Remove entire Analysis/, State/, advanced Testing/, Core/ helpers (2-3 hours)
+- Unified Macro Design: Design one protocol + one macro per component approach (2-3 hours)
+- Protocol Foundation: Establish AxiomClient, AxiomContext, AxiomView, AxiomState, AxiomCapability protocols
+- Remove Multi-Macro Complexity: Eliminate macro combination confusion
 
-**Phase 2: New Macro Implementation** (Priority 2 - 4-6 hours)  
-- @ArchitectureValidation Macro: Implement constraint checking logic
-- @Pattern Macro System: Implement common pattern templates
-- Integration Cleanup: Remove legacy macro implementations
-- Direct Integration: No compatibility layers needed (MVP approach)
+**Phase 2: Core Macro Implementation** (Priority 2 - 6-8 hours)  
+- @Client Macro: Complete actor implementation generation with AxiomClient conformance (2 hours)
+- @Context Macro: Client relationship management with AxiomContext conformance (2 hours)
+- @View Macro: SwiftUI integration with AxiomView conformance (1-2 hours)
+- @State Macro: Immutable value object generation with AxiomState conformance (1-2 hours)
+- Protocol Validation: Ensure all generated code conforms to respective protocols
 
-**Phase 3: Advanced Code Generation and Final Cleanup** (Priority 3 - 3-4 hours)
-- Performance Integration: Generate monitoring and benchmarking code (simplified for MVP)
-- Testing Integration: Generate test scaffolding and validation
-- Final Framework Cleanup: Remove remaining unused imports and test files
-- Example App Update: Update to use simplified framework
-- Optimization: Final performance and memory optimization
+**Phase 3: Integration and Polish** (Priority 3 - 3-4 hours)
+- @Capability Macro: Runtime validation with AxiomCapability conformance (1-2 hours)
+- Framework Integration: Protocol conformance generation and cross-macro validation (1-2 hours)
+- Final Cleanup: Remove unused imports, validate builds, update example app (1 hour)
+- Architecture Enforcement: Verify 7 architectural constraints enforced through protocols
 
 #### 🎯 Success Criteria & Quality Gates
 **Technical Excellence Metrics** (All must be achieved):
-- 50%+ Boilerplate Reduction: Measurable decrease in repetitive code
-- Zero Architecture Violations: Compile-time constraint enforcement  
-- 10%+ Performance Improvement: Optimized generated code performance
-- 100% Type Safety: Enhanced compile-time validation coverage
+- One Protocol + One Macro Per Component: Clear, unambiguous usage
+- 70%+ Framework Size Reduction: Massive simplification through component removal
+- 50%+ Boilerplate Reduction: Generated code eliminates repetitive patterns
+- Zero Architecture Violations: Automatic enforcement through protocol contracts
+- 100% Type Safety: Complete compile-time validation with protocol conformance
 - Complete Test Coverage: All generated code thoroughly tested
-- 30%+ Framework Size Reduction: Removal of over-engineered components
-- Faster Build Times: Fewer files and dependencies to compile
+- Faster Build Times: Significantly fewer files and dependencies
 
 **Implementation Validation**:
 - Each phase includes comprehensive testing before proceeding
