@@ -24,28 +24,28 @@ final class ViewMacroTests: XCTestCase {
             """,
             expandedSource: """
             struct MyView: View {
+                var body: some View {
+                    Text("Hello")
+                }
+
                 @ObservedObject var context: MyContext
-                
+
                 public init(context: MyContext) {
                     self.context = context
                 }
-                
+
                 private func axiomOnAppear() async {
                     await context.onAppear()
                 }
-                
+
                 private func axiomOnDisappear() async {
                     await context.onDisappear()
                 }
-                
+
                 @State private var showingError = false
-                
+
                 private func queryIntelligence(_ query: String) async -> String? {
                     return await context.intelligence.query(query)
-                }
-                
-                var body: some View {
-                    Text("Hello")
                 }
             }
             """,
@@ -65,28 +65,28 @@ final class ViewMacroTests: XCTestCase {
             """,
             expandedSource: """
             struct GenericView: View {
+                var body: some View {
+                    EmptyView()
+                }
+
                 @ObservedObject var context: GenericContext<String>
-                
+
                 public init(context: GenericContext<String>) {
                     self.context = context
                 }
-                
+
                 private func axiomOnAppear() async {
                     await context.onAppear()
                 }
-                
+
                 private func axiomOnDisappear() async {
                     await context.onDisappear()
                 }
-                
+
                 @State private var showingError = false
-                
+
                 private func queryIntelligence(_ query: String) async -> String? {
                     return await context.intelligence.query(query)
-                }
-                
-                var body: some View {
-                    EmptyView()
                 }
             }
             """,
@@ -236,26 +236,6 @@ final class ViewMacroTests: XCTestCase {
             """,
             expandedSource: """
             struct UserView: View {
-                @ObservedObject var context: UserContext
-                
-                public init(context: UserContext) {
-                    self.context = context
-                }
-                
-                private func axiomOnAppear() async {
-                    await context.onAppear()
-                }
-                
-                private func axiomOnDisappear() async {
-                    await context.onDisappear()
-                }
-                
-                @State private var showingError = false
-                
-                private func queryIntelligence(_ query: String) async -> String? {
-                    return await context.intelligence.query(query)
-                }
-                
                 @State private var username: String = ""
                 @Binding var isPresented: Bool
                 
@@ -264,6 +244,26 @@ final class ViewMacroTests: XCTestCase {
                         TextField("Username", text: $username)
                         Button("Close") { isPresented = false }
                     }
+                }
+
+                @ObservedObject var context: UserContext
+
+                public init(context: UserContext) {
+                    self.context = context
+                }
+
+                private func axiomOnAppear() async {
+                    await context.onAppear()
+                }
+
+                private func axiomOnDisappear() async {
+                    await context.onDisappear()
+                }
+
+                @State private var showingError = false
+
+                private func queryIntelligence(_ query: String) async -> String? {
+                    return await context.intelligence.query(query)
                 }
             }
             """,
@@ -291,26 +291,6 @@ final class ViewMacroTests: XCTestCase {
             """,
             expandedSource: """
             struct DataView: View {
-                @ObservedObject var context: DataContext
-                
-                public init(context: DataContext) {
-                    self.context = context
-                }
-                
-                private func axiomOnAppear() async {
-                    await context.onAppear()
-                }
-                
-                private func axiomOnDisappear() async {
-                    await context.onDisappear()
-                }
-                
-                @State private var showingError = false
-                
-                private func queryIntelligence(_ query: String) async -> String? {
-                    return await context.intelligence.query(query)
-                }
-                
                 @State private var data: [String] = []
                 
                 init(data: [String]) {
@@ -321,6 +301,26 @@ final class ViewMacroTests: XCTestCase {
                     List(data, id: \\.self) { item in
                         Text(item)
                     }
+                }
+
+                @ObservedObject var context: DataContext
+
+                public init(context: DataContext) {
+                    self.context = context
+                }
+
+                private func axiomOnAppear() async {
+                    await context.onAppear()
+                }
+
+                private func axiomOnDisappear() async {
+                    await context.onDisappear()
+                }
+
+                @State private var showingError = false
+
+                private func queryIntelligence(_ query: String) async -> String? {
+                    return await context.intelligence.query(query)
                 }
             }
             """,
@@ -342,28 +342,28 @@ final class ViewMacroTests: XCTestCase {
             """,
             expandedSource: """
             struct ComplexView: View {
+                var body: some View {
+                    Text("Complex")
+                }
+
                 @ObservedObject var context: ComplexContext<Data.Model, String>
-                
+
                 public init(context: ComplexContext<Data.Model, String>) {
                     self.context = context
                 }
-                
+
                 private func axiomOnAppear() async {
                     await context.onAppear()
                 }
-                
+
                 private func axiomOnDisappear() async {
                     await context.onDisappear()
                 }
-                
+
                 @State private var showingError = false
-                
+
                 private func queryIntelligence(_ query: String) async -> String? {
                     return await context.intelligence.query(query)
-                }
-                
-                var body: some View {
-                    Text("Complex")
                 }
             }
             """,

@@ -44,13 +44,8 @@ public struct ViewMacro: MemberMacro, AxiomMacro {
         // Extract context type from the macro argument
         let contextType = try extractContextType(from: node, in: context)
         
+        // If empty, extractContextType has already diagnosed the issue
         guard !contextType.isEmpty else {
-            context.diagnose(
-                SyntaxUtilities.createDiagnostic(
-                    node: node,
-                    message: ViewMacroDiagnostic.missingContextType
-                )
-            )
             return []
         }
         
@@ -287,9 +282,6 @@ public struct ViewMacro: MemberMacro, AxiomMacro {
         // Generate: @State private var showingError = false
         let pattern = PatternBindingSyntax(
             pattern: IdentifierPatternSyntax(identifier: .identifier("showingError")),
-            typeAnnotation: TypeAnnotationSyntax(
-                type: TypeSyntax(IdentifierTypeSyntax(name: .identifier("Bool")))
-            ),
             initializer: InitializerClauseSyntax(
                 value: ExprSyntax(BooleanLiteralExprSyntax(literal: .keyword(.false)))
             )
@@ -321,6 +313,7 @@ public struct ViewMacro: MemberMacro, AxiomMacro {
     private static func generateQueryIntelligenceMethod() -> FunctionDeclSyntax? {
         // Generate: private func queryIntelligence(_ query: String) async -> String?
         let parameter = CodeGenerationUtilities.createParameter(
+            label: "_",
             name: "query",
             type: TypeSyntax(IdentifierTypeSyntax(name: .identifier("String")))
         )

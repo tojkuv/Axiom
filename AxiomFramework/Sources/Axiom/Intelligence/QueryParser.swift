@@ -321,9 +321,9 @@ public actor NaturalLanguageQueryParser: QueryParsing {
     private func classifyByKeywords(_ query: String) -> QueryIntent {
         let words = query.components(separatedBy: .whitespaces)
         
-        // Component-related keywords
-        if words.contains(where: { ["component", "class", "type", "module"].contains($0) }) {
-            if words.contains(where: { ["list", "show", "find", "all"].contains($0) }) {
+        // Component-related keywords (enhanced)
+        if words.contains(where: { ["component", "components", "class", "type", "module", "system"].contains($0) }) {
+            if words.contains(where: { ["list", "show", "find", "all", "what", "are"].contains($0) }) {
                 return .listComponents
             } else if words.contains(where: { ["count", "how", "many"].contains($0) }) {
                 return .countComponents
@@ -337,8 +337,8 @@ public actor NaturalLanguageQueryParser: QueryParsing {
             return .findDependencies
         }
         
-        // Pattern keywords
-        if words.contains(where: { ["pattern", "anti-pattern", "antipattern"].contains($0) }) {
+        // Pattern keywords (enhanced)
+        if words.contains(where: { ["pattern", "patterns", "actor", "anti-pattern", "antipattern"].contains($0) }) {
             if words.contains(where: { ["anti", "bad", "problem"].contains($0) }) {
                 return .detectAntiPatterns
             } else {
@@ -346,8 +346,8 @@ public actor NaturalLanguageQueryParser: QueryParsing {
             }
         }
         
-        // Performance keywords
-        if words.contains(where: { ["performance", "speed", "fast", "slow", "metric"].contains($0) }) {
+        // Performance and complexity keywords
+        if words.contains(where: { ["performance", "speed", "fast", "slow", "metric", "complexity"].contains($0) }) {
             return .getPerformance
         }
         

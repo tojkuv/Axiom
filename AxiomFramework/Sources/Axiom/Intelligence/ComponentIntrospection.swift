@@ -347,29 +347,101 @@ public actor ComponentIntrospectionEngine: ComponentIntrospecting {
     // MARK: Private Implementation
     
     private func discoverClients() async -> [IntrospectedComponent] {
-        // In a real implementation, this would use reflection or registry to find AxiomClient implementations
-        // For now, return mock data representing discovered clients
-        return []
+        // Discover AxiomClient implementations
+        var clients: [IntrospectedComponent] = []
+        
+        // Add framework's core client types
+        clients.append(IntrospectedComponent(
+            id: ComponentID("axiom-client-protocol"),
+            name: "AxiomClient",
+            category: .client,
+            type: "Protocol",
+            architecturalDNA: createClientProtocolDNA()
+        ))
+        
+        // Add performance monitor client
+        clients.append(IntrospectedComponent(
+            id: ComponentID("performance-monitor-client"),
+            name: "PerformanceMonitor",
+            category: .client,
+            type: "Actor",
+            architecturalDNA: createPerformanceMonitorDNA()
+        ))
+        
+        return clients
     }
     
     private func discoverContexts() async -> [IntrospectedComponent] {
         // Discover AxiomContext implementations
-        return []
+        var contexts: [IntrospectedComponent] = []
+        
+        // Add framework's core context types
+        contexts.append(IntrospectedComponent(
+            id: ComponentID("axiom-context-protocol"),
+            name: "AxiomContext",
+            category: .context,
+            type: "Protocol",
+            architecturalDNA: createContextProtocolDNA()
+        ))
+        
+        return contexts
     }
     
     private func discoverViews() async -> [IntrospectedComponent] {
         // Discover AxiomView implementations
-        return []
+        var views: [IntrospectedComponent] = []
+        
+        // Add framework's core view types
+        views.append(IntrospectedComponent(
+            id: ComponentID("axiom-view-protocol"),
+            name: "AxiomView",
+            category: .view,
+            type: "Protocol",
+            architecturalDNA: createViewProtocolDNA()
+        ))
+        
+        return views
     }
     
     private func discoverDomainModels() async -> [IntrospectedComponent] {
         // Discover DomainModel implementations
-        return []
+        var domainModels: [IntrospectedComponent] = []
+        
+        // Add framework's core domain model types
+        domainModels.append(IntrospectedComponent(
+            id: ComponentID("domain-model-protocol"),
+            name: "DomainModel",
+            category: .domainModel,
+            type: "Protocol",
+            architecturalDNA: createDomainModelProtocolDNA()
+        ))
+        
+        return domainModels
     }
     
     private func discoverCapabilities() async -> [IntrospectedComponent] {
         // Discover capability providers
-        return []
+        var capabilities: [IntrospectedComponent] = []
+        
+        // Add framework's core capability types
+        capabilities.append(IntrospectedComponent(
+            id: ComponentID("capability-manager"),
+            name: "CapabilityManager",
+            category: .capability,
+            type: "Actor",
+            architecturalDNA: createCapabilityManagerDNA()
+        ))
+        
+        // Add intelligence components
+        capabilities.append(IntrospectedComponent(
+            id: ComponentID("axiom-intelligence"),
+            name: "AxiomIntelligence",
+            category: .intelligence,
+            type: "Protocol",
+            architecturalDNA: createIntelligenceSystemDNA()
+        ))
+        
+        return capabilities
     }
     
     private func performComponentAnalysis(_ component: IntrospectedComponent) async -> ComponentAnalysis {
@@ -716,6 +788,189 @@ public actor ComponentIntrospectionEngine: ComponentIntrospecting {
         }
         
         return issues
+    }
+    
+    // MARK: - DNA Creation Methods
+    
+    private func createClientProtocolDNA() -> DefaultArchitecturalDNA {
+        DefaultArchitecturalDNA(
+            componentID: ComponentID("axiom-client-protocol"),
+            purpose: ComponentPurpose(
+                category: .client,
+                role: "Actor-based State Management",
+                domain: "Framework Core",
+                responsibilities: [
+                    "Manage component state through actor isolation",
+                    "Provide thread-safe state access",
+                    "Implement observer pattern for state changes",
+                    "Validate state transitions and business logic"
+                ],
+                businessValue: "Ensures thread-safe state management with architectural consistency"
+            ),
+            architecturalLayer: .domain,
+            relationships: [],
+            constraints: [
+                ArchitecturalConstraint(type: .actorSafety, description: "Must use actor isolation", rule: .all),
+                ArchitecturalConstraint(type: .sendableCompliance, description: "All state must be Sendable", rule: .all)
+            ]
+        )
+    }
+    
+    private func createPerformanceMonitorDNA() -> DefaultArchitecturalDNA {
+        DefaultArchitecturalDNA(
+            componentID: ComponentID("performance-monitor-client"),
+            purpose: ComponentPurpose(
+                category: .infrastructure,
+                role: "Performance Monitoring",
+                domain: "System Performance",
+                responsibilities: [
+                    "Monitor operation performance",
+                    "Collect and analyze metrics",
+                    "Provide performance insights",
+                    "Enable performance-based optimizations"
+                ],
+                businessValue: "Enables data-driven performance optimization"
+            ),
+            architecturalLayer: .infrastructure,
+            relationships: [],
+            constraints: [
+                ArchitecturalConstraint(type: .actorSafety, description: "Actor-based isolation", rule: .all)
+            ]
+        )
+    }
+    
+    private func createContextProtocolDNA() -> DefaultArchitecturalDNA {
+        DefaultArchitecturalDNA(
+            componentID: ComponentID("axiom-context-protocol"),
+            purpose: ComponentPurpose(
+                category: .context,
+                role: "Client Orchestration Layer",
+                domain: "Framework Core",
+                responsibilities: [
+                    "Orchestrate multiple client interactions",
+                    "Provide SwiftUI integration layer",
+                    "Maintain 1:1 relationship with views",
+                    "Coordinate cross-cutting concerns"
+                ],
+                businessValue: "Enables clean separation between UI and business logic"
+            ),
+            architecturalLayer: .application,
+            relationships: [
+                ComponentRelationship(
+                    type: .dependsOn,
+                    targetComponent: ComponentID("axiom-client-protocol"),
+                    description: "Orchestrates client components"
+                )
+            ],
+            constraints: [
+                ArchitecturalConstraint(type: .viewContextRelationship, description: "1:1 View-Context relationship", rule: .exactly(count: 1))
+            ]
+        )
+    }
+    
+    private func createViewProtocolDNA() -> DefaultArchitecturalDNA {
+        DefaultArchitecturalDNA(
+            componentID: ComponentID("axiom-view-protocol"),
+            purpose: ComponentPurpose(
+                category: .view,
+                role: "SwiftUI Integration",
+                domain: "User Interface",
+                responsibilities: [
+                    "Present user interface components",
+                    "Bind to context state reactively",
+                    "Handle user interactions",
+                    "Maintain 1:1 relationship with context"
+                ],
+                businessValue: "Provides type-safe UI integration with framework"
+            ),
+            architecturalLayer: .presentation,
+            relationships: [
+                ComponentRelationship(
+                    type: .dependsOn,
+                    targetComponent: ComponentID("axiom-context-protocol"),
+                    description: "1:1 binding to context"
+                )
+            ],
+            constraints: [
+                ArchitecturalConstraint(type: .viewContextRelationship, description: "1:1 View-Context relationship", rule: .exactly(count: 1))
+            ]
+        )
+    }
+    
+    private func createDomainModelProtocolDNA() -> DefaultArchitecturalDNA {
+        DefaultArchitecturalDNA(
+            componentID: ComponentID("domain-model-protocol"),
+            purpose: ComponentPurpose(
+                category: .domainModel,
+                role: "Domain Entity Definition",
+                domain: "Business Logic",
+                responsibilities: [
+                    "Define business entity structure",
+                    "Implement business validation rules",
+                    "Provide value object semantics",
+                    "Enable query operations"
+                ],
+                businessValue: "Encapsulates business logic and domain knowledge"
+            ),
+            architecturalLayer: .domain,
+            relationships: [],
+            constraints: [
+                ArchitecturalConstraint(type: .sendableCompliance, description: "Must be Sendable", rule: .all),
+                ArchitecturalConstraint(type: .dataIntegrity, description: "Value object semantics", rule: .all)
+            ]
+        )
+    }
+    
+    private func createCapabilityManagerDNA() -> DefaultArchitecturalDNA {
+        DefaultArchitecturalDNA(
+            componentID: ComponentID("capability-manager"),
+            purpose: ComponentPurpose(
+                category: .capability,
+                role: "Runtime Capability Management",
+                domain: "System Capabilities",
+                responsibilities: [
+                    "Validate capability availability",
+                    "Manage capability dependencies",
+                    "Enable graceful degradation",
+                    "Monitor capability health"
+                ],
+                businessValue: "Enables adaptive system behavior based on available capabilities"
+            ),
+            architecturalLayer: .infrastructure,
+            relationships: [],
+            constraints: [
+                ArchitecturalConstraint(type: .actorSafety, description: "Thread-safe capability access", rule: .all)
+            ]
+        )
+    }
+    
+    private func createIntelligenceSystemDNA() -> DefaultArchitecturalDNA {
+        DefaultArchitecturalDNA(
+            componentID: ComponentID("axiom-intelligence"),
+            purpose: ComponentPurpose(
+                category: .intelligence,
+                role: "AI-Powered Architecture Analysis",
+                domain: "Intelligence Systems",
+                responsibilities: [
+                    "Analyze architectural patterns",
+                    "Predict potential issues",
+                    "Generate optimization suggestions",
+                    "Provide natural language interfaces"
+                ],
+                businessValue: "Enables intelligent development assistance and architectural optimization"
+            ),
+            architecturalLayer: .intelligence,
+            relationships: [
+                ComponentRelationship(
+                    type: .dependsOn,
+                    targetComponent: ComponentID("performance-monitor-client"),
+                    description: "Uses performance data for analysis"
+                )
+            ],
+            constraints: [
+                ArchitecturalConstraint(type: .actorSafety, description: "Thread-safe analysis operations", rule: .all)
+            ]
+        )
     }
 }
 

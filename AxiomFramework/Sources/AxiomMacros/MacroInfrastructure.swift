@@ -183,13 +183,20 @@ public enum CodeGenerationUtilities {
     ) -> VariableDeclSyntax {
         let pattern = PatternBindingSyntax(
             pattern: IdentifierPatternSyntax(identifier: .identifier(name)),
-            typeAnnotation: TypeAnnotationSyntax(type: type),
+            typeAnnotation: TypeAnnotationSyntax(
+                colon: .colonToken(trailingTrivia: .space),
+                type: type
+            ),
             initializer: initializer.map { InitializerClauseSyntax(value: $0) }
         )
         
+        let modifiers: DeclModifierListSyntax = isPrivate ? [
+            DeclModifierSyntax(name: .keyword(.private, trailingTrivia: .space))
+        ] : []
+        
         return VariableDeclSyntax(
-            modifiers: isPrivate ? [DeclModifierSyntax(name: .keyword(.private))] : [],
-            bindingSpecifier: .keyword(isLet ? .let : .var),
+            modifiers: modifiers,
+            bindingSpecifier: .keyword(isLet ? .let : .var, trailingTrivia: .space),
             bindings: PatternBindingListSyntax([pattern])
         )
     }
@@ -224,8 +231,13 @@ public enum CodeGenerationUtilities {
         isPublic: Bool = false,
         body: CodeBlockItemListSyntax
     ) -> InitializerDeclSyntax {
-        InitializerDeclSyntax(
-            modifiers: isPublic ? [DeclModifierSyntax(name: .keyword(.public))] : [],
+        let modifiers: DeclModifierListSyntax = isPublic ? [
+            DeclModifierSyntax(name: .keyword(.public, trailingTrivia: .space))
+        ] : []
+        
+        return InitializerDeclSyntax(
+            modifiers: modifiers,
+            initKeyword: .keyword(.`init`),
             signature: FunctionSignatureSyntax(
                 parameterClause: FunctionParameterClauseSyntax(
                     parameters: FunctionParameterListSyntax(parameters)
@@ -241,11 +253,22 @@ public enum CodeGenerationUtilities {
         name: String,
         type: TypeSyntax
     ) -> FunctionParameterSyntax {
-        FunctionParameterSyntax(
-            firstName: label.map { TokenSyntax.identifier($0) } ?? TokenSyntax.wildcardToken(),
-            secondName: label != nil ? TokenSyntax.identifier(name) : nil,
-            type: type
-        )
+        if let label = label {
+            // External label + internal name
+            return FunctionParameterSyntax(
+                firstName: .identifier(label, trailingTrivia: .space),
+                secondName: .identifier(name),
+                colon: .colonToken(trailingTrivia: .space),
+                type: type
+            )
+        } else {
+            // No external label, just parameter name
+            return FunctionParameterSyntax(
+                firstName: .identifier(name),
+                colon: .colonToken(trailingTrivia: .space),
+                type: type
+            )
+        }
     }
     
     /// Creates a function call expression
