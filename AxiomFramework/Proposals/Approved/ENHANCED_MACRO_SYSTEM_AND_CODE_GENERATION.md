@@ -2,7 +2,7 @@
 
 ## Summary
 
-Enhance the framework's macro system to provide advanced code generation capabilities that further reduce boilerplate, strengthen type safety guarantees, and improve consistency for AI agent coding. This proposal focuses on expanding the existing @Client, @Context, and @View macros with additional compile-time validation and introducing new macros for common patterns.
+Enhance the framework's macro system to provide advanced code generation capabilities that further reduce boilerplate, strengthen type safety guarantees, and improve consistency for AI agent coding. This proposal focuses on expanding the existing @Client, @Context, and @View macros with additional compile-time validation, introducing new macros for common patterns, and removing unnecessary framework implementations that add complexity without MVP value.
 
 ## Technical Specification
 
@@ -124,16 +124,71 @@ func updateUserName(_ name: String) {
 - **Documentation**: Auto-generated documentation for generated code
 - **Testing**: Generated test scaffolding and validation
 
+## Framework Implementation Cleanup
+
+### Current Framework Over-Engineering Assessment
+The framework currently contains numerous implementations that add complexity without providing MVP value. These over-engineered components should be removed to focus on core functionality:
+
+#### Analysis/ Directory - Excessive Complexity
+- **AlgorithmOptimization.swift**: Premature optimization for MVP stage
+- **ArchitecturalDNA.swift**: Over-engineered architectural introspection
+- **ArchitecturalMetadata.swift**: Unnecessary metadata complexity
+- **ParallelProcessingEngine.swift**: Overkill parallel processing for MVP
+- **QueryEngine.swift & QueryParser.swift**: Complex query system not needed
+
+#### Core/ Directory - Unnecessary Helpers
+- **AxiomDebugger.swift**: Over-engineered debugging for MVP
+- **DeveloperAssistant.swift**: Complex developer tooling beyond MVP scope
+- **ClientContainerHelpers.swift**: Redundant helper functionality
+
+#### Testing/ Directory - Advanced Features Beyond MVP
+- **AdvancedIntegrationTesting.swift**: Overly complex testing infrastructure
+- **DevicePerformanceProfiler.swift**: Sophisticated profiling beyond MVP needs
+- **RealWorldTestingEngine.swift**: Complex testing engine not required
+
+#### State/ Directory - Complex State Management
+- **StateSnapshot.swift**: Snapshot functionality not needed in MVP
+- **StateTransaction.swift**: Transaction system adds unnecessary complexity
+
+#### Other Over-Engineered Components
+- **ComponentIntrospection.swift**: Complex introspection beyond MVP needs
+- **ComponentRegistry.swift**: Sophisticated registry system overkill
+- **PatternDetection.swift**: Advanced pattern detection not required
+
+### MVP-Focused Framework Core
+**Retain Only Essential Components**:
+- **Core**: AxiomClient, AxiomContext, basic Types, MemoryManagement, WeakObserver
+- **Capabilities**: Basic capability validation without complex features
+- **SwiftUI**: Essential view integration without advanced features
+- **Errors**: Simple error handling without complex utilities
+- **Performance**: Basic monitoring without advanced profiling
+- **Testing**: TestingAnalyzer with simplified functionality
+
+### Removal Benefits
+- **Reduced Complexity**: Focus on core 7 architectural constraints
+- **Faster Build Times**: Fewer files and dependencies
+- **Easier Maintenance**: Less code to maintain and debug
+- **Cleaner Architecture**: Remove complexity that doesn't add MVP value
+- **Enhanced Performance**: Less overhead from unused features
+
 ## Implementation Plan
 
-### Phase 1: Core Macro Enhancement (3-4 hours)
-1. **Replace Existing Macros**
+### Phase 1: Framework Cleanup and Core Macro Enhancement (4-5 hours)
+1. **Framework Implementation Removal** (1-2 hours)
+   - Remove Analysis/ directory over-engineered components
+   - Remove unnecessary Core/ helpers (AxiomDebugger, DeveloperAssistant, ClientContainerHelpers)
+   - Remove advanced Testing/ components beyond MVP scope
+   - Remove State/ complex management (StateSnapshot, StateTransaction)
+   - Update imports and dependencies throughout framework
+
+2. **Replace Existing Macros** (2-3 hours)
    - Complete redesign of @Client, @Context, @View (breaking changes acceptable)
    - Implement compile-time relationship validation
    - Add performance optimization code generation
    - Enhanced error reporting for macro failures
+   - Remove dependencies on removed framework components
 
-2. **Architecture Validation Framework**
+3. **Architecture Validation Framework**
    - Create compile-time validation for 7 architectural constraints
    - Implement relationship checking between components
    - Add constraint violation reporting
@@ -152,9 +207,9 @@ func updateUserName(_ name: String) {
    - Add customization options
    - Direct integration without legacy support
 
-### Phase 3: Advanced Code Generation (3-4 hours)
+### Phase 3: Advanced Code Generation and Final Cleanup (3-4 hours)
 1. **Performance Integration**
-   - Generate performance monitoring code
+   - Generate performance monitoring code (simplified for MVP)
    - Add automatic benchmarking points
    - Implement memory tracking integration
    - Create optimization hints
@@ -164,6 +219,12 @@ func updateUserName(_ name: String) {
    - Add validation test generation
    - Implement pattern compliance tests
    - Create integration test templates
+
+3. **Final Framework Cleanup**
+   - Remove any remaining unused imports
+   - Cleanup test files referencing removed components
+   - Validate framework builds successfully
+   - Update example app to use simplified framework
 
 ## Testing Strategy
 
@@ -193,6 +254,8 @@ func updateUserName(_ name: String) {
 - **10%+ performance improvement**: Optimized generated code performance
 - **100% type safety**: Enhanced compile-time validation coverage
 - **Complete test coverage**: All generated code thoroughly tested
+- **30%+ framework size reduction**: Removal of over-engineered components
+- **Faster build times**: Fewer files and dependencies to compile
 
 ### Developer Experience
 - **Improved consistency**: Uniform patterns across generated code
@@ -208,14 +271,17 @@ func updateUserName(_ name: String) {
 - **Testing coverage**: Comprehensive test generation and validation
 - **Maintainability**: Consistent, readable generated code
 - **MVP Focus**: Clean implementation without legacy baggage
+- **Simplified Framework**: Focused core without over-engineering
+- **Reduced Complexity**: Essential components only for MVP needs
 
 ## Integration Notes
 
 ### Dependencies
 - **Swift Macros**: Requires Swift 5.9+ macro system
-- **Existing Framework**: Builds on current macro implementations
-- **Testing Infrastructure**: Integrates with TestingAnalyzer
-- **Performance System**: Uses PerformanceMonitor integration
+- **Core Framework**: Builds on essential framework components only
+- **Testing Infrastructure**: Integrates with simplified TestingAnalyzer
+- **Performance System**: Uses basic PerformanceMonitor (simplified)
+- **Removed Dependencies**: No longer depends on complex Analysis/, advanced Testing/, or State/ components
 
 ### MVP Approach
 - **Breaking changes**: Complete redesign acceptable for MVP stage
@@ -231,6 +297,6 @@ func updateUserName(_ name: String) {
 
 ---
 
-**Proposal Status**: Created in Unapproved/ - Ready for Review and Approval
-**Implementation Estimate**: 10-14 hours across 3 phases (reduced due to no backwards compatibility)
-**Priority**: Medium-High - Significant framework enhancement with measurable benefits
+**Proposal Status**: Approved and Ready for Development Implementation
+**Implementation Estimate**: 11-15 hours across 3 phases (includes framework cleanup and removal)
+**Priority**: High - Significant framework enhancement with MVP-focused cleanup and measurable benefits
