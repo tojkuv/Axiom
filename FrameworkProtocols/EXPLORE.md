@@ -71,7 +71,7 @@ Work commands operate on current branch without version control:
 2. **Design Reasoning** → Explain architectural decisions and design trade-offs
 3. **Implementation Details** → Detail implementation approaches and technical choices
 4. **Usage Patterns** → Explain proper framework usage and integration patterns
-5. **Knowledge Documentation** → Document analysis findings for team understanding
+5. **Knowledge Synthesis** → Synthesize analysis findings for team understanding
 
 ## Framework Exploration Categories
 
@@ -169,7 +169,6 @@ echo "🔍 Exploration ready - proceeding in framework workspace"
 **Exploration Purpose**: Provide deep analysis and understanding of framework components for informed development
 **Development Support**: Exploration insights support PLAN proposal creation and DEVELOP implementation decisions
 **Knowledge Transfer**: Exploration provides framework understanding for team knowledge sharing
-**Documentation Integration**: Exploration findings complement technical documentation and specifications
 **Decision Support**: Analysis supports informed architectural and implementation decisions
 
 ## Framework Exploration Coordination
@@ -177,7 +176,6 @@ echo "🔍 Exploration ready - proceeding in framework workspace"
 **Analysis Focus**: Framework component analysis and architectural understanding on framework branch
 **Knowledge Creation**: Generate comprehensive understanding of framework implementation and patterns
 **Development Integration**: Exploration insights support planning and development workflows
-**Documentation Complement**: Analysis complements existing technical documentation and specifications
 **Decision Support**: Provide informed analysis for architectural and implementation decisions
 
 ---
@@ -186,6 +184,6 @@ echo "🔍 Exploration ready - proceeding in framework workspace"
 **CORE FOCUS**: Deep framework component analysis and architectural understanding  
 **EXPLORATION SCOPE**: Comprehensive framework analysis, pattern recognition, and implementation explanation
 **KNOWLEDGE INTEGRATION**: Framework understanding and analysis for informed development decisions
-**WORKFLOW INTEGRATION**: Analysis integration with planning, development, and documentation workflows
+**WORKFLOW INTEGRATION**: Analysis integration with planning and development workflows
 
 **Use FrameworkProtocols/@EXPLORE for comprehensive framework analysis, explanation, and architectural reasoning.**

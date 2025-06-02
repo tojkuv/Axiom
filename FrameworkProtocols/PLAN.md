@@ -1,6 +1,6 @@
 # @PLAN.md - Axiom Framework Development Planning Command
 
-Framework development planning command that creates proposals for framework implementation
+Framework development planning command that creates proposals for type-safe, actor-based framework implementation
 
 ## Automated Mode Trigger
 
@@ -28,7 +28,6 @@ Work commands operate on current branch without version control:
 1. **Analysis**: Read current TRACKING.md priorities and framework status
 2. **Planning**: Create framework development proposals
 3. **Proposal Management**: Move proposals through lifecycle stages
-4. **Documentation**: Update proposal status and planning coordination
 **No Git Operations**: PLAN commands never commit, push, or merge
 
 ## Framework Development Planning Philosophy
@@ -63,10 +62,9 @@ Work commands operate on current branch without version control:
 1. **Technical Specification** → Create detailed framework technical approach and architecture
 2. **Implementation Planning** → Plan framework development phases and implementation steps
 3. **Testing Strategy** → Define framework testing approach and validation procedures
-4. **Documentation Planning** → Plan framework documentation updates and requirements
-5. **Integration Strategy** → Define integration with existing framework codebase and workflows
+4. **Integration Strategy** → Define integration with existing framework codebase and workflows
 
-### Phase 3: Framework Proposal Documentation
+### Phase 3: Framework Proposal Finalization
 1. **Structured Format** → Create framework proposal using established format and sections
 2. **Technical Details** → Include comprehensive framework technical specifications and approaches
 3. **Implementation Roadmap** → Provide clear framework implementation steps and phases
