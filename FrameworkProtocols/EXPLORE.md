@@ -1,6 +1,6 @@
 # @EXPLORE.md - Axiom Framework Exploration Command
 
-Framework exploration command that analyzes, explains, and reasons about framework components
+Framework exploration command that analyzes type-safe, concurrency-safe, performant, deterministic, actor-based framework components
 
 ## Automated Mode Trigger
 
@@ -34,7 +34,7 @@ Work commands operate on current branch without version control:
 
 ## Framework Exploration Philosophy
 
-**Core Principle**: Framework exploration provides deep analysis and understanding of framework components, architectural patterns, and implementation details to support informed development decisions and knowledge transfer.
+**Core Principle**: Framework exploration provides deep analysis of type-safe, concurrency-safe, performant, deterministic framework components. Focuses on actor-based patterns, capabilities permissions, minimal boilerplate design, and consistent patterns optimized for AI agent coding.
 
 **Exploration Workflow**: @EXPLORE analyzes framework components → Provides detailed explanations → Supports informed development decisions → Knowledge documented for team understanding
 
@@ -52,19 +52,19 @@ Work commands operate on current branch without version control:
 ## Framework Exploration Methodology
 
 ### Phase 1: Framework Component Analysis
-1. **Component Identification** → Identify specific framework components and their relationships
-2. **Architecture Assessment** → Analyze framework architectural patterns and constraint compliance
-3. **Implementation Review** → Examine framework implementation details and design patterns
-4. **Dependency Analysis** → Understand component dependencies and integration points
-5. **Pattern Recognition** → Identify recurring patterns and architectural decisions
-6. **Constraint Validation** → Validate adherence to 8 architectural constraints
+1. **Type System Review** → Analyze type safety guarantees and compile-time validation
+2. **Actor Architecture** → Examine actor-based concurrency patterns and isolation
+3. **Performance Profiling** → Measure framework performance characteristics
+4. **Determinism Check** → Validate predictable behavior without side effects
+5. **Pattern Consistency** → Verify uniform patterns across framework components
+6. **Capabilities Analysis** → Review permissions enforcement and validation patterns
 
 ### Phase 2: Framework Deep Analysis
-1. **Technical Specification Review** → Analyze framework technical specifications and design documents
-2. **Code Pattern Analysis** → Examine code patterns, conventions, and implementation approaches
-3. **Integration Assessment** → Understand framework integration points and external dependencies
-4. **Performance Analysis** → Analyze performance characteristics and optimization strategies
-5. **Intelligence System Analysis** → Examine AI integration and intelligent system components
+1. **Type Safety Analysis** → Examine compile-time type guarantees and validation patterns
+2. **Concurrency Safety Review** → Analyze actor-based isolation and thread safety mechanisms
+3. **Performance Assessment** → Measure and analyze performance characteristics
+4. **Determinism Validation** → Verify predictable, reproducible behavior patterns
+5. **Boilerplate Analysis** → Identify code generation effectiveness and pattern consistency
 
 ### Phase 3: Framework Explanation and Reasoning
 1. **Concept Explanation** → Provide clear explanations of framework concepts and patterns
@@ -76,7 +76,7 @@ Work commands operate on current branch without version control:
 ## Framework Exploration Categories
 
 ### Framework Architecture Exploration
-**Focus**: Core framework architecture, 8 architectural constraints, design patterns
+**Focus**: Type-safe architecture, actor-based concurrency, performance patterns, deterministic design
 **Components**: 
 - AxiomClient → Actor-based state management analysis
 - AxiomContext → Client orchestration pattern exploration
@@ -84,14 +84,14 @@ Work commands operate on current branch without version control:
 - Capability System → Runtime validation architecture exploration
 **Analysis**: Component relationships, constraint compliance, pattern consistency
 
-### Intelligence System Exploration
-**Focus**: AI integration, intelligent system components, analysis capabilities
+### Capabilities System Exploration
+**Focus**: Runtime capability validation, permissions enforcement, compile-time optimization
 **Components**:
-- Component Introspection → Architectural analysis capabilities
-- Pattern Detection → Code pattern recognition systems
-- Query Engine → Natural language query processing
-- Performance Monitor → Analysis-driven optimization systems
-**Analysis**: AI integration patterns, intelligence system architecture, analysis capabilities
+- Capability Manager → Runtime permissions validation with graceful degradation
+- Capability Validator → Compile-time hints and runtime enforcement
+- Permission Patterns → Consistent capability checking across components
+- Performance Impact → Minimal overhead capability validation
+**Analysis**: Permissions patterns, capability architecture, performance characteristics
 
 ### Implementation Pattern Exploration
 **Focus**: Code patterns, conventions, implementation approaches
@@ -180,8 +180,8 @@ echo "🔍 Exploration ready - proceeding in framework workspace"
 
 ---
 
-**FRAMEWORK EXPLORATION COMMAND STATUS**: Framework exploration command with analysis, explanation, and reasoning capabilities
-**CORE FOCUS**: Deep framework component analysis and architectural understanding  
+**FRAMEWORK EXPLORATION COMMAND STATUS**: Framework exploration for type-safe, concurrency-safe, performant, deterministic framework
+**CORE FOCUS**: Actor-based architecture analysis with capabilities permissions and consistent patterns for AI agent coding  
 **EXPLORATION SCOPE**: Comprehensive framework analysis, pattern recognition, and implementation explanation
 **KNOWLEDGE INTEGRATION**: Framework understanding and analysis for informed development decisions
 **WORKFLOW INTEGRATION**: Analysis integration with planning and development workflows

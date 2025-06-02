@@ -34,7 +34,7 @@ TDD-enforced development workflow (NO git operations):
 
 ## Framework Development Philosophy
 
-**Core Principle**: Framework development focuses on building iOS development capabilities that integrate architectural analysis with intelligent system features.
+**Core Principle**: Framework development focuses on building type-safe, concurrency-safe, performant, deterministic iOS development framework with actor-based isolation, minimal boilerplate, and capabilities permissions for AI agent coding.
 
 **Test-Driven Development Philosophy**: ALL framework development MUST follow TDD methodology - tests written first, implementation follows, refactoring with passing tests.
 
@@ -42,7 +42,7 @@ TDD-enforced development workflow (NO git operations):
 
 **Testing Requirements**: Framework development targets 100% test success rate with comprehensive test coverage. See `AxiomFramework/Documentation/Testing/TESTING_STRATEGY.md` for testing requirements and standards.
 
-**Development Focus**: Framework development implements capabilities that enhance iOS development through AI integration, predictive analysis, and intelligent automation features.
+**Development Focus**: Framework development implements type-safe architecture, actor-based concurrency, performance optimization, deterministic behavior, code generation for minimal boilerplate, and capabilities permissions enforcement with consistent patterns.
 
 **Code Integrity**: ZERO TOLERANCE for broken tests in main branch - development process designed to prevent test failures from reaching production.
 
@@ -55,12 +55,12 @@ TDD-enforced development workflow (NO git operations):
 - **Performance Focus**: Achieve performance targets while maintaining feature functionality
 - **Thread Safety**: Implement actor-based isolation and concurrency patterns
 
-### Intelligence Capability Development
-- **AI Integration**: Build artificial intelligence capabilities into framework core
-- **Predictive Analysis**: Develop features that identify and prevent issues
-- **Optimization Systems**: Create analysis-driven optimization and improvement systems
-- **Natural Language Processing**: Enable architectural queries and analysis through text interface
-- **Pattern Detection**: Implement pattern recognition and standardization capabilities
+### Core Technical Capabilities
+- **Type Safety**: Build compile-time type validation and runtime safety guarantees
+- **Concurrency Safety**: Develop actor-based isolation preventing data races
+- **Performance Optimization**: Create measurable performance improvements and profiling
+- **Deterministic Behavior**: Enable predictable, reproducible operations
+- **Boilerplate Reduction**: Implement code generation through macros and builders
 
 ### Developer Experience
 - **API Design**: Design framework interfaces that are intuitive and functional
@@ -87,12 +87,12 @@ TDD-enforced development workflow (NO git operations):
 2. **Actor Integration** → Implement thread-safe patterns using actor-based isolation
 3. **Protocol Design** → Create protocol hierarchies that support framework goals
 4. **Capability Development** → Build runtime capability validation and management systems
-5. **Intelligence Integration** → Integrate AI and ML capabilities into framework operations
+5. **Capabilities Integration** → Integrate runtime permissions validation with compile-time hints
 
 ### Phase 3: Test-Driven Development and Validation
 **TDD Requirements**: ALL development must follow test-driven development methodology
 **Testing Standards**: 100% test success rate - NO EXCEPTIONS for commits to main branch
-**Testing Strategy**: Multi-layered validation including unit, integration, performance, AI/ML, security, and concurrency testing
+**Testing Strategy**: Multi-layered validation including unit, integration, performance, security, and concurrency testing
 **Standards**: Detailed testing requirements in `AxiomFramework/Documentation/Testing/TESTING_STRATEGY.md`
 **CRITICAL RULE**: Test failures COMPLETELY BLOCK all development progress until resolved
 **TDD Process**: Write failing tests → Implement minimal code → Make tests pass → Refactor → Repeat
@@ -111,15 +111,15 @@ TDD-enforced development workflow (NO git operations):
 - **AxiomView** → 1:1 view-context relationships with reactive binding
 - **Capability System** → Runtime validation with compile-time optimization
 - **Domain Models** → Immutable value objects with business logic integration
-- **Intelligence System** → AI-powered architectural analysis and optimization
+- **Capabilities System** → Runtime permissions validation with graceful degradation
 
-### Intelligence Capability Areas
-- **Component Introspection** → Component analysis and documentation generation systems
-- **Predictive Analysis** → Issue identification and architectural analysis
-- **Natural Language Queries** → Text-based architectural exploration interface
-- **Performance Optimization** → Analysis-driven optimization recommendations
-- **Pattern Detection** → Pattern recognition and standardization capabilities
-- **Architecture Evolution** → Requirements-based architecture adaptation
+### Technical Implementation Areas
+- **Type System Design** → Compile-time validation and type-safe interfaces
+- **Actor Isolation** → Thread-safe state management and concurrency patterns
+- **Performance Profiling** → Measurement and optimization of framework performance
+- **Code Generation** → Macro system reducing boilerplate and ensuring consistency
+- **Permissions Validation** → Capability checking with compile-time optimization
+- **Pattern Consistency** → Uniform patterns enabling reliable AI agent coding
 
 ### **Performance and Quality Systems**
 - **Memory Management** → Efficient memory usage patterns and optimization
@@ -131,7 +131,7 @@ TDD-enforced development workflow (NO git operations):
 ## Testing Integration
 
 **Testing Framework**: Multi-layered testing strategy covering framework components
-**Testing Categories**: Unit, integration, performance, AI/ML, security, concurrency, and regression testing
+**Testing Categories**: Unit, integration, performance, security, concurrency, and regression testing
 **Testing Standards**: Testing specifications available in `AxiomFramework/Documentation/Testing/TESTING_STRATEGY.md`
 **Integration**: Testing requirements integrated into development workflow
 
@@ -178,8 +178,8 @@ fi
 
 ## Development Success Criteria
 
-**Architectural Compliance**: Adherence to 8 architectural constraints, consistent design patterns, functional API design, performance targets achieved
-**Intelligence Capabilities**: AI features providing analysis value, predictive issue identification, optimization recommendations
+**Architectural Compliance**: Type safety, concurrency safety through actors, performance targets, deterministic behavior, minimal boilerplate, capabilities permissions
+**Technical Capabilities**: Type safety guarantees, actor-based concurrency, performance targets, deterministic behavior, minimal boilerplate
 **Developer Experience**: Intuitive APIs, boilerplate reduction through code generation, type safety, clear error handling
 **Testing Standards**: High test coverage, comprehensive test success rates, testing across all categories
 **Standards**: Success criteria in `AxiomFramework/Documentation/DEVELOPMENT_STANDARDS.md`
@@ -251,7 +251,7 @@ cd ..
 
 ## 📚 Development Resources
 
-**Framework Architecture**: 8 architectural constraints, 8 intelligence systems, performance targets, API design principles
+**Framework Architecture**: Type-safe design, actor-based concurrency, performance optimization, deterministic patterns, capabilities system, code generation
 **Development Infrastructure**: Testing framework, performance monitoring, documentation systems, quality tools
 **Resources**: Complete development resources in `AxiomFramework/Documentation/Development/`
 

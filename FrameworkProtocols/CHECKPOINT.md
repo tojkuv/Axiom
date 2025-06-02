@@ -2,7 +2,7 @@
 
 ## ⚡ Worktree-Based Checkpoint Management
 
-This command provides intelligent checkpoint management for worktree-based development workflows, integrating framework and application development changes into main branch.
+This command provides deterministic checkpoint management for worktree-based development workflows, integrating framework and application development changes into main branch.
 
 ### 🎯 **Usage Modes**
 - **`@CHECKPOINT`** → Commit and integrate all worktree changes into main branch

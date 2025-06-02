@@ -1,6 +1,6 @@
 # @PLAN.md - Axiom Framework Development Planning Command
 
-Framework development planning command that creates proposals for type-safe, actor-based framework implementation
+Framework development planning command that creates proposals for type-safe, concurrency-safe, performant, deterministic, actor-based framework with low boilerplate and capabilities permissions
 
 ## Automated Mode Trigger
 
@@ -32,7 +32,7 @@ Work commands operate on current branch without version control:
 
 ## Framework Development Planning Philosophy
 
-**Core Principle**: Framework planning creates detailed technical proposals for framework development that can be reviewed, revised, and approved by users before implementation begins. Proposals focus exclusively on technical implementation details.
+**Core Principle**: Framework planning creates detailed technical proposals for a type-safe, concurrency-safe, performant, deterministic framework designed for AI agent coding. The framework emphasizes actor-based isolation, low boilerplate through code generation, capabilities permissions safety, and consistent patterns throughout.
 
 **Proposal Workflow**: @PLAN creates framework proposals → User reviews/revises → FrameworkProtocols/@APPROVE accepts proposals → FrameworkProtocols/DEVELOP.md implements → Progress tracked in FrameworkProtocols/TRACKING.md
 
@@ -44,25 +44,30 @@ Work commands operate on current branch without version control:
 - **REFACTOR**: Code organization → Updates TRACKING.md quality → NO functionality changes
 - **TRACKING**: Central progress store → Updated by all commands → NO command execution
 
-**Quality Standards**: Framework proposals include comprehensive technical specifications, implementation approaches, and success criteria
+**Quality Standards**: Framework proposals ensure type safety, concurrency safety through actors, performance optimization, deterministic behavior, minimal boilerplate, capabilities permissions enforcement, and consistent patterns
 
-**Technical Focus Only**: Proposals strictly focus on technical implementation details. No consideration of non-technical aspects (community involvement, adoption, marketing, business strategy, user engagement, etc.)
+**Technical Focus Only**: Proposals strictly focus on technical implementation for AI agent coding. Framework design prioritizes machine readability, consistent patterns, and deterministic behavior optimized for automated development workflows.
 
 ## Framework Planning Methodology
 
 ### Phase 1: Framework Analysis
 1. **TRACKING.md Review** → Read current priorities, progress, and next actions from FrameworkProtocols/TRACKING.md
-2. **Current Framework Assessment** → Analyze current framework implementation status and needs
-3. **Technical Requirements Analysis** → Understand technical objectives and implementation constraints only
-4. **Technical Assessment** → Evaluate framework technical approaches and implementation strategies
-5. **Technical Architecture Planning** → Assess technical framework architecture changes and implementation requirements
-6. **Technical Success Criteria Definition** → Define measurable technical outcomes and validation criteria (performance, functionality, architecture compliance)
+2. **Type Safety Assessment** → Analyze compile-time type safety guarantees and validation
+3. **Concurrency Safety Analysis** → Evaluate actor-based isolation and thread safety patterns
+4. **Performance Requirements** → Define performance targets and optimization strategies
+5. **Determinism Validation** → Ensure predictable, reproducible behavior without side effects
+6. **Boilerplate Reduction Planning** → Identify code generation opportunities to minimize repetitive code
+7. **Capabilities Permissions** → Plan runtime capability validation with compile-time hints
+8. **Pattern Consistency** → Ensure uniform patterns across framework components
 
 ### Phase 2: Framework Proposal Creation
-1. **Technical Specification** → Create detailed framework technical approach and architecture
-2. **Implementation Planning** → Plan framework development phases and implementation steps
-3. **Testing Strategy** → Define framework testing approach and validation procedures
-4. **Integration Strategy** → Define integration with existing framework codebase and workflows
+1. **Type-Safe Architecture** → Design compile-time type validation and safety guarantees
+2. **Actor-Based Concurrency** → Plan actor isolation patterns for thread-safe state management
+3. **Performance Optimization** → Define performance targets and measurement strategies
+4. **Deterministic Implementation** → Ensure predictable behavior without hidden state
+5. **Code Generation Strategy** → Plan macros and builders to reduce boilerplate
+6. **Capabilities System** → Design permissions validation with graceful degradation
+7. **Testing Strategy** → Define comprehensive testing for all safety guarantees
 
 ### Phase 3: Framework Proposal Finalization
 1. **Structured Format** → Create framework proposal using established format and sections
@@ -74,7 +79,7 @@ Work commands operate on current branch without version control:
 ## Framework Proposal Creation Process
 
 ### Framework Proposals (AxiomFramework/Proposals/)
-**Focus**: Core framework development, architecture enhancements, capability implementation
+**Focus**: Type-safe architecture, actor-based concurrency, performance optimization, deterministic behavior, boilerplate reduction, capabilities permissions
 **Directories**: 
 - Active/: Framework proposals under development
 - WaitingApproval/: Framework proposals ready for user review
@@ -154,11 +159,13 @@ echo "🎯 Planning ready - proceeding in framework workspace"
 - **Integration Notes**: Framework integration considerations and dependencies
 
 ### Framework Quality Standards
-- **Technical Coverage Only**: All technical aspects of framework development approach covered (no business, marketing, or adoption considerations)
-- **Technical Depth**: Sufficient technical detail for framework implementation
-- **Clear Implementation Steps**: Actionable technical implementation procedures only
-- **Technical Validation Approach**: Clear technical testing and validation strategy (performance, functionality, integration)
-- **Technical Metrics Only**: Specific technical success criteria and metrics (no user engagement, adoption, or business metrics)
+- **Type Safety**: Compile-time type validation and runtime safety guarantees
+- **Concurrency Safety**: Actor-based isolation preventing data races and ensuring thread safety
+- **Performance Targets**: Measurable performance goals and optimization strategies
+- **Deterministic Behavior**: Predictable, reproducible operations without hidden state
+- **Minimal Boilerplate**: Code generation reducing repetitive patterns
+- **Capabilities Enforcement**: Runtime permissions validation with compile-time optimization
+- **Pattern Consistency**: Uniform patterns enabling reliable AI agent coding
 
 ## Framework Planning Workflow Integration
 
@@ -180,10 +187,10 @@ echo "🎯 Planning ready - proceeding in framework workspace"
 
 ---
 
-**FRAMEWORK PLANNING COMMAND STATUS**: Framework development planning command with proposal creation and lifecycle management
-**CORE FOCUS**: Strategic framework proposal creation for framework development  
+**FRAMEWORK PLANNING COMMAND STATUS**: Framework development planning for type-safe, concurrency-safe, performant, deterministic framework
+**CORE FOCUS**: Actor-based architecture with minimal boilerplate and capabilities permissions for AI agent coding
+**TECHNICAL ATTRIBUTES**: Type safety, concurrency safety, performance, determinism, low boilerplate, capabilities permissions, consistent patterns
 **PROPOSAL CREATION**: Creates structured framework proposals in AxiomFramework/Proposals/Active/
-**USER WORKFLOW**: Framework proposals for user review and revision before @APPROVE processing
 **INTEGRATION**: Workflow integration with FrameworkProtocols/@APPROVE, DEVELOP.md and TRACKING progress monitoring
 
 **Use FrameworkProtocols/@PLAN for strategic framework development planning with structured proposal creation and @APPROVE workflow integration.**

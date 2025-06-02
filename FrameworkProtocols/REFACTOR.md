@@ -193,7 +193,7 @@ echo "🎯 Refactoring ready - proceeding in framework workspace"
 
 ## 📚 Refactoring Resources
 
-**Framework Structure**: 8 architectural constraints, established patterns, performance requirements, quality standards
+**Framework Structure**: Type-safe architecture, actor patterns, performance requirements, deterministic behavior, capabilities system
 **Refactoring Infrastructure**: Validation tools, quality measurement, structural analysis, improvement tracking
 **Resources**: Complete refactoring resources in `Documentation/Refactoring/`
 
