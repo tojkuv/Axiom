@@ -67,9 +67,18 @@ if [ -d "$FRAMEWORK_WORKSPACE" ]; then
     
     if [ -n "$(git status --porcelain)" ]; then
         git add .
-        FRAMEWORK_MESSAGE="Framework development checkpoint: $(date '+%Y-%m-%d %H:%M')"
-        git commit -m "$FRAMEWORK_MESSAGE" || echo "No framework changes to commit"
-        echo "✅ Framework changes committed: $FRAMEWORK_MESSAGE"
+        CURRENT_DATE=$(date '+%Y-%m-%d %H:%M')
+        git commit -m "$(cat <<EOF
+Framework development checkpoint: $CURRENT_DATE
+
+Framework workspace changes committed via @CHECKPOINT protocol
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)" || echo "No framework changes to commit"
+        echo "✅ Framework changes committed: $CURRENT_DATE"
     else
         echo "ℹ️ No framework changes to commit"
     fi
@@ -84,14 +93,46 @@ if [ -d "$APPLICATION_WORKSPACE" ]; then
     
     if [ -n "$(git status --porcelain)" ]; then
         git add .
-        APPLICATION_MESSAGE="Application development checkpoint: $(date '+%Y-%m-%d %H:%M')"
-        git commit -m "$APPLICATION_MESSAGE" || echo "No application changes to commit"
-        echo "✅ Application changes committed: $APPLICATION_MESSAGE"
+        CURRENT_DATE=$(date '+%Y-%m-%d %H:%M')
+        git commit -m "$(cat <<EOF
+Application development checkpoint: $CURRENT_DATE
+
+Application workspace changes committed via @CHECKPOINT protocol
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)" || echo "No application changes to commit"
+        echo "✅ Application changes committed: $CURRENT_DATE"
     else
         echo "ℹ️ No application changes to commit"
     fi
     
     cd ..
+fi
+
+# 3.5. Fallback: Commit main repository changes if worktrees don't exist
+if [ ! -d "$FRAMEWORK_WORKSPACE" ] && [ ! -d "$APPLICATION_WORKSPACE" ]; then
+    echo "💾 No worktrees found - committing main repository changes..."
+    
+    if [ -n "$(git status --porcelain)" ]; then
+        git add .
+        CURRENT_DATE=$(date '+%Y-%m-%d %H:%M')
+        git commit -m "$(cat <<EOF
+Development checkpoint: $CURRENT_DATE
+
+Main repository changes committed via @CHECKPOINT protocol
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)" || echo "No main repository changes to commit"
+        echo "✅ Main repository changes committed: $CURRENT_DATE"
+    else
+        echo "ℹ️ No main repository changes to commit"
+    fi
 fi
 ```
 
@@ -108,7 +149,17 @@ if [ -d "$FRAMEWORK_WORKSPACE" ]; then
     echo "🔗 Integrating framework development..."
     if git merge-tree $(git merge-base main framework) main framework | grep -q "^"; then
         echo "📝 Framework changes detected - merging..."
-        git merge framework --no-ff -m "Integrate framework development: $(date '+%Y-%m-%d %H:%M')" || {
+        MERGE_DATE=$(date '+%Y-%m-%d %H:%M')
+        git merge framework --no-ff -m "$(cat <<EOF
+Integrate framework development: $MERGE_DATE
+
+Framework workspace integration via @CHECKPOINT protocol
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)" || {
             echo "❌ Framework merge conflict detected"
             echo "🔧 Manual resolution required"
             exit 1
@@ -124,7 +175,17 @@ if [ -d "$APPLICATION_WORKSPACE" ]; then
     echo "🔗 Integrating application development..."
     if git merge-tree $(git merge-base main application) main application | grep -q "^"; then
         echo "📝 Application changes detected - merging..."
-        git merge application --no-ff -m "Integrate application development: $(date '+%Y-%m-%d %H:%M')" || {
+        MERGE_DATE=$(date '+%Y-%m-%d %H:%M')
+        git merge application --no-ff -m "$(cat <<EOF
+Integrate application development: $MERGE_DATE
+
+Application workspace integration via @CHECKPOINT protocol
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)" || {
             echo "❌ Application merge conflict detected"
             echo "🔧 Manual resolution required"
             exit 1
