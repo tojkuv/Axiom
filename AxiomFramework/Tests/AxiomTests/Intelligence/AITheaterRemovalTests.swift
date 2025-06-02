@@ -1,4 +1,5 @@
 import XCTest
+import SwiftUI
 @testable import Axiom
 
 /// TDD Tests for removing AI theater and preserving genuine functionality
@@ -148,8 +149,31 @@ final class AITheaterRemovalTests: XCTestCase {
 // MARK: - Test Support Classes
 
 @MainActor
-class MockAxiomContext: AxiomContext {
+final class MockAxiomContext: AxiomContext {
+    typealias View = MockAxiomView
+    typealias Clients = MockClientContainer
+    
     let intelligence: any AxiomIntelligence = AITheaterMockIntelligence()
+    let clients = MockClientContainer()
+    
+    func onAppear() async {}
+    func onDisappear() async {}
+    func onClientStateChange<T: AxiomClient>(_ client: T) async {}
+    func handleError(_ error: any AxiomError) async {}
+    func trackAnalyticsEvent(_ event: String, parameters: [String: Any]) async {}
+}
+
+struct MockAxiomView: AxiomView {
+    typealias Context = MockAxiomContext
+    @ObservedObject var context: MockAxiomContext
+    
+    var body: some View {
+        EmptyView()
+    }
+}
+
+struct MockClientContainer: ClientDependencies {
+    // Empty container for testing
 }
 
 actor AITheaterMockIntelligence: AxiomIntelligence {
@@ -163,24 +187,24 @@ actor AITheaterMockIntelligence: AxiomIntelligence {
     func disableFeature(_ feature: IntelligenceFeature) async { enabledFeatures.remove(feature) }
     func setAutomationLevel(_ level: AutomationLevel) async { automationLevel = level }
     func setLearningMode(_ mode: LearningMode) async { learningMode = mode }
-    func getMetrics() async -> IntelligenceMetrics { 
+    
+    func getMetrics() async -> IntelligenceMetrics {
         return IntelligenceMetrics(
             totalOperations: 0,
-            averageResponseTime: 0.0,
-            cacheHitRate: 0.0,
+            averageResponseTime: 0,
+            cacheHitRate: 0,
             successfulPredictions: 0,
-            predictionAccuracy: 0.0,
+            predictionAccuracy: 0,
             featureMetrics: [:],
             timestamp: Date()
         )
     }
-    func reset() async { enabledFeatures.removeAll() }
     
-    func getComponentRegistry() async -> [ComponentID: ComponentMetadata] { 
-        return [:] // Empty registry for testing
+    func reset() async {}
+    
+    func getComponentRegistry() async -> [ComponentID: ComponentMetadata] {
+        return [:]
     }
     
-    func registerComponent<T: AxiomContext>(_ component: T) async {
-        // Mock implementation for testing
-    }
+    func registerComponent<T: AxiomContext>(_ component: T) async {}
 }

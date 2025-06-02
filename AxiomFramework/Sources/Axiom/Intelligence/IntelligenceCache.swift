@@ -139,10 +139,11 @@ public struct CachedQueryResult: Sendable {
     }
 }
 
-// MARK: - Intelligence Cache Actor
+// MARK: - Framework Cache Actor
 
-/// Thread-safe intelligence component cache with LRU eviction and TTL expiration
-public actor IntelligenceCache {
+/// Thread-safe framework component cache with LRU eviction and TTL expiration
+/// Phase 3: Renamed from IntelligenceCache to remove AI branding while preserving functionality
+public actor FrameworkCache {
     private let configuration: CacheConfiguration
     private var cache: [ComponentID: CachedComponent] = [:]
     private var accessOrder: [ComponentID] = []
@@ -239,12 +240,12 @@ public actor IntelligenceCache {
     }
     
     /// Get cache hit rate statistics
-    public func getCacheStatistics() -> IntelligenceCacheStatistics {
+    public func getCacheStatistics() -> FrameworkCacheStatistics {
         let totalAccess = cache.values.reduce(0) { $0 + $1.accessCount }
         let averageAge = cache.values.isEmpty ? 0 : 
             cache.values.reduce(0.0) { $0 + Date().timeIntervalSince($1.cachedAt) } / Double(cache.count)
         
-        return IntelligenceCacheStatistics(
+        return FrameworkCacheStatistics(
             totalItems: cache.count,
             memoryUsage: memoryUsage,
             totalAccess: totalAccess,
@@ -306,6 +307,13 @@ public actor IntelligenceCache {
         addToAccessOrder(id)
     }
 }
+
+// MARK: - Backward Compatibility
+
+/// Backward compatibility typealias for existing code
+/// Phase 3: IntelligenceCache → FrameworkCache migration
+public typealias IntelligenceCache = FrameworkCache
+public typealias IntelligenceCacheStatistics = FrameworkCacheStatistics
 
 // MARK: - Query Result Cache Actor
 
@@ -423,10 +431,11 @@ public actor QueryResultCache {
     }
 }
 
-// MARK: - Intelligence Cache Statistics
+// MARK: - Framework Cache Statistics
 
-/// Statistics for intelligence cache performance monitoring
-public struct IntelligenceCacheStatistics: Sendable {
+/// Statistics for framework cache performance monitoring  
+/// Phase 3: Renamed from IntelligenceCacheStatistics to remove AI branding
+public struct FrameworkCacheStatistics: Sendable {
     public let totalItems: Int
     public let memoryUsage: Int
     public let totalAccess: Int

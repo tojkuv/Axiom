@@ -279,25 +279,11 @@ struct ViewModifiersTests {
             )
         }
         func reset() async { enabledFeatures.removeAll() }
-        func processQuery(_ query: String) async throws -> QueryResponse { return QueryResponse.explanation("Test", confidence: 0.9) }
-        func analyzeCodePatterns() async throws -> [OptimizationSuggestion] { return [] }
-        func predictArchitecturalIssues() async throws -> [ArchitecturalRisk] { return [] }
-        func generateDocumentation(for componentID: ComponentID) async throws -> GeneratedDocumentation {
-            return GeneratedDocumentation(
-                componentID: componentID,
-                title: "Test Documentation",
-                overview: "Test overview",
-                purpose: "Test purpose",
-                responsibilities: ["Test responsibility"],
-                dependencies: ["Test dependency"],
-                usagePatterns: ["Test pattern"],
-                performanceCharacteristics: ["Test characteristic"],
-                bestPractices: ["Test practice"],
-                examples: ["Test example"],
-                generatedAt: Date()
-            )
+        
+        func getComponentRegistry() async -> [ComponentID: ComponentMetadata] {
+            return [:]
         }
-        func suggestRefactoring() async throws -> [RefactoringSuggestion] { return [] }
+        
         func registerComponent<T: AxiomContext>(_ component: T) async {}
     }
     

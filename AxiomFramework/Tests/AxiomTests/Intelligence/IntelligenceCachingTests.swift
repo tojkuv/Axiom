@@ -261,6 +261,65 @@ final class IntelligenceCachingTests: XCTestCase {
         print("   Retrieval: \(String(format: "%.4f", avgRetrievalTime * 1000))ms avg")
     }
     
+    // MARK: - Phase 3: FrameworkCache Tests (TDD RED PHASE)
+    
+    func testFrameworkCacheBasicOperations() async throws {
+        // RED PHASE: This test should fail because FrameworkCache doesn't exist yet
+        let frameworkCache = FrameworkCache(
+            configuration: CacheConfiguration(
+                maxSize: 100,
+                ttl: 300.0,
+                evictionPolicy: .lru
+            )
+        )
+        
+        let componentID = ComponentID("framework-test-component")
+        let cachedComponent = CachedComponent(
+            id: componentID,
+            name: "FrameworkTestComponent",
+            type: "Actor",
+            cachedAt: Date(),
+            data: ["framework": "data"]
+        )
+        
+        // Cache the component
+        await frameworkCache.cacheComponent(cachedComponent, for: componentID)
+        
+        // Retrieve from cache
+        let retrieved = await frameworkCache.cachedComponent(for: componentID)
+        XCTAssertNotNil(retrieved, "Component should be cached in FrameworkCache")
+        XCTAssertEqual(retrieved?.id, componentID, "Component ID should match")
+        XCTAssertEqual(retrieved?.name, "FrameworkTestComponent", "Component name should match")
+    }
+    
+    func testFrameworkCachePerformanceOptimization() async throws {
+        // RED PHASE: This test should fail because FrameworkCache doesn't exist yet
+        let frameworkCache = FrameworkCache(configuration: CacheConfiguration())
+        
+        // First component access - should be slower (cache miss)
+        let startTime1 = Date()
+        let component1 = CachedComponent(
+            id: ComponentID("perf-test-1"),
+            name: "PerfTest1",
+            type: "Actor",
+            cachedAt: Date(),
+            data: [:]
+        )
+        await frameworkCache.cacheComponent(component1, for: component1.id)
+        let retrieved1 = await frameworkCache.cachedComponent(for: component1.id)
+        let duration1 = Date().timeIntervalSince(startTime1)
+        
+        // Second access - should be faster (cache hit)
+        let startTime2 = Date()
+        let retrieved2 = await frameworkCache.cachedComponent(for: component1.id)
+        let duration2 = Date().timeIntervalSince(startTime2)
+        
+        XCTAssertNotNil(retrieved1, "First retrieval should succeed")
+        XCTAssertNotNil(retrieved2, "Second retrieval should succeed")
+        XCTAssertLessThan(duration2, duration1 * 0.5, "Cached access should be significantly faster")
+        XCTAssertLessThan(duration2, 0.001, "Cached access should be <1ms")
+    }
+    
     // MARK: - Cache Configuration Tests
     
     func testCacheConfiguration() async throws {

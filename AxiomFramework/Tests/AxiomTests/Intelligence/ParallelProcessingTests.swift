@@ -72,13 +72,12 @@ final class ParallelProcessingTests: XCTestCase {
     /// Test: Intelligence features should execute with dependency resolution and parallelism
     func testConcurrentIndependentFeatureExecution() async throws {
         // Test concurrent execution with dependency resolution
-        // .architecturalDNA first, then others that depend on it can run in parallel
+        // .componentRegistry first, then others that depend on it can run in parallel
         
         let features: [IntelligenceFeature] = [
-            .architecturalDNA,
-            .naturalLanguageQueries,
-            .selfOptimizingPerformance,
-            .emergentPatternDetection
+            .componentRegistry,
+            .performanceMonitoring,
+            .capabilityValidation
         ]
         
         let startTime = Date()
@@ -108,11 +107,9 @@ final class ParallelProcessingTests: XCTestCase {
         // RED: This test should fail initially
         
         let features: [IntelligenceFeature] = [
-            .architecturalDNA, // No dependencies
-            .intentDrivenEvolution, // Depends on architecturalDNA
-            .temporalDevelopmentWorkflows, // Depends on architecturalDNA + emergentPatternDetection
-            .emergentPatternDetection, // Depends on architecturalDNA
-            .predictiveArchitectureIntelligence // Depends on all others
+            .componentRegistry, // No dependencies
+            .performanceMonitoring, // Depends on componentRegistry
+            .capabilityValidation // Depends on componentRegistry
         ]
         
         let startTime = Date()

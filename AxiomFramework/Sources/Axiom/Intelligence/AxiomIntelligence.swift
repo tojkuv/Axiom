@@ -257,8 +257,8 @@ public actor DefaultAxiomIntelligence: AxiomIntelligence {
     private let queryEngine: ArchitecturalQueryEngine
     private let performanceMonitor: PerformanceMonitor
     
-    // Caching system
-    private let intelligenceCache: IntelligenceCache
+    // Caching system (Phase 3: Updated to use FrameworkCache)
+    private let frameworkCache: FrameworkCache
     private let queryCache: QueryResultCache
     
     // Metrics tracking
@@ -313,14 +313,14 @@ public actor DefaultAxiomIntelligence: AxiomIntelligence {
             )
         )
         
-        // Initialize caching system
+        // Initialize caching system (Phase 3: Updated to use FrameworkCache)
         let cacheConfig = CacheConfiguration(
             maxSize: performanceConfiguration.maxConcurrentOperations * 2,
             ttl: performanceConfiguration.cacheExpiration,
             evictionPolicy: .lru,
             memoryThreshold: performanceConfiguration.maxMemoryUsage / 2
         )
-        self.intelligenceCache = IntelligenceCache(configuration: cacheConfig)
+        self.frameworkCache = FrameworkCache(configuration: cacheConfig)
         self.queryCache = QueryResultCache(configuration: cacheConfig)
     }
     
@@ -395,8 +395,8 @@ public actor DefaultAxiomIntelligence: AxiomIntelligence {
     
     /// Get detailed cache performance metrics
     public func getCacheMetrics() async -> IntelligenceCacheMetrics {
-        let intelligenceStats = await intelligenceCache.getCacheStatistics()
-        let queryStats = IntelligenceCacheStatistics(
+        let frameworkStats = await frameworkCache.getCacheStatistics()
+        let queryStats = FrameworkCacheStatistics(
             totalItems: await queryCache.getCacheSize(),
             memoryUsage: await queryCache.getMemoryUsage(),
             totalAccess: cacheHits + cacheMisses,
@@ -405,7 +405,7 @@ public actor DefaultAxiomIntelligence: AxiomIntelligence {
         )
         
         return IntelligenceCacheMetrics(
-            componentCache: intelligenceStats,
+            componentCache: frameworkStats,
             queryCache: queryStats,
             totalHits: cacheHits,
             totalMisses: cacheMisses,
@@ -424,8 +424,8 @@ public actor DefaultAxiomIntelligence: AxiomIntelligence {
         successfulPredictions = 0
         featureUsage = [:]
         
-        // Clear caches
-        await intelligenceCache.clearAll()
+        // Clear caches (Phase 3: Updated to use FrameworkCache)
+        await frameworkCache.clearAll()
         await queryCache.clearAll()
         
         await performanceMonitor.clearMetrics()
@@ -987,17 +987,18 @@ public struct ComponentMetadata: Sendable {
 
 // MARK: - Cache Metrics Types
 
-/// Comprehensive cache metrics for intelligence system
+/// Comprehensive cache metrics for framework system 
+/// Phase 3: Updated to use FrameworkCacheStatistics
 public struct IntelligenceCacheMetrics: Sendable {
-    public let componentCache: IntelligenceCacheStatistics
-    public let queryCache: IntelligenceCacheStatistics
+    public let componentCache: FrameworkCacheStatistics
+    public let queryCache: FrameworkCacheStatistics
     public let totalHits: Int
     public let totalMisses: Int
     public let hitRate: Double
     
     public init(
-        componentCache: IntelligenceCacheStatistics,
-        queryCache: IntelligenceCacheStatistics,
+        componentCache: FrameworkCacheStatistics,
+        queryCache: FrameworkCacheStatistics,
         totalHits: Int,
         totalMisses: Int,
         hitRate: Double
