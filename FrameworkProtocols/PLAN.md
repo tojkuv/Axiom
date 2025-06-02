@@ -1,47 +1,49 @@
-# @PLAN.md - Axiom Framework Development Planning Command
+# @PLAN.md - Axiom Framework Proposal Lifecycle Management
 
-Framework development planning command that creates proposals for type-safe, concurrency-safe, performant, deterministic, actor-based framework with low boilerplate and capabilities permissions
+Framework proposal lifecycle management command that creates, approves, and resolves proposals
 
 ## Automated Mode Trigger
 
 **When human sends**: `@PLAN [optional-args]`
-**Action**: Enter ultrathink mode and execute framework development planning workflow
+**Action**: Enter ultrathink mode and execute framework proposal lifecycle workflow
 
 ### Usage Modes
-- **`@PLAN`** → Create framework development proposal in AxiomFramework/Proposals/Active/
-- **`@PLAN plan`** → Plan framework development tasks and create proposal
-- **`@PLAN analyze`** → Analyze framework needs and create implementation proposal
-- **`@PLAN enhance`** → Plan framework enhancements and capability improvements
+- **`@PLAN`** → Show current proposal status across all directories
+- **`@PLAN create`** → Create new proposal in AxiomFramework/Proposals/Unapproved/
+- **`@PLAN approve`** → Move proposal from Unapproved/ to Approved/ and update TRACKING.md
+- **`@PLAN resolve`** → Archive completed proposal from Approved/ to Archive/
+- **`@PLAN status`** → Display detailed proposal status in each lifecycle stage
 
 ### Framework Planning Scope
-**Planning Focus**: Framework development proposal creation and strategic planning
+**Lifecycle Management**: Complete proposal lifecycle from creation to resolution
 **Branch Requirement**: Must be executed from framework branch for framework development
-**Proposal Creation**: Creates structured framework proposals for user review and revision
-**Development Integration**: Proposals are approved through FrameworkProtocols/APPROVE.md and implemented through FrameworkProtocols/DEVELOP.md
+**Proposal Management**: Creates, approves, and resolves framework proposals
+**Development Integration**: Approved proposals implemented through FrameworkProtocols/DEVELOP.md
 
 ### 🔄 **Development Workflow Architecture**
 **IMPORTANT**: PLAN commands NEVER perform git operations (commit/push/merge)
 **Version Control**: Only @CHECKPOINT commands handle all git operations
-**Work Philosophy**: PLAN creates proposals → @APPROVE accepts proposals → DEVELOP implements → Multiple DEVELOP/REFACTOR cycles → @CHECKPOINT commits and merges
+**Work Philosophy**: PLAN manages full lifecycle → Creates proposals → Approves proposals → DEVELOP implements → PLAN resolves completed work → @CHECKPOINT commits and merges
 
 Work commands operate on current branch without version control:
-1. **Analysis**: Read current TRACKING.md priorities and framework status
-2. **Planning**: Create framework development proposals
-3. **Proposal Management**: Move proposals through lifecycle stages
+1. **Creation**: Create new proposals directly in Unapproved/
+2. **Approval**: Move proposals to Approved/ and update TRACKING.md priorities
+3. **Resolution**: Archive completed proposals from Approved/ to Archive/
+4. **Status Tracking**: Update TRACKING.md at approval and resolution stages
 **No Git Operations**: PLAN commands never commit, push, or merge
 
 ## Framework Development Planning Philosophy
 
 **Core Principle**: Framework planning manages the complete lifecycle of technical proposals - from creation through approval to resolution. This protocol handles proposal workflow management, not framework architecture decisions.
 
-**Proposal Workflow**: @PLAN creates framework proposals → User reviews/revises → FrameworkProtocols/@APPROVE accepts proposals → FrameworkProtocols/DEVELOP.md implements → Progress tracked in FrameworkProtocols/TRACKING.md
+**Proposal Workflow**: @PLAN create (Unapproved/) → User reviews → @PLAN approve (to Approved/) → DEVELOP implements → @PLAN resolve (to Archive/)
 
 ### 🎯 **Clear Separation of Concerns**
-- **PLAN**: Reads TRACKING.md priorities → Creates proposals → NO approval or implementation
-- **APPROVE**: Accepts proposals → Updates TRACKING.md priorities → NO creation or implementation
-- **DEVELOP**: Implements approved proposals → Updates TRACKING.md progress → NO planning or approval
+- **PLAN**: Manages complete proposal lifecycle (create/approve/resolve) → Updates TRACKING.md
+- **DEVELOP**: Implements approved proposals → Updates TRACKING.md progress → NO planning
 - **CHECKPOINT**: Git workflow → Updates TRACKING.md completion → NO development
 - **REFACTOR**: Code organization → Updates TRACKING.md quality → NO functionality changes
+- **DOCUMENT**: Documentation operations → NO implementation or planning
 - **TRACKING**: Central progress store → Updated by all commands → NO command execution
 
 **Quality Standards**: Framework proposals include comprehensive technical specifications, clear implementation paths, and measurable success criteria
@@ -72,42 +74,41 @@ Work commands operate on current branch without version control:
 2. **Technical Details** → Include comprehensive framework technical specifications and approaches
 3. **Implementation Roadmap** → Provide clear framework implementation steps and phases
 4. **Success Metrics** → Define measurable framework success criteria and validation approaches
-5. **Review Preparation** → Prepare framework proposal for user review and potential revision
+5. **Ready for Review** → Save proposal in Unapproved/ for user review
 
 ## Framework Proposal Creation Process
 
 ### Framework Proposals (AxiomFramework/Proposals/)
-**Focus**: Type-safe architecture, actor-based concurrency, performance optimization, deterministic behavior, boilerplate reduction, capabilities permissions
+**Focus**: Core framework development, architecture enhancements, capability implementation
 **Directories**: 
-- Active/: Framework proposals under development
-- WaitingApproval/: Framework proposals ready for user review
-- Archive/: Completed framework proposals
+- Unapproved/: New proposals awaiting approval
+- Approved/: Approved proposals ready for development
+- Archive/: Completed proposals
 **Implementation**: Implemented through FrameworkProtocols/DEVELOP.md
-**Progress Tracking**: Tracked in FrameworkProtocols/TRACKING.md
+**Progress Tracking**: Updated in TRACKING.md at approval and resolution
 
 ## Framework Proposal Lifecycle Management
 
 ### Framework Proposal States
-- **Active**: Proposal created in Active/ directory, under development
-- **Waiting Approval**: Proposal in WaitingApproval/ directory, ready for approval
-- **Under Revision**: User requests changes, proposal updated in Active/
-- **Approved**: @PLAN approve accepts proposal, updates TRACKING.md
-- **In Development**: @DEVELOP implementing proposal, progress tracked
-- **Completed**: Implementation complete, @PLAN resolve archives to Archive/
+- **Unapproved**: New proposal in Unapproved/ directory awaiting review
+- **Under Review**: User reviewing proposal in Unapproved/
+- **Approved**: Proposal moved to Approved/, TRACKING.md updated with priorities
+- **In Development**: @DEVELOP implementing from Approved/ directory
+- **Completed**: Implementation done, ready for resolution
+- **Archived**: @PLAN resolve moves from Approved/ to Archive/
 
 ### Framework Workflow Integration
-1. **@PLAN create** → Creates framework proposal in AxiomFramework/Proposals/Active/
-2. **User Review** → User reviews and edits proposal in Active/
-3. **Submit for Approval** → Move proposal to WaitingApproval/
-4. **@PLAN approve** → Process proposal, update TRACKING.md priorities
-5. **@DEVELOP** → Implement approved proposal with progress tracking
-6. **@PLAN resolve** → Validate completion and archive to Archive/
-7. **@CHECKPOINT** → Commit completed work to version control
+1. **@PLAN create** → Creates proposal in AxiomFramework/Proposals/Unapproved/
+2. **User Review** → User reviews proposal in Unapproved/
+3. **@PLAN approve** → Move to Approved/, update TRACKING.md priorities
+4. **@DEVELOP** → Implement from Approved/ with progress tracking
+5. **@PLAN resolve** → Archive from Approved/ to Archive/, update TRACKING.md
+6. **@CHECKPOINT** → Commit completed work to version control
 
 ## Framework Planning Command Execution
 
-**Command**: `@PLAN [plan|analyze|enhance]`
-**Action**: Execute comprehensive framework planning workflow with proposal creation
+**Command**: `@PLAN [create|approve|resolve|status]`
+**Action**: Execute comprehensive framework proposal lifecycle management
 
 ### 🔄 **Planning Execution Process**
 
@@ -131,20 +132,34 @@ echo "🎯 Planning ready - proceeding in framework workspace"
 ```
 
 **Automated Execution Process**:
-1. **TRACKING.md Priority Analysis** → Read current priorities and status from FrameworkProtocols/TRACKING.md
-2. **Framework Context Analysis** → Analyze existing framework implementation and identify development needs
-3. **Requirements Assessment** → Understand framework development objectives and constraints
-4. **Technical Planning** → Design framework technical approach and implementation strategy
-5. **Framework Proposal Creation** → Create structured framework proposal in AxiomFramework/Proposals/Active/
-6. **Review Preparation** → Prepare framework proposal for user review and potential revision
+
+### Create Mode (`@PLAN create`)
+1. **TRACKING.md Analysis** → Read current priorities from FrameworkProtocols/TRACKING.md
+2. **Requirements Assessment** → Analyze framework development needs
+3. **Proposal Creation** → Create structured proposal in AxiomFramework/Proposals/Unapproved/
+4. **Ready for Review** → Proposal immediately available for user review
+
+### Approve Mode (`@PLAN approve`)
+1. **Scan Unapproved/** → List proposals awaiting approval
+2. **Validate Proposals** → Ensure technical completeness
+3. **Move to Approved/** → Transfer proposal to Approved/ directory
+4. **Update TRACKING.md** → Add to development priorities
+
+### Resolve Mode (`@PLAN resolve`)
+1. **Scan Approved/** → List completed proposals in Approved/
+2. **Validate Completion** → Verify implementation success
+3. **Archive Proposal** → Move from Approved/ to Archive/
+4. **Update TRACKING.md** → Mark as completed and clear from priorities
+
 **No Git Operations**: All version control handled by @CHECKPOINT commands only
 
 
 **Framework Planning Execution Examples**:
-- `@PLAN` → Create framework development proposal
-- `@PLAN plan` → Plan framework development tasks and create proposal
-- `@PLAN analyze` → Analyze framework needs and create implementation proposal
-- `@PLAN enhance` → Plan framework enhancements and capability improvements
+- `@PLAN` → Show current proposal status across all directories
+- `@PLAN create` → Create new proposal in Unapproved/
+- `@PLAN approve` → Move proposal from Unapproved/ to Approved/
+- `@PLAN resolve` → Archive completed proposal from Approved/
+- `@PLAN status` → Display proposals in each lifecycle stage
 
 ## Framework Proposal Format Standards
 
@@ -158,13 +173,11 @@ echo "🎯 Planning ready - proceeding in framework workspace"
 - **Integration Notes**: Framework integration considerations and dependencies
 
 ### Framework Quality Standards
-- **Type Safety**: Compile-time type validation and runtime safety guarantees
-- **Concurrency Safety**: Actor-based isolation preventing data races and ensuring thread safety
-- **Performance Targets**: Measurable performance goals and optimization strategies
-- **Deterministic Behavior**: Predictable, reproducible operations without hidden state
-- **Minimal Boilerplate**: Code generation reducing repetitive patterns
-- **Capabilities Enforcement**: Runtime permissions validation with compile-time optimization
-- **Pattern Consistency**: Uniform patterns enabling reliable AI agent coding
+- **Technical Completeness**: All specifications fully defined
+- **Implementation Clarity**: Clear development path outlined
+- **Testing Coverage**: Comprehensive validation strategy
+- **Performance Metrics**: Measurable optimization targets
+- **Integration Planning**: Compatible with existing framework
 
 ## Framework Proposal Approval Process
 
@@ -176,11 +189,11 @@ echo "🎯 Planning ready - proceeding in framework workspace"
 - **Framework Compatibility**: Aligns with framework design
 
 ### Approval Workflow
-1. **Scan WaitingApproval/** → List pending proposals
+1. **Scan Unapproved/** → List pending proposals
 2. **Validate Completeness** → Ensure ready for implementation
-3. **Update TRACKING.md** → Add to development priorities
-4. **Set Implementation Order** → Based on dependencies
-5. **Prepare for Development** → Ready for DEVELOP.md
+3. **Move to Approved/** → Transfer proposal to approved directory
+4. **Update TRACKING.md** → Add to development priorities
+5. **Set Implementation Order** → Based on dependencies
 
 ## Framework Proposal Resolution Process
 
@@ -192,26 +205,38 @@ echo "🎯 Planning ready - proceeding in framework workspace"
 - **Documentation Current**: Via DOCUMENT.md
 
 ### Resolution Workflow
-1. **Validate Completion** → Check success criteria
-2. **Update TRACKING.md** → Mark as completed
-3. **Archive Proposal** → Move to Archive/
-4. **Document Outcomes** → Record achievements
-5. **Reset for Next Cycle** → Clear active tracking
+1. **Scan Approved/** → Find completed proposals
+2. **Validate Completion** → Check success criteria
+3. **Archive Proposal** → Move from Approved/ to Archive/
+4. **Update TRACKING.md** → Mark as completed and remove from priorities
+5. **Document Outcomes** → Record achievements in archive
 
 ## Framework Planning Workflow Integration
 
-**Planning Purpose**: Strategic framework proposal creation for structured development
-**Approval Separation**: FrameworkProtocols/APPROVE.md handles proposal acceptance, never creates proposals
-**Implementation Separation**: FrameworkProtocols/DEVELOP.md implements approved proposals, never creates or approves them
-**Progress Tracking**: FrameworkProtocols/TRACKING.md monitors framework proposal implementation progress
-**Archive Management**: Completed framework proposals archived for reference and documentation
-**User Control**: Users review and revise framework proposals before @APPROVE processing
+**Lifecycle Management**: Complete proposal lifecycle in one command
+**Implementation Separation**: FrameworkProtocols/DEVELOP.md implements approved proposals only
+**Progress Tracking**: FrameworkProtocols/TRACKING.md monitors all proposal stages
+**Archive Management**: Completed proposals archived through resolve operation
+**User Control**: Users review proposals before approval processing
+**Unified Command**: Single command manages creation, approval, and resolution
 
 ## Framework Planning Coordination
 
-**Proposal Creation**: Creates framework proposals in AxiomFramework/Proposals/Active/ directory, moves to WaitingApproval/ when ready for review
+**Proposal Directories**:
+- `Unapproved/` - New proposals awaiting approval
+- `Approved/` - Approved proposals ready for development
+- `Archive/` - Completed proposals
+
+**Lifecycle Operations**:
+- **Create**: New proposals directly to Unapproved/
+- **Review**: User reviews in Unapproved/
+- **Approve**: Move to Approved/ and update TRACKING.md
+- **Develop**: Implementation from Approved/ via DEVELOP.md
+- **Resolve**: Archive from Approved/ and update TRACKING.md
+
+**Proposal Creation**: Creates framework proposals in AxiomFramework/Proposals/Unapproved/ directory
 **User Interaction**: Framework proposals designed for user review and revision
-**Approval Integration**: Framework proposals processed through FrameworkProtocols/@APPROVE for acceptance
+**Approval Processing**: Move proposals from Unapproved/ to Approved/ with TRACKING.md update
 **Development Integration**: Approved framework proposals implemented through FrameworkProtocols/DEVELOP.md
 **Progress Monitoring**: Framework implementation progress tracked through FrameworkProtocols/TRACKING.md
 **Archive Management**: Completed framework proposals archived for future reference
@@ -221,7 +246,7 @@ echo "🎯 Planning ready - proceeding in framework workspace"
 **FRAMEWORK PLANNING COMMAND STATUS**: Complete proposal lifecycle management (create/approve/resolve)
 **CORE FOCUS**: Proposal workflow management - creation, approval, and resolution
 **PROPOSAL LIFECYCLE**: Unified command for all proposal states and transitions
-**LIFECYCLE MANAGEMENT**: Handles Active/, WaitingApproval/, and Archive/ directories
+**LIFECYCLE MANAGEMENT**: Handles Unapproved/, Approved/, and Archive/ directories
 **INTEGRATION**: Direct integration with DEVELOP.md and TRACKING.md for seamless workflow
 
 **Use FrameworkProtocols/@PLAN for complete proposal lifecycle management - creation, approval, and resolution.**
