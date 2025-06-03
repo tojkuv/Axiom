@@ -14,6 +14,36 @@ public struct ApplicationMacro: MemberMacro {
         providingMembersOf declaration: some DeclGroupSyntax,
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
+        // Parse macro parameters
+        var entryView: String? = nil
+        var entryContext: String? = nil
+        var enableDependencyInjection = false
+        var enableGlobalErrorHandling = false
+        
+        if let arguments = node.arguments?.as(LabeledExprListSyntax.self) {
+            for argument in arguments {
+                switch argument.label?.text {
+                case "entryView":
+                    if let expr = argument.expression.as(MemberAccessExprSyntax.self) {
+                        entryView = expr.declName.baseName.text
+                    }
+                case "entryContext":
+                    if let expr = argument.expression.as(MemberAccessExprSyntax.self) {
+                        entryContext = expr.declName.baseName.text
+                    }
+                case "dependencyInjection":
+                    if let boolExpr = argument.expression.as(BooleanLiteralExprSyntax.self) {
+                        enableDependencyInjection = boolExpr.literal.tokenKind == .keyword(.true)
+                    }
+                case "errorHandling":
+                    if let boolExpr = argument.expression.as(BooleanLiteralExprSyntax.self) {
+                        enableGlobalErrorHandling = boolExpr.literal.tokenKind == .keyword(.true)
+                    }
+                default:
+                    break
+                }
+            }
+        }
         // Validate it's applied to a struct
         guard let structDecl = declaration.as(StructDeclSyntax.self) else {
             context.diagnose(
@@ -97,13 +127,88 @@ public struct ApplicationMacro: MemberMacro {
         
         // Generate configure if it doesn't exist
         if !hasValidConfigure {
+            let enhancedMode = entryView != nil || entryContext != nil || enableDependencyInjection || enableGlobalErrorHandling
+            
+            let configureBody: String
+            if enhancedMode {
+                var body = ["// Application configuration"]
+                
+                if enableDependencyInjection {
+                    body.append("setupDependencyInjection()")
+                }
+                
+                if enableGlobalErrorHandling {
+                    body.append("setupGlobalErrorHandling()")
+                }
+                
+                if let entryContext = entryContext {
+                    body.append("setupEntryContext(\(entryContext).self)")
+                }
+                
+                if let entryView = entryView {
+                    body.append("setupEntryView(\(entryView).self)")
+                }
+                
+                body.append("// Custom configuration can be added here")
+                configureBody = body.joined(separator: "\n        ")
+            } else {
+                configureBody = "// Default configuration"
+            }
+            
             let configureDecl = """
             func configure() async throws {
-                // Default configuration
+                \(configureBody)
             }
             """
             generatedMembers.append(DeclSyntax(stringLiteral: configureDecl))
             isConfigureAsync = true  // Auto-generated configure is always async
+            
+            // Generate helper methods if enhanced mode is enabled
+            if enhancedMode {
+                if enableDependencyInjection {
+                    let diDecl = """
+                    
+                    private func setupDependencyInjection() {
+                        // Initialize dependency injection container
+                        // Register services and dependencies
+                    }
+                    """
+                    generatedMembers.append(DeclSyntax(stringLiteral: diDecl))
+                }
+                
+                if enableGlobalErrorHandling {
+                    let errorDecl = """
+                    
+                    private func setupGlobalErrorHandling() {
+                        // Configure global error handling
+                        // Set up error reporting and recovery
+                    }
+                    """
+                    generatedMembers.append(DeclSyntax(stringLiteral: errorDecl))
+                }
+                
+                if entryContext != nil {
+                    let contextDecl = """
+                    
+                    private func setupEntryContext(_ contextType: Any.Type) {
+                        // Initialize entry context
+                        // Configure context dependencies
+                    }
+                    """
+                    generatedMembers.append(DeclSyntax(stringLiteral: contextDecl))
+                }
+                
+                if entryView != nil {
+                    let viewDecl = """
+                    
+                    private func setupEntryView(_ viewType: Any.Type) {
+                        // Configure entry view
+                        // Set up view hierarchy
+                    }
+                    """
+                    generatedMembers.append(DeclSyntax(stringLiteral: viewDecl))
+                }
+            }
         }
         
         // Generate main method
@@ -167,4 +272,9 @@ enum ApplicationMacroFixIt: String, FixItMessage {
 // MARK: - Public Macro Declaration
 
 @attached(member, names: arbitrary)
-public macro Application() = #externalMacro(module: "AxiomMacros", type: "ApplicationMacro")
+public macro Application(
+    entryView: Any.Type? = nil,
+    entryContext: Any.Type? = nil,
+    dependencyInjection: Bool = false,
+    errorHandling: Bool = false
+) = #externalMacro(module: "AxiomMacros", type: "ApplicationMacro")

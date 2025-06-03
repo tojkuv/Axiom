@@ -1,5 +1,5 @@
 import Foundation
-@testable import Axiom
+import Axiom
 
 // MARK: - Axiom Testing
 

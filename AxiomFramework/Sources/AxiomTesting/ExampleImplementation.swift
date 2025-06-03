@@ -1,6 +1,6 @@
 import Foundation
 import SwiftUI
-@testable import Axiom
+import Axiom
 
 // MARK: - Example: Complete Architecture Implementation
 
