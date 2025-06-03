@@ -1,71 +1,128 @@
-// @file:AxiomTesting.swift
-// Comprehensive testing infrastructure for Axiom Framework
-// Incrementally built with test-driven development
-
 import Foundation
-import Axiom
+@testable import Axiom
 
-/// AxiomTesting provides comprehensive testing utilities for the Axiom framework
+// MARK: - Axiom Testing
+
+/// Testing utilities for Axiom framework
 public struct AxiomTesting {
     public init() {}
 }
 
-// MARK: - Test Doubles and Mocks
+// MARK: - Mock Implementations
 
-/// Mock capability manager for testing
-public actor MockCapabilityManager {
-    public private(set) var availableCapabilities: Set<Capability> = []
-    public private(set) var validationHistory: [(Capability, Bool)] = []
+/// Mock state for testing
+public struct MockState: Axiom.State {
+    public var value: Int = 0
     
-    public init(availableCapabilities: Set<Capability> = Set(Capability.allCases)) {
-        self.availableCapabilities = availableCapabilities
+    public init() {}
+    public init(value: Int) {
+        self.value = value
+    }
+}
+
+/// Mock client for testing
+public actor MockClient: Client {
+    public typealias State = MockState
+    
+    public private(set) var state: MockState
+    
+    public init() {
+        self.state = MockState()
     }
     
-    public func validate(_ capability: Capability) async throws {
-        let isAvailable = availableCapabilities.contains(capability)
-        validationHistory.append((capability, isAvailable))
+    public init(state: MockState) {
+        self.state = state
+    }
+    
+    public func updateState(_ transform: (inout MockState) -> Void) async {
+        transform(&state)
+    }
+}
+
+/// Mock context state
+public struct MockContextState: Axiom.State {
+    public let displayValue: String
+    
+    public init() {
+        self.displayValue = "0"
+    }
+    
+    public init(displayValue: String) {
+        self.displayValue = displayValue
+    }
+}
+
+/// Mock context actions
+public struct MockContextActions {
+    public let increment: () async -> Void
+    public let decrement: () async -> Void
+    public let reset: () async -> Void
+}
+
+/// Mock context for testing
+@MainActor
+public class MockContext: BaseContext<MockContextState, MockContextActions> {
+    private let client: MockClient
+    
+    public init(client: MockClient) {
+        self.client = client
         
-        if !isAvailable {
-            throw CapabilityError.unavailable(capability)
+        let actions = MockContextActions(
+            increment: { },
+            decrement: { },
+            reset: { }
+        )
+        
+        super.init(state: MockContextState(), actions: actions)
+        
+        // Set actions with self reference
+        setActions(MockContextActions(
+            increment: { [weak self] in await self?.increment() },
+            decrement: { [weak self] in await self?.decrement() },
+            reset: { [weak self] in await self?.reset() }
+        ))
+        
+        Task {
+            await refreshState()
         }
     }
     
-    public func addCapability(_ capability: Capability) async {
-        availableCapabilities.insert(capability)
+    private func increment() async {
+        await client.updateState { $0.value += 1 }
+        await refreshState()
     }
     
-    public func removeCapability(_ capability: Capability) async {
-        availableCapabilities.remove(capability)
+    private func decrement() async {
+        await client.updateState { $0.value -= 1 }
+        await refreshState()
     }
     
-    public func reset() async {
-        validationHistory.removeAll()
-        availableCapabilities = Set(Capability.allCases)
+    private func reset() async {
+        await client.updateState { $0.value = 0 }
+        await refreshState()
+    }
+    
+    private func refreshState() async {
+        let clientState = await client.state
+        updateState(MockContextState(displayValue: "\(clientState.value)"))
     }
 }
 
-// MARK: - Basic Test Utilities
-
-public struct AxiomTestUtilities {
+/// Mock capability for testing
+public struct MockCapability: Capability {
+    public let id: String
+    private let available: Bool
     
-    /// Creates a mock capability manager for testing
-    public static func createMockCapabilityManager(with capabilities: [Capability] = Array(Capability.allCases)) -> MockCapabilityManager {
-        return MockCapabilityManager(availableCapabilities: Set(capabilities))
+    public init(id: String, available: Bool = true) {
+        self.id = id
+        self.available = available
     }
-}
-
-/// Basic testing infrastructure - building incrementally with TDD
-public struct AxiomTestSuite {
-    public static func runBasicTests() -> Bool {
-        print("🧪 Running basic Axiom framework tests...")
-        
-        // Test 1: Framework imports correctly
-        print("✅ Framework imports successfully")
-        
-        // Test 2: Basic types exist
-        let hasBasicTypes = true // Will expand with actual tests
-        print("✅ Basic types available")
-        
-        return hasBasicTypes
+    
+    public func isAvailable() -> Bool {
+        available
+    }
+    
+    public var description: String {
+        "MockCapability(\(id): \(available ? "available" : "unavailable"))"
     }
 }

@@ -1,49 +1,21 @@
 import SwiftCompilerPlugin
-import SwiftSyntax
-import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-// MARK: - Axiom Macros Plugin
+// MARK: - Axiom Macro Plugin
 
-/// The main plugin that provides all Axiom macros
+/// The Axiom macro plugin that provides all framework macros
 @main
-public struct AxiomMacrosPlugin: CompilerPlugin {
-    public let providingMacros: [Macro.Type] = [
-        // Example macro for testing infrastructure
-        GreetingMacro.self,
-        
-        // Core Axiom macros
+struct AxiomMacrosPlugin: CompilerPlugin {
+    let providingMacros: [Macro.Type] = [
+        // Core Framework Macros (One macro per component)
         ClientMacro.self,
-        CapabilitiesMacro.self,
-        DomainModelMacro.self,
-        CrossCuttingMacro.self,
-        ViewMacro.self,
         ContextMacro.self,
+        PresentationMacro.self,
+        StateMacro.self,
+        CapabilityMacro.self,
+        ApplicationMacro.self,
         
-        // Additional macros
-        ObservableStateMacro.self,
-        IntelligenceMacro.self
+        // Example/Test Macro
+        GreetingMacro.self
     ]
-    
-    public init() {}
-}
-
-// MARK: - Macro Exports
-
-// Re-export all macro declarations for easier importing
-public extension AxiomMacrosPlugin {
-    /// List of all available Axiom macros
-    static var availableMacros: [String: String] {
-        [
-            "@Greeting": "Adds a greeting property to a struct (example macro)",
-            "@Client": "Automatically inject and manage client dependencies",
-            "@Capabilities": "Declare and validate capability requirements",
-            "@DomainModel": "Generate domain model boilerplate including validation and immutable updates",
-            "@CrossCutting": "Inject supervised cross-cutting concerns like analytics, logging, and error reporting",
-            "@View": "Generate SwiftUI view boilerplate with AxiomContext integration, lifecycle methods, and error handling",
-            "@Context": "Comprehensive context orchestration automation - integrates @Client + @CrossCutting + context-specific features for 95% boilerplate reduction",
-            "@ObservableState": "Make state observable with automatic updates and change notifications",
-            "@Intelligence": "Enable intelligence features with configuration and capability registration"
-        ]
-    }
 }

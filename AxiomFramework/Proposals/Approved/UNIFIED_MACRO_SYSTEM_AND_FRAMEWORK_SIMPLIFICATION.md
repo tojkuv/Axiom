@@ -67,27 +67,100 @@ actor UserClient: Client {
 **Protocol**: `Context` - Defines the interface for all contexts
 **Macro**: `@Context` - The ONLY macro for contexts. Generates complete implementation conforming to Context protocol.
 
+**Architectural Flexibility**: 
+- **Any context can depend on any client** for business logic and orchestration
+- **Any context can access any state** with immutable/read-only access
+- **State mutations must go through the owning client** to maintain 1:1 ownership
+
+**Context Components** (Enforced 1:1 Mapping):
+1. **State**: Derived/computed state for presentation layer
+2. **Actions**: Methods that presentation layer can trigger
+3. **Reducers**: Business logic that implements actions with client access
+
+**CRITICAL CONSTRAINT**: Every action MUST have a matching reducer
+- **1:1 Action-Reducer Mapping**: Each action in the Actions struct must have a corresponding reducer method
+- **Compile-Time Enforcement**: @Context macro validates all actions have implementations
+- **No Dead Actions**: Prevents actions without business logic implementation
+- **Complete Implementation**: Ensures all user interactions are handled
+
 **Generated Functionality**:
-- Client relationship management
-- Read-only state access enforcement
+- Multi-client dependency management
+- Derived state computation and caching
+- Action method generation with proper signatures
+- Reducer implementation with client orchestration
+- Automatic state propagation to presentation
 - SwiftUI binding optimization
 - Cross-cutting concern integration
-- Compile-time client validation
-- Context orchestration patterns
+- Compile-time validation
 - Automatic Context protocol conformance
+
+**Macro Validation Behavior**:
+```swift
+@Context
+class CartContext: Context {
+    struct Actions {
+        let addItem: (Item) async -> Void
+        let removeItem: (String) async -> Void
+    }
+    
+    // ✅ Valid: Has matching reducer
+    func addItem(_ item: Item) async { ... }
+    
+    // ❌ COMPILE ERROR: Missing reducer for 'removeItem'
+    // Error: "Context 'CartContext' missing reducer 'removeItem(_:)' for action"
+}
+```
+
+The @Context macro will:
+1. Parse the Actions struct to identify all action properties
+2. Extract the method signature from each action type
+3. Search for matching reducer methods in the context class
+4. Generate compile-time errors for any missing reducers
+5. Provide fix-it suggestions with correct reducer signatures
 
 ```swift
 @Context
 class UserContext: Context {
+    // Dependencies: Can access any clients
     let userClient: UserClient
     let preferencesClient: PreferencesClient
+    let analyticsClient: AnalyticsClient
     
-    // ALL context functionality generated automatically:
-    // - Client relationships conforming to Context
-    // - Read-only access
-    // - SwiftUI bindings
-    // - Cross-cutting concerns
-    // - Orchestration patterns
+    // Generated State for presentation
+    struct State: Axiom.State {
+        let userName: String
+        let isPremium: Bool
+        let theme: Theme
+    }
+    
+    // Generated Actions for presentation (each MUST have a matching reducer)
+    struct Actions {
+        let updateProfile: () async -> Void
+        let changeTheme: (Theme) async -> Void
+        let upgradeToPremium: () async -> Void
+    }
+    
+    // REQUIRED: Matching reducers for EVERY action
+    func updateProfile() async {  // ✅ Matches Actions.updateProfile
+        // Orchestrate across clients
+        await userClient.updateState { ... }
+        await analyticsClient.updateState { ... }
+        await refreshDerivedState()
+    }
+    
+    func changeTheme(_ theme: Theme) async {  // ✅ Matches Actions.changeTheme
+        await preferencesClient.updateState { $0.theme = theme }
+        await refreshDerivedState()
+    }
+    
+    func upgradeToPremium() async {  // ✅ Matches Actions.upgradeToPremium
+        await userClient.updateState { $0.isPremium = true }
+        await analyticsClient.updateState { $0.recordUpgrade() }
+        await refreshDerivedState()
+    }
+    
+    // ❌ COMPILE ERROR if any action lacks a reducer:
+    // "Missing reducer 'changeTheme' for action in Actions"
 }
 ```
 
@@ -96,9 +169,15 @@ class UserContext: Context {
 **Protocol**: `Presentation` - Defines the interface for all SwiftUI presentations
 **Macro**: `@Presentation` - The ONLY macro for presentations. Generates complete implementation conforming to Presentation protocol.
 
+**Architectural Constraint**: 
+- **Presentation components CANNOT access clients or states directly**
+- **Only access context.state and context.actions** for strict separation
+- **Business logic lives in Context, UI logic lives in Presentation**
+
 **Generated Functionality**:
 - 1:1 context relationship enforcement
-- Automatic binding generation
+- Automatic binding to context.state and context.actions only
+- Prevention of direct client/state access
 - Performance optimization
 - UI consistency validation
 - SwiftUI integration patterns
@@ -109,12 +188,18 @@ class UserContext: Context {
 struct UserView: Presentation {
     let context: UserContext
     
-    // ALL presentation functionality generated automatically:
-    // - Context binding conforming to Presentation
-    // - SwiftUI integration
-    // - Performance optimization
-    // - UI consistency
-    // - Reactive updates
+    var body: some View {
+        VStack {
+            // ✅ ALLOWED: Access context state
+            Text(context.state.userName)
+            
+            // ✅ ALLOWED: Trigger context actions
+            Button("Update", action: context.actions.updateProfile)
+            
+            // ❌ PREVENTED: Direct client access (compile error)
+            // Text(context.userClient.state.name) // NOT ALLOWED
+        }
+    }
 }
 ```
 
@@ -300,9 +385,11 @@ The framework provides exactly **6 protocol/macro pairs** for complete component
 
 2. **@Context Macro** (2 hours)
    - Client relationship management
+   - Action-Reducer validation (1:1 mapping enforcement)
    - Read-only access enforcement
    - SwiftUI binding generation
    - Cross-cutting concern integration
+   - Compile-time validation of complete reducer implementation
 
 3. **@Presentation Macro** (1-2 hours)
    - 1:1 context relationship enforcement (Presentation protocol)
@@ -347,8 +434,9 @@ The framework provides exactly **6 protocol/macro pairs** for complete component
 - **Single Macro Validation**: Each macro generates complete, correct implementation
 - **No Multi-Macro Conflicts**: Verify no macro combination issues exist
 - **Generated Code Testing**: Validate all generated functionality works correctly
-- **Constraint Enforcement**: Verify 7 architectural constraints enforced automatically
+- **Constraint Enforcement**: Verify architectural constraints enforced automatically
 - **1:1 Client-State Ownership**: Validate one client owns one state enforcement
+- **1:1 Action-Reducer Mapping**: Validate every action has matching reducer implementation
 
 ### Framework Testing
 - **Build Validation**: Framework builds successfully after component removal
@@ -380,6 +468,154 @@ The framework provides exactly **6 protocol/macro pairs** for complete component
 - **Performance Optimization**: Generated code optimized for each component type
 - **MVP Focus**: Essential functionality only, no over-engineering
 - **Professional Quality**: Polished, consistent developer experience
+
+## Architectural Constraints Clarification
+
+### State Access and Mutation Rules
+
+1. **Client-State Ownership (1:1)**: Each client owns exactly one state type
+   - Only the owning client can mutate its state
+   - State mutations MUST go through the owning client's `updateState` method
+   - Actor isolation ensures thread-safe exclusive write access
+
+2. **Context Flexibility**: Contexts can orchestrate any clients and read any states
+   - **Any context can depend on any client** for business logic
+   - **Any context can read any state** with immutable access
+   - **Cross-domain orchestration** is encouraged for complex workflows
+   - **State mutations are delegated** to the owning client
+
+3. **Unidirectional Flow with Flexibility**:
+   - Views → Contexts (1:1 binding)
+   - Contexts → Any Clients (flexible orchestration)
+   - Contexts → Any States (read-only access)
+   - Mutations → Through owning Client only
+
+### Data Flow and Separation of Concerns
+
+**Strict Separation**:
+1. **Presentation Layer**: Only knows about State (what to show) and Actions (what can be done)
+2. **Context Layer**: Orchestrates business logic, derives state, implements actions
+3. **Client Layer**: Owns and mutates domain state with actor safety
+
+**Unidirectional Data Flow**:
+```
+User Input → Presentation.Action → Context.Reducer → Client.UpdateState 
+    ↓                                                        ↓
+Display ← Presentation.State ← Context.State ← Client.State
+```
+
+### Example: Complete Architecture Implementation
+
+```swift
+// Domain State (owned by client)
+@State
+struct CartState: State {
+    var items: [Item] = []
+    var couponCode: String? = nil
+}
+
+// Client (owns state)
+@Client
+actor CartClient: Client {
+    typealias State = CartState
+    // State management generated
+}
+
+// Context (orchestrates and derives)
+@Context
+class CheckoutContext: Context {
+    // Dependencies
+    let cartClient: CartClient
+    let userClient: UserClient
+    let paymentClient: PaymentClient
+    
+    // Derived State for Presentation
+    struct State: Axiom.State {
+        let itemCount: Int
+        let totalPrice: Decimal
+        let canCheckout: Bool
+        let userName: String
+    }
+    
+    // Actions for Presentation (ENFORCED: each must have matching reducer)
+    struct Actions {
+        let addItem: (Item) async -> Void      // → requires addItem(_:) reducer
+        let removeItem: (String) async -> Void  // → requires removeItem(_:) reducer
+        let applyCoupon: (String) async -> Void // → requires applyCoupon(_:) reducer
+        let checkout: () async -> Void         // → requires checkout() reducer
+    }
+    
+    // REQUIRED Reducers (1:1 with Actions)
+    
+    func addItem(_ item: Item) async {  // ✅ Implements Actions.addItem
+        await cartClient.updateState { state in
+            state.items.append(item)
+        }
+        await refreshDerivedState()
+    }
+    
+    func removeItem(_ itemId: String) async {  // ✅ Implements Actions.removeItem
+        await cartClient.updateState { state in
+            state.items.removeAll { $0.id == itemId }
+        }
+        await refreshDerivedState()
+    }
+    
+    func applyCoupon(_ code: String) async {  // ✅ Implements Actions.applyCoupon
+        // Validate coupon
+        if await validateCoupon(code) {
+            await cartClient.updateState { $0.couponCode = code }
+        }
+        await refreshDerivedState()
+    }
+    
+    func checkout() async {  // ✅ Implements Actions.checkout
+        // Complex orchestration
+        let cartState = await cartClient.state
+        let userState = await userClient.state
+        
+        // Validate, process payment, update inventory
+        await paymentClient.updateState { ... }
+        await cartClient.updateState { $0.items.removeAll() }
+        
+        await refreshDerivedState()
+    }
+    
+    // Derive state for presentation
+    private func refreshDerivedState() async {
+        let cart = await cartClient.state
+        let user = await userClient.state
+        
+        self.state = State(
+            itemCount: cart.items.count,
+            totalPrice: calculateTotal(cart.items),
+            canCheckout: !cart.items.isEmpty,
+            userName: user.name
+        )
+    }
+}
+
+// Presentation (pure UI)
+@Presentation
+struct CheckoutView: Presentation {
+    let context: CheckoutContext
+    
+    var body: some View {
+        VStack {
+            // ✅ Access derived state
+            Text("Items: \(context.state.itemCount)")
+            Text("Total: \(context.state.totalPrice)")
+            
+            // ✅ Trigger actions
+            Button("Checkout", action: context.actions.checkout)
+                .disabled(!context.state.canCheckout)
+            
+            // ❌ CANNOT access clients or their states
+            // Text(context.cartClient.state.items.count) // COMPILE ERROR
+        }
+    }
+}
+```
 
 ## Integration Notes
 
