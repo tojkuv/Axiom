@@ -1,6 +1,6 @@
 # @PLAN.md - Axiom Framework Proposal Lifecycle Management
 
-Framework proposal lifecycle management command that creates, approves, and resolves proposals
+Framework proposal lifecycle management - concise, bullet-point focused RFC creation
 
 ## Automated Mode Trigger
 
@@ -8,255 +8,292 @@ Framework proposal lifecycle management command that creates, approves, and reso
 **Action**: Enter ultrathink mode and execute framework proposal lifecycle workflow
 
 ### Usage Modes
-- **`@PLAN`** → Show current proposal status across all directories
-- **`@PLAN create`** → Create new proposal in AxiomFramework/Proposals/Unapproved/
-- **`@PLAN approve`** → Move proposal from Unapproved/ to Approved/ and update TRACKING.md
-- **`@PLAN resolve`** → Archive completed proposal from Approved/ to Archive/
-- **`@PLAN status`** → Display detailed proposal status in each lifecycle stage
+- **`@PLAN`** → Show current RFC status across all directories
+- **`@PLAN create [title]`** → Create new RFC in AxiomFramework/RFCs/Draft/ with sequential RFC number
+- **`@PLAN propose [RFC-XXX]`** → Move RFC from Draft/ to Proposed/
+- **`@PLAN activate [RFC-XXX]`** → Move RFC from Proposed/ to Active/ after implementation
+- **`@PLAN deprecate [RFC-XXX] [RFC-YYY]`** → Deprecate RFC-XXX in favor of RFC-YYY
+- **`@PLAN status`** → Display RFCs in each lifecycle stage
+- **`@PLAN suggest [RFC-XXX]`** → Analyze RFC and provide improvement suggestions
 
-### Framework Planning Scope
-**Lifecycle Management**: Complete proposal lifecycle from creation to resolution
-**Branch Requirement**: Must be executed from framework branch for framework development
-**Proposal Management**: Creates, approves, and resolves framework proposals
-**Development Integration**: Approved proposals implemented through FrameworkProtocols/DEVELOP.md
 
-### 🔄 **Development Workflow Architecture**
+### Development Workflow Architecture
 **IMPORTANT**: PLAN commands NEVER perform git operations (commit/push/merge)
 **Version Control**: Only @CHECKPOINT commands handle all git operations
-**Work Philosophy**: PLAN manages full lifecycle → Creates proposals → Approves proposals → DEVELOP implements → PLAN resolves completed work → @CHECKPOINT commits and merges
+**RFC Philosophy**: Each RFC is self-contained with implementation checklists and version history
+**Work Philosophy**: PLAN manages full lifecycle → Creates proposals → Proposes for implementation → DEVELOP implements → PLAN activates completed work → @CHECKPOINT commits and merges
 
-Work commands operate on current branch without version control:
-1. **Creation**: Create new proposals directly in Unapproved/
-2. **Approval**: Move proposals to Approved/ and update TRACKING.md priorities
-3. **Resolution**: Archive completed proposals from Approved/ to Archive/
-4. **Status Tracking**: Update TRACKING.md at approval and resolution stages
-**No Git Operations**: PLAN commands never commit, push, or merge
 
-## Framework Development Planning Philosophy
+**Core Principle**: Lifecycle management for technical proposals. Requirements focus, no implementation.
 
-**Core Principle**: Framework planning manages the complete lifecycle of technical proposals - from creation through approval to resolution. This protocol handles proposal workflow management, not framework architecture decisions.
+### Clear Separation of Concerns
+- **PLAN**: Manages complete RFC lifecycle → Updates RFC metadata and version history
+- **DEVELOP**: Implements proposed RFCs → Checks off implementation checklist items
+- **CHECKPOINT**: Git workflow → NO RFC modifications
+- **REFACTOR**: Code organization → NO RFC modifications
+- **DOCUMENT**: Documentation operations → NO RFC modifications
 
-**Proposal Workflow**: @PLAN create (Unapproved/) → User reviews → @PLAN approve (to Approved/) → DEVELOP implements → @PLAN resolve (to Archive/)
+**Quality Standards**: Requirements only. Measurable criteria. Bullet points. No code.
 
-### 🎯 **Clear Separation of Concerns**
-- **PLAN**: Manages complete proposal lifecycle (create/approve/resolve) → Updates TRACKING.md
-- **DEVELOP**: Implements approved proposals → Updates TRACKING.md progress → NO planning
-- **CHECKPOINT**: Git workflow → Updates TRACKING.md completion → NO development
-- **REFACTOR**: Code organization → Updates TRACKING.md quality → NO functionality changes
-- **DOCUMENT**: Documentation operations → NO implementation or planning
-- **TRACKING**: Central progress store → Updated by all commands → NO command execution
 
-**Quality Standards**: Framework proposals include comprehensive technical specifications, clear implementation paths, and measurable success criteria
 
-**Technical Focus Only**: Proposals strictly focus on technical implementation for AI agent coding. Framework design prioritizes machine readability, consistent patterns, and deterministic behavior optimized for automated development workflows.
+## RFC Lifecycle States
 
-**Architectural Constraint Enforcement**: All proposals must respect the fundamental constraint that one client owns one state (1:1 client-state ownership). This ensures clear actor boundaries, prevents state sharing conflicts, and maintains domain model integrity.
+| State | Location | Status | Next Action |
+|-------|----------|--------|-------------|
+| Draft | `Draft/` | Creating/editing | `@PLAN propose` |
+| Proposed | `Proposed/` | Ready to implement | `@DEVELOP` |
+| Active | `Active/` | Implemented | `@PLAN deprecate` |
+| Deprecated | `Deprecated/` | Superseded | Archive |
+| Archived | `Archive/` | Historical | None |
 
-**MVP Development Stage**: Framework is currently in MVP stage - breaking changes are acceptable and backwards compatibility is not required. This enables clean implementations without legacy constraints.
-
-## Framework Planning Methodology
-
-### Phase 1: Framework Analysis
-1. **TRACKING.md Review** → Read current priorities and progress
-2. **Framework Assessment** → Analyze current implementation state
-3. **Requirements Analysis** → Identify development needs and gaps
-4. **Technical Planning** → Define implementation approach
-5. **Resource Planning** → Estimate development effort
-6. **Risk Assessment** → Identify potential challenges
-
-### Phase 2: Framework Proposal Creation
-1. **Technical Specification** → Define implementation approach and architecture
-2. **Architectural Constraint Validation** → Ensure one client owns one state (1:1 client-state ownership)
-3. **Type Safety Design** → Plan compile-time validation and guarantees
-4. **Concurrency Strategy** → Design actor-based isolation patterns with single state ownership
-5. **Performance Targets** → Set measurable optimization goals
-6. **Code Generation** → Plan boilerplate reduction strategies
-7. **Testing Approach** → Define comprehensive validation procedures
-8. **Integration Planning** → Ensure compatibility with existing framework
-
-### Phase 3: Framework Proposal Finalization
-1. **Structured Format** → Create framework proposal using established format and sections
-2. **Technical Details** → Include comprehensive framework technical specifications and approaches
-3. **Implementation Roadmap** → Provide clear framework implementation steps and phases
-4. **Success Metrics** → Define measurable framework success criteria and validation approaches
-5. **Ready for Review** → Save proposal in Unapproved/ for user review
-
-## Framework Proposal Creation Process
-
-### Framework Proposals (AxiomFramework/Proposals/)
-**Focus**: Core framework development, architecture enhancements, capability implementation
-**Directories**: 
-- Unapproved/: New proposals awaiting approval
-- Approved/: Approved proposals ready for development
-- Archive/: Completed proposals
-**Implementation**: Implemented through FrameworkProtocols/DEVELOP.md
-**Progress Tracking**: Updated in TRACKING.md at approval and resolution
-
-## Framework Proposal Lifecycle Management
-
-### Framework Proposal States
-- **Unapproved**: New proposal in Unapproved/ directory awaiting review
-- **Under Review**: User reviewing proposal in Unapproved/
-- **Approved**: Proposal moved to Approved/, TRACKING.md updated with priorities
-- **In Development**: @DEVELOP implementing from Approved/ directory
-- **Completed**: Implementation done, ready for resolution
-- **Archived**: @PLAN resolve moves from Approved/ to Archive/
-
-### Framework Workflow Integration
-1. **@PLAN create** → Creates proposal in AxiomFramework/Proposals/Unapproved/
-2. **User Review** → User reviews proposal in Unapproved/
-3. **@PLAN approve** → Move to Approved/, update TRACKING.md priorities
-4. **@DEVELOP** → Implement from Approved/ with progress tracking
-5. **@PLAN resolve** → Archive from Approved/ to Archive/, update TRACKING.md
-6. **@CHECKPOINT** → Commit completed work to version control
 
 ## Framework Planning Command Execution
 
-**Command**: `@PLAN [create|approve|resolve|status]`
-**Action**: Execute comprehensive framework proposal lifecycle management
-
-### 🔄 **Planning Execution Process**
-
-**CRITICAL**: PLAN commands work on current branch state - NO git operations
-
-```bash
-# Navigate to framework workspace
-echo "🔄 Entering framework development workspace..."
-cd framework-workspace/ || {
-    echo "❌ Framework workspace not found"
-    echo "💡 Run '@WORKSPACE setup' to initialize worktrees"
-    exit 1
-}
-
-# Planning workflow (NO git operations)
-echo "🎯 Framework Planning Execution"
-echo "📍 Workspace: $(pwd)"
-echo "🌿 Branch: $(git branch --show-current)"
-echo "⚠️ Version control managed by @CHECKPOINT only"
-echo "🎯 Planning ready - proceeding in framework workspace"
-```
-
-**Automated Execution Process**:
-
-### Create Mode (`@PLAN create`)
-1. **TRACKING.md Analysis** → Read current priorities from FrameworkProtocols/TRACKING.md
-2. **Requirements Assessment** → Analyze framework development needs
-3. **MVP Consideration** → Breaking changes acceptable - focus on clean implementation
-4. **Proposal Creation** → Create structured proposal in AxiomFramework/Proposals/Unapproved/
-5. **Ready for Review** → Proposal immediately available for user review
-
-### Approve Mode (`@PLAN approve`)
-1. **Scan Unapproved/** → List proposals awaiting approval
-2. **Validate Proposals** → Ensure technical completeness and 1:1 client-state ownership compliance
-3. **Move to Approved/** → Transfer proposal to Approved/ directory
-4. **Update TRACKING.md** → Add to development priorities
-
-### Resolve Mode (`@PLAN resolve`)
-1. **Scan Approved/** → List completed proposals in Approved/
-2. **Validate Completion** → Verify implementation success
-3. **Archive Proposal** → Move from Approved/ to Archive/
-4. **Update TRACKING.md** → Mark as completed and clear from priorities
-
-**No Git Operations**: All version control handled by @CHECKPOINT commands only
+**Command**: `@PLAN [create|propose|activate|deprecate|status|suggest]`
+**Action**: Execute framework proposal lifecycle management
 
 
-**Framework Planning Execution Examples**:
-- `@PLAN` → Show current proposal status across all directories
-- `@PLAN create` → Create new proposal in Unapproved/
-- `@PLAN approve` → Move proposal from Unapproved/ to Approved/
-- `@PLAN resolve` → Archive completed proposal from Approved/
-- `@PLAN status` → Display proposals in each lifecycle stage
+### Create Mode (`@PLAN create [title]`)
+- Assign next RFC number
+- Scan existing RFCs for context
+- Generate RFC-XXX-[TITLE].md in Draft/
+- Populate metadata (status: Draft)
+- Include standard appendices
+- Focus on:
+  - Technical requirements
+  - Constraints and invariants
+  - Measurable criteria
+  - Interface contracts
+
+### Propose Mode (`@PLAN propose [RFC-XXX]`)
+- Locate RFC in Draft/
+- Validate:
+  - Requirements focus
+  - No code examples
+  - Complete interfaces
+  - Measurable criteria
+  - Implementation checklist exists
+- Update status → "Proposed"
+- Update metadata:
+  - Updated date
+  - Version history entry
+- Move to Proposed/
+
+### Activate Mode (`@PLAN activate [RFC-XXX]`)
+- Locate RFC in Proposed/
+- Verify implementation complete:
+  - Check implementation checklist
+  - Confirm all items completed
+- Update status → "Active"
+- Update metadata:
+  - Updated date
+  - Version history entry
+- Move to Active/
+
+### Deprecate Mode (`@PLAN deprecate [RFC-XXX] [RFC-YYY]`)
+- Validate RFC-YYY supersedes RFC-XXX
+- Update RFC-XXX:
+  - Status → "Deprecated"
+  - Add "Superseded-By: RFC-YYY"
+  - Version history entry
+- Update RFC-YYY:
+  - Add "Supersedes: RFC-XXX"
+  - Version history entry
+- Move RFC-XXX to Deprecated/
+
+### Suggest Mode (`@PLAN suggest [RFC-XXX]`)
+- Locate RFC (any directory)
+- Analyze without modifying
+- Provide suggestions:
+  - Missing requirements
+  - Unclear constraints
+  - Structure improvements
+  - Redundant content
+  - Technical gaps
+- Output as bullet points
+- No file changes
+
+### Status Mode (`@PLAN status`)
+- Scan all RFC directories
+- Extract from each RFC:
+  - Status from metadata
+  - Type from metadata
+  - Latest update date
+- Display summary table:
+  - RFC number and title
+  - Current status
+  - Type
+  - Last updated
+
+
+
 
 ## Framework Proposal Format Standards
 
-### Framework Proposal Structure
-- **Title**: Clear, descriptive framework proposal title
-- **Summary**: Brief overview of framework proposal objectives and approach
-- **Technical Specification**: Detailed framework technical approach and architecture
-- **Implementation Plan**: Step-by-step framework implementation phases and procedures
-- **Testing Strategy**: Comprehensive framework testing approach and validation procedures
-- **Success Criteria**: Measurable framework outcomes and validation criteria
-- **Integration Notes**: Framework integration considerations and dependencies
+### RFC Proposal Format
 
-### Framework Quality Standards
-- **Technical Completeness**: All specifications fully defined
-- **Architectural Compliance**: One client owns one state (1:1 client-state ownership) enforced
-- **Implementation Clarity**: Clear development path outlined
-- **Testing Coverage**: Comprehensive validation strategy
-- **Performance Metrics**: Measurable optimization targets
-- **Integration Planning**: Compatible with existing framework
-- **MVP Approach**: Breaking changes acceptable - no backwards compatibility required
+All proposals must follow standard RFC format with proper metadata and structure:
 
-## Framework Proposal Approval Process
+#### RFC Metadata Header
+```markdown
+# RFC-XXX: [Title]
 
-### Approval Criteria (`@PLAN approve`)
-- **Technical Completeness**: All specifications defined
-- **Architectural Constraint Compliance**: One client owns one state (1:1 client-state ownership) verified
-- **Implementation Readiness**: Clear development path
-- **Testing Strategy**: Comprehensive validation approach
-- **Performance Requirements**: Defined and measurable
-- **Framework Compatibility**: Aligns with framework design
-- **MVP Considerations**: Breaking changes acceptable for clean implementation
+**RFC Number**: XXX  
+**Title**: [Descriptive title]  
+**Status**: Draft | Proposed | Active | Deprecated | Superseded  
+**Type**: Architecture | Feature | Process | Standards  
+**Created**: YYYY-MM-DD  
+**Updated**: YYYY-MM-DD  
+**Authors**: [Author names]  
+**Supersedes**: RFC-XXX (if applicable)  
+**Superseded-By**: RFC-XXX (if applicable)
+```
 
-### Approval Workflow
-1. **Scan Unapproved/** → List pending proposals
-2. **Validate Completeness** → Ensure ready for implementation
-3. **Move to Approved/** → Transfer proposal to approved directory
-4. **Update TRACKING.md** → Add to development priorities
-5. **Set Implementation Order** → Based on dependencies
+#### RFC Document Structure
 
-## Framework Proposal Resolution Process
+**Required Sections**:
+- **Abstract**: 2-3 paragraph summary
+- **Motivation**: Problem statement and need
+- **Specification**: Technical requirements (bullet points preferred)
+  - Constraints and invariants
+  - Interface definitions
+  - Performance targets
+  - NO implementation examples
+- **Rationale**: Design decisions vs alternatives
+- **Backwards Compatibility**: Breaking changes impact
+- **Security Considerations**: Threat model and mitigations
+- **References**: Related RFCs and docs
+- **Appendices**: Context-specific (implementation checklist, version history, etc.)
 
-### Resolution Criteria (`@PLAN resolve`)
-- **Implementation Complete**: All phases finished
-- **Tests Passing**: Required success rate achieved
-- **Performance Met**: Benchmarks satisfied
-- **Quality Standards**: Framework requirements met
-- **Documentation Current**: Via DOCUMENT.md
+#### RFC Content Guidelines
 
-### Resolution Workflow
-1. **Scan Approved/** → Find completed proposals
-2. **Validate Completion** → Check success criteria
-3. **Archive Proposal** → Move from Approved/ to Archive/
-4. **Update TRACKING.md** → Mark as completed and remove from priorities
-5. **Document Outcomes** → Record achievements in archive
+**Writing Style**:
+- Use bullet points for specifications
+- Keep sections concise and scannable  
+- Focus on WHAT, not HOW
+- Define measurable criteria
 
-## Framework Planning Workflow Integration
+**Content Rules**:
+- NO code examples
+- NO implementation details
+- YES to constraints and invariants
+- YES to interface contracts
+- YES to performance targets
+- YES to test criteria
 
-**Lifecycle Management**: Complete proposal lifecycle in one command
-**Implementation Separation**: FrameworkProtocols/DEVELOP.md implements approved proposals only
-**Progress Tracking**: FrameworkProtocols/TRACKING.md monitors all proposal stages
-**Archive Management**: Completed proposals archived through resolve operation
-**User Control**: Users review proposals before approval processing
-**Unified Command**: Single command manages creation, approval, and resolution
+#### RFC Appendices Guide
+
+**Common Appendices**:
+- **Implementation Checklist**: Task list for development (if complex)
+- **Dependency Matrix**: Constraint relationships (if many constraints)
+- **Version History**: Single-line entries per version
+- **MVP Guide**: Phased implementation approach (if needed)
+
+**Appendix Flexibility**:
+- Each RFC determines its own appendices
+- No fixed appendix structure required
+- Content driven by RFC complexity and scope
+
+
+
+### RFC Specification Writing Guide
+
+**Use Bullet Points For**:
+- Component requirements
+- Constraint definitions  
+- Interface contracts
+- Performance targets
+- Error conditions
+- Test criteria
+
+**Example Specification Format**:
+```markdown
+### Component Requirements
+- Must be thread-safe
+- Singleton lifetime
+- < 50ms initialization
+- Handles these errors:
+  - NetworkUnavailable
+  - PermissionDenied
+  - ResourceExhausted
+```
+
+**Avoid Natural Language For**:
+- Technical specifications
+- Measurable criteria
+- Interface definitions
+- Constraint lists
+
+### Suggestion Quality Standards (`@PLAN suggest`)
+
+**Focus Areas**:
+- Missing requirements
+- Unmeasurable criteria
+- Incomplete interfaces
+- Redundant content
+- Technical gaps
+- Structure issues
+
+**Output Format**:
+- Use bullet points
+- Group by category
+- Prioritize by impact
+- Mark blockers clearly
+
+
 
 ## Framework Planning Coordination
 
-**Proposal Directories**:
-- `Unapproved/` - New proposals awaiting approval
-- `Approved/` - Approved proposals ready for development
-- `Archive/` - Completed proposals
+**RFC Directories** (located at `AxiomFramework/RFCs/`):
+- `Draft/` - New RFCs with status "Draft"
+- `Proposed/` - RFCs with status "Proposed" ready for implementation
+- `Active/` - Implemented RFCs with status "Active"
+- `Deprecated/` - Superseded RFCs with status "Deprecated"
+- `Archive/` - Historical record of all RFCs
 
-**Lifecycle Operations**:
-- **Create**: New proposals directly to Unapproved/
-- **Review**: User reviews in Unapproved/
-- **Approve**: Move to Approved/ and update TRACKING.md
-- **Develop**: Implementation from Approved/ via DEVELOP.md
-- **Resolve**: Archive from Approved/ and update TRACKING.md
-
-**Proposal Creation**: Creates framework proposals in AxiomFramework/Proposals/Unapproved/ directory
-**User Interaction**: Framework proposals designed for user review and revision
-**Approval Processing**: Move proposals from Unapproved/ to Approved/ with TRACKING.md update
-**Development Integration**: Approved framework proposals implemented through FrameworkProtocols/DEVELOP.md
-**Progress Monitoring**: Framework implementation progress tracked through FrameworkProtocols/TRACKING.md
-**Archive Management**: Completed framework proposals archived for future reference
+**RFC Self-Containment**:
+- Each RFC is fully self-contained
+- Progress tracked via implementation checklists
+- History tracked via version appendix
+- No external tracking dependencies
 
 ---
 
-**FRAMEWORK PLANNING COMMAND STATUS**: Complete proposal lifecycle management (create/approve/resolve)
-**CORE FOCUS**: Proposal workflow management - creation, approval, and resolution
-**PROPOSAL LIFECYCLE**: Unified command for all proposal states and transitions
-**LIFECYCLE MANAGEMENT**: Handles Unapproved/, Approved/, and Archive/ directories
-**INTEGRATION**: Direct integration with DEVELOP.md and TRACKING.md for seamless workflow
+### RFC Examples
 
-**Use FrameworkProtocols/@PLAN for complete proposal lifecycle management - creation, approval, and resolution.**
+**Specification Example (Bullet Points)**:
+```markdown
+### Client Protocol Requirements
+- Thread Safety:
+  - Actor isolation required
+  - No @MainActor methods
+  - Async state mutations only
+- Performance:
+  - State access < 1ms
+  - Memory < 512 bytes overhead
+  - Concurrent operations supported
+```
+
+**Appendix Example (From RFC-001)**:
+```markdown
+### Appendix A: Constraint Dependency Matrix
+| Constraint | Requires | Enables | Validation |
+|------------|----------|---------|------------|
+| Rule 1 | - | Rules 5, 6 | Type system |
+| Rule 2 | Rule 1 | Rules 5, 8 | Type system |
+
+### Appendix B: Implementation Checklist
+- [ ] AxiomError protocol with recovery strategies
+- [ ] Capability protocol with degradation levels
+- [ ] Client protocol with state observation
+
+### Appendix C: Version History
+- **v1.5** (2025-01-13): Enhanced error recovery, added dependency matrix
+- **v1.4** (2025-01-09): Added Rules 17-19, constraint enforcement
+- **v1.3** (2025-01-08): Enhanced protocol specifications
+```
+
+---
+
+**Use FrameworkProtocols/@PLAN for complete RFC lifecycle management with self-contained proposals.**
