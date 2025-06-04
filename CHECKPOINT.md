@@ -13,24 +13,23 @@
 
 Sync branches → Commit worktrees → Merge to main → Push to remote
 
-**Philosophy**: Automated integration with conflict prevention.
-**Strategy**: Sync feature branches with main before merging.
+**Philosophy**: Automated integration with conflict prevention through sync-first approach.
+**Constraint**: Located at repository root to prevent workspace duplication.
 
 ## Workflow
 
 ### Standard Integration
-1. Sync each worktree branch with main
-2. Check for changes in each worktree
-3. Commit changes with timestamp
-4. Switch to main branch
-5. Merge framework branch (no-ff, strategy=ours)
-6. Merge application branch (no-ff, strategy=ours)  
-7. Push integrated changes to remote
+1. Sync worktree branch with main (auto-resolve conflicts)
+2. Commit changes in worktree with timestamp
+3. Switch to main branch
+4. Merge framework branch with `--no-ff --strategy=recursive -X theirs`
+5. Merge application branch with same strategy
+6. Push integrated changes to remote
 
-### Selective Integration
-- **Framework only**: Steps 1-4, merge framework, push
-- **Application only**: Steps 1-4, merge application, push
-- **Fallback**: If no worktrees, commit directly on current branch
+### Workspace Isolation
+- **Framework workspace**: Only sees `FrameworkProtocols/` and `AxiomFramework/`
+- **Application workspace**: Only sees `ApplicationProtocols/` and `AxiomExampleApp/`
+- **Sparse-checkout**: Prevents cross-boundary file access
 
 ## Technical Details
 
@@ -59,43 +58,70 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ## Execution Process
 
 ```bash
-# Sync framework branch with main first (prevents conflicts)
+# 1. Sync and commit framework workspace
 if [ -d "framework-workspace" ]; then
     cd framework-workspace
     git fetch origin main
     git merge origin/main -m "Sync with main: $(date '+%Y-%m-%d %H:%M')" || {
-        echo "Conflict during sync - resolving in favor of framework changes"
+        echo "Auto-resolving conflicts in favor of framework"
         git checkout --theirs .
         git add .
-        git commit -m "Sync with main: $(date '+%Y-%m-%d %H:%M') - framework changes preserved"
+        git commit -m "Sync with main: $(date '+%Y-%m-%d %H:%M') - framework preserved"
     }
-    cd ..
-fi
+    
+    if [ -n "$(git status --porcelain)" ]; then
+        git add .
+        git commit -m "Framework development checkpoint: $(date '+%Y-%m-%d %H:%M')
 
-# Check and commit framework changes
-if [ -d "framework-workspace" ] && [ -n "$(cd framework-workspace && git status --porcelain)" ]; then
-    cd framework-workspace
-    git add .
-    git commit -m "Framework development checkpoint: $(date '+%Y-%m-%d %H:%M')
-
-Generated with [Claude Code](https://claude.ai/code)
+🤖 Generated with [Claude Code](https://claude.ai/code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
+    fi
     cd ..
 fi
 
-# Merge to main
+# 2. Sync and commit application workspace
+if [ -d "application-workspace" ]; then
+    cd application-workspace
+    git fetch origin main
+    git merge origin/main -m "Sync with main: $(date '+%Y-%m-%d %H:%M')" || {
+        echo "Auto-resolving conflicts in favor of application"
+        git checkout --theirs .
+        git add .
+        git commit -m "Sync with main: $(date '+%Y-%m-%d %H:%M') - application preserved"
+    }
+    
+    if [ -n "$(git status --porcelain)" ]; then
+        git add .
+        git commit -m "Application development checkpoint: $(date '+%Y-%m-%d %H:%M')
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+    fi
+    cd ..
+fi
+
+# 3. Integrate to main
 git checkout main
 git pull origin main || true
 
-# Merge branches with history (using recursive strategy with theirs option)
-git merge framework --no-ff --strategy=recursive -X theirs -m "Integrate framework development: $(date '+%Y-%m-%d %H:%M')
+# Merge with auto-conflict resolution
+git merge framework --no-ff --strategy=recursive -X theirs \
+    -m "Integrate framework development: $(date '+%Y-%m-%d %H:%M')
 
-Generated with [Claude Code](https://claude.ai/code)
+🤖 Generated with [Claude Code](https://claude.ai/code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
 
-# Push to remote
+git merge application --no-ff --strategy=recursive -X theirs \
+    -m "Integrate application development: $(date '+%Y-%m-%d %H:%M')
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com)"
+
+# 4. Push to remote
 git push origin main || echo "Local integration complete - remote push failed"
 ```
 
@@ -138,15 +164,17 @@ git push origin main || echo "Local integration complete - remote push failed"
 # Helps plan integration
 ```
 
-Integrates worktree development into main branch with automated commits and merges.
+## Workspace Configuration
 
-## Conflict Prevention
+**Sparse-Checkout Setup**:
+- Framework workspace: `/FrameworkProtocols/`, `/AxiomFramework/`, `/.gitignore`
+- Application workspace: `/ApplicationProtocols/`, `/AxiomExampleApp/`, `/.gitignore`
+- Protocol files at root: Prevents duplication and conflicts
 
-The checkpoint process prevents merge conflicts through:
+**Benefits**:
+1. **Isolation**: Each workspace only sees relevant files
+2. **No Conflicts**: Protocol files exist only at repository root
+3. **Clean Boundaries**: Cannot accidentally edit cross-workspace files
+4. **Focused Development**: Reduced complexity and faster operations
 
-1. **Pre-sync**: Framework branch pulls latest main changes before committing
-2. **Auto-resolution**: When conflicts occur during sync, framework changes are preserved
-3. **Merge strategy**: Final merge uses `-X theirs` to favor framework branch changes
-4. **Clean history**: Each integration maintains clear commit history
-
-This ensures framework development can proceed independently without manual conflict resolution.
+Integrates isolated worktree development with automatic conflict resolution and clean history.
