@@ -1,6 +1,6 @@
 # @PLAN.md - Axiom Framework Proposal Lifecycle Management
 
-Framework proposal lifecycle management - concise, bullet-point focused RFC creation
+Framework proposal lifecycle management - concise, bullet-point focused RFC creation with TDD-oriented requirements
 
 ## Automated Mode Trigger
 
@@ -14,26 +14,54 @@ Framework proposal lifecycle management - concise, bullet-point focused RFC crea
 - **`@PLAN activate [RFC-XXX]`** → Move RFC from Proposed/ to Active/ after implementation
 - **`@PLAN deprecate [RFC-XXX] [RFC-YYY]`** → Deprecate RFC-XXX in favor of RFC-YYY
 - **`@PLAN status`** → Display RFCs in each lifecycle stage
-- **`@PLAN suggest [RFC-XXX]`** → Analyze RFC and provide improvement suggestions
+- **`@PLAN suggest [RFC-XXX]`** → Analyze RFC and provide actionable suggestions with solutions
 
 
 ### Development Workflow Architecture
-**IMPORTANT**: PLAN commands NEVER perform git operations (commit/push/merge)
-**Version Control**: Only @CHECKPOINT commands handle all git operations
-**RFC Philosophy**: Each RFC is self-contained with implementation checklists and version history
-**Work Philosophy**: PLAN manages full lifecycle → Creates proposals → Proposes for implementation → DEVELOP implements → PLAN activates completed work → @CHECKPOINT commits and merges
+**IMPORTANT**: PLAN commands NEVER perform git operations or touch code
+**Scope**: Requirements engineering and RFC lifecycle management only
+**RFC Philosophy**: Each RFC contains testable requirements with acceptance criteria
+**Workflow**: PLAN creates requirements → DEVELOP implements → PLAN activates
+**Integration Points**: 
+  - Output: RFCs with acceptance criteria for DEVELOP
+  - Input: Implementation status from DEVELOP for activation
+  - Never: Direct code interaction or test execution
 
 
-**Core Principle**: Lifecycle management for technical proposals. Requirements focus, no implementation.
+**Core Principle**: Requirements engineering and RFC lifecycle management. Creates specifications with testable acceptance criteria. Never touches code.
+
+### Protocol Boundaries and Responsibilities
+
+**PLAN Protocol (Requirements & Lifecycle)**:
+- **Purpose**: Define WHAT to build through testable requirements
+- **Focus**: Requirements, constraints, acceptance criteria, performance targets
+- **Output**: RFCs with specifications ready for TDD implementation
+- **Never**: Write code, suggest implementation approaches, or handle testing
+
+**DEVELOP Protocol (Implementation & Testing)**:
+- **Purpose**: Build HOW requirements are satisfied through TDD
+- **Focus**: Code implementation, testing, refactoring, performance optimization
+- **Input**: RFCs from PLAN with acceptance criteria and test boundaries
+- **Never**: Modify RFC specifications or change requirements
 
 ### Clear Separation of Concerns
-- **PLAN**: Manages complete RFC lifecycle → Updates RFC metadata and version history
-- **DEVELOP**: Implements proposed RFCs → Checks off implementation checklist items
-- **CHECKPOINT**: Git workflow → NO RFC modifications
-- **REFACTOR**: Code organization → NO RFC modifications
-- **DOCUMENT**: Documentation operations → NO RFC modifications
+- **PLAN**: RFC lifecycle (create→propose→activate→deprecate) + requirements engineering
+- **DEVELOP**: TDD implementation (red→green→refactor) + code quality
+- **CHECKPOINT**: Version control operations only
+- **REFACTOR**: Code reorganization only
+- **DOCUMENT**: Documentation updates only
 
-**Quality Standards**: Requirements only. Measurable criteria. Bullet points. No code.
+**Quality Standards**: 
+- Requirements must be testable with clear acceptance criteria
+- Specifications in bullet points, no prose
+- Performance targets with measurable outcomes
+- No code examples or implementation details
+
+**Suggestion Philosophy**: 
+- Provide complete requirement text for additions
+- Include technical rationale for impossibilities  
+- Focus on stabilization over features
+- Always check for duplication and format compliance
 
 
 
@@ -61,19 +89,23 @@ Framework proposal lifecycle management - concise, bullet-point focused RFC crea
 - Populate metadata (status: Draft)
 - Include standard appendices
 - Focus on:
-  - Technical requirements
+  - Testable technical requirements
   - Constraints and invariants
-  - Measurable criteria
-  - Interface contracts
+  - Acceptance criteria for each requirement
+  - Interface contracts with clear test boundaries
+  - Performance targets with measurable metrics
+  - TDD-ready implementation checklist
 
 ### Propose Mode (`@PLAN propose [RFC-XXX]`)
 - Locate RFC in Draft/
 - Validate:
-  - Requirements focus
+  - Requirements are testable
+  - Each requirement has acceptance criteria
   - No code examples
-  - Complete interfaces
-  - Measurable criteria
-  - Implementation checklist exists
+  - Complete interfaces with test boundaries
+  - Measurable criteria enabling test assertions
+  - Implementation checklist supports TDD cycles
+  - Requirements enable refactoring opportunities
 - Update status → "Proposed"
 - Update metadata:
   - Updated date
@@ -105,13 +137,40 @@ Framework proposal lifecycle management - concise, bullet-point focused RFC crea
 ### Suggest Mode (`@PLAN suggest [RFC-XXX]`)
 - Locate RFC (any directory)
 - Analyze without modifying
-- Provide suggestions:
-  - Missing requirements
-  - Unclear constraints
-  - Structure improvements
-  - Redundant content
-  - Technical gaps
-- Output as bullet points
+- **MANDATORY CHECKS** (performed first):
+  - Format compliance with RFC_FORMAT.md
+  - Duplicate requirements across sections
+  - Inconsistent terminology or naming
+  - Missing acceptance criteria
+  - Untestable specifications
+- **Priority System**:
+  - **High Priority**: Requirements stabilization only
+    - Missing acceptance criteria
+    - Untestable specifications
+    - Technical impossibilities
+    - Ambiguous requirements
+    - Inconsistent constraints
+  - **Medium Priority**: Feature completeness only
+    - Missing capability specifications
+    - Incomplete interface definitions
+    - Missing error handling requirements
+    - Incomplete performance targets
+  - **Low Priority**: Quality improvements only
+    - Structure reorganization
+    - Terminology standardization
+    - Section consolidation
+    - Clarity enhancements
+- **Output Format**:
+  - Problem → Solution with exact requirement text
+  - Group by priority, then by category
+  - Technical impossibilities with platform rationale
+  - No implementation suggestions ever
+- **Quality Gate**: Suggestions stop when RFC has:
+  - All requirements with acceptance criteria
+  - No duplicate specifications
+  - Consistent terminology throughout
+  - Clear test boundaries for all interfaces
+  - Measurable performance targets
 - No file changes
 
 ### Status Mode (`@PLAN status`)
@@ -131,115 +190,56 @@ Framework proposal lifecycle management - concise, bullet-point focused RFC crea
 
 ## Framework Proposal Format Standards
 
-### RFC Proposal Format
+All RFCs must follow the standard format defined in [RFC_FORMAT.md](./RFC_FORMAT.md).
 
-All proposals must follow standard RFC format with proper metadata and structure:
+**Key Format Requirements**:
+- Standard metadata header with status tracking
+- Required sections for comprehensive specification
+- Bullet-point specifications with acceptance criteria
+- TDD-oriented implementation checklists
+- No code examples or implementation details
 
-#### RFC Metadata Header
-```markdown
-# RFC-XXX: [Title]
-
-**RFC Number**: XXX  
-**Title**: [Descriptive title]  
-**Status**: Draft | Proposed | Active | Deprecated | Superseded  
-**Type**: Architecture | Feature | Process | Standards  
-**Created**: YYYY-MM-DD  
-**Updated**: YYYY-MM-DD  
-**Authors**: [Author names]  
-**Supersedes**: RFC-XXX (if applicable)  
-**Superseded-By**: RFC-XXX (if applicable)
-```
-
-#### RFC Document Structure
-
-**Required Sections**:
-- **Abstract**: 2-3 paragraph summary
-- **Motivation**: Problem statement and need
-- **Specification**: Technical requirements (bullet points preferred)
-  - Constraints and invariants
-  - Interface definitions
-  - Performance targets
-  - NO implementation examples
-- **Rationale**: Design decisions vs alternatives
-- **Backwards Compatibility**: Breaking changes impact
-- **Security Considerations**: Threat model and mitigations
-- **References**: Related RFCs and docs
-- **Appendices**: Context-specific (implementation checklist, version history, etc.)
-
-#### RFC Content Guidelines
-
-**Writing Style**:
-- Use bullet points for specifications
-- Keep sections concise and scannable  
-- Focus on WHAT, not HOW
-- Define measurable criteria
-
-**Content Rules**:
-- NO code examples
-- NO implementation details
-- YES to constraints and invariants
-- YES to interface contracts
-- YES to performance targets
-- YES to test criteria
-
-#### RFC Appendices Guide
-
-**Common Appendices**:
-- **Implementation Checklist**: Task list for development (if complex)
-- **Dependency Matrix**: Constraint relationships (if many constraints)
-- **Version History**: Single-line entries per version
-- **MVP Guide**: Phased implementation approach (if needed)
-
-**Appendix Flexibility**:
-- Each RFC determines its own appendices
-- No fixed appendix structure required
-- Content driven by RFC complexity and scope
-
-
-
-### RFC Specification Writing Guide
-
-**Use Bullet Points For**:
-- Component requirements
-- Constraint definitions  
-- Interface contracts
-- Performance targets
-- Error conditions
-- Test criteria
-
-**Example Specification Format**:
-```markdown
-### Component Requirements
-- Must be thread-safe
-- Singleton lifetime
-- < 50ms initialization
-- Handles these errors:
-  - NetworkUnavailable
-  - PermissionDenied
-  - ResourceExhausted
-```
-
-**Avoid Natural Language For**:
-- Technical specifications
-- Measurable criteria
-- Interface definitions
-- Constraint lists
+**See [RFC_FORMAT.md](./RFC_FORMAT.md) for**:
+- Complete RFC metadata header format
+- Required document structure and sections
+- Content guidelines and writing style
+- Appendices guide and examples
+- Specification writing patterns
 
 ### Suggestion Quality Standards (`@PLAN suggest`)
 
-**Focus Areas**:
-- Missing requirements
-- Unmeasurable criteria
-- Incomplete interfaces
-- Redundant content
-- Technical gaps
-- Structure issues
+**Solution Requirements**:
+- Every suggestion must include actionable solution
+- Provide complete requirement text for additions
+- Show exact reorganization for structure changes
+- Supply specific acceptance criteria for untestable requirements
+- State "Not technically achievable because..." for impossible requirements
 
-**Output Format**:
-- Use bullet points
-- Group by category
-- Prioritize by impact
-- Mark blockers clearly
+**Requirements Priority System** (focused on WHAT, never HOW):
+- **High Priority**: Requirements that block implementation
+  - Missing acceptance criteria for testability
+  - Ambiguous specifications needing clarification
+  - Technical impossibilities requiring revision
+  - Inconsistent constraints across sections
+- **Medium Priority**: Requirements for feature completeness
+  - Missing capability specifications
+  - Incomplete interface contracts
+  - Undefined error scenarios
+  - Missing performance boundaries
+- **Low Priority**: Requirements quality improvements
+  - Structure and organization
+  - Terminology consistency
+  - Duplicate consolidation
+  - Readability enhancements
+
+**Priority-Grouped Output Format**:
+- Problem → Solution format
+- Group by priority (High/Medium/Low) then by development category
+- Include ready-to-add requirement text for immediate implementation
+- Mark technical impossibilities with platform-specific rationale  
+- Present High Priority (stabilization) suggestions first for immediate action
+- Present Medium Priority (feature expansions) suggestions second for planning
+- Present Low Priority (general considerations) suggestions third for future improvement
 
 
 
@@ -262,38 +262,147 @@ All proposals must follow standard RFC format with proper metadata and structure
 
 ### RFC Examples
 
-**Specification Example (Bullet Points)**:
+**For complete RFC examples and patterns, see [RFC_FORMAT.md](./RFC_FORMAT.md)**
+
+**Quick Reference**:
+- Specification examples with bullet points
+- Appendix patterns (dependency matrix, TDD checklist, version history)
+- TDD-oriented requirement examples with acceptance criteria
+
+### Priority-Grouped Suggest Mode Output Examples
+
+**Example Output Format**:
 ```markdown
-### Client Protocol Requirements
-- Thread Safety:
-  - Actor isolation required
-  - No @MainActor methods
-  - Async state mutations only
-- Performance:
-  - State access < 1ms
-  - Memory < 512 bytes overhead
-  - Concurrent operations supported
+## MANDATORY CHECKS COMPLETED
+✓ RFC format compliance verified
+✓ Duplicate requirements: Found 3 instances
+✓ Inconsistent terminology: 2 conflicts identified
+✓ Missing acceptance criteria: 5 requirements
+✓ Untestable specifications: 2 found
+
+## HIGH PRIORITY (Requirements Stabilization)
+
+### Missing Acceptance Criteria
+
+**Problem**: "Framework must handle errors gracefully" lacks testable criteria
+**Solution**: Replace with:
+```
+"Error Handling: Framework propagates all errors to nearest Context boundary"
+- Acceptance: Error injection at any component reaches Context within 10ms
+- Test Boundary: Mock error generation at Client, Capability, and State levels
 ```
 
-**Appendix Example (From RFC-001)**:
-```markdown
-### Appendix A: Constraint Dependency Matrix
-| Constraint | Requires | Enables | Validation |
-|------------|----------|---------|------------|
-| Rule 1 | - | Rules 5, 6 | Type system |
-| Rule 2 | Rule 1 | Rules 5, 8 | Type system |
+**Problem**: "Performance must be optimal" is not measurable
+**Solution**: Replace with:
+```
+"State Update Performance: State mutations complete within 8ms"
+- Acceptance: 95th percentile of 1000 state updates measures <8ms
+- Test Boundary: Performance test harness with timing measurements
+```
 
-### Appendix B: Implementation Checklist
-- [ ] AxiomError protocol with recovery strategies
-- [ ] Capability protocol with degradation levels
-- [ ] Client protocol with state observation
+### Technical Impossibilities
 
-### Appendix C: Version History
-- **v1.5** (2025-01-13): Enhanced error recovery, added dependency matrix
-- **v1.4** (2025-01-09): Added Rules 17-19, constraint enforcement
-- **v1.3** (2025-01-08): Enhanced protocol specifications
+**Problem**: "Zero-latency state propagation" requirement
+**Platform Limitation**: Swift actor message passing has minimum 1ms overhead
+**Solution**: Revise to "State propagation completes within 2ms"
+
+### Requirement Conflicts
+
+**Problem**: Section 3 requires "synchronous state access" while Section 5 mandates "all state access via actors"
+**Solution**: Remove synchronous requirement, maintain actor-based async access throughout
+
+---
+
+## MEDIUM PRIORITY (Feature Completeness)
+
+### Missing Capability Requirements
+
+**Problem**: Capability lifecycle transitions not specified
+**Solution**: Add requirement:
+```
+"Capability State Transitions: Available → Degraded → Unavailable with notifications"
+- Acceptance: State machine test validates all transition paths
+- Test Boundary: Mock capability with controllable state changes
+```
+
+### Incomplete Interface Definitions
+
+**Problem**: Error recovery protocol lacks required methods
+**Solution**: Add requirement:
+```
+"Recovery Protocol: All errors must include recoveryStrategies: [RecoveryStrategy] property"
+- Acceptance: Compiler enforces recovery strategies on all AxiomError types
+- Test Boundary: Protocol conformance validation
+```
+
+### Missing Performance Boundaries
+
+**Problem**: Memory usage limits not defined
+**Solution**: Add requirement:
+```
+"Memory Constraints: Context overhead <1KB, Client overhead <512B excluding state"
+- Acceptance: Memory profiler validates limits across 100 component instances
+- Test Boundary: Instruments memory measurement
 ```
 
 ---
 
-**Use FrameworkProtocols/@PLAN for complete RFC lifecycle management with self-contained proposals.**
+## LOW PRIORITY (Quality Improvements)
+
+### Duplicate Consolidation
+
+**Problem**: Performance requirements scattered across 5 sections
+**Solution**: Consolidate into single "Performance Requirements" section with subsections for each component
+
+**Problem**: Error handling requirements duplicated in Protocols and Implementation sections
+**Solution**: Create single "Error Handling Requirements" section, reference from others
+
+### Terminology Standardization
+
+**Problem**: "Client" vs "Actor" used interchangeably
+**Solution**: Standardize on "Client" throughout, note actor as implementation detail
+
+**Problem**: "State" vs "Model" inconsistency
+**Solution**: Use "State" for mutable data, "Model" for domain value objects
+
+### Structure Optimization
+
+**Problem**: Implementation checklist mixed with requirements
+**Solution**: Move checklist to Appendix B, keep requirements in main sections
+
+**Problem**: Test boundaries scattered throughout
+**Solution**: Collect all test boundaries in dedicated subsection per component
+
+---
+
+## SUGGESTION SUMMARY
+- High Priority: 4 issues blocking implementation
+- Medium Priority: 3 issues for feature completeness  
+- Low Priority: 6 quality improvements
+- RFC Ready for Implementation: NO - resolve High priority issues first
+```
+
+### TDD-Oriented RFC Example
+
+**Specification with Acceptance Criteria**:
+```markdown
+### State Management Requirements
+- Thread-Safe State Access:
+  - Requirement: All state mutations via actor isolation
+  - Acceptance: Race condition test with 1000 concurrent operations shows no data corruption
+  - Boundary: Public API exposes only async methods
+  
+- Observable State Changes:
+  - Requirement: State changes trigger observer notifications
+  - Acceptance: Observer receives notification within 10ms of state change
+  - Test: Mock observer validates notification timing and content
+  
+- State Snapshot Performance:
+  - Requirement: State snapshots complete in < 5ms
+  - Acceptance: Performance test measures 1000 snapshots all under 5ms
+  - Refactoring: Consider copy-on-write optimization if needed
+```
+
+---
+
+**Use FrameworkProtocols/@PLAN for complete RFC lifecycle management with TDD-ready proposals.**
