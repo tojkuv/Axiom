@@ -5,7 +5,7 @@
 **Status**: Active  
 **Type**: Architecture  
 **Created**: 2025-01-06  
-**Updated**: 2025-01-13  
+**Updated**: 2025-01-14  
 **Authors**: Axiom Framework Team  
 **Supersedes**: None  
 **Superseded-By**: None
@@ -30,13 +30,25 @@ Current iOS architectures (MVC, MVVM, VIPER) address some issues but lack strict
 
 ## Specification
 
-### Component Types
+### Overview
+
+The Axiom framework defines a complete iOS application architecture with six immutable component types, nineteen architectural constraints, and strict performance requirements. This specification is organized into the following sections:
+
+1. **Component Architecture** - Component types and their relationships
+2. **Architectural Constraints** - Rules governing component interactions
+3. **Protocol Specifications** - Complete protocol requirements
+4. **Performance Requirements** - Measurable performance targets
+5. **Implementation Details** - Technical requirements and mechanisms
+
+### Component Architecture
+
+#### Component Types
 
 The Axiom architecture consists of exactly six immutable component types:
 
 | Component | Purpose | Dependencies | Thread Safety | Lifetime |
 |-----------|---------|--------------|---------------|----------|
-| **Capability** | External system access | Other Capabilities only | Thread-safe (see req. 11) | Transient |
+| **Capability** | External system access | Other Capabilities only | Thread-safe (actor/MainActor/synchronized) | Transient |
 | **Owned State** | Domain model representation | None | Value types | Singleton |
 | **Client** | Domain logic | Capabilities only | Actor isolation | Singleton |
 | **Orchestrator** | Application lifecycle | Creates Contexts | @MainActor | Singleton |
@@ -44,6 +56,8 @@ The Axiom architecture consists of exactly six immutable component types:
 | **Presentation** | User interface | One Context | SwiftUI View | Multiple instances |
 
 ### Architectural Constraints
+
+Nineteen constraints enforce architectural integrity through compile-time and runtime validation:
 
 #### Dependency Constraints (Rules 1-8)
 
@@ -92,60 +106,155 @@ The Axiom architecture consists of exactly six immutable component types:
 
 **Cross-Cutting Dependencies**:
 - Rule 5 requires Rules 1-2 and enables clean testing boundaries
-- Rule 8 requires Rule 2 but adds runtime cycle detection
+- Rule 8 requires Rule 2 but adds runtime cycle detection at context creation time
 - Rules 14-19 form cohesive state management subsystem
 
-### Core Protocols
+### Protocol Specifications
 
 The framework defines four primary protocols with error handling and state observation capabilities:
 
-**Capability Protocol**: Manages external system access with availability checking, initialization, invalidation, and error recovery strategies (retry, fallback, propagate, ignore).
-- Required members: `isAvailable: Bool`, `initialize() async throws`, `invalidate()`, `capabilityIdentifier: String`
-- Optional members: `recoveryStrategy: RecoveryStrategy`
+#### Capability Protocol
 
-**Client Protocol**: Actor-based business logic container providing thread-safe state management, action processing, state publishing via AsyncStream, and error handling.
-- Required members: `stateStream: AsyncStream<State>`, `processAction(_ action: Action) async throws`, `initialState: State`
-- Required associated types: `State`, `Action`
+**Purpose**: Manages external system access with lifecycle management and degradation support.
 
-**Context Protocol**: MainActor-bound feature coordinator that observes client state changes, handles user actions, manages view lifecycle, and provides error recovery.
-- Required members: `observeClient() async`, `handleUserAction(_ action: UserAction) async`
-- Required lifecycle methods: `onAppear()`, `onDisappear()`
-- UserAction requirement: Must conform to a protocol with validation capabilities
+**Required Members**:
+- `isAvailable: Bool` - Current availability status
+- `initialize() async throws` - Async initialization with error handling
+- `invalidate()` - Resource cleanup (must complete in < 5ms)
+- `capabilityIdentifier: String` - Unique identifier for dependency resolution
+- `degradationLevel: DegradationLevel` - Current operational level (Full/Limited/Minimal/Unavailable)
 
-**Orchestrator Protocol**: Application-level coordinator managing context creation, dependency injection, navigation control, and capability lifecycle events (permission changes, service availability).
-- Required members: `createContext(for view: ViewType) -> Context`, `handleCapabilityChange(_ change: CapabilityChange)`
-- Required services: context creation capability, dependency resolution capability, navigation management capability
-- ViewType requirement: Must be a concrete type identifier, not a generic View protocol
+**Optional Members**:
+- `recoveryStrategy: RecoveryStrategy` - Default recovery strategy (retry/fallback/propagate/ignore)
+- `requiresUserConsent: Bool` - Whether capability needs user permission
 
-**Error Handling**: All protocols incorporate AxiomError with recovery strategies. Capability changes include permission revocation (biometrics, photos, notifications, camera, microphone, location) and service unavailability (network, bluetooth, authentication, storage).
+**Thread Safety**: Must be @MainActor, actor-isolated, or use explicit synchronization
+
+**Versioning**: Protocol version checked at initialization via `capabilityVersion: String`
+
+#### Client Protocol
+
+**Purpose**: Actor-based business logic container with thread-safe state management.
+
+**Required Members**:
+- `stateStream: AsyncStream<State>` - State updates with 10-event buffer and coalescing
+- `processAction(_ action: Action) async throws` - Action processing (must complete in < 8ms)
+- `initialState: State` - Initial state value
+- `clientIdentifier: String` - Unique identifier for dependency injection
+
+**Required Associated Types**:
+- `State: Sendable` - Must contain only value types (structs/enums/primitives)
+- `Action: Sendable` - Value type with command/query separation
+
+**AsyncStream Configuration**:
+- Buffer size: 10 pending states (overflow triggers coalescing)
+- Critical states: Marked with `priority: .critical` to prevent dropping
+- Backpressure: Keep only latest state on overflow
+
+#### Context Protocol
+
+**Purpose**: MainActor-bound feature coordinator with error boundary capabilities.
+
+**Required Members**:
+- `observeClient() async` - Subscribe to client state stream with weak self reference
+- `handleUserAction(_ action: UserAction) async` - Process user interactions
+- `contextIdentifier: String` - Unique identifier for debugging
+
+**Required Lifecycle Methods**:
+- `onAppear()` - View appearance handling (must complete in < 10ms)
+- `onDisappear()` - Cleanup and task cancellation (must complete in < 10ms)
+
+**Error Boundary Requirements**:
+- Must catch all Client errors in `observeClient()`
+- Must implement recovery or explicit propagation
+- "Handling" means: user notification, automatic retry, navigation fallback, or silent recovery
+- "Propagating" means: re-throwing with context information
+
+#### Orchestrator Protocol
+
+**Purpose**: Application lifecycle coordinator with service-oriented architecture.
+
+**Required Members**:
+- `createContext(for view: ViewType) -> Context` - Factory method for context creation
+- `handleCapabilityChange(_ change: CapabilityChange)` - System event handling
+- `orchestratorVersion: String` - Version for compatibility checking
+
+**Required Services** (as Capabilities):
+- **ContextCreationService**: Factory registration and context instantiation
+  - `registerFactory(for: ViewType, factory: @escaping () -> Context)`
+  - `createContext(for: ViewType) -> Context?`
+- **DependencyResolutionService**: Capability and client dependency injection
+  - `register<T>(type: T.Type, factory: @escaping () -> T)`
+  - `resolve<T>(type: T.Type) -> T?`
+- **NavigationManagementService**: Navigation state and circular path detection
+  - `navigate(to: ViewType)`
+  - `detectCircularNavigation() -> Bool`
+
+**System Event Monitoring**:
+- Permission changes: biometrics, photos, notifications, camera, microphone, location
+- Service availability: network, bluetooth, authentication, storage
+- Thermal events: CPU throttling, background restrictions
+
+#### Error Protocol Integration
+
+All protocols incorporate `AxiomError` protocol with recovery strategies:
+
+**AxiomError Requirements**:
+- `errorCode: String` - Unique error identifier
+- `userMessage: String` - Localized user-facing message
+- `technicalDetails: String` - Developer-facing diagnostics
+- `recoveryStrategies: [RecoveryStrategy]` - Available recovery options
+- `severity: ErrorSeverity` - critical/high/medium/low
 
 ### Error Recovery Specification
 
-#### Component-Specific Recovery Strategies
+#### Recovery Strategy Definitions
+
+**Retry Strategy**:
+- Automatic retry with exponential backoff
+- Initial delay: 100ms, max delay: 5s, max attempts: 3
+- Timeout per attempt: 30s
+
+**Fallback Strategy**:
+- Return cached/default data with metadata
+- Staleness indicator required
+- Cache TTL: Configuration-dependent
+
+**Propagate Strategy**:
+- Forward error with context to caller
+- Preserve original error chain
+- Add component-specific context
+
+**Ignore Strategy**:
+- Log error with severity level
+- Continue execution
+- Only for non-critical operations
+
+#### Component-Specific Recovery Patterns
 
 **Capability Recovery**:
-- **Retry**: Automatic retry with exponential backoff for transient failures
-- **Fallback**: Return cached data with staleness indicator
-- **Propagate**: Forward error to Client for domain-specific handling
-- **Ignore**: Log and continue for non-critical capabilities
+- Transient failures → Retry with backoff
+- Permission denied → Fallback to cached data
+- Service unavailable → Propagate to Client
+- Non-critical errors → Ignore with logging
 
 **Client Recovery**:
-- **State Rollback**: Revert to previous valid state on mutation failure
-- **Partial Update**: Apply valid portions of composite actions
-- **Error State**: Transition to explicit error state with recovery actions
-- **Graceful Degradation**: Continue with reduced functionality
+- State mutation failure → Rollback to previous state
+- Partial action failure → Apply valid portions only
+- Critical errors → Transition to error state
+- Capability degradation → Graceful functionality reduction
 
 **Context Recovery**:
-- **User Notification**: Present error UI with recovery options
-- **Automatic Retry**: Retry failed user actions with visual feedback
-- **Navigation Fallback**: Navigate to safe state on critical errors
-- **Silent Recovery**: Handle non-critical errors without user interruption
+- User action failure → Present error UI with retry option
+- State observation error → Automatic reconnection attempt
+- Navigation error → Fallback to safe view
+- Non-critical errors → Silent recovery with logging
 
 **Orchestrator Recovery**:
-- **System Reset**: Reinitialize capability graph on critical failures
-- **Partial Shutdown**: Disable affected subsystems while maintaining core functionality
-- **Emergency Mode**: Minimal functionality with explicit user consent
-- **Diagnostic Collection**: Gather system state for debugging
+- Capability graph failure → Reinitialize affected subgraph
+- Multiple failures → Partial shutdown mode
+- Critical system failure → Emergency mode with user consent
+- All failures → Diagnostic data collection
 
 ### Component Initialization Order
 
@@ -172,44 +281,12 @@ The framework defines four primary protocols with error handling and state obser
 5. **Capability Lifecycle**: Capabilities must handle initialization/invalidation
 6. **Testing Support**: Framework must provide testing utilities for capability simulation, client stubbing, and orchestration control
 7. **Error Handling**: All components must implement error handling with recovery strategies
-8. **State Observation**: Clients must expose state updates: `stateUpdates: AsyncStream<State>` property
-9. **Performance**: Components must meet defined performance targets
+8. **State Observation**: Clients must expose state updates via `stateStream: AsyncStream<State>` property
+9. **Performance**: Components must meet defined performance targets (see Performance Requirements section)
 10. **Validation Enforcement**: Each constraint must specify compile-time or runtime enforcement mechanism
 11. **Capability Thread Safety**: Capabilities must either be @MainActor, actor-isolated, or use explicit synchronization
 12. **Component Destruction Order**: Component destruction must follow reverse dependency order: Views → Contexts → Clients → Capabilities
-
-### Performance Requirements
-
-#### Capability Performance
-- **Initialization**: First check may take up to 10ms; subsequent checks must use cached results and complete in < 1ms
-- **Invalidation**: Resource cleanup must complete in < 5ms
-- **Recovery Strategy**: Strategy determination must complete in < 5ms (excluding execution)
-
-#### Client Performance  
-- **State Mutation**: Processing actions to produce new state must complete in < 8ms
-- **State Publishing**: AsyncStream notification dispatch must occur within 1ms of state change
-- **Memory**: Actor overhead must be < 512 bytes per instance (excluding state data)
-
-#### Context Performance
-- **Creation**: Context initialization must complete in < 50ms
-- **State Observation**: State change receipt from Client must occur within 8ms of dispatch
-- **Memory**: Framework overhead must be < 1KB per instance (excluding stored properties)
-- **Lifecycle**: onAppear/onDisappear handlers must complete in < 10ms
-
-#### View Performance
-- **Rendering**: State mutation to UI update must complete in < 16ms (60fps requirement)
-- **Navigation**: View transitions must complete in < 300ms (iOS standard animation)
-- **Memory**: SwiftUI view body computation must use < 256KB stack space
-
-**Measurement Methodology**: Performance targets must be measured at specific boundaries:
-- State propagation: From actor queue dispatch to SwiftUI render completion
-- Memory overhead: Framework-specific allocations excluding application data
-- Capability checks: Differentiate first-time initialization from cached access
-
-**Technical Limitations**:
-- AsyncStream state observation has inherent latency due to actor queue scheduling
-- Context memory measurement excludes Swift runtime overhead which varies by platform
-- Performance targets assume iOS 15+ on A12 Bionic or newer processors
+13. **Protocol Versioning**: All protocols must expose version string for compatibility checking
 
 ### State Observation Mechanism
 
@@ -295,8 +372,18 @@ Capabilities support degraded operation modes:
 - **Client Stubbing**: Predefined state sequences with timing control for deterministic testing
 - **Orchestration Control**: Dependency injection overrides and lifecycle event simulation
 - **Performance Harness**: Automated measurement with statistical analysis and regression detection
-- **CircularDependencyDetector**: Runtime validation of component relationships
-- **Debug Inspection APIs**: Component introspection for development builds
+
+**CircularDependencyDetector**:
+- Algorithm: Depth-first search with cycle detection
+- Execution: During Context creation in Orchestrator
+- Performance: O(n) where n = number of Contexts
+- Output: Throws `CircularDependencyError` with cycle path
+
+**Debug Inspection APIs**:
+- `debugDescription`: Dependency graph visualization
+- `dumpState()`: Current component state snapshot
+- `traceDependencies()`: Live dependency path tracing
+- `performanceMetrics()`: Real-time performance data
 
 **Test Categories**:
 
@@ -326,18 +413,26 @@ Capabilities support degraded operation modes:
 #### Debugging Support
 - Framework must provide debug descriptions for all components showing dependency graphs
 - Components must expose runtime inspection APIs for development builds
+- Debug builds include performance profiling with automatic violation detection
 
 #### Observability Requirements
 - Framework must expose metrics for: component creation/destruction, error rates, performance violations
-- Metrics must be accessible through standardized observability protocols
+- Metrics accessible through `MetricsProvider` protocol:
+  - `componentMetrics()`: Creation/destruction counts
+  - `errorMetrics()`: Error rates by component type
+  - `performanceMetrics()`: Violation counts and durations
 
-#### Configuration Management
-- Capabilities must support configuration injection without recompilation
-- Configuration changes must not require capability recreation unless permissions change
+#### Framework Versioning
+- All protocols expose `protocolVersion: String` for compatibility checking
+- Version format: `major.minor.patch` (semantic versioning)
+- Compatibility matrix maintained in `VersionCompatibility.swift`
+- Mismatches fail at initialization with suggested migration path
 
-#### Versioning Requirements
-- Framework must provide version detection and compatibility checking at initialization
-- Version mismatches must fail fast with clear error messages
+#### Backward Compatibility Testing
+- Test suite validates protocol version compatibility
+- Migration tests ensure upgrade paths work correctly
+- Performance regression tests compare versions
+- API stability tests prevent breaking changes
 
 ### Constraint Enforcement Mechanisms
 
@@ -352,7 +447,6 @@ Capabilities support degraded operation modes:
 
 **Performance Enforcement**: Performance violations must trigger warnings in DEBUG builds and errors in RELEASE builds.
 
-
 ### Migration Guide
 
 **From MVVM**: Transform ViewModels into Contexts, Services into Capabilities, and Models into State+Client pairs. Move @Published properties from ViewModels to Contexts while keeping business logic in actor-based Clients.
@@ -366,6 +460,162 @@ Capabilities support degraded operation modes:
 - Use @Published in Contexts for UI binding
 - Navigation managed by Orchestrator's navigation management capability
 - Dependencies injected via Orchestrator's dependency resolution capability
+
+## Performance Requirements
+
+### Overview
+
+Performance requirements ensure responsive user experience and efficient resource usage. All targets are measured on iOS 15+ with A12 Bionic or newer processors unless specified otherwise.
+
+### Component Performance Targets
+
+#### Capability Performance
+- **Initialization**: First check may take up to 10ms; subsequent checks must use cached results and complete in < 1ms
+- **Invalidation**: Resource cleanup must complete in < 5ms
+- **Recovery Strategy**: Strategy determination must complete in < 5ms (excluding execution)
+- **Configuration Reload**: Hot-reload of configuration must complete in < 20ms without capability recreation
+
+#### Client Performance
+- **State Mutation**: Processing actions to produce new state must complete in < 8ms
+- **State Publishing**: AsyncStream notification dispatch must occur within 1ms of state change
+- **Memory**: Actor overhead must be < 512 bytes per instance (excluding state data)
+- **Concurrent Operations**: Support minimum 100 concurrent state observations without degradation
+
+#### Context Performance
+- **Creation**: Context initialization must complete in < 50ms
+- **State Observation**: State change receipt from Client must occur within 8ms of dispatch
+- **Memory**: Framework overhead must be < 1KB per instance (excluding stored properties)
+- **Lifecycle**: onAppear/onDisappear handlers must complete in < 10ms
+
+#### View Performance
+- **Rendering**: State mutation to UI update must complete in < 16ms (60fps requirement)
+- **Navigation**: View transitions must complete in < 300ms (iOS standard animation)
+- **Memory**: SwiftUI view body computation must use < 256KB stack space
+- **Layout**: Complex view hierarchies (>100 views) must layout in < 33ms
+
+### Measurement Methodology
+
+**Performance Boundaries**:
+- State propagation: From actor queue dispatch to SwiftUI render completion
+- Memory overhead: Framework-specific allocations excluding application data
+- Capability checks: Differentiate first-time initialization from cached access
+- Error recovery: Time from error detection to recovery strategy execution
+
+**Testing Conditions**:
+- Device: iOS 15+ on A12 Bionic minimum (older devices may have relaxed targets)
+- Memory: Measured with Instruments memory profiler
+- Timing: Measured with os_signpost intervals
+- Concurrency: Tested under load with 100+ simultaneous operations
+
+### Platform-Specific Considerations
+
+**iOS Performance**:
+- Primary platform with strictest requirements
+- ProMotion displays require 8ms frame budget for 120fps
+- Background execution limited to 30s continuous
+
+**macOS Performance**:
+- Relaxed view transition target: < 500ms
+- No background execution limits
+- Higher memory allowance: 2KB per Context
+
+**watchOS Performance**:
+- Stricter targets: State mutation < 4ms
+- Reduced memory: 256 bytes per Context
+- Limited concurrent operations: 10 maximum
+
+**Technical Limitations**:
+- AsyncStream state observation has inherent latency (1-3ms) due to actor queue scheduling
+- Context memory measurement excludes Swift runtime overhead which varies by platform
+- Thermal throttling may increase all targets by up to 3x under sustained load
+
+## Platform Support
+
+### Supported Platforms
+
+| Platform | Minimum Version | Status | Notes |
+|----------|----------------|--------|-------|
+| iOS | 15.0 | Primary | Full feature support |
+| macOS | 12.0 | Secondary | Desktop optimizations |
+| watchOS | 8.0 | Experimental | Limited capabilities |
+| tvOS | 15.0 | Planned | Not yet implemented |
+
+### Platform-Specific Adaptations
+
+**iOS Specifics**:
+- Full SwiftUI integration
+- All capability types supported
+- Background task coordination
+- ProMotion display support
+
+**macOS Specifics**:
+- AppKit bridge for legacy components
+- Multi-window coordination
+- File system capabilities enhanced
+- No camera/location restrictions
+
+**watchOS Specifics**:
+- Simplified Context lifecycle
+- Reduced capability set (no camera)
+- Complication update integration
+- Extended runtime sessions
+
+### Cross-Platform Considerations
+
+**Conditional Compilation**:
+```
+#if os(iOS)
+// iOS-specific capability implementation
+#elseif os(macOS)
+// macOS-specific capability implementation
+#elseif os(watchOS)
+// watchOS-specific capability implementation
+#endif
+```
+
+**Shared Components**:
+- Core protocols identical across platforms
+- Performance targets adjusted per platform
+- Platform-specific capabilities conditionally available
+
+## Configuration Management
+
+### Configuration Architecture
+
+**Configuration Injection**:
+- Capabilities accept configuration via init parameters
+- Configuration changes without recompilation via property lists
+- Environment-based configuration switching
+
+**Hot-Reload Support**:
+- Configuration changes detected via file system monitoring
+- Capabilities notified of configuration updates
+- Non-permission changes applied without recreation
+
+**Configuration Scope**:
+- **Global**: Application-wide settings (API endpoints, feature flags)
+- **Capability**: Component-specific settings (timeout values, retry counts)
+- **Environment**: Development/staging/production variants
+
+### Configuration Change Handling
+
+**Reload Triggers**:
+- File system change detection
+- Push notification from configuration service
+- Manual reload via debug menu
+- App foreground transition
+
+**Reload Process**:
+1. Detect configuration change
+2. Validate new configuration
+3. Notify affected capabilities
+4. Apply changes without service interruption
+5. Log configuration transition
+
+**Limitations**:
+- Permission-based changes require capability recreation
+- Some network configurations require connection reset
+- UI-affecting changes may require view refresh
 
 ## Rationale
 
@@ -501,6 +751,7 @@ Add these constraints after MVP validation:
 
 ### Appendix D: Version History
 
+- **v1.6** (2025-01-14): Major reorganization - elevated Performance Requirements, added Platform Support and Configuration Management sections, enhanced protocol specifications, clarified technical gaps
 - **v1.5** (2025-01-13): Reorganized content, added complete dependency matrix, enhanced error recovery specs
 - **v1.4** (2025-01-09): Added Rules 17-19, non-functional requirements, constraint enforcement mechanisms
 - **v1.3** (2025-01-08): Added Rules 14-16, enhanced protocol specs, performance methodology

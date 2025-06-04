@@ -1,6 +1,6 @@
 # @WORKSPACE.md - Axiom Framework Workspace Management Command
 
-Framework workspace management command that creates and manages git worktrees for development
+Framework workspace management command that creates and manages git worktree for framework development
 
 ## Automated Mode Trigger
 
@@ -9,34 +9,34 @@ Framework workspace management command that creates and manages git worktrees fo
 
 ### Usage Modes
 - **`@WORKSPACE`** → Show current workspace status and configuration
-- **`@WORKSPACE setup`** → Initialize framework and application worktrees for parallel development
-- **`@WORKSPACE reset`** → Reset and recreate worktrees with clean state
+- **`@WORKSPACE setup`** → Initialize framework worktree with latest main branch changes
+- **`@WORKSPACE reset`** → Reset and recreate worktree with clean state from main
 - **`@WORKSPACE status`** → Show detailed worktree status and branch information
-- **`@WORKSPACE cleanup`** → Remove and cleanup all development worktrees
+- **`@WORKSPACE cleanup`** → Remove and cleanup framework development worktree
 
 ### Framework Workspace Scope
-**Workspace Focus**: Git worktree creation and management for parallel framework and application development
-**Branch Independence**: Creates isolated development environments on permanent branches
-**Development Integration**: Enables simultaneous framework and application development
-**Real-time Sync**: Framework changes immediately available to application workspace
+**Workspace Focus**: Git worktree creation and management for framework development
+**Branch Synchronization**: Ensures framework branch stays up to date with main
+**Development Isolation**: Creates isolated development environment on framework branch
+**Main Integration**: Framework branch regularly synchronized with main branch changes
 
 ### 🔄 **Development Workflow Architecture**
 **IMPORTANT**: WORKSPACE commands perform git worktree operations for development setup
-**Version Control**: WORKSPACE creates isolated development environments, @CHECKPOINT handles commits
-**Work Philosophy**: WORKSPACE creates development environments → Parallel development in worktrees → @CHECKPOINT integrates
+**Version Control**: WORKSPACE creates isolated development environment, @CHECKPOINT handles commits
+**Work Philosophy**: WORKSPACE creates development environment → Development in worktree → @CHECKPOINT integrates
 
 Workspace commands manage development infrastructure:
-1. **Worktree Creation**: Create framework-workspace/ and application-workspace/ directories
-2. **Branch Assignment**: Permanent branch assignment (framework, application) to each worktree
-3. **Integration Setup**: Real-time framework-application connection via symlinks
+1. **Worktree Creation**: Create framework-workspace/ directory
+2. **Branch Synchronization**: Update framework branch with latest main changes
+3. **Branch Assignment**: Permanent framework branch assignment to worktree
 4. **Environment Validation**: Verify worktree functionality and development readiness
-**Git Operations**: WORKSPACE commands create worktrees and manage development infrastructure
+**Git Operations**: WORKSPACE commands create worktree and manage development infrastructure
 
 ## Framework Workspace Management Philosophy
 
-**Core Principle**: Framework workspace management eliminates branch switching friction by creating permanent development environments for parallel framework and application development. Each workspace maintains complete development context.
+**Core Principle**: Framework workspace management eliminates branch switching friction by creating a permanent development environment for framework development. The workspace maintains complete development context synchronized with main branch.
 
-**Workspace Workflow**: @WORKSPACE creates worktrees → Developers work in isolated environments → Real-time integration via symlinks → @CHECKPOINT integrates changes
+**Workspace Workflow**: @WORKSPACE creates worktree → Developers work in isolated environment → @CHECKPOINT integrates changes → @WORKSPACE syncs with main
 
 ### 🎯 **Clear Separation of Concerns**
 - **WORKSPACE**: Creates and manages worktree infrastructure → NO development work
@@ -52,23 +52,23 @@ Workspace commands manage development infrastructure:
 
 ### Phase 1: Workspace Environment Analysis
 1. **Current State Assessment** → Analyze existing git repository and branch structure
-2. **Worktree Validation** → Check for existing worktrees and potential conflicts
-3. **Branch Status Review** → Understand current branch state and development context
+2. **Worktree Validation** → Check for existing framework worktree and potential conflicts
+3. **Branch Status Review** → Understand framework branch state and sync with main
 4. **Infrastructure Requirements** → Assess workspace requirements and setup prerequisites
-5. **Integration Planning** → Plan real-time framework-application integration approach
+5. **Synchronization Planning** → Plan framework branch update from main branch
 
 ### Phase 2: Worktree Infrastructure Creation
-1. **Cleanup Existing Worktrees** → Remove any existing worktree configurations
-2. **Framework Workspace Creation** → Create framework-workspace/ with framework branch
-3. **Application Workspace Creation** → Create application-workspace/ with application branch
-4. **Real-time Integration Setup** → Create symlinks for framework-application connection
-5. **Environment Validation** → Verify worktree functionality and development readiness
+1. **Cleanup Existing Worktree** → Remove any existing framework worktree configuration
+2. **Branch Synchronization** → Update framework branch with latest main changes
+3. **Framework Workspace Creation** → Create framework-workspace/ with synchronized branch
+4. **Environment Validation** → Verify worktree functionality and development readiness
+5. **Status Tracking** → Create workspace status file for monitoring
 
 ### Phase 3: Workspace Configuration and Documentation
-1. **Development Environment Setup** → Configure each workspace for optimal development
-2. **Integration Testing** → Validate real-time framework-application synchronization
+1. **Development Environment Setup** → Configure workspace for optimal framework development
+2. **Synchronization Verification** → Validate framework branch is up to date with main
 3. **Workspace Documentation** → Document workspace usage and development procedures
-4. **Development Coordination** → Prepare workspaces for parallel development workflows
+4. **Development Preparation** → Prepare workspace for framework development workflow
 5. **Status Monitoring** → Establish workspace status monitoring and validation
 
 ## Framework Workspace Management Process
@@ -80,22 +80,19 @@ Axiom/ (main repository - coordination hub)
 ├── .git/                           # Main git repository
 ├── FrameworkProtocols/             # Protocol coordination (main branch)
 ├── ApplicationProtocols/           # Protocol coordination (main branch)
-├── framework-workspace/            # Framework development worktree
-│   ├── AxiomFramework/            # Active framework development
-│   ├── FrameworkProtocols/        # Framework protocol access
-│   └── .workspace-status          # Development state tracking
-└── application-workspace/          # Application development worktree
-    ├── AxiomExampleApp/           # Active application development
-    ├── ApplicationProtocols/      # Application protocol access
-    ├── AxiomFramework-dev@        # Symlink to framework-workspace/AxiomFramework
+├── AxiomFramework/                 # Framework package (main branch)
+├── AxiomExampleApp/                # Example application (main branch)
+└── framework-workspace/            # Framework development worktree
+    ├── AxiomFramework/            # Active framework development
+    ├── FrameworkProtocols/        # Framework protocol access
     └── .workspace-status          # Development state tracking
 ```
 
 ### Workspace Integration Strategy
-- **Framework Workspace** → Permanent framework branch, complete framework development context
-- **Application Workspace** → Permanent application branch, real-time framework access via symlink
-- **Protocol Access** → Each workspace has access to relevant protocols
-- **Real-time Sync** → Framework changes immediately available to application development
+- **Framework Workspace** → Permanent framework branch, synchronized with main
+- **Branch Synchronization** → Framework branch regularly updated from main
+- **Protocol Access** → Workspace has access to framework protocols
+- **Development Isolation** → Clean development environment for framework work
 
 ## Framework Workspace Command Execution
 
@@ -121,96 +118,93 @@ fi
 
 **Automated Workspace Setup Process**:
 1. **Repository Validation** → Ensure execution from git repository root
-2. **Existing Worktree Cleanup** → Remove any existing development worktrees
-3. **Branch Preparation** → Ensure framework and application branches exist
-4. **Framework Worktree Creation** → Create framework-workspace/ with framework branch
-5. **Application Worktree Creation** → Create application-workspace/ with application branch
-6. **Real-time Integration Setup** → Create symlinks for framework-application connection
-7. **Environment Validation** → Verify worktree functionality and development capabilities
-8. **Development Preparation** → Prepare workspaces for immediate development use
+2. **Existing Worktree Cleanup** → Remove any existing framework worktree
+3. **Branch Synchronization** → Update framework branch with latest main changes
+4. **Framework Worktree Creation** → Create framework-workspace/ with updated branch
+5. **Environment Validation** → Verify worktree functionality and development capabilities
+6. **Development Preparation** → Prepare workspace for immediate development use
 **Git Operations**: WORKSPACE commands create and manage worktree infrastructure
 
 ```bash
 # Workspace setup implementation
-echo "🧹 Cleaning existing worktrees..."
+echo "🧹 Cleaning existing framework worktree..."
 git worktree remove framework-workspace 2>/dev/null || true
-git worktree remove application-workspace 2>/dev/null || true
+
+echo "🔄 Synchronizing framework branch with main..."
+# Ensure framework branch exists
+if ! git show-ref --verify --quiet refs/heads/framework; then
+    echo "📝 Creating framework branch from main..."
+    git checkout -b framework main
+    git push -u origin framework
+    git checkout main
+else
+    echo "📝 Updating framework branch with latest main changes..."
+    git checkout framework
+    git merge main --no-edit -m "Sync framework branch with main" || {
+        echo "⚠️ Merge conflict detected - resolving by accepting main changes"
+        git reset --hard main
+    }
+    git push origin framework --force-with-lease
+    git checkout main
+fi
 
 echo "🏗️ Creating framework development workspace..."
-git worktree add framework-workspace framework || {
-    echo "📝 Creating framework branch..."
-    git checkout -b framework
-    git push origin framework
-    git worktree add framework-workspace framework
-}
-
-echo "🏗️ Creating application development workspace..."
-git worktree add application-workspace application || {
-    echo "📝 Creating application branch..."
-    git checkout -b application
-    git push origin application
-    git worktree add application-workspace application
-}
-
-echo "🔗 Setting up real-time framework integration..."
-cd application-workspace/
-ln -sf ../framework-workspace/AxiomFramework AxiomFramework-dev
-cd ..
+git worktree add framework-workspace framework
 
 echo "📊 Creating workspace status tracking..."
 echo "Framework workspace created: $(date)" > framework-workspace/.workspace-status
-echo "Application workspace created: $(date)" > application-workspace/.workspace-status
+echo "Synchronized with main: $(git rev-parse --short main)" >> framework-workspace/.workspace-status
 
-echo "✅ Development workspaces ready for parallel development"
+echo "✅ Framework workspace ready for development"
 echo "📍 Framework workspace: framework-workspace/"
-echo "📍 Application workspace: application-workspace/"
-echo "🔗 Real-time integration: application-workspace/AxiomFramework-dev → framework-workspace/AxiomFramework"
+echo "🔄 Branch synchronized with main: $(git rev-parse --short main)"
+echo "💡 Use '@CHECKPOINT' to integrate changes back to main"
 ```
 
 **Framework Workspace Execution Examples**:
-- `@WORKSPACE setup` → Create development worktrees for parallel development
-- `@WORKSPACE reset` → Reset worktrees with clean state
-- `@WORKSPACE status` → Show worktree status and branch information
-- `@WORKSPACE cleanup` → Remove all development worktrees
+- `@WORKSPACE setup` → Create framework worktree synchronized with main
+- `@WORKSPACE reset` → Reset framework worktree with latest main changes
+- `@WORKSPACE status` → Show framework worktree status and synchronization info
+- `@WORKSPACE cleanup` → Remove framework development worktree
 
 ## Framework Workspace Standards
 
 ### Workspace Creation Standards
-- **Clean Environment**: Complete removal of existing worktrees before creation
-- **Branch Isolation**: Each worktree permanently assigned to specific development branch
-- **Real-time Integration**: Framework changes immediately accessible to application workspace
-- **Development Readiness**: Workspaces configured for immediate development use
-- **Status Tracking**: Workspace creation and status monitoring
+- **Clean Environment**: Complete removal of existing framework worktree before creation
+- **Branch Synchronization**: Framework branch updated with latest main changes
+- **Branch Isolation**: Worktree permanently assigned to framework branch
+- **Development Readiness**: Workspace configured for immediate development use
+- **Status Tracking**: Workspace creation and synchronization status monitoring
 
 ### Workspace Quality Standards
 - **Infrastructure Reliability**: Robust worktree creation with error handling
-- **Integration Verification**: Validated real-time framework-application connection
+- **Synchronization Verification**: Validated framework branch is current with main
 - **Development Efficiency**: Optimized workspace configuration for development velocity
-- **Clean Separation**: Clear workspace boundaries with proper isolation
-- **Documentation**: Clear workspace usage and development procedures
+- **Clean State**: Framework branch reset to main when conflicts arise
+- **Documentation**: Clear workspace usage and synchronization procedures
 
 ## Framework Workspace Workflow Integration
 
-**Workspace Purpose**: Create development infrastructure for parallel framework and application development
-**Development Integration**: Workspaces provide isolated environments for FrameworkProtocols and ApplicationProtocols
-**Real-time Sync**: Framework changes immediately available to application development
-**Protocol Access**: Each workspace has access to relevant development protocols
+**Workspace Purpose**: Create development infrastructure for framework development
+**Development Integration**: Workspace provides isolated environment for FrameworkProtocols
+**Main Synchronization**: Framework branch stays synchronized with main branch changes
+**Protocol Access**: Workspace has access to framework development protocols
 **Infrastructure Management**: Workspace lifecycle management independent of development workflows
 
 ## Framework Workspace Coordination
 
-**Infrastructure Creation**: Creates isolated development environments with parallel development capability
-**Development Integration**: Workspaces integrate with existing FrameworkProtocols and ApplicationProtocols
-**Real-time Synchronization**: Framework-application integration via symlink connections
+**Infrastructure Creation**: Creates isolated development environment for framework work
+**Branch Management**: Maintains framework branch synchronized with main
+**Development Integration**: Workspace integrates with existing FrameworkProtocols
 **Environment Management**: Workspace lifecycle management with setup, reset, and cleanup capabilities
-**Development Coordination**: Enables coordinated parallel development across framework and application teams
+**Main Integration**: Regular synchronization ensures framework branch stays current
 
 ---
 
-**FRAMEWORK WORKSPACE COMMAND STATUS**: Framework workspace management command with parallel development infrastructure
-**CORE FOCUS**: Git worktree infrastructure for simultaneous framework and application development  
-**WORKSPACE CREATION**: Creates framework-workspace/ and application-workspace/ with permanent branch assignment
-**REAL-TIME INTEGRATION**: Framework changes immediately available to application workspace via symlinks
-**DEVELOPMENT VELOCITY**: Eliminates branch switching and enables true parallel development
+**FRAMEWORK WORKSPACE COMMAND STATUS**: Framework workspace management command for isolated development
+**CORE FOCUS**: Git worktree infrastructure for framework development with main synchronization
+**WORKSPACE CREATION**: Creates framework-workspace/ with synchronized framework branch
+**BRANCH SYNCHRONIZATION**: Framework branch regularly updated from main branch
+**DEVELOPMENT VELOCITY**: Eliminates branch switching while maintaining main integration
 
-**Use FrameworkProtocols/@WORKSPACE for development infrastructure management and parallel development setup.**
+**Use FrameworkProtocols/@WORKSPACE for framework development infrastructure management.**
