@@ -20,15 +20,12 @@ Create worktrees → Setup symlinks → Track status
 
 ```
 Axiom/                              # Main repository
-├── FrameworkProtocols/             # Protocol files (root only)
-├── ApplicationProtocols/           # Protocol files (root only)
 ├── framework-workspace/            # Framework branch worktree
 │   ├── AxiomFramework/            # Active development
-│   ├── FrameworkProtocols@        # Symlink to ../FrameworkProtocols/
 │   └── .workspace-status          # State tracking
 └── application-workspace/          # Application branch worktree  
     ├── AxiomExampleApp/           # Active development
-    ├── ApplicationProtocols@      # Symlink to ../ApplicationProtocols/
+    ├── AxiomFramework-dev@        # Symlink to framework
     └── .workspace-status          # State tracking
 ```
 
@@ -39,12 +36,12 @@ Axiom/                              # Main repository
 2. Remove any existing worktrees
 3. Create framework worktree on `framework` branch
 4. Create application worktree on `application` branch
-5. Create protocol symlinks in both workspaces
+5. Symlink framework into application workspace
 6. Create status tracking files
 
 ### Key Features
 - **Isolation**: Each workspace locked to its branch
-- **Protocol Access**: Real-time protocol access via symlinks
+- **Integration**: Real-time framework access via symlinks
 - **Persistence**: No branch switching required
 - **Tracking**: Status files monitor workspace health
 
@@ -57,11 +54,8 @@ Axiom/                              # Main repository
 
 **Symlink Structure**:
 ```bash
-# In framework-workspace/
-ln -s ../FrameworkProtocols FrameworkProtocols
-
 # In application-workspace/
-ln -s ../ApplicationProtocols ApplicationProtocols
+ln -sf ../framework-workspace/AxiomFramework AxiomFramework-dev
 ```
 
 **Status Tracking**:
@@ -85,11 +79,9 @@ git worktree add application-workspace application || {
     git worktree add application-workspace application  
 }
 
-# Create protocol symlinks
-cd framework-workspace/
-ln -s ../FrameworkProtocols FrameworkProtocols
-cd ../application-workspace/
-ln -s ../ApplicationProtocols ApplicationProtocols
+# Create integration symlink
+cd application-workspace/
+ln -sf ../framework-workspace/AxiomFramework AxiomFramework-dev
 cd ..
 
 # Initialize status tracking
@@ -112,7 +104,7 @@ echo "Created: $(date)" > application-workspace/.workspace-status
 @WORKSPACE status
 # framework-workspace: healthy (framework branch)
 # application-workspace: healthy (application branch)
-# Protocol symlinks: active
+# Symlink: active
 ```
 
 **Clean Restart**:

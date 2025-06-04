@@ -4,107 +4,115 @@
 
 ## Commands
 
-- `setup` → Create application workspace with protocol access
-- `reset` → Recreate workspace with clean state
-- `status` → Show workspace health and dependencies
-- `cleanup` → Remove application workspace
+- `setup` → Create framework and application worktrees
+- `reset` → Recreate worktrees with clean state
+- `status` → Show worktree details and health
+- `cleanup` → Remove all worktrees
 
 ## Core Process
 
-Create workspace → Setup protocol symlinks → Validate dependencies
+Create worktrees → Setup symlinks → Track status
 
-**Philosophy**: Isolated application development with framework integration.
-**Constraint**: Application workspace depends on framework availability.
+**Philosophy**: Isolated development environments for parallel work.
+**Constraint**: Permanent branch assignment per workspace.
 
 ## Workspace Structure
 
 ```
 Axiom/                              # Main repository
-├── ApplicationProtocols/           # Protocol files (root only)
-├── FrameworkProtocols/            # Protocol files (root only)
-├── AxiomFramework/                # Framework package
-└── application-workspace/          # Application branch worktree
-    ├── AxiomExampleApp/           # iOS application development
-    ├── ApplicationProtocols@      # Symlink to ../ApplicationProtocols/
+├── framework-workspace/            # Framework branch worktree
+│   ├── AxiomFramework/            # Active development
+│   └── .workspace-status          # State tracking
+└── application-workspace/          # Application branch worktree  
+    ├── AxiomExampleApp/           # Active development
+    ├── AxiomFramework-dev@        # Symlink to framework
     └── .workspace-status          # State tracking
 ```
 
 ## Workflow
 
-### Application Setup
-1. Validate framework package exists
-2. Create application worktree on `application` branch
-3. Symlink to ApplicationProtocols for workflow access
-4. Configure workspace dependencies
-5. Create status tracking files
+### Initial Setup
+1. Validate git repository root
+2. Remove any existing worktrees
+3. Create framework worktree on `framework` branch
+4. Create application worktree on `application` branch
+5. Symlink framework into application workspace
+6. Create status tracking files
 
 ### Key Features
-- **Application Focus**: Dedicated iOS application development
-- **Protocol Access**: Direct access to application workflows
-- **Framework Integration**: Uses framework as external dependency
-- **Isolation**: Cannot modify framework code directly
+- **Isolation**: Each workspace locked to its branch
+- **Integration**: Real-time framework access via symlinks
+- **Persistence**: No branch switching required
+- **Tracking**: Status files monitor workspace health
 
 ## Technical Details
 
 **Branch Assignment**:
+- `framework-workspace/` → framework branch only
 - `application-workspace/` → application branch only
-- Framework access → via workspace dependency or published package
+- Main repository → coordination and merging
 
 **Symlink Structure**:
 ```bash
 # In application-workspace/
-ln -s ../ApplicationProtocols ApplicationProtocols
+ln -sf ../framework-workspace/AxiomFramework AxiomFramework-dev
 ```
 
-**Dependencies**:
-- Framework package must exist (AxiomFramework/)
-- ApplicationProtocols must be present at root
-- Xcode project must be properly configured
+**Status Tracking**:
+- `.workspace-status` files in each workspace
+- Records creation time and last update
+- Used by other protocols for validation
 
 ## Execution Process
 
 ```bash
-# Create application workspace
+# Setup worktrees
+git worktree add framework-workspace framework || {
+    git checkout -b framework
+    git push origin framework  
+    git worktree add framework-workspace framework
+}
+
 git worktree add application-workspace application || {
     git checkout -b application
     git push origin application
-    git worktree add application-workspace application
+    git worktree add application-workspace application  
 }
 
-# Create protocol symlink
+# Create integration symlink
 cd application-workspace/
-ln -s ../ApplicationProtocols ApplicationProtocols
+ln -sf ../framework-workspace/AxiomFramework AxiomFramework-dev
 cd ..
 
 # Initialize status tracking
+echo "Created: $(date)" > framework-workspace/.workspace-status
 echo "Created: $(date)" > application-workspace/.workspace-status
-echo "Framework dependency: AxiomFramework" >> application-workspace/.workspace-status
 ```
 
 ## Examples
 
-**Application Development Setup**:
+**First Time Setup**:
 ```
 @WORKSPACE setup
-# Creates application workspace
-# Links to ApplicationProtocols
-# Validates framework dependency
+# Creates both worktrees
+# Sets up symlinks
+# Shows success status
 ```
 
-**Health Check**:
+**Check Health**:
 ```
 @WORKSPACE status
+# framework-workspace: healthy (framework branch)
 # application-workspace: healthy (application branch)
-# ApplicationProtocols: symlinked
-# Framework dependency: available
+# Symlink: active
 ```
 
-**Clean Development Start**:
+**Clean Restart**:
 ```
 @WORKSPACE reset
-# Removes existing workspace
+# Removes existing worktrees
 # Recreates with clean state
-# Preserves framework integration
+# Preserves uncommitted work warning
 ```
 
-Creates isolated application workspace with protocol access and framework integration.
+Creates isolated worktrees for parallel framework and application development.
