@@ -1,6 +1,6 @@
 # @DEVELOP.md - Axiom Framework Development Command
 
-Framework development command with methodology, requirements, and execution procedures
+Implementation command that transforms RFC requirements into working code through disciplined TDD
 
 ## Automated Mode Trigger
 
@@ -12,39 +12,41 @@ Framework development command with methodology, requirements, and execution proc
 - **`@DEVELOP test [RFC-XXX]`** → Run tests for RFC implementation
 - **`@DEVELOP`** → Show current RFC implementation status in Proposed/ directory
 
-### Development Command Scope
-**RFC Implementation**: Implement RFCs from Proposed/ directory with TDD methodology
-**Build Command Mandate**: MANDATORY refactoring after every implementation cycle
-**Progress Tracking**: Update RFC implementation checklists as tasks complete
-**Quality Standards**: High test coverage with comprehensive success rates and code organization excellence
-**Refactoring Requirement**: Build command MUST include refactoring - it's not complete without it
+### Implementation Command Scope
+**Single Responsibility**: Transform RFC requirements into tested, refactored code
+**Input Source**: RFCs in Proposed/ directory with acceptance criteria
+**Core Process**: Red-Green-Refactor cycles (mandatory refactoring)
+**Success Criteria**: All acceptance tests pass, zero code smells
+**Progress Tracking**: Check off TDD checklist items in RFC
+**Quality Gate**: 100% test success before and after refactoring
+**Strict Boundary**: Read requirements only, never modify them
 **Integration**: Works with @PLAN for RFC lifecycle and @CHECKPOINT for version control
 
-### 🔄 **Test-Driven Development & Refactoring Workflow Architecture**
-**IMPORTANT**: DEVELOP commands NEVER perform git operations (commit/push/merge)
-**Version Control**: Only @CHECKPOINT commands handle all git operations
+### TDD Implementation Workflow
+
+**Workflow Rules**:
+- No git operations (handled by @CHECKPOINT)
+- Mandatory refactoring after every green test
+- Update RFC checklist after each cycle
+
 **Work Philosophy**: DEVELOP implements code → Refactor for quality → Multiple cycles → @CHECKPOINT commits and merges
 
-TDD-enforced development workflow with MANDATORY refactoring (NO git operations):
-1. **RFC Analysis**: Review RFC requirements and implementation checklist
-2. **Test-First Development**: Write failing tests for RFC requirements (RED phase)
-3. **Minimal Implementation**: Execute implementation to make tests pass (GREEN phase)
-4. **Test Validation**: MANDATORY - All tests must pass before proceeding
-5. **MANDATORY Refactoring Phase**: REQUIRED - Improve code structure (REFACTOR phase)
-   - Eliminate code duplication through abstraction
-   - Simplify complex logic while preserving behavior
-   - Improve naming for clarity and consistency
-   - Optimize file and module organization
-   - Remove technical debt and dead code
-6. **Quality Gate Validation**: ABSOLUTE REQUIREMENT - 100% test success after refactoring
-7. **Structural Excellence**: Verify optimal organization and maintainability
-8. **Final Validation**: Ensure functionality preservation and test success
-9. **RFC Checklist Update**: Check off completed implementation items in RFC
-**No Git Operations**: DEVELOP commands never commit, push, or merge
+**Red-Green-Refactor Cycle**:
+1. **RED**: Write test from RFC acceptance criteria → Verify it fails
+2. **GREEN**: Write minimal code to pass → All tests green
+3. **REFACTOR**: Apply patterns to improve → Tests stay green
+4. **CHECKLIST**: Mark RFC item complete → Move to next requirement
 
-## Framework Development Philosophy
+**Refactoring Targets**:
+- Extract methods/classes
+- Remove duplication
+- Improve naming
+- Simplify logic
+- Optimize structure
 
-**Core Principle**: Framework development focuses on building type-safe, concurrency-safe, performant, deterministic iOS development framework with actor-based isolation, minimal boilerplate, and capabilities permissions for AI agent coding.
+## Implementation Philosophy
+
+**Core Discipline**: Transform requirements into reality through rigorous TDD and refactoring
 
 **Test-Driven Development Philosophy**: Following Kent Beck's TDD methodology - "Test-Driven Development by Example"
 - Write tests first, implementation follows, refactor with confidence
@@ -59,36 +61,87 @@ TDD-enforced development workflow with MANDATORY refactoring (NO git operations)
 
 **Quality Standards**: Framework components maintain architectural integrity, meet performance targets, provide good developer experience, exhibit structural excellence, and integrate with framework capabilities.
 
-**Testing Requirements**: Framework development targets 100% test success rate with comprehensive test coverage. See `AxiomFramework/Documentation/Testing/TESTING_STRATEGY.md` for testing requirements and standards.
+**TDD Methodology** (Kent Beck):
+- Red: Write failing test from acceptance criteria
+- Green: Minimal code to pass
+- Refactor: Improve without changing behavior
+- Small steps, continuous validation
 
-**Development Focus**: Framework development implements type-safe architecture, actor-based concurrency, performance optimization, deterministic behavior, code generation for minimal boilerplate, and capabilities permissions enforcement with consistent patterns.
+**Refactoring Discipline** (Martin Fowler):
+- Catalog of 70+ proven patterns
+- Eliminate code smells systematically
+- Maintain green tests throughout
+- Boy Scout Rule always applies
+
+**Quality Gates**:
+- 100% acceptance criteria satisfaction
+- Zero failing tests ever
+- No code smells remaining
+- Performance targets met
 
 **Structural Excellence**: Optimal code organization, minimal complexity, zero duplication, clear naming conventions, and architectural consistency.
 
 **Code Integrity**: ZERO TOLERANCE for broken tests in main branch - development process designed to prevent test failures from reaching production.
 
-## Framework Development Principles
+**Implementation Focus**:
+- Read requirements, write tests
+- Implement to pass tests
+- Refactor to excellence
+- Never modify requirements
 
-### Architectural Integrity
-- **Architectural Constraints**: Maintain adherence to foundational architectural patterns
-- **Design Consistency**: Ensure consistent patterns and approaches across framework components
-- **API Design**: Design intuitive and type-safe interfaces for framework consumers
-- **Performance Focus**: Achieve performance targets while maintaining feature functionality
-- **Thread Safety**: Implement actor-based isolation and concurrency patterns
+## Implementation Principles
 
-### Core Technical Capabilities
-- **Type Safety**: Build compile-time type validation and runtime safety guarantees
-- **Concurrency Safety**: Develop actor-based isolation preventing data races
-- **Performance Optimization**: Create measurable performance improvements and profiling
-- **Deterministic Behavior**: Enable predictable, reproducible operations
-- **Boilerplate Reduction**: Implement code generation through macros and builders
+**From Requirements to Code**:
+- Read acceptance criteria → Write test
+- Test fails → Implement minimal solution
+- Test passes → Refactor to excellence
+- Never guess intent → Follow RFC exactly
 
-### Developer Experience
-- **API Design**: Design framework interfaces that are intuitive and functional
-- **Code Generation**: Minimize repetitive code through automation
-- **Type Safety**: Provide compile-time guarantees and runtime safety
-- **Error Handling**: Implement graceful degradation and error management
-- **Documentation**: Ensure framework capabilities are documented and accessible
+**Technical Excellence**:
+- Type safety through Swift's type system
+- Concurrency safety through actors
+- Performance through measurement
+- Maintainability through refactoring
+
+**Code Quality Standards**:
+- Zero tolerance for failing tests
+- No code smells after refactoring
+- Clear naming from RFC terminology
+- Modular structure for testability
+
+### Industry Standard Refactoring Principles (Martin Fowler's Approach)
+
+**Core Refactoring Definition**: 
+"A change made to the internal structure of software to make it easier to understand and cheaper to modify without changing its observable behavior" - Martin Fowler
+
+**When to Refactor (The Three Strikes Rule)**:
+1. **First time**: Just do it
+2. **Second time**: Wince at duplication, but do it anyway
+3. **Third time**: Refactor before proceeding
+
+**Types of Refactoring**:
+- **Preparatory Refactoring**: Making it easier to add a feature
+- **Comprehension Refactoring**: Making code easier to understand
+- **Litter-Pickup Refactoring**: Small cleanups as you go
+- **Planned Refactoring**: Dedicated time for larger improvements
+- **Long-Term Refactoring**: Gradual architectural improvements
+
+**Refactoring Process**:
+1. **Identify Code Smell**: Recognize what needs improvement
+2. **Choose Refactoring**: Select appropriate technique from catalog
+3. **Apply in Small Steps**: Each step maintains working code
+4. **Run Tests**: After EVERY micro-change
+5. **Verify**: Ensure all tests pass (commits handled by @CHECKPOINT)
+
+**Common Refactorings to Apply**:
+- Extract Method/Function (most used refactoring)
+- Rename Variable/Method/Class
+- Extract Variable
+- Inline Variable/Method
+- Move Method/Field
+- Extract Class
+- Replace Conditional with Polymorphism
+- Introduce Parameter Object
 
 ### Industry Standard Refactoring Principles (Martin Fowler's Approach)
 
@@ -128,19 +181,21 @@ TDD-enforced development workflow with MANDATORY refactoring (NO git operations)
 **Requirements**: High test coverage, comprehensive test success rates, multiple test categories
 **Standards**: See `AxiomFramework/Documentation/Testing/TESTING_STRATEGY.md` for detailed testing methodology and requirements
 
-## Framework Development Methodology
+## Implementation Methodology
 
-### Phase 1: RFC Analysis (for build command)
-1. **RFC Requirements Review** → Analyze RFC specifications and implementation checklist
-2. **API Design Validation** → Ensure APIs match RFC interface specifications
-3. **Performance Target Review** → Verify RFC performance requirements
+### Phase 1: RFC Analysis
+1. **Extract Acceptance Criteria** → One test per criterion
+2. **Identify Test Boundaries** → Know what to mock
+3. **Note Performance Targets** → Prepare benchmarks
+4. **Follow TDD Checklist** → Work in order
+5. **API Design Validation** → Ensure APIs match RFC interface specifications
 
-### Phase 2: Implementation and Development
-1. **Core Implementation** → Build framework capabilities using established patterns and principles
-2. **Actor Integration** → Implement thread-safe patterns using actor-based isolation
-3. **Protocol Design** → Create protocol hierarchies that support framework goals
-4. **Capability Development** → Build runtime capability validation and management systems
-5. **Capabilities Integration** → Integrate runtime permissions validation with compile-time hints
+### Phase 2: Writing the Code
+1. **Test First** → From acceptance criteria
+2. **Code Minimal** → Just enough to pass
+3. **Refactor Always** → After each green
+4. **Measure Performance** → Against RFC targets
+5. **Update Checklist** → Track progress
 
 ### Phase 3: Professional Test-Driven Development
 
@@ -204,38 +259,22 @@ TDD-enforced development workflow with MANDATORY refactoring (NO git operations)
    - Performance characteristics maintained
    - Architectural constraints respected
 
-## 📊 Framework Development Categories
+## Implementation Components
 
-### **Core Framework Components**
-- **AxiomClient** → Actor-based state management with single ownership patterns
-- **AxiomContext** → Client orchestration and SwiftUI integration layer
-- **AxiomView** → 1:1 view-context relationships with reactive binding
-- **Capability System** → Runtime validation with compile-time optimization
-- **Domain Models** → Immutable value objects with business logic integration
-- **Capabilities System** → Runtime permissions validation with graceful degradation
+**What Gets Built** (from RFC requirements):
+- Protocols matching RFC interfaces
+- Actors for thread-safe components  
+- Value types for immutable state
+- Error types with recovery strategies
+- Performance benchmarks from targets
 
-### Technical Implementation Areas
-- **Type System Design** → Compile-time validation and type-safe interfaces
-- **Actor Isolation** → Thread-safe state management and concurrency patterns
-- **Performance Profiling** → Measurement and optimization of framework performance
-- **Code Generation** → Macro system reducing boilerplate and ensuring consistency
-- **Permissions Validation** → Capability checking with compile-time optimization
-- **Pattern Consistency** → Uniform patterns enabling reliable AI agent coding
-
-### Refactoring Focus Areas
-- **Code Organization** → Optimal file structure, module boundaries, and dependency management
-- **Technical Debt Elimination** → Remove duplication, dead code, and complexity
-- **Naming Consistency** → Standardize naming conventions across framework
-- **Structural Improvements** → Enhance maintainability and readability
-- **Interface Alignment** → Ensure APIs match architectural intentions
-- **Functionality Preservation** → 100% behavioral compatibility during refactoring
-
-### **Performance and Quality Systems**
-- **Memory Management** → Efficient memory usage patterns and optimization
-- **Concurrency Patterns** → Actor-based isolation and async/await integration
-- **Error Handling** → Comprehensive error management and recovery
-- **Type Safety** → Compile-time and runtime type validation
-- **API Consistency** → Uniform interface design across framework components
+**How It Gets Built** (TDD process):
+- Test-first from acceptance criteria
+- Minimal implementation to green
+- Refactor to remove all smells
+- Measure against RFC targets
+- Update checklist on completion
+>>>>>>> framework
 
 ## Testing Integration
 
@@ -255,8 +294,9 @@ TDD-enforced development workflow with MANDATORY refactoring (NO git operations)
 **Integration Requirement**: Tests must pass for @CHECKPOINT to integrate changes
 **Standards**: Testing requirements in `AxiomFramework/Documentation/Testing/TESTING_STRATEGY.md`
 
-## 🔬 Test-Driven Development Methodology
+## TDD Execution Details
 
+<<<<<<< HEAD
 **Industry Standard TDD Cycle (Kent Beck's RED-GREEN-REFACTOR)**:
 
 1. **RED Phase - Write a Failing Test**
@@ -316,21 +356,12 @@ TDD-enforced development workflow with MANDATORY refactoring (NO git operations)
 
 **Quality Gate Validation**:
 ```bash
-# Test validation (enforced by @DEVELOP)
-if ! swift test; then
-    echo "❌ DEVELOPMENT BLOCKED: Tests must pass before proceeding"
-    exit 1
-fi
-
-# Integration readiness check
-if ! swift test; then
-    echo "❌ NOT READY: Tests must pass for @CHECKPOINT integration"
-    exit 1
-fi
+swift test || exit 1  # No broken tests ever
 ```
 
-## Development Success Criteria
+## Success Criteria
 
+<<<<<<< HEAD
 **Architectural Compliance**: Type safety, concurrency safety through actors, performance targets, deterministic behavior, minimal boilerplate, capabilities permissions
 **Technical Capabilities**: Type safety guarantees, actor-based concurrency, performance targets, deterministic behavior, minimal boilerplate
 **Developer Experience**: Intuitive APIs, boilerplate reduction through code generation, type safety, clear error handling
@@ -338,6 +369,15 @@ fi
 **Testing Standards**: High test coverage, comprehensive test success rates, testing across all categories
 **Refactoring Quality**: 100% functionality preservation, improved maintainability, reduced technical debt, enhanced readability
 **Standards**: Success criteria in `AxiomFramework/Documentation/DEVELOPMENT_STANDARDS.md`
+=======
+**Implementation Complete When**:
+- All RFC acceptance criteria have passing tests
+- Zero code smells after refactoring
+- Performance meets RFC targets
+- TDD checklist fully checked
+- No failing tests anywhere
+- Code structure optimal
+>>>>>>> framework
 
 ## 🤖 Development Execution Loop
 
@@ -394,6 +434,7 @@ echo "⚠️ Version control managed by @CHECKPOINT only"
 cd ..
 ```
 
+<<<<<<< HEAD
 **Build Command - Professional TDD Implementation**:
 
 1. **Pre-Implementation Setup**
@@ -445,6 +486,30 @@ cd ..
 2. **Test Execution** → Run swift test with coverage
 3. **Results Validation** → Verify 100% pass rate
 4. **Coverage Report** → Display test coverage metrics
+=======
+**Build Command Execution**:
+
+1. **Setup**: Verify RFC in Proposed/, run tests (must be green)
+
+2. **For Each Requirement**:
+   - **RED**: Write test from acceptance criteria
+   - **GREEN**: Minimal code to pass
+   - **REFACTOR**: Apply patterns, eliminate smells
+   - **CHECK**: Mark item complete in RFC
+
+3. **Final Validation**:
+   - All acceptance criteria satisfied
+   - Performance targets met
+   - Zero code smells
+   - Checklist complete
+
+**Test Command Execution**:
+1. **Scope**: Full suite or RFC-specific
+2. **Run**: `swift test` with coverage
+3. **Validate**: All acceptance criteria pass
+4. **Measure**: Performance vs RFC targets
+5. **Report**: Coverage and results
+>>>>>>> framework
 
 **CRITICAL - No Git Operations**: The @DEVELOP protocol performs NO git operations whatsoever. ALL version control (commits, pushes, merges) is handled exclusively by @CHECKPOINT protocol.
 
@@ -460,6 +525,7 @@ cd ..
 **Build Command**: Implements RFCs using Kent Beck's TDD with Martin Fowler's refactoring
 **Test Command**: Validates implementation following test pyramid principles
 **RFC Workflow**: @PLAN propose → @DEVELOP build (TDD+refactoring) → @DEVELOP test → @PLAN activate
+<<<<<<< HEAD
 **Progress Tracking**: RFC checklist items checked off as test-driven cycles complete
 
 **TDD Discipline (Robert C. Martin's Three Laws)**:
@@ -484,9 +550,18 @@ cd ..
 - **Continuous Integration**: Tests run on every change
 - **Collective Code Ownership**: Anyone can refactor anything
 - **Merciless Refactoring**: Never tolerate code smells
+=======
+**Progress Tracking**: RFC TDD checklist items checked off as Red-Green-Refactor cycles complete
+**Acceptance Driven**: Each RFC requirement has testable acceptance criteria that drive implementation
+**Test Boundaries**: RFCs define clear test boundaries and mock requirements for each protocol
+>>>>>>> framework
 
-## 📚 Development Resources
+**TDD Discipline (Robert C. Martin's Three Laws)**:
+1. Write production code only to pass a failing test
+2. Write only enough test code to fail
+3. Write only enough production code to pass
 
+<<<<<<< HEAD
 **Industry Standard References**:
 - **TDD**: "Test-Driven Development by Example" - Kent Beck
 - **Refactoring**: "Refactoring: Improving the Design of Existing Code" - Martin Fowler
@@ -504,19 +579,58 @@ cd ..
 - **TDD Examples**: `AxiomFramework/Documentation/TDD/`
 - **Refactoring Guides**: `AxiomFramework/Documentation/Refactoring/`
 - **Testing Strategy**: `AxiomFramework/Documentation/Testing/TESTING_STRATEGY.md`
+=======
+**Refactoring Discipline (Martin Fowler)**:
+- Refactor when you add function (preparatory)
+- Refactor when you need to understand (comprehension)
+- Refactor when you see mess (litter-pickup)
+- Never refactor when tests are red
+>>>>>>> framework
 
-## 🤖 Development Coordination
+**Quality Standards**:
+- **Test Coverage**: 100% coverage for new code
+- **Test Speed**: Unit tests run in milliseconds
+- **Test Independence**: Each test runs in isolation
+- **Refactoring Safety**: All tests green before and after
 
+<<<<<<< HEAD
 **RFC Implementation**: Implements RFCs from Proposed/ directory with TDD methodology
 **RFC Selection**: @PLAN propose moves RFCs to Proposed/ for implementation
 **Progress Tracking**: RFC implementation checklists track development progress
 **Completion Criteria**: All RFC checklist items must be completed
 **Activation Ready**: Completed RFCs can be activated via @PLAN activate
+=======
+**Professional Practices**:
+- **Boy Scout Rule**: Leave code cleaner than found
+- **Continuous Integration**: Tests run on every change
+- **Collective Code Ownership**: Anyone can refactor anything
+- **Merciless Refactoring**: Never tolerate code smells
+
+## References
+
+**Core Methodologies**:
+- Kent Beck's TDD: Red-Green-Refactor
+- Martin Fowler's Refactoring: 70+ patterns
+- Robert Martin's SOLID principles
+
+**Documentation**:
+- RFC format: [RFC_FORMAT.md](./RFC_FORMAT.md)
+- Testing: `AxiomFramework/Documentation/Testing/`
+- Examples: `AxiomFramework/Documentation/TDD/`
+>>>>>>> framework
 
 ---
 
----
+**DEVELOP Command Summary**:
+- **Purpose**: Transform RFC requirements into tested code
+- **Commands**: `build RFC-XXX` | `test [RFC-XXX]` | status
+- **Process**: Red-Green-Refactor with mandatory refactoring
+- **Input**: RFCs from Proposed/ with acceptance criteria
+- **Output**: Working code passing all tests
+- **Quality**: Zero broken tests, zero code smells
+- **Boundaries**: Never modify requirements, no git operations
 
+<<<<<<< HEAD
 **DEVELOPMENT COMMAND STATUS**: RFC implementation with build and test commands
 **CORE FOCUS**: Implement RFCs from Proposed/ directory using TDD methodology  
 **COMMANDS**: `@DEVELOP build RFC-XXX` for implementation, `@DEVELOP test [RFC-XXX]` for testing  
@@ -531,3 +645,19 @@ cd ..
 **NO GIT OPERATIONS**: @DEVELOP only builds and tests - no commits, pushes, or merges
 
 **Use @DEVELOP build RFC-XXX to implement RFCs with TDD, or @DEVELOP test to validate implementation.**
+=======
+### Expected RFC Format
+
+DEVELOP protocol expects RFCs following the standard format defined in [RFC_FORMAT.md](./RFC_FORMAT.md).
+
+**Key RFC Requirements for Implementation**:
+- **Testable Acceptance Criteria**: Each requirement includes specific acceptance criteria
+- **Test Boundaries**: Protocol definitions specify test boundaries and mock requirements  
+- **TDD Implementation Checklist**: Red-Green-Refactor format for each component
+- **Performance Targets**: Specific percentile requirements with test scenarios
+- **Refactoring Opportunities**: Documented optimization and improvement strategies
+
+**See [RFC_FORMAT.md](./RFC_FORMAT.md)** for complete RFC structure and format requirements.
+
+This standardized format enables DEVELOP to extract acceptance criteria, test boundaries, and refactoring guidance directly from RFCs for implementation.
+>>>>>>> framework

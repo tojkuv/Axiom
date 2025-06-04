@@ -2,19 +2,19 @@
 
 **RFC Number**: 001  
 **Title**: Axiom Foundation Architecture  
-**Status**: Active  
+**Status**: Draft  
 **Type**: Architecture  
 **Created**: 2025-01-06  
-**Updated**: 2025-01-14  
+**Updated**: 2025-01-15
 **Authors**: Axiom Framework Team  
 **Supersedes**: None  
 **Superseded-By**: None
 
 ## Abstract
 
-This RFC establishes the foundation architecture for the Axiom framework, defining the complete architectural blueprint from inception to first release. It specifies six immutable component types, nineteen architectural constraints, core protocols, performance requirements, and implementation roadmap. This foundation ensures thread safety, testability, and maintainability by leveraging Swift's actor model for concurrency and SwiftUI for reactive UI updates.
+This RFC establishes the foundation architecture for the Axiom framework, defining the complete architectural blueprint from inception to first release. It specifies six immutable component types, nineteen architectural constraints with testable acceptance criteria, core protocols with clear test boundaries, performance requirements with measurable targets, and a TDD-oriented implementation roadmap. This foundation ensures thread safety, testability, and maintainability by leveraging Swift's actor model for concurrency and SwiftUI for reactive UI updates.
 
-The foundation architecture enforces clear boundaries between components through compile-time and runtime validation, preventing common iOS development issues such as race conditions, circular dependencies, and memory leaks. This document serves as the definitive reference for building Axiom from initial implementation through first stable release, establishing all architectural principles, protocols, and development milestones.
+The foundation architecture enforces clear boundaries between components through compile-time and runtime validation, preventing common iOS development issues such as race conditions, circular dependencies, and memory leaks. Each requirement includes specific acceptance criteria enabling test-driven development cycles. This document serves as the definitive reference for building Axiom from initial implementation through first stable release, establishing all architectural principles, protocols, test strategies, and development milestones.
 
 ## Motivation
 
@@ -62,30 +62,87 @@ Nineteen constraints enforce architectural integrity through compile-time and ru
 #### Dependency Constraints (Rules 1-8)
 
 1. **Client Dependency**: Clients can ONLY depend on Capabilities
+   - Acceptance: Compiler rejects Client importing another Client type
+   - Test: Attempt Client-to-Client dependency fails at compile time
+
 2. **Context Dependency**: Contexts can ONLY depend on Clients and downstream Contexts
+   - Acceptance: Compiler rejects Context importing Capability directly
+   - Test: Context isolation test validates no capability access
+
 3. **Capability Composition**: Capabilities can ONLY depend on other Capabilities (forming a DAG)
+   - Acceptance: Circular capability dependency detected and rejected at runtime
+   - Test: DAG validation test with 10 capabilities shows no cycles
+
 4. **View-Context Binding**: Each View has exactly ONE Context dependency
+   - Acceptance: View with multiple contexts fails SwiftUI compilation
+   - Test: View creation test confirms single context requirement
+
 5. **Unidirectional Flow**: Dependencies flow: Orchestrator → Context → Client → Capability → System
+   - System Boundary: External dependencies outside framework control (iOS SDK, third-party frameworks, hardware APIs)
+   - Acceptance: Reverse dependency attempts fail at compile time
+   - Test: Dependency analyzer confirms unidirectional graph
+   - Test: Dependency analyzer categorizes 100% of imports as framework-controlled or system
+
 6. **Client Isolation**: Clients cannot depend on other Clients
+   - Acceptance: Inter-client communication attempts fail compilation
+   - Test: Client isolation test with 5 clients shows no cross-references
+
 7. **State Ownership**: Each State is owned by exactly ONE Client
+   - Acceptance: Shared state attempts trigger compiler error
+   - Test: State ownership test validates 1:1 client-state pairing
+
 8. **Context Composition**: Contexts form a DAG with no circular dependencies
+   - Acceptance: Circular context references detected within 100ms at runtime
+   - Test: Context graph with 20 nodes validates as acyclic
 
 #### Lifetime Constraints (Rules 9-13)
 
 9. **View Lifetime**: Multiple instances - new instance per usage in SwiftUI hierarchy
+   - Acceptance: Multiple view instances have unique identities
+   - Test: Create 10 views, verify 10 distinct instances via ObjectIdentifier
+
 10. **Context Lifetime**: One instance per view instance - maintains 1:1 relationship
+   - Acceptance: Each view instance gets unique context instance
+   - Test: View-context pairing test shows 1:1 correspondence for 100 views
+
 11. **Client Lifetime**: Singleton - one instance per client type for entire application
+   - Acceptance: Multiple client requests return identical instance
+   - Test: Concurrent access from 100 threads returns same client instance
+
 12. **State Lifetime**: Singleton - one instance per state type, paired 1:1 with client
+   - Acceptance: State instance remains constant across app lifecycle
+   - Test: State identity test over 1000 mutations shows same instance
+
 13. **Capability Lifetime**: Transient - recreated when permissions or availability changes
+   - Acceptance: Permission change triggers capability recreation within 50ms
+   - Test: Capability lifecycle test validates recreation on permission events
 
 #### State Management Constraints (Rules 14-19)
 
 14. **State Mutation**: State mutations must be atomic and produce new immutable instances
+   - Acceptance: Concurrent mutations produce consistent final state
+   - Test: 1000 concurrent state mutations show no data corruption
+   - Refactoring: Consider copy-on-write optimization for large states
+
 15. **Error Propagation**: Errors must propagate upward through component hierarchy without skipping levels
+   - Acceptance: Error at capability level reaches context within 10ms
+   - Test: Error injection at each level validates propagation path
+
 16. **Capability Initialization**: Capability initialization must respect dependency order in the DAG
+   - Acceptance: Dependent capabilities initialize after dependencies
+   - Test: 10-node capability DAG initializes in topological order
+
 17. **State Composition**: States must contain only value types (structs, enums, primitive types)
+   - Acceptance: Compiler rejects reference types in state definitions
+   - Test: State definition with class property fails compilation
+
 18. **Action Definition**: Actions must be value types with clear command/query separation
+   - Acceptance: Actions are immutable and side-effect free
+   - Test: Action mutation attempts fail at compile time
+
 19. **Error Boundaries**: Contexts act as error boundaries and must handle or explicitly propagate all Client errors
+   - Acceptance: Unhandled client errors caught by context within 5ms
+   - Test: Error boundary test validates 100% error capture rate
 
 #### Constraint Dependencies
 
@@ -128,7 +185,59 @@ The framework defines four primary protocols with error handling and state obser
 - `recoveryStrategy: RecoveryStrategy` - Default recovery strategy (retry/fallback/propagate/ignore)
 - `requiresUserConsent: Bool` - Whether capability needs user permission
 
+**Test Boundaries**: Mock capabilities must simulate all availability states
+- Acceptance: Capability mock can transition through all states in < 10ms
+- Refactoring opportunity: Extract common capability behaviors into base protocol
+
 **Thread Safety**: Must be @MainActor, actor-isolated, or use explicit synchronization
+
+**Versioning**: Protocol version checked at initialization via `capabilityVersion: String`
+
+#### Client Protocol
+
+**Purpose**: Actor-based business logic container with thread-safe state management.
+
+**Required Members**:
+- `stateStream: AsyncStream<State>` - State updates with 10-event buffer and coalescing
+- `processAction(_ action: Action) async throws` - Action processing (must complete in < 8ms)
+- `initialState: State` - Initial state value
+- `clientIdentifier: String` - Unique identifier for dependency injection
+
+**Required Associated Types**:
+- `State: Sendable` - Must contain only value types (structs/enums/primitives)
+- `Action: Sendable` - Value type with command/query separation
+
+**AsyncStream Configuration**:
+- Buffer size: 10 pending states (overflow triggers coalescing)
+- Critical states: Marked with `priority: .critical` to prevent dropping
+- Backpressure: Keep only latest state on overflow
+
+**Test Boundaries**: State streams must be observable in tests
+- Acceptance: Test harness receives all state updates within 5ms
+- Refactoring opportunity: Consider protocol extensions for common patterns
+
+#### Context Protocol
+
+**Purpose**: MainActor-bound feature coordinator with error boundary capabilities.
+
+**Required Members**:
+- `observeClient() async` - Subscribe to client state stream with weak self reference
+- `handleUserAction(_ action: UserAction) async` - Process user interactions
+- `contextIdentifier: String` - Unique identifier for debugging
+
+**Required Lifecycle Methods**:
+- `onAppear()` - View appearance handling (must complete in < 10ms)
+- `onDisappear()` - Cleanup and task cancellation (must complete in < 10ms)
+
+**UserAction Requirement**: Must conform to a protocol with validation capabilities
+
+**Environment Support**: Must support SwiftUI @Environment injection for configuration
+
+**Test Boundaries**: Lifecycle methods must be independently testable
+- Acceptance: Mock context handles 1000 actions without memory leaks
+- Acceptance: Environment injection test validates configuration propagation through context hierarchy
+- Test boundary: Mock environment values must be injectable in test contexts
+- Refactoring opportunity: Extract observation logic into reusable component
 
 **Versioning**: Protocol version checked at initialization via `capabilityVersion: String`
 
@@ -195,6 +304,12 @@ The framework defines four primary protocols with error handling and state obser
 - Service availability: network, bluetooth, authentication, storage
 - Thermal events: CPU throttling, background restrictions
 
+**ViewType Requirement**: Must be a concrete type identifier, not a generic View protocol
+
+**Test Boundaries**: Dependency injection must be overridable for testing
+- Acceptance: Test orchestrator creates 50 contexts in < 500ms
+- Refactoring opportunity: Use builder pattern for complex context creation
+
 #### Error Protocol Integration
 
 All protocols incorporate `AxiomError` protocol with recovery strategies:
@@ -256,6 +371,30 @@ All protocols incorporate `AxiomError` protocol with recovery strategies:
 - Critical system failure → Emergency mode with user consent
 - All failures → Diagnostic data collection
 
+### Error Message Standardization
+
+**Error Message Requirements**:
+- **Error Code**: All framework errors must include unique error code for programmatic handling
+- **Localized Description**: Human-readable error message appropriate for user display
+- **Recovery Suggestion**: Actionable guidance for resolving or mitigating the error
+- **Debug Information**: Technical details for developers (debug builds only)
+
+**Error Message Format**:
+- Code: Framework-specific error codes (e.g., AXIOM_CLIENT_001, AXIOM_CONTEXT_002)
+- Description: Clear, concise explanation of what went wrong
+- Recovery: Specific steps user or developer can take
+- Context: Relevant state information for debugging
+
+**Error Classification**:
+- **Critical Errors**: Prevent core functionality, require immediate attention
+- **Non-Critical Errors**: Allow degraded operation, can be handled gracefully
+- **Warning Conditions**: Potential issues that don't stop execution
+
+**Acceptance Criteria**:
+- Error message audit shows 100% compliance with format requirements
+- All error types include recovery suggestions
+- Critical vs non-critical error classification covers all framework error types
+
 ### Component Initialization Order
 
 **Bootstrap Sequence**:
@@ -287,6 +426,27 @@ All protocols incorporate `AxiomError` protocol with recovery strategies:
 11. **Capability Thread Safety**: Capabilities must either be @MainActor, actor-isolated, or use explicit synchronization
 12. **Component Destruction Order**: Component destruction must follow reverse dependency order: Views → Contexts → Clients → Capabilities
 13. **Protocol Versioning**: All protocols must expose version string for compatibility checking
+14. **Package Distribution**: Swift Package Manager compatible, minimum iOS 15.0, tvOS 15.0, watchOS 8.0, macOS 12.0
+    - Acceptance: Package.swift validates platform requirements and builds successfully
+
+### Performance Summary
+
+| Component | Operation | Target | Measurement | Acceptance Test |
+|-----------|-----------|--------|-------------|-----------------|
+| **Capability** | Initialization (first) | < 10ms | Individual capability | 100 capability checks p99 < 1ms cached |
+| **Capability** | Initialization (cached) | < 1ms | Individual capability | Performance test with 100 checks |
+| **Capability** | Invalidation | < 5ms | Resource cleanup | 50 capabilities complete in < 250ms |
+| **Capability** | Recovery Strategy | < 5ms | Strategy determination | 1000 errors average < 3ms |
+| **Client** | State Mutation | < 8ms | Action processing | 10,000 actions p95 < 8ms |
+| **Client** | State Publishing | < 1ms | AsyncStream dispatch | State propagation test < 1ms |
+| **Client** | Memory Overhead | < 512 bytes | Actor overhead | Memory profiler validation |
+| **Context** | Creation | < 50ms | Initialization | With dependencies p99 < 50ms |
+| **Context** | State Observation | < 8ms | Client to Context | End-to-end test < 8ms |
+| **Context** | Memory Overhead | < 1KB | Framework allocations | Instruments validation |
+| **Context** | Lifecycle Methods | < 10ms | onAppear/onDisappear | All handlers < 10ms |
+| **View** | Rendering | < 16ms | State to UI update | 60fps maintenance test |
+| **View** | Navigation | < 300ms | View transitions | All transitions < 300ms |
+| **View** | Memory | < 256KB | Body computation | Stack profiler validation |
 
 ### State Observation Mechanism
 
@@ -408,11 +568,35 @@ Capabilities support degraded operation modes:
 - Capability checks: cached access performance (<1ms)
 - Error recovery: strategy determination time (<5ms)
 
+### Test Strategy
+
+The framework testing approach follows the test pyramid with emphasis on fast, isolated tests:
+
+**Unit Test Categories**:
+- Component isolation tests (milliseconds)
+- Protocol conformance tests
+- Thread safety validation
+- Performance characteristic tests
+
+**Integration Test Categories**:
+- Component interaction flows (seconds)
+- Error propagation paths
+- State synchronization scenarios
+- Capability lifecycle integration
+
+**End-to-End Test Categories**:
+- Complete user workflows (minutes)
+- Permission change handling
+- App lifecycle scenarios
+- Performance under load
+
 ### Non-Functional Requirements
 
 #### Debugging Support
 - Framework must provide debug descriptions for all components showing dependency graphs
+  - Acceptance: Debug description includes full dependency tree
 - Components must expose runtime inspection APIs for development builds
+  - Acceptance: Inspection API reveals internal state without side effects
 - Debug builds include performance profiling with automatic violation detection
 
 #### Observability Requirements
@@ -683,16 +867,37 @@ Framework is currently in MVP stage - breaking changes are acceptable until vers
 | Rule 18 (Action Value Types) | - | - | Compile-time |
 | Rule 19 (Error Boundaries) | Rules 2, 15 | - | Compile-time |
 
-### Appendix B: Implementation Checklist
+### Appendix B: TDD Implementation Checklist
 
-**Core Components**:
+**Core Components** (Red-Green-Refactor cycles):
 - [ ] AxiomError protocol with recovery strategies
+  - [ ] Write failing test for error recovery behavior
+  - [ ] Implement minimal error handling to pass test
+  - [ ] Refactor to extract common recovery patterns
 - [ ] Capability protocol with degradation levels
+  - [ ] Write test for capability degradation transitions
+  - [ ] Implement degradation level support
+  - [ ] Refactor to eliminate duplication across capabilities
 - [ ] Client protocol with state observation and backpressure
+  - [ ] Write test for state stream backpressure handling
+  - [ ] Implement AsyncStream with buffering
+  - [ ] Refactor to optimize memory usage
 - [ ] Context protocol with error boundary behavior
+  - [ ] Write test for error boundary catching
+  - [ ] Implement error handling in context
+  - [ ] Refactor to centralize error handling logic
 - [ ] Orchestrator protocol with capability monitoring
+  - [ ] Write test for capability lifecycle monitoring
+  - [ ] Implement monitoring system
+  - [ ] Refactor to use observer pattern
 - [ ] CapabilityChange enum for lifecycle events
+  - [ ] Write test for all change event types
+  - [ ] Implement enum with associated values
+  - [ ] Refactor if enum becomes too large
 - [ ] CapabilityMonitor for permission/service tracking
+  - [ ] Write test for permission change detection
+  - [ ] Implement system notification observers
+  - [ ] Refactor to separate concerns by capability type
 
 **Infrastructure Components**:
 - [ ] Component initialization ordering system
@@ -749,12 +954,87 @@ Add these constraints after MVP validation:
 4. **Phase 4 (Week 6)**: Add performance monitoring and optimization
 5. **Phase 5 (Weeks 7-8)**: Complete testing infrastructure
 
-### Appendix D: Version History
+### Appendix D: Refactoring Opportunities
 
+**Protocol Segregation**:
+- Large protocols can be split into focused concerns
+- Common patterns extracted into protocol extensions
+- Default implementations for standard behaviors
+
+**State Management Optimization**:
+- Copy-on-write for large state objects
+- State diffing to minimize update overhead
+- Compression for state snapshots
+
+**Performance Improvements**:
+- Lazy initialization for expensive components
+- Caching strategies for capability checks
+- Batch processing for state updates
+
+**Code Organization**:
+- Extract common error handling patterns
+- Centralize validation logic
+- Modularize capability implementations
+
+### Appendix E: Version History
+
+- **v1.7** (2025-01-15): Stabilization improvements: system boundary clarification, error message standardization, performance consolidation, SwiftUI Environment support
 - **v1.6** (2025-01-14): Major reorganization - elevated Performance Requirements, added Platform Support and Configuration Management sections, enhanced protocol specifications, clarified technical gaps
+- **v1.6** (2025-01-13): Added TDD acceptance criteria, test boundaries, refactoring opportunities
 - **v1.5** (2025-01-13): Reorganized content, added complete dependency matrix, enhanced error recovery specs
 - **v1.4** (2025-01-09): Added Rules 17-19, non-functional requirements, constraint enforcement mechanisms
 - **v1.3** (2025-01-08): Added Rules 14-16, enhanced protocol specs, performance methodology
 - **v1.2** (2025-01-07): Removed code examples, improved clarity and readability
 - **v1.1** (2025-01-07): Added error handling, performance targets, state observation, testing patterns
 - **v1.0** (2025-01-06): Initial RFC with six components, thirteen constraints, actor model
+
+### Appendix F: TDD Enhancement Summary
+
+This revision enhances RFC-001 with comprehensive TDD support:
+
+**Testable Requirements**:
+- All 19 constraints now include acceptance criteria
+- Each requirement specifies measurable test outcomes
+- Performance targets include specific test scenarios
+
+**Test Boundaries**:
+- Protocol definitions include test boundary specifications
+- Mock requirements clearly defined for each component
+- Integration points identified for testing
+
+**Implementation Approach**:
+- TDD checklist follows Red-Green-Refactor cycles
+- Each component implementation starts with failing tests
+- Refactoring opportunities identified throughout
+
+**Quality Metrics**:
+- Acceptance criteria use quantifiable measures
+- Performance tests specify percentile requirements
+- Memory and timing constraints are testable
+
+This TDD-oriented approach ensures the framework can be built incrementally with confidence, maintaining quality through comprehensive test coverage at every stage.
+
+### Appendix G: Stabilization Summary
+
+Version 1.7 adds critical stabilization improvements for implementation readiness:
+
+**System Boundary Clarification**:
+- Clear definition of "System" as external dependencies outside framework control
+- Dependency analyzer requirements for import classification
+
+**Error Message Standardization**:
+- Standardized error format with codes, descriptions, and recovery suggestions
+- Clear classification of critical vs non-critical errors
+- Comprehensive error handling requirements
+
+**Performance Consolidation**:
+- Unified Performance Specification section with summary table
+- Consistent measurement methodology across all components
+- Clear acceptance criteria for all performance targets
+
+**SwiftUI Environment Integration**:
+- Context protocol support for @Environment injection
+- Configuration propagation through context hierarchy
+- Test boundaries for environment value injection
+
+These stabilization improvements ensure consistent implementation patterns and reduce integration complexity during framework development.
