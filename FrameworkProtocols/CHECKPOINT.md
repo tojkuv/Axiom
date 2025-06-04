@@ -1,32 +1,32 @@
 # @CHECKPOINT.md - Framework Development Checkpoint System
 
-## ⚡ Framework Worktree Checkpoint Management
+## ⚡ Worktree-Based Checkpoint Management
 
-This command provides deterministic checkpoint management for framework development workflow, integrating framework workspace changes into main branch.
+This command provides deterministic checkpoint management for worktree-based development workflows, integrating framework and application development changes into main branch.
 
 ### 🎯 **Usage Modes**
-- **`@CHECKPOINT`** → Commit and integrate framework worktree changes into main branch
-- **`@CHECKPOINT status`** → Show framework worktree status and pending changes
-- **`@CHECKPOINT push`** → Push integrated changes to remote repository
+- **`@CHECKPOINT`** → Commit and integrate all worktree changes into main branch
+- **`@CHECKPOINT framework`** → Commit and integrate only framework workspace changes
+- **`@CHECKPOINT application`** → Commit and integrate only application workspace changes
+- **`@CHECKPOINT status`** → Show worktree status and pending changes
 
-### 🧠 **Framework Integration Focus**
-**Framework Development Context**: Integrates framework-workspace/ changes into main branch
-**Main Branch Coordination**: Central integration point for framework development
-**Branch Synchronization**: Ensures clean integration from synchronized framework branch
+### 🧠 **Worktree Integration Focus**
+**Framework Development Context**: Integrates framework-workspace/ changes with parallel application development
+**Application Integration**: Coordinates application-workspace/ changes with framework dependencies
+**Main Branch Coordination**: Central integration point for all development workstreams
 
-### 🔄 **Framework Worktree Git Workflow**
+### 🔄 **Worktree-Based Git Workflow**
 All development commands follow this simplified workflow:
-1. **Development**: Work occurs in framework-workspace/ on synchronized framework branch
-2. **Commit**: Commit changes within framework worktree
-3. **Integration**: Merge framework branch into main branch
+1. **Development**: Work occurs in dedicated worktrees (framework-workspace/, application-workspace/)
+2. **Commit**: Commit changes within each worktree on respective branches
+3. **Integration**: Merge development branches into main branch
 4. **Deployment**: Push integrated main branch to remote repository
-5. **Synchronization**: Keep framework branch updated with main via @WORKSPACE
+5. **Cleanup**: Maintain clean development state across worktrees
 
 ### 🛡️ Enhanced Safety Features
-- **Worktree Validation**: Ensures framework worktree exists before attempting operations
-- **Uncommitted Change Detection**: Only commits when there are actual changes in framework workspace
+- **Worktree Validation**: Ensures worktrees exist before attempting operations
+- **Uncommitted Change Detection**: Only commits when there are actual changes in each workspace
 - **Merge Conflict Detection**: Stops automation and consults human if conflicts occur
-- **Branch Synchronization**: Validates framework branch is synchronized with main
 - **Integration Testing**: Validates integration before pushing to remote
 
 ## 🤖 Execution
@@ -48,14 +48,16 @@ echo "🌿 Current branch: $(git branch --show-current)"
 
 # 1. Validate worktree existence
 FRAMEWORK_WORKSPACE="framework-workspace"
+APPLICATION_WORKSPACE="application-workspace"
 
 if [ ! -d "$FRAMEWORK_WORKSPACE" ]; then
     echo "⚠️ Framework workspace not found: $FRAMEWORK_WORKSPACE"
-    echo "💡 Run '@WORKSPACE setup' to initialize framework worktree"
-    # Create fallback for main repository changes
-    WORKSPACE_EXISTS=false
-else
-    WORKSPACE_EXISTS=true
+    echo "💡 Run '@WORKSPACE setup' to initialize worktrees"
+fi
+
+if [ ! -d "$APPLICATION_WORKSPACE" ]; then
+    echo "⚠️ Application workspace not found: $APPLICATION_WORKSPACE"
+    echo "💡 Run '@WORKSPACE setup' to initialize worktrees"
 fi
 
 # 2. Commit framework workspace changes
@@ -84,8 +86,34 @@ EOF
     cd ..
 fi
 
-# 3. Fallback: Commit main repository changes if framework worktree doesn't exist
-if [ "$WORKSPACE_EXISTS" = false ]; then
+# 3. Commit application workspace changes
+if [ -d "$APPLICATION_WORKSPACE" ]; then
+    echo "💾 Committing application workspace changes..."
+    cd $APPLICATION_WORKSPACE
+    
+    if [ -n "$(git status --porcelain)" ]; then
+        git add .
+        CURRENT_DATE=$(date '+%Y-%m-%d %H:%M')
+        git commit -m "$(cat <<EOF
+Application development checkpoint: $CURRENT_DATE
+
+Application workspace changes committed via @CHECKPOINT protocol
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)" || echo "No application changes to commit"
+        echo "✅ Application changes committed: $CURRENT_DATE"
+    else
+        echo "ℹ️ No application changes to commit"
+    fi
+    
+    cd ..
+fi
+
+# 3.5. Fallback: Commit main repository changes if worktrees don't exist
+if [ ! -d "$FRAMEWORK_WORKSPACE" ] && [ ! -d "$APPLICATION_WORKSPACE" ]; then
     echo "💾 No worktrees found - committing main repository changes..."
     
     if [ -n "$(git status --porcelain)" ]; then
@@ -117,10 +145,9 @@ git checkout main
 git pull origin main || echo "Could not pull from remote"
 
 # 5. Merge framework development
-if [ "$WORKSPACE_EXISTS" = true ]; then
+if [ -d "$FRAMEWORK_WORKSPACE" ]; then
     echo "🔗 Integrating framework development..."
-    # Check if there are changes to merge
-    if ! git diff --quiet main framework; then
+    if git merge-tree $(git merge-base main framework) main framework | grep -q "^"; then
         echo "📝 Framework changes detected - merging..."
         MERGE_DATE=$(date '+%Y-%m-%d %H:%M')
         git merge framework --no-ff -m "$(cat <<EOF
@@ -142,6 +169,32 @@ EOF
         echo "ℹ️ No new framework changes to merge"
     fi
 fi
+
+# 6. Merge application development
+if [ -d "$APPLICATION_WORKSPACE" ]; then
+    echo "🔗 Integrating application development..."
+    if git merge-tree $(git merge-base main application) main application | grep -q "^"; then
+        echo "📝 Application changes detected - merging..."
+        MERGE_DATE=$(date '+%Y-%m-%d %H:%M')
+        git merge application --no-ff -m "$(cat <<EOF
+Integrate application development: $MERGE_DATE
+
+Application workspace integration via @CHECKPOINT protocol
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)" || {
+            echo "❌ Application merge conflict detected"
+            echo "🔧 Manual resolution required"
+            exit 1
+        }
+        echo "✅ Application development integrated"
+    else
+        echo "ℹ️ No new application changes to merge"
+    fi
+fi
 ```
 
 3. **Deploy and Maintain Clean State**
@@ -154,45 +207,43 @@ git push origin main || {
     echo "✅ Local integration complete"
 }
 
-# 7. Show integration summary
+# 8. Show integration summary
 echo ""
 echo "📊 Checkpoint Summary:"
-echo "✅ Framework workspace: $([ "$WORKSPACE_EXISTS" = true ] && echo "committed and integrated" || echo "main repository committed")"
+echo "✅ Framework workspace: $([ -d "$FRAMEWORK_WORKSPACE" ] && echo "committed" || echo "not found")"
+echo "✅ Application workspace: $([ -d "$APPLICATION_WORKSPACE" ] && echo "committed" || echo "not found")"
 echo "✅ Main branch: integrated and deployed"
 echo "📍 Current branch: $(git branch --show-current)"
-echo "🔄 Framework branch status: $([ "$WORKSPACE_EXISTS" = true ] && echo "merged into main" || echo "no worktree")"
 echo ""
 echo "🏁 Framework development checkpoint complete"
-echo "💡 Continue development in framework-workspace/"
+echo "💡 Continue development in respective workspaces"
 ```
 
 ## 🔧 Workflow Integration
 
-### **Framework Development Cycle**
-1. **Development Phase**: Work in `framework-workspace/` on synchronized framework branch
-2. **Checkpoint Phase**: Run `@CHECKPOINT` to commit and integrate framework changes
+### **Worktree Development Cycle**
+1. **Development Phase**: Work in `framework-workspace/` and `application-workspace/` simultaneously
+2. **Checkpoint Phase**: Run `@CHECKPOINT` to commit and integrate all changes
 3. **Deployment Phase**: Integrated changes pushed to remote main branch
-4. **Synchronization Phase**: Use `@WORKSPACE reset` to sync framework branch with main
+4. **Continuation Phase**: Resume development in workspaces with clean integration state
 
 ### **Integration Strategy**
-- **Isolated Development**: Framework development in dedicated worktree
-- **Clean Commits**: Framework changes committed before integration
+- **Parallel Development**: Framework and application development occurs simultaneously
+- **Coordinated Commits**: Both workspaces committed before integration
 - **Conflict Resolution**: Manual intervention required for merge conflicts
-- **Clean History**: No-fast-forward merges maintain framework branch history
-- **Main Synchronization**: Framework branch kept current via @WORKSPACE
+- **Clean History**: No-fast-forward merges maintain development branch history
 
 ### **Safety and Reliability**
-- **Worktree Validation**: Ensures framework workspace exists
+- **Worktree Validation**: Ensures development environment integrity
 - **Change Detection**: Only commits when actual changes exist
 - **Merge Safety**: Conflict detection prevents broken integrations
 - **Remote Coordination**: Handles remote push failures gracefully
-- **Fallback Support**: Commits main repository changes when no worktree exists
 
 ---
 
-**CHECKPOINT COMMAND STATUS**: Framework worktree checkpoint system for development integration
-**CORE FOCUS**: Framework development workflow with main branch integration
-**WORKTREE INTEGRATION**: Commits and merges framework development into main branch
-**DEVELOPMENT CONTINUITY**: Maintains clean development state with synchronized branches
+**CHECKPOINT COMMAND STATUS**: Worktree-based checkpoint system for parallel framework and application development
+**CORE FOCUS**: Integrated development workflow with simultaneous framework and application changes
+**WORKTREE INTEGRATION**: Commits and merges both development streams into main branch
+**DEVELOPMENT CONTINUITY**: Maintains clean development state across parallel workspaces
 
-**Use FrameworkProtocols/@CHECKPOINT for framework development integration and deployment.**
+**Use FrameworkProtocols/@CHECKPOINT for worktree-based development integration and deployment.**
