@@ -27,8 +27,8 @@ Sync branches → Commit worktrees → Merge to main → Push to remote
 6. Push integrated changes to remote
 
 ### Workspace Isolation
-- **Framework workspace**: Only sees `FrameworkProtocols/` and `AxiomFramework/`
-- **Application workspace**: Only sees `ApplicationProtocols/` and `AxiomExampleApp/`
+- **Framework workspace**: Only sees `AxiomFramework/` (with symlink to `../FrameworkProtocols/`)
+- **Application workspace**: Only sees `AxiomExampleApp/` (with symlink to `../ApplicationProtocols/`)
 - **Sparse-checkout**: Prevents cross-boundary file access
 
 ## Technical Details
@@ -167,13 +167,13 @@ git push origin main || echo "Local integration complete - remote push failed"
 ## Workspace Configuration
 
 **Sparse-Checkout Setup**:
-- Framework workspace: `/FrameworkProtocols/`, `/AxiomFramework/`, `/.gitignore`
-- Application workspace: `/ApplicationProtocols/`, `/AxiomExampleApp/`, `/.gitignore`
-- Protocol files at root: Prevents duplication and conflicts
+- Framework workspace: `/AxiomFramework/`, `/.gitignore` (symlink to `../FrameworkProtocols/`)
+- Application workspace: `/AxiomExampleApp/`, `/.gitignore` (symlink to `../ApplicationProtocols/`)
+- Protocol files at root only: Prevents duplication and conflicts
 
 **Benefits**:
-1. **Isolation**: Each workspace only sees relevant files
-2. **No Conflicts**: Protocol files exist only at repository root
+1. **Isolation**: Each workspace only sees relevant files via symlinks
+2. **No Duplication**: Protocol files exist only at repository root
 3. **Clean Boundaries**: Cannot accidentally edit cross-workspace files
 4. **Focused Development**: Reduced complexity and faster operations
 
