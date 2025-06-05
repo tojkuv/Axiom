@@ -21,6 +21,7 @@ Create worktree → Configure sparse-checkout → Create protocol symlink → Tr
 
 **Philosophy**: Isolated development environments for each component.
 **Constraint**: Each workspace contains only its specific directory and protocol symlink.
+**Safety**: Automatically navigates to Axiom directory regardless of invocation location.
 
 ## Workspace Structure
 
@@ -90,8 +91,28 @@ axiom-apple/                        # Top-level directory
 ## Execution Process
 
 ```bash
+# Determine correct Axiom directory
+AXIOM_DIR="/Users/tojkuv/Documents/GitHub/axiom-apple/Axiom"
+
+# Validate Axiom directory exists
+if [[ ! -d "$AXIOM_DIR" ]]; then
+    echo "ERROR: Axiom directory not found at $AXIOM_DIR"
+    echo "Cannot perform workspace operations"
+    exit 1
+fi
+
+# Change to Axiom directory for all operations
+cd "$AXIOM_DIR" || exit 1
+
 # Validate we're in Axiom git root
 [[ -d .git ]] || { echo "Not in Axiom git root"; exit 1; }
+
+# Safety check: Verify expected directory structure
+if [[ ! -d "AxiomFramework" ]] || [[ ! -d "AxiomExampleApp" ]] || [[ ! -d "Protocols" ]]; then
+    echo "ERROR: Expected Axiom directory structure not found"
+    echo "Missing AxiomFramework, AxiomExampleApp, or Protocols directories"
+    exit 1
+fi
 
 # Parse arguments
 WORKSPACE_TYPE="$1"
@@ -206,7 +227,6 @@ fi
 
 **Framework Setup**:
 ```
-cd Axiom
 @WORKSPACE framework setup
 # Creating framework worktree...
 # Configuring sparse-checkout...
