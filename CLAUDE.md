@@ -1,3 +1,0 @@
-- you are the only agent that is working on the documentation, implementation, and maintenance of the framework . no human will ever look at the framework code nor your documentation . this is only for you . the human only looks at the @README.md and @STATUS.md
-- ALWAYS USE ULTRATHINK AGENT MODE
-- use concise, evidence-based, scientific language
