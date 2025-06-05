@@ -22,19 +22,7 @@ Draft/ → Proposed/ → Active/ → Deprecated/ → Archive/
 **Constraint**: Minimum 3-5 stable requirements before propose.
 **Requirement**: Every command validates against current RFC_FORMAT.md.
 
-## CRITICAL SAFETY RULES
-
-1. **NEVER** create or modify RFCs in `/Protocols/FrameworkProtocols/` directory
-2. **ALWAYS** operate on RFCs in framework workspace
-3. **VERIFY** target path is `$FRAMEWORK_WORKSPACE/AxiomFramework/RFCs/`
-4. **ABORT** if attempting to modify protocol directory files
-
 ## Dependencies
-
-**Protocol Dependencies**:
-- Requires framework workspace via `@WORKSPACE framework setup`
-- Changes integrated via `@CHECKPOINT framework` or `@CHECKPOINT`
-- All protocols can be invoked from any directory
 
 **Required Before Any Command**:
 - Current RFC_FORMAT.md must be loaded and validated
@@ -145,19 +133,6 @@ Draft/ → Proposed/ → Active/ → Deprecated/ → Archive/
 # Shows: [R1] Add Performance Constraints section
 @PLAN accept RFC-001 R1
 ```
-
-## Workspace Configuration
-
-**IMPORTANT**: All @PLAN commands must operate within the framework workspace:
-```bash
-# Framework workspace location (DO NOT MODIFY)
-FRAMEWORK_WORKSPACE="/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace"
-
-# All RFC operations occur here:
-RFC_BASE="$FRAMEWORK_WORKSPACE/AxiomFramework/RFCs"
-```
-
-**Safety**: Commands must NEVER modify files in the protocol directory itself.
 
 Format: [RFC_FORMAT.md](./RFC_FORMAT.md) - REQUIRED REFERENCE
 
