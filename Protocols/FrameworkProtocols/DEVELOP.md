@@ -74,12 +74,10 @@ if [ -f "Package.swift" ] && [ -d "RFCs" ]; then
     # Already in framework workspace AxiomFramework directory
     echo "In framework workspace"
 else
-    # Search for framework workspace relative to current location
+    # Search for framework workspace (current dir or 1 level up only)
     SEARCH_PATHS=(
         "."
         ".."
-        "../.."
-        "../../.."
     )
     
     FOUND_WORKSPACE=""
