@@ -18,6 +18,19 @@ Red → Green → Refactor → Checklist Update
 
 ## Workflow
 
+### Workspace Usage
+**Framework Workspace**:
+```bash
+cd framework-workspace/AxiomFramework
+@DEVELOP build RFC-001  # Access via FrameworkProtocols symlink
+```
+
+**Main Repository**:
+```bash
+cd Axiom
+@DEVELOP build RFC-001  # Automatically navigates to AxiomFramework/
+```
+
 ### TDD Implementation
 1. Review RFC's TDD checklist current state
 2. Extract requirement (4 parts: requirement, acceptance, boundary, refactor)
@@ -36,9 +49,14 @@ Red → Green → Refactor → Checklist Update
 ## Technical Details
 
 **Input Requirements**:
-- RFC in `Proposed/` directory
+- RFC in `Proposed/` directory (RFCs/Proposed/ in framework workspace)
 - Valid RFC_FORMAT.md structure
 - TDD Implementation Checklist present
+
+**Execution Context**:
+- From framework workspace: `AxiomFramework/` directory
+- From main repository: Automatically enters `AxiomFramework/`
+- Protocol symlink: Access via `FrameworkProtocols/DEVELOP.md`
 
 **Test Requirements**:
 - MANDATORY: All tests pass before proceeding
@@ -53,16 +71,26 @@ Red → Green → Refactor → Checklist Update
 ## Execution Process
 
 ```bash
+# Determine if we're in framework workspace or main repository
+if [ -f "Package.swift" ] && [ -d "RFCs" ]; then
+    # We're in framework workspace already
+    RFC_PATH="RFCs/Proposed/${RFC_NUMBER}*.md"
+elif [ -d "AxiomFramework/RFCs" ]; then
+    # We're in main repository
+    RFC_PATH="AxiomFramework/RFCs/Proposed/${RFC_NUMBER}*.md"
+    cd AxiomFramework || exit 1
+else
+    echo "ERROR: Not in valid framework directory"
+    echo "Run from framework workspace or main repository"
+    exit 1
+fi
+
 # Validate RFC exists in Proposed/
-RFC_PATH="AxiomFramework/RFCs/Proposed/${RFC_NUMBER}*.md"
 if ! ls $RFC_PATH 1> /dev/null 2>&1; then
     echo "RFC not found in Proposed/"
     echo "Use '@PLAN propose' first"
     exit 1
 fi
-
-# Enter framework workspace
-cd framework-workspace/AxiomFramework || exit 1
 
 # MANDATORY: Run test suite
 if ! swift test; then
