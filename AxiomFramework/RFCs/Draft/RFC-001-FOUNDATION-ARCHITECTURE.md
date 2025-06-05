@@ -15,7 +15,11 @@ This RFC establishes the foundation architecture for the Axiom framework, defini
 
 The foundation architecture enforces clear boundaries between components through compile-time and runtime validation, preventing common iOS development issues such as race conditions, circular dependencies, and memory leaks. Each requirement includes specific acceptance criteria enabling test-driven development cycles.
 
+By establishing these immutable constraints and clear component relationships, Axiom enables teams to build maintainable iOS applications with confidence. The framework's strict architectural rules eliminate entire categories of bugs while its performance guarantees ensure smooth user experiences across all supported devices.
+
 ## Motivation
+
+### Problem Statement
 
 iOS development suffers from several recurring architectural problems:
 
@@ -25,7 +29,16 @@ iOS development suffers from several recurring architectural problems:
 4. **Testing Difficulties**: Tightly coupled components resist isolation for unit testing
 5. **State Inconsistency**: Multiple sources of truth lead to synchronization bugs
 
-Current iOS architectures (MVC, MVVM, VIPER) address some issues but lack strict constraints and comprehensive foundations. Axiom provides a complete architectural foundation with immutable rules, defined protocols, performance targets, and clear development roadmap from inception to release.
+### Current Limitations
+
+Current iOS architectures (MVC, MVVM, VIPER) address some issues but lack strict constraints and comprehensive foundations. They often allow architectural violations that lead to technical debt, provide insufficient guidance on concurrency patterns, and lack built-in testability guarantees.
+
+### Use Cases
+
+Axiom provides a complete architectural foundation with immutable rules, defined protocols, performance targets, and clear development roadmap from inception to release. Key use cases include:
+
+1. **Large Team Development**: Teams building complex iOS applications need consistent architectural patterns that prevent common mistakes and enable parallel development without conflicts
+2. **High-Performance Applications**: Apps requiring smooth 60fps UI updates with complex state management benefit from Axiom's performance guarantees and efficient state propagation
 
 ## Specification
 
@@ -270,10 +283,26 @@ Framework is currently in MVP stage - breaking changes are acceptable until vers
 
 ## Security Considerations
 
-1. **Actor Isolation**: Prevents concurrent access to mutable state
-2. **Capability Validation**: Runtime checks ensure system access is authorized
-3. **Type Safety**: Compile-time validation prevents many security issues
-4. **Memory Safety**: Clear ownership rules prevent use-after-free bugs
+### Threat Model
+
+1. **Concurrent Data Access**: Multiple threads attempting to modify shared state simultaneously
+2. **Unauthorized System Access**: Components attempting to use capabilities without proper permissions
+3. **Memory Corruption**: Use-after-free or buffer overflow vulnerabilities from improper memory management
+4. **Injection Attacks**: Malicious input exploiting weak type validation or improper data handling
+
+### Mitigations
+
+1. **Actor Isolation**: Prevents concurrent access to mutable state through Swift's actor model, ensuring all state mutations are serialized
+2. **Capability Validation**: Runtime checks ensure system access is authorized before any capability usage, with fail-safe defaults
+3. **Type Safety**: Compile-time validation prevents many security issues including type confusion and invalid state transitions
+4. **Memory Safety**: Clear ownership rules enforced by Swift's ARC prevent use-after-free bugs and memory leaks
+
+### Security Boundaries
+
+1. **Component Boundaries**: Each component type has defined security boundaries preventing unauthorized cross-component access
+2. **Actor Boundaries**: Actor isolation creates security boundaries preventing race conditions and data corruption
+3. **Capability Boundaries**: System capabilities are isolated behind protocols with explicit authorization requirements
+4. **Module Boundaries**: Swift Package Manager enforces module boundaries preventing unauthorized internal access
 
 ## Test Strategy
 
@@ -303,9 +332,14 @@ Framework is currently in MVP stage - breaking changes are acceptable until vers
 
 ## References
 
-- [Swift Evolution: Actor Model](https://github.com/apple/swift-evolution/blob/main/proposals/0306-actors.md)
-- [SwiftUI Documentation](https://developer.apple.com/documentation/swiftui)
-- [iOS App Architecture](https://developer.apple.com/documentation/uikit/app_and_environment)
+### Normative References
+
+- [Swift Evolution: Actor Model](https://github.com/apple/swift-evolution/blob/main/proposals/0306-actors.md) - Defines the actor concurrency model used for Client isolation
+- [SwiftUI Documentation](https://developer.apple.com/documentation/swiftui) - Specifies the UI framework requirements for Presentation components
+
+### Informative References
+
+- [iOS App Architecture](https://developer.apple.com/documentation/uikit/app_and_environment) - Provides context on iOS application lifecycle and architecture patterns
 
 ## TDD Implementation Checklist
 
