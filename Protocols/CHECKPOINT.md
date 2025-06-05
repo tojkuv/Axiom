@@ -1,6 +1,6 @@
 # @CHECKPOINT.md
 
-**Trigger**: `@CHECKPOINT [workspace]`
+**Trigger**: `@CHECKPOINT [command]`
 
 ## Commands
 
@@ -8,14 +8,14 @@
 - `framework` → Commit and integrate framework workspace only
 - `application` → Commit and integrate application workspace only
 - `protocols` → Commit and integrate protocols workspace only
-- `(no args)` → Commit and integrate all workspaces
+- `all` → Commit and integrate all workspaces
 
 ## Core Process
 
 Sync branches → Commit worktrees → Integration branch → Single commit to main → Push to remote
 
 **Philosophy**: Single clean commit to main with protocol file preservation and proper conflict resolution.
-**Constraint**: Located at repository root to prevent workspace duplication.
+**Constraint**: Uses external script to maintain simplicity within protocol.
 
 ## Workflow
 
@@ -36,6 +36,8 @@ Sync branches → Commit worktrees → Integration branch → Single commit to m
 - **Protocol Protection**: Protocol files preserved during integration
 
 ## Technical Details
+
+**Script Location**: `Protocols/checkpoint.sh`
 
 **Commit Message Format**:
 ```
@@ -63,235 +65,9 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ## Execution Process
 
 ```bash
-# Status command
-if [[ "$1" == "status" ]]; then
-    echo "=== Workspace Status ==="
-    
-    # Check framework workspace
-    if [ -d "../framework-workspace" ]; then
-        echo -e "\nFramework workspace:"
-        (cd ../framework-workspace && git status --short)
-    else
-        echo -e "\nFramework workspace: not found"
-    fi
-    
-    # Check application workspace
-    if [ -d "../application-workspace" ]; then
-        echo -e "\nApplication workspace:"
-        (cd ../application-workspace && git status --short)
-    else
-        echo -e "\nApplication workspace: not found"
-    fi
-    
-    # Check protocols workspace
-    if [ -d "../protocols-workspace" ]; then
-        echo -e "\nProtocols workspace:"
-        (cd ../protocols-workspace && git status --short)
-    else
-        echo -e "\nProtocols workspace: not found"
-    fi
-    
-    # Check main repository
-    echo -e "\nMain repository:"
-    git status --short
-    exit 0
-fi
-
-TIMESTAMP=$(date '+%Y-%m-%d %H:%M')
-
-# Handle workspace-specific commands
-if [[ "$1" == "framework" ]] || [[ "$1" == "application" ]] || [[ "$1" == "protocols" ]]; then
-    WORKSPACE_TYPE="$1"
-    WORKSPACE_DIR="../${WORKSPACE_TYPE}-workspace"
-    
-    if [ ! -d "$WORKSPACE_DIR" ]; then
-        echo "Error: $WORKSPACE_TYPE workspace not found at $WORKSPACE_DIR"
-        echo "Run '@WORKSPACE setup' in the appropriate protocol directory first"
-        exit 1
-    fi
-    
-    # Process only the specified workspace
-    cd "$WORKSPACE_DIR"
-    git fetch origin main
-    git merge origin/main -m "Sync with main: $TIMESTAMP" || {
-        echo "Auto-resolving conflicts in favor of $WORKSPACE_TYPE"
-        git checkout --theirs .
-        git add --sparse .
-        git commit -m "Sync with main: $TIMESTAMP - $WORKSPACE_TYPE preserved"
-    }
-    
-    if [ -n "$(git status --porcelain)" ]; then
-        git add --sparse .
-        git commit -m "$(echo $WORKSPACE_TYPE | sed 's/.*/\u&/') development checkpoint: $TIMESTAMP
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>"
-    fi
-    cd ../Axiom
-    
-    # Continue with integration for single workspace
-    INTEGRATE_FRAMEWORK=$([[ "$WORKSPACE_TYPE" == "framework" ]] && echo "true" || echo "false")
-    INTEGRATE_APPLICATION=$([[ "$WORKSPACE_TYPE" == "application" ]] && echo "true" || echo "false")
-    INTEGRATE_PROTOCOLS=$([[ "$WORKSPACE_TYPE" == "protocols" ]] && echo "true" || echo "false")
-else
-    # Process all workspaces
-    INTEGRATE_FRAMEWORK="true"
-    INTEGRATE_APPLICATION="true"
-    INTEGRATE_PROTOCOLS="true"
-fi
-
-# 1. Sync and commit framework workspace
-if [[ "$INTEGRATE_FRAMEWORK" == "true" ]] && [ -d "../framework-workspace" ]; then
-    cd ../framework-workspace
-    git fetch origin main
-    git merge origin/main -m "Sync with main: $TIMESTAMP" || {
-        echo "Auto-resolving conflicts in favor of framework"
-        git checkout --theirs .
-        git add --sparse .
-        git commit -m "Sync with main: $TIMESTAMP - framework preserved"
-    }
-    
-    if [ -n "$(git status --porcelain)" ]; then
-        git add --sparse .
-        git commit -m "Framework development checkpoint: $TIMESTAMP
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>"
-    fi
-    cd ../Axiom
-fi
-
-# 2. Sync and commit application workspace
-if [[ "$INTEGRATE_APPLICATION" == "true" ]] && [ -d "../application-workspace" ]; then
-    cd ../application-workspace
-    git fetch origin main
-    git merge origin/main -m "Sync with main: $TIMESTAMP" || {
-        echo "Auto-resolving conflicts in favor of application"
-        git checkout --theirs .
-        git add --sparse .
-        git commit -m "Sync with main: $TIMESTAMP - application preserved"
-    }
-    
-    if [ -n "$(git status --porcelain)" ]; then
-        git add --sparse .
-        git commit -m "Application development checkpoint: $TIMESTAMP
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>"
-    fi
-    cd ../Axiom
-fi
-
-# 3. Sync and commit protocols workspace
-if [[ "$INTEGRATE_PROTOCOLS" == "true" ]] && [ -d "../protocols-workspace" ]; then
-    cd ../protocols-workspace
-    git fetch origin main
-    git merge origin/main -m "Sync with main: $TIMESTAMP" || {
-        echo "Auto-resolving conflicts in favor of protocols"
-        git checkout --theirs .
-        git add --sparse .
-        git commit -m "Sync with main: $TIMESTAMP - protocols preserved"
-    }
-    
-    if [ -n "$(git status --porcelain)" ]; then
-        git add --sparse .
-        git commit -m "Protocols development checkpoint: $TIMESTAMP
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>"
-    fi
-    cd ../Axiom
-fi
-
-# 4. Create integration branch and merge workspaces
-git checkout main
-git pull origin main || true
-
-# Preserve protocol files before integration
-cp -r Protocols /tmp/protocols-backup 2>/dev/null || true
-
-# Create integration branch
-git checkout -b "integration-$TIMESTAMP" main
-
-# Merge workspaces into integration branch
-if [[ "$INTEGRATE_FRAMEWORK" == "true" ]] && [ -d "../framework-workspace" ]; then
-    git merge framework --no-ff --strategy=recursive -X ours \
-        -m "Integrate framework workspace: $TIMESTAMP" || {
-        echo "Resolving framework conflicts"
-        git add .
-        git commit -m "Integrate framework workspace: $TIMESTAMP"
-    }
-fi
-
-if [[ "$INTEGRATE_APPLICATION" == "true" ]] && [ -d "../application-workspace" ]; then
-    git merge application --no-ff --strategy=recursive -X ours \
-        -m "Integrate application workspace: $TIMESTAMP" || {
-        echo "Resolving application conflicts"
-        git add .
-        git commit -m "Integrate application workspace: $TIMESTAMP"
-    }
-fi
-
-if [[ "$INTEGRATE_PROTOCOLS" == "true" ]] && [ -d "../protocols-workspace" ]; then
-    git merge protocols --no-ff --strategy=recursive -X ours \
-        -m "Integrate protocols workspace: $TIMESTAMP" || {
-        echo "Resolving protocols conflicts"
-        git add .
-        git commit -m "Integrate protocols workspace: $TIMESTAMP"
-    }
-fi
-
-# Restore protocol files if they were affected
-if [ -d "/tmp/protocols-backup" ]; then
-    rm -rf Protocols
-    cp -r /tmp/protocols-backup Protocols
-    rm -rf /tmp/protocols-backup
-fi
-
-# Clean up any merge artifacts
-rm -rf Protocols~* 2>/dev/null || true
-
-# Commit protocol restoration if needed
-if [ -n "$(git status --porcelain)" ]; then
-    git add .
-    git commit -m "Preserve protocol files during integration"
-fi
-
-# 4. Squash merge to main and push
-git checkout main
-git merge --squash "integration-$TIMESTAMP"
-
-# Determine commit message based on what was integrated
-INTEGRATED_PARTS=()
-[[ "$INTEGRATE_FRAMEWORK" == "true" ]] && INTEGRATED_PARTS+=("framework")
-[[ "$INTEGRATE_APPLICATION" == "true" ]] && INTEGRATED_PARTS+=("application")
-[[ "$INTEGRATE_PROTOCOLS" == "true" ]] && INTEGRATED_PARTS+=("protocols")
-
-if [[ ${#INTEGRATED_PARTS[@]} -eq 3 ]]; then
-    INTEGRATION_MSG="Integrated framework, application, and protocols workspace changes"
-elif [[ ${#INTEGRATED_PARTS[@]} -eq 2 ]]; then
-    INTEGRATION_MSG="Integrated ${INTEGRATED_PARTS[0]} and ${INTEGRATED_PARTS[1]} workspace changes"
-elif [[ ${#INTEGRATED_PARTS[@]} -eq 1 ]]; then
-    INTEGRATION_MSG="Integrated ${INTEGRATED_PARTS[0]} workspace changes"
-fi
-
-git commit -m "Development checkpoint: $TIMESTAMP
-
-$INTEGRATION_MSG
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>"
-
-# Clean up integration branch
-git branch -D "integration-$TIMESTAMP"
-
-# Push single commit to remote
-git push origin main || echo "Local integration complete - remote push failed"
+# Execute checkpoint script with command
+PROTOCOL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+bash "$PROTOCOL_DIR/checkpoint.sh" "$1"
 ```
 
 ## Error Handling
@@ -321,7 +97,7 @@ git push origin main || echo "Local integration complete - remote push failed"
 
 **Full Integration**:
 ```
-@CHECKPOINT
+@CHECKPOINT all
 # Syncs all three workspaces
 # Creates integration branch
 # Preserves protocol files
