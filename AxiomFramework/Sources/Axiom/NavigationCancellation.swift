@@ -17,6 +17,8 @@ public struct CancellableNavigationState<RouteType: Equatable & Sendable>: Senda
 public actor CancellableNavigationService<RouteType: Equatable & Sendable> {
     private var _currentState = CancellableNavigationState<RouteType>()
     private var activeNavigationTask: Task<Void, Error>?
+    private var navigationGeneration = 0
+    private var isCancelled = false
     
     public init() {}
     
@@ -28,7 +30,10 @@ public actor CancellableNavigationService<RouteType: Equatable & Sendable> {
     public func navigate(to route: RouteType) async throws {
         // Cancel any active navigation
         activeNavigationTask?.cancel()
-        await Task.yield() // Allow cancellation to propagate
+        
+        // Increment generation to invalidate previous navigations
+        navigationGeneration += 1
+        let currentGeneration = navigationGeneration
         
         // Create new navigation task
         let navigationTask = Task { [weak self] in
@@ -36,6 +41,11 @@ public actor CancellableNavigationService<RouteType: Equatable & Sendable> {
             
             // Check cancellation at start
             try Task.checkCancellation()
+            
+            // Only update if this is still the current navigation
+            guard await self.navigationGeneration == currentGeneration else {
+                throw CancellationError()
+            }
             
             // Update state atomically
             await self.updateState { state in
@@ -64,53 +74,86 @@ public actor CancellableNavigationService<RouteType: Equatable & Sendable> {
     ) async throws {
         // Cancel any active navigation
         activeNavigationTask?.cancel()
-        await Task.yield() // Allow cancellation to propagate
+        isCancelled = true // Mark current navigation as cancelled
         
-        let navigationTask = Task { [weak self] in
-            guard let self = self else { return }
+        // Wait a bit for cancellation to propagate
+        await Task.yield()
+        
+        // Reset cancellation flag for new navigation
+        isCancelled = false
+        
+        // Increment generation to invalidate previous navigations
+        navigationGeneration += 1
+        let currentGeneration = navigationGeneration
+        
+        // Set pending route
+        updateState { state in
+            state.pendingRoute = route
+        }
+        
+        // Check if cancelled
+        guard !isCancelled else {
+            updateState { state in
+                state.pendingRoute = nil
+            }
+            throw NavigationCancellationError.navigationCancelled
+        }
+        
+        // Simulate navigation delay with cancellation checks
+        let delayTask = Task { [weak self] in
+            guard let self = self else { throw NavigationCancellationError.navigationCancelled }
             
-            // Set pending route
-            await self.updateState { state in
-                state.pendingRoute = route
+            // Check cancellation and generation before sleep
+            let cancelled = await self.isCancelled
+            let generation = await self.navigationGeneration
+            guard !cancelled && generation == currentGeneration else {
+                throw NavigationCancellationError.navigationCancelled
             }
             
-            // Check cancellation before delay
-            try Task.checkCancellation()
-            
-            // Simulate navigation delay
             try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
             
-            // Check cancellation after delay
-            try Task.checkCancellation()
+            // Check cancellation and generation after sleep
+            let cancelledAfter = await self.isCancelled
+            let generationAfter = await self.navigationGeneration
+            guard !cancelledAfter && generationAfter == currentGeneration else {
+                throw NavigationCancellationError.navigationCancelled
+            }
+        }
+        
+        // Store as active task
+        activeNavigationTask = delayTask
+        
+        do {
+            try await delayTask.value
             
-            // Update state only if not cancelled
-            await self.updateState { state in
+            // Final check before updating state
+            guard !isCancelled && navigationGeneration == currentGeneration else {
+                updateState { state in
+                    state.pendingRoute = nil
+                }
+                throw NavigationCancellationError.navigationCancelled
+            }
+            
+            // Update state
+            updateState { state in
                 state.currentRoute = route
                 state.pendingRoute = nil
             }
             
-            // Call completion handler only if not cancelled
-            if !Task.isCancelled {
-                onCompletion?(route)
-            }
-        }
-        
-        activeNavigationTask = navigationTask
-        
-        do {
-            try await navigationTask.value
-        } catch is CancellationError {
-            // Clear pending route on cancellation
-            await updateState { state in
-                state.pendingRoute = nil
-            }
-            throw NavigationCancellationError.navigationCancelled
+            // Call completion handler
+            onCompletion?(route)
+            
         } catch {
             // Clear pending route on any error
-            await updateState { state in
+            updateState { state in
                 state.pendingRoute = nil
             }
-            throw error
+            
+            if error is CancellationError || error is NavigationCancellationError {
+                throw NavigationCancellationError.navigationCancelled
+            } else {
+                throw error
+            }
         }
     }
     
@@ -121,12 +164,20 @@ public actor CancellableNavigationService<RouteType: Equatable & Sendable> {
     ) async throws {
         // Cancel any active navigation
         activeNavigationTask?.cancel()
-        await Task.yield() // Allow cancellation to propagate
+        
+        // Increment generation to invalidate previous navigations
+        navigationGeneration += 1
+        let currentGeneration = navigationGeneration
         
         let navigationTask = Task { [weak self] in
             guard let self = self else { return }
             
             try Task.checkCancellation()
+            
+            // Check generation before proceeding
+            guard await self.navigationGeneration == currentGeneration else {
+                throw CancellationError()
+            }
             
             // Track child tasks and cancellation handle
             var childTasks: [Task<Void, Error>] = []
@@ -151,6 +202,11 @@ public actor CancellableNavigationService<RouteType: Equatable & Sendable> {
             do {
                 for task in childTasks {
                     try await task.value
+                }
+                
+                // Check generation again before updating state
+                guard await self.navigationGeneration == currentGeneration else {
+                    throw CancellationError()
                 }
                 
                 // Update navigation state only if all tasks complete
@@ -181,6 +237,7 @@ public actor CancellableNavigationService<RouteType: Equatable & Sendable> {
 /// Task group for managing child task cancellation
 private actor TaskGroup {
     private var activeTasks = 0
+    private var continuation: CheckedContinuation<Void, Never>?
     
     func addTask() {
         activeTasks += 1
@@ -188,11 +245,20 @@ private actor TaskGroup {
     
     func removeTask() {
         activeTasks = max(0, activeTasks - 1)
+        if activeTasks == 0, let continuation = continuation {
+            self.continuation = nil
+            continuation.resume()
+        }
     }
     
     func waitForAll() async {
-        while activeTasks > 0 {
-            await Task.yield()
+        guard activeTasks > 0 else { return }
+        await withCheckedContinuation { continuation in
+            self.continuation = continuation
+            if activeTasks == 0 {
+                self.continuation = nil
+                continuation.resume()
+            }
         }
     }
 }
@@ -208,6 +274,7 @@ public actor TestNavigationCoordinator<RouteType: Equatable & Sendable> {
     private var _currentState = CancellableNavigationState<RouteType>()
     private var operations: [String: (CheckCancellation) async throws -> Void] = [:]
     private var activeNavigationTask: Task<Void, Error>?
+    private var navigationGeneration = 0
     
     public typealias CheckCancellation = () async -> Bool
     
@@ -226,10 +293,18 @@ public actor TestNavigationCoordinator<RouteType: Equatable & Sendable> {
     public func navigateWithOperations(to route: RouteType) async throws {
         // Cancel previous navigation
         activeNavigationTask?.cancel()
-        await Task.yield() // Allow cancellation to propagate
+        
+        // Increment generation to invalidate previous navigations
+        navigationGeneration += 1
+        let currentGeneration = navigationGeneration
         
         let navigationTask = Task { [weak self] in
             guard let self = self else { return }
+            
+            // Check generation before proceeding
+            guard await self.navigationGeneration == currentGeneration else {
+                throw CancellationError()
+            }
             
             // Create cancellation check
             let isCancelled: CheckCancellation = {
@@ -250,6 +325,11 @@ public actor TestNavigationCoordinator<RouteType: Equatable & Sendable> {
                 
                 // Wait for all operations with cancellation check
                 try await group.waitForAll()
+            }
+            
+            // Check generation again before updating state
+            guard await self.navigationGeneration == currentGeneration else {
+                throw CancellationError()
             }
             
             // Update state only if not cancelled
@@ -350,14 +430,17 @@ public class NavigationTransaction<RouteType: Equatable & Sendable>: @unchecked 
         self.transactionState = initialState
         self.service = service
         
-        // Monitor task cancellation
+        // Monitor task cancellation using withTaskCancellationHandler
         Task { [weak self] in
-            while await self?.stateManager.getState() == .active {
-                if Task.isCancelled {
-                    await self?.handleCancellation()
-                    break
+            await withTaskCancellationHandler {
+                // Wait for transaction to complete or be cancelled
+                while await self?.stateManager.getState() == .active {
+                    try? await Task.sleep(nanoseconds: 10_000_000) // 10ms check interval
                 }
-                await Task.yield()
+            } onCancel: {
+                Task { [weak self] in
+                    await self?.handleCancellation()
+                }
             }
         }
     }
