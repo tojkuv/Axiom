@@ -5,7 +5,7 @@
 ## Commands
 
 - `status` → Show RFC status across all directories
-- `create [title]` → New RFC in Draft/ (validates against RFC_FORMAT.md)
+- `create [title]` → New RFC in Draft/ with all sections/subsections from templates
 - `propose [RFC-XXX]` → Move to Proposed/ (requires format compliance)
 - `activate [RFC-XXX]` → Move to Active/ (final format check)
 - `deprecate [RFC-XXX] [RFC-YYY]` → Replace with new
@@ -51,10 +51,20 @@ Draft/ → Proposed/ → Active/ → Deprecated/ → Archive/
 ## Technical Details
 
 **Format Validation**:
-- Checks all 11 required sections present
-- Validates requirement/acceptance/boundary/refactoring format
-- Ensures TDD Implementation Checklist exists
-- Verifies metadata header completeness
+- Checks all 11 required sections present with proper structure
+- Validates each section follows its template format:
+  - Abstract: 3 paragraphs, max 300 words
+  - Motivation: Problem Statement, Current Limitations, Use Cases subsections
+  - Specification: Requirements with component headers and 4-part format
+  - Rationale: Design Decisions and Alternatives Considered subsections
+  - Backwards Compatibility: Breaking Changes, Deprecations, Migration Strategy
+  - Security: Threat Model, Mitigations, Security Boundaries subsections
+  - Test Strategy: Unit, Integration, Performance test categories
+  - References: Normative and Informative subsections
+  - TDD Checklist: Metadata header and component tracking
+  - API Design: Interfaces, Contract Guarantees, Evolution Strategy
+  - Performance: Latency, Memory, Throughput constraints
+- Verifies metadata header completeness (8 fields)
 
 **Revise Command**:
 - Loads RFC_FORMAT.md before analysis
@@ -64,7 +74,11 @@ Draft/ → Proposed/ → Active/ → Deprecated/ → Archive/
   - Technical impossibilities → achievable versions
   - Missing acceptance criteria → complete criteria
   - Untestable specs → testable versions
-  - Format violations → compliant versions
+  - Format violations → compliant versions:
+    - Missing required subsections (e.g., "Add Problem Statement to Motivation")
+    - Incorrect section structure (e.g., "Use 3-paragraph format for Abstract")
+    - Missing metadata fields (e.g., "Add Type field to header")
+    - Improper requirement format (e.g., "Add Refactoring field to requirement")
 - Quality over quantity: 0-8 critical fixes better than 20 minor ones
 
 **Explore Command**:
@@ -96,9 +110,13 @@ Draft/ → Proposed/ → Active/ → Deprecated/ → Archive/
 ## Error Handling
 
 **Format Violations**:
-- "Missing required section X" → Add section per RFC_FORMAT.md
+- "Missing required section X" → Add section per RFC_FORMAT.md template
 - "Invalid requirement format" → Use requirement/acceptance/boundary/refactoring
-- "No TDD checklist" → Add checklist with red-green-refactor items
+- "No TDD checklist" → Add checklist with metadata and component tracking
+- "Missing subsection in Motivation" → Add Problem Statement/Current Limitations/Use Cases
+- "Abstract too long" → Reduce to 3 paragraphs, max 300 words
+- "Security section incomplete" → Add Threat Model/Mitigations/Boundaries subsections
+- "Performance constraints missing units" → Add latency (ms), memory (MB/KB), throughput (ops/sec)
 
 **Recovery**:
 1. Run `@PLAN status` to identify non-compliant RFCs
@@ -111,13 +129,15 @@ Draft/ → Proposed/ → Active/ → Deprecated/ → Archive/
 ```
 # RFC_FORMAT.md automatically loaded
 @PLAN create awesome-feature
-# Creates RFC with all 11 required sections
+# Creates RFC with all 11 sections using templates
+# Including subsections like Problem Statement, Threat Model, etc.
 @PLAN revise RFC-001
-# Shows: [R1] "Zero-latency" → "<2ms propagation"
-#        [R2] Missing TDD checklist → Add checklist template
-@PLAN accept RFC-001 R1,R2
+# Shows: [R1] "Zero-latency" → "<2ms propagation @ P99"
+#        [R2] Missing Use Cases in Motivation → Add 2 use cases
+#        [R3] Abstract missing 3rd paragraph → Add benefits
+@PLAN accept RFC-001 R1,R2,R3
 @PLAN ready RFC-001
-# Verifies format compliance and stability
+# Verifies all sections follow templates and requirements stable
 @PLAN propose RFC-001
 ```
 
@@ -147,8 +167,10 @@ Draft/ → Proposed/ → Active/ → Deprecated/ → Archive/
 @PLAN status
 # Shows: 3 RFCs need format updates
 @PLAN revise RFC-001
-# Shows: [R1] Add Performance Constraints section
-@PLAN accept RFC-001 R1
+# Shows: [R1] Add Performance Constraints section with Latency/Memory/Throughput
+#        [R2] Update Security section → Add Security Boundaries subsection
+#        [R3] API Design missing Evolution Strategy → Add versioning approach
+@PLAN accept RFC-001 R1,R2,R3
 ```
 
 Format: [RFC_FORMAT.md](./RFC_FORMAT.md) - REQUIRED REFERENCE
