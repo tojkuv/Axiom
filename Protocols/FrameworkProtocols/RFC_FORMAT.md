@@ -20,29 +20,189 @@ RFC specifications for TDD-driven framework development.
 
 ### Required Sections
 
-1. **Abstract**: 2-3 paragraph summary of the proposal
-2. **Motivation**: Problem statement and why this change is needed
-3. **Specification**: Technical requirements with TDD criteria
-4. **Rationale**: Design decisions and rejected alternatives
-5. **Backwards Compatibility**: Impact on existing code
-6. **Security Considerations**: Threat model and mitigations
-7. **Test Strategy**: Testing categories and validation approach
-8. **References**: Related RFCs and documentation
-9. **TDD Implementation Checklist**: Progress tracking for development sessions
-10. **API Design**: Public interface contracts and evolution strategy
-11. **Performance Constraints**: Framework overhead limits and benchmarks
+Each section must follow the specified format:
 
-## Specification Format
-
-Each requirement must include:
-- **Requirement**: What must be true
-- **Acceptance**: How to verify it's working (measurable)
-- **Boundary**: Scope of testing
-- **Refactoring**: Optimization opportunities
-
-### Example
+#### 1. Abstract
 ```markdown
-### Component Requirements
+## Abstract
+
+[2-3 paragraphs, max 300 words]
+[Paragraph 1: What this RFC proposes]
+[Paragraph 2: Key technical approach]
+[Paragraph 3: Expected outcomes and benefits]
+```
+
+#### 2. Motivation
+```markdown
+## Motivation
+
+### Problem Statement
+[Clear description of the problem being solved]
+
+### Current Limitations
+- [Limitation 1 with impact]
+- [Limitation 2 with impact]
+
+### Use Cases
+1. [Primary use case with actor and scenario]
+2. [Secondary use case with actor and scenario]
+```
+
+#### 3. Specification
+```markdown
+## Specification
+
+### Requirements
+[Each requirement must follow the format below]
+
+#### [Component/Feature Name]
+- [Requirement Name]:
+  - Requirement: [What must be true]
+  - Acceptance: [Measurable verification criteria]
+  - Boundary: [Scope and limitations]
+  - Refactoring: [Future optimization opportunities]
+```
+
+#### 4. Rationale
+```markdown
+## Rationale
+
+### Design Decisions
+- [Decision 1]: [Why this approach was chosen]
+- [Decision 2]: [Trade-offs considered]
+
+### Alternatives Considered
+1. [Alternative approach 1]
+   - Pros: [Benefits]
+   - Cons: [Drawbacks]
+   - Rejected because: [Reason]
+```
+
+#### 5. Backwards Compatibility
+```markdown
+## Backwards Compatibility
+
+### Breaking Changes
+- [Change 1]: [Impact and migration path]
+- None (if no breaking changes)
+
+### Deprecations
+- [API/Feature]: [Timeline and replacement]
+
+### Migration Strategy
+1. [Step 1 with timeline]
+2. [Step 2 with timeline]
+```
+
+#### 6. Security Considerations
+```markdown
+## Security Considerations
+
+### Threat Model
+- [Threat 1]: [Description and impact]
+- [Threat 2]: [Description and impact]
+
+### Mitigations
+- [Threat 1]: [Specific mitigation strategy]
+- [Threat 2]: [Specific mitigation strategy]
+
+### Security Boundaries
+- [Boundary definition and enforcement]
+```
+
+#### 7. Test Strategy
+```markdown
+## Test Strategy
+
+### Unit Tests
+- [Component 1]: [Test approach and coverage target]
+- [Component 2]: [Test approach and coverage target]
+
+### Integration Tests
+- [Scenario 1]: [End-to-end validation]
+- [Scenario 2]: [Cross-component interaction]
+
+### Performance Tests
+- [Benchmark 1]: [Metric and threshold]
+- [Benchmark 2]: [Metric and threshold]
+```
+
+#### 8. References
+```markdown
+## References
+
+### Normative References
+- [RFC-XXX]: [Title and relevance]
+- [Standard/Spec]: [Version and usage]
+
+### Informative References
+- [Document]: [Context and relationship]
+- [External Resource]: [URL and description]
+```
+
+#### 9. TDD Implementation Checklist
+```markdown
+## TDD Implementation Checklist
+
+**Last Updated**: YYYY-MM-DD HH:MM
+**Current Focus**: [Active component/requirement]
+**Session Notes**: [Blockers or decisions]
+
+### [Component Name]
+- [ ] [Feature/Requirement]
+  - [ ] Red: [Test description]
+  - [ ] Green: [Implementation approach]
+  - [ ] Refactor: [Optimization plan]
+```
+
+#### 10. API Design
+```markdown
+## API Design
+
+### Public Interfaces
+```language
+// Interface definitions with comments
+protocol/interface Name {
+    // Method signatures
+}
+```
+
+### Contract Guarantees
+- [Guarantee 1]: [Invariant maintained]
+- [Guarantee 2]: [Behavior promise]
+
+### Evolution Strategy
+- Versioning: [Approach]
+- Deprecation: [Policy]
+- Extension Points: [Mechanism]
+```
+
+#### 11. Performance Constraints
+```markdown
+## Performance Constraints
+
+### Latency Requirements
+- [Operation 1]: < [X]ms @ P99
+- [Operation 2]: < [X]ms @ P95
+
+### Memory Constraints
+- Baseline overhead: < [X]MB
+- Per-instance cost: < [X]KB
+
+### Throughput Targets
+- [Operation]: > [X] ops/sec
+- Concurrency: [X] simultaneous operations
+```
+
+## Format Example
+
+### Complete Specification Example
+```markdown
+## Specification
+
+### Requirements
+
+#### State Management Component
 - Thread-Safe State Access:
   - Requirement: All state mutations via concurrency control
   - Acceptance: Race condition test with 1000 concurrent operations shows no data corruption
@@ -56,31 +216,13 @@ Each requirement must include:
   - Refactoring: Batch notifications if frequency > 100/sec
 ```
 
-## TDD Implementation Checklist Format
+## Tracking Progress
 
-```markdown
-## TDD Implementation Checklist
-
-**Last Updated**: YYYY-MM-DD HH:MM
-**Current Focus**: [Active component/requirement]
-**Session Notes**: [Any blockers or decisions needed]
-
-### Component A: [Name]
-- [ ] Interface Definition
-  - [x] Red: Test interface contract requirements
-  - [x] Green: Define minimal interface  
-  - [ ] Refactor: Add default implementations
-- [ ] Concurrency Safety
-  - [ ] Red: Test concurrent access patterns
-  - [ ] Green: Implement thread-safe access
-  - [ ] Refactor: Optimize for common usage
-```
-
-Track progress by:
-- Marking items with [x] when complete
-- Including test file references
-- Noting deferred refactorings
-- Updating timestamp each session
+The TDD Implementation Checklist (Section 9) tracks development progress:
+- Mark items with [x] when complete
+- Include test file references
+- Note deferred refactorings
+- Update timestamp each session
 
 ## Writing Guidelines
 
