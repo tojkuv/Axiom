@@ -33,6 +33,17 @@ Draft/ → Proposed/ → Active/ → Deprecated/ → Archive/
 
 ## Workflow
 
+### Workspace Requirement
+**MANDATORY**: PLAN protocol only runs in framework workspace
+- Automatically navigates to framework workspace if available
+- Errors if workspace not found
+
+**Usage**:
+```bash
+# From anywhere
+@PLAN create awesome-feature  # Auto-navigates to framework-workspace/AxiomFramework
+```
+
 ### Stabilization Process
 1. Load current RFC_FORMAT.md requirements
 2. `revise` → Get fixes for unstable requirements
@@ -49,6 +60,11 @@ Draft/ → Proposed/ → Active/ → Deprecated/ → Archive/
 4. `revise` → Verify stability and format maintained
 
 ## Technical Details
+
+**Execution Context**:
+- ONLY runs in framework workspace: `framework-workspace/AxiomFramework/`
+- Auto-navigates to workspace from any location (current dir or 1 level up)
+- Requires framework workspace to be set up via `@WORKSPACE setup framework`
 
 **Format Validation**:
 - Checks all 11 required sections present with proper structure
@@ -97,6 +113,48 @@ Draft/ → Proposed/ → Active/ → Deprecated/ → Archive/
 - `accept RFC-001 E2,E4-6` → Apply explorations
 - `accept RFC-001 all-revisions` → Apply all
 - Post-accept format validation always runs
+
+## Execution Process
+
+```bash
+# PLAN only works in framework workspace
+if [ -f "Package.swift" ] && [ -d "RFCs" ]; then
+    # Already in framework workspace AxiomFramework directory
+    echo "In framework workspace"
+else
+    # Search for framework workspace (current dir or 1 level up only)
+    SEARCH_PATHS=(
+        "."
+        ".."
+    )
+    
+    FOUND_WORKSPACE=""
+    for path in "${SEARCH_PATHS[@]}"; do
+        if [ -d "$path/framework-workspace/AxiomFramework" ]; then
+            FOUND_WORKSPACE="$path/framework-workspace/AxiomFramework"
+            break
+        fi
+    done
+    
+    if [ -n "$FOUND_WORKSPACE" ]; then
+        echo "Navigating to framework workspace..."
+        cd "$FOUND_WORKSPACE" || exit 1
+    else
+        echo "ERROR: Framework workspace not found"
+        echo "Run '@WORKSPACE setup framework' first"
+        exit 1
+    fi
+fi
+
+# Load RFC_FORMAT.md for validation
+RFC_FORMAT="FrameworkProtocols/RFC_FORMAT.md"
+if [ ! -f "$RFC_FORMAT" ]; then
+    echo "ERROR: RFC_FORMAT.md not found"
+    exit 1
+fi
+
+echo "Ready for RFC planning operations"
+```
 
 ## Known Impossibilities
 
