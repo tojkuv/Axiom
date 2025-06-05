@@ -258,13 +258,21 @@ elif [[ ${#INTEGRATED_PARTS[@]} -eq 1 ]]; then
     INTEGRATION_MSG="Integrated ${INTEGRATED_PARTS[0]} workspace changes"
 fi
 
-git commit -m "Development checkpoint: $TIMESTAMP
+# Only commit if there are staged changes
+if [ -n "$(git diff --cached --name-only)" ]; then
+    git commit -m "$(cat <<EOF
+Development checkpoint: $TIMESTAMP
 
 $INTEGRATION_MSG
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
-Co-Authored-By: Claude <noreply@anthropic.com>"
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"
+else
+    echo "No changes to commit after squash merge"
+fi
 
 # Clean up integration branch
 git branch -D "integration-$BRANCH_TIMESTAMP"
