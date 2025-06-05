@@ -28,8 +28,8 @@ Sync branches → Commit worktrees → Integration branch → Single commit to m
 7. Push single commit to remote
 
 ### Workspace Isolation
-- **Framework workspace**: Only sees `AxiomFramework/` (with symlink to `../FrameworkProtocols/`)
-- **Application workspace**: Only sees `AxiomExampleApp/` (with symlink to `../ApplicationProtocols/`)
+- **Framework workspace**: Only sees `AxiomFramework/` (with symlink to `FrameworkProtocols`)
+- **Application workspace**: Only sees `AxiomExampleApp/` (with symlink to `ApplicationProtocols`)
 - **Sparse-checkout**: Prevents cross-boundary file access
 - **Protocol Protection**: Root protocol files preserved during integration
 
@@ -61,11 +61,77 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ## Execution Process
 
 ```bash
+# Status command
+if [[ "$1" == "status" ]]; then
+    echo "=== Workspace Status ==="
+    
+    # Check framework workspace
+    if [ -d "../framework-workspace" ]; then
+        echo -e "\nFramework workspace:"
+        (cd ../framework-workspace && git status --short)
+    else
+        echo -e "\nFramework workspace: not found"
+    fi
+    
+    # Check application workspace
+    if [ -d "../application-workspace" ]; then
+        echo -e "\nApplication workspace:"
+        (cd ../application-workspace && git status --short)
+    else
+        echo -e "\nApplication workspace: not found"
+    fi
+    
+    # Check main repository
+    echo -e "\nMain repository:"
+    git status --short
+    exit 0
+fi
+
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M')
 
+# Handle workspace-specific commands
+if [[ "$1" == "framework" ]] || [[ "$1" == "application" ]]; then
+    WORKSPACE_TYPE="$1"
+    WORKSPACE_DIR="../${WORKSPACE_TYPE}-workspace"
+    
+    if [ ! -d "$WORKSPACE_DIR" ]; then
+        echo "Error: $WORKSPACE_TYPE workspace not found at $WORKSPACE_DIR"
+        echo "Run '@WORKSPACE setup' in the appropriate protocol directory first"
+        exit 1
+    fi
+    
+    # Process only the specified workspace
+    cd "$WORKSPACE_DIR"
+    git fetch origin main
+    git merge origin/main -m "Sync with main: $TIMESTAMP" || {
+        echo "Auto-resolving conflicts in favor of $WORKSPACE_TYPE"
+        git checkout --theirs .
+        git add --sparse .
+        git commit -m "Sync with main: $TIMESTAMP - $WORKSPACE_TYPE preserved"
+    }
+    
+    if [ -n "$(git status --porcelain)" ]; then
+        git add --sparse .
+        git commit -m "$(echo $WORKSPACE_TYPE | sed 's/.*/\u&/') development checkpoint: $TIMESTAMP
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+    fi
+    cd ../Axiom
+    
+    # Continue with integration for single workspace
+    INTEGRATE_FRAMEWORK=$([[ "$WORKSPACE_TYPE" == "framework" ]] && echo "true" || echo "false")
+    INTEGRATE_APPLICATION=$([[ "$WORKSPACE_TYPE" == "application" ]] && echo "true" || echo "false")
+else
+    # Process all workspaces
+    INTEGRATE_FRAMEWORK="true"
+    INTEGRATE_APPLICATION="true"
+fi
+
 # 1. Sync and commit framework workspace
-if [ -d "framework-workspace" ]; then
-    cd framework-workspace
+if [[ "$INTEGRATE_FRAMEWORK" == "true" ]] && [ -d "../framework-workspace" ]; then
+    cd ../framework-workspace
     git fetch origin main
     git merge origin/main -m "Sync with main: $TIMESTAMP" || {
         echo "Auto-resolving conflicts in favor of framework"
@@ -82,12 +148,12 @@ if [ -d "framework-workspace" ]; then
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
     fi
-    cd ..
+    cd ../Axiom
 fi
 
 # 2. Sync and commit application workspace
-if [ -d "application-workspace" ]; then
-    cd application-workspace
+if [[ "$INTEGRATE_APPLICATION" == "true" ]] && [ -d "../application-workspace" ]; then
+    cd ../application-workspace
     git fetch origin main
     git merge origin/main -m "Sync with main: $TIMESTAMP" || {
         echo "Auto-resolving conflicts in favor of application"
@@ -104,7 +170,7 @@ if [ -d "application-workspace" ]; then
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
     fi
-    cd ..
+    cd ../Axiom
 fi
 
 # 3. Create integration branch and merge workspaces
@@ -119,7 +185,7 @@ cp -r ApplicationProtocols /tmp/application-protocols-backup 2>/dev/null || true
 git checkout -b "integration-$TIMESTAMP" main
 
 # Merge workspaces into integration branch
-if [ -d "framework-workspace" ]; then
+if [[ "$INTEGRATE_FRAMEWORK" == "true" ]] && [ -d "../framework-workspace" ]; then
     git merge framework --no-ff --strategy=recursive -X ours \
         -m "Integrate framework workspace: $TIMESTAMP" || {
         echo "Resolving framework conflicts"
@@ -128,7 +194,7 @@ if [ -d "framework-workspace" ]; then
     }
 fi
 
-if [ -d "application-workspace" ]; then
+if [[ "$INTEGRATE_APPLICATION" == "true" ]] && [ -d "../application-workspace" ]; then
     git merge application --no-ff --strategy=recursive -X ours \
         -m "Integrate application workspace: $TIMESTAMP" || {
         echo "Resolving application conflicts"
@@ -162,9 +228,19 @@ fi
 # 4. Squash merge to main and push
 git checkout main
 git merge --squash "integration-$TIMESTAMP"
+
+# Determine commit message based on what was integrated
+if [[ "$INTEGRATE_FRAMEWORK" == "true" ]] && [[ "$INTEGRATE_APPLICATION" == "true" ]]; then
+    INTEGRATION_MSG="Integrated framework and application workspace changes"
+elif [[ "$INTEGRATE_FRAMEWORK" == "true" ]]; then
+    INTEGRATION_MSG="Integrated framework workspace changes"
+elif [[ "$INTEGRATE_APPLICATION" == "true" ]]; then
+    INTEGRATION_MSG="Integrated application workspace changes"
+fi
+
 git commit -m "Development checkpoint: $TIMESTAMP
 
-Integrated framework and application workspace changes
+$INTEGRATION_MSG
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
@@ -232,8 +308,8 @@ git push origin main || echo "Local integration complete - remote push failed"
 ## Workspace Configuration
 
 **Sparse-Checkout Setup**:
-- Framework workspace: `/AxiomFramework/`, `/.gitignore` (symlink to `../FrameworkProtocols/`)
-- Application workspace: `/AxiomExampleApp/`, `/.gitignore` (symlink to `../ApplicationProtocols/`)
+- Framework workspace: `/AxiomFramework/` (symlink to `../Axiom/FrameworkProtocols/`)
+- Application workspace: `/AxiomExampleApp/` (symlink to `../Axiom/ApplicationProtocols/`)
 - Protocol files at root only: Protected during integration
 
 **Protocol File Protection**:

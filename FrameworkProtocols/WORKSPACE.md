@@ -4,115 +4,177 @@
 
 ## Commands
 
-- `setup` → Create framework and application worktrees
-- `reset` → Recreate worktrees with clean state
+- `setup` → Create framework worktree
+- `reset` → Recreate worktree with clean state
 - `status` → Show worktree details and health
-- `cleanup` → Remove all worktrees
+- `cleanup` → Remove framework worktree
 
 ## Core Process
 
-Create worktrees → Setup symlinks → Track status
+Create worktree → Configure sparse-checkout → Create protocol symlink → Track status
 
-**Philosophy**: Isolated development environments for parallel work.
-**Constraint**: Permanent branch assignment per workspace.
+**Philosophy**: Isolated framework development environment.
+**Constraint**: Workspace contains only AxiomFramework and protocol symlink.
 
 ## Workspace Structure
 
 ```
-Axiom/                              # Main repository
-├── framework-workspace/            # Framework branch worktree
-│   ├── AxiomFramework/            # Active development
-│   └── .workspace-status          # State tracking
-└── application-workspace/          # Application branch worktree  
-    ├── AxiomExampleApp/           # Active development
-    ├── AxiomFramework-dev@        # Symlink to framework
+axiom-apple/                        # Top-level directory
+├── Axiom/                          # Main repository
+│   ├── FrameworkProtocols/         # Protocol definitions
+│   └── AxiomFramework/            # Framework code
+└── framework-workspace/            # Framework branch worktree
+    ├── .git                       # Worktree git directory
+    ├── .gitignore                 # Sparse-checkout aware
+    ├── AxiomFramework/            # Active development
+    ├── FrameworkProtocols@        # Symlink to ../Axiom/FrameworkProtocols/
     └── .workspace-status          # State tracking
 ```
 
 ## Workflow
 
 ### Initial Setup
-1. Validate git repository root
-2. Remove any existing worktrees
-3. Create framework worktree on `framework` branch
-4. Create application worktree on `application` branch
-5. Symlink framework into application workspace
-6. Create status tracking files
+1. Navigate to Axiom directory
+2. Validate git repository root
+3. Create framework worktree at ../framework-workspace
+4. Configure cone sparse-checkout
+5. Set sparse-checkout to only include AxiomFramework
+6. Reapply sparse-checkout to clean workspace
+7. Create symlink to FrameworkProtocols
+8. Initialize status tracking
 
 ### Key Features
-- **Isolation**: Each workspace locked to its branch
-- **Integration**: Real-time framework access via symlinks
-- **Persistence**: No branch switching required
-- **Tracking**: Status files monitor workspace health
+- **Minimal**: Only AxiomFramework and protocol symlink
+- **Isolated**: Framework branch locked
+- **Clean**: Sparse-checkout enforced
+- **Tracked**: Status file monitors health
 
 ## Technical Details
 
-**Branch Assignment**:
-- `framework-workspace/` → framework branch only
-- `application-workspace/` → application branch only
-- Main repository → coordination and merging
-
-**Symlink Structure**:
-```bash
-# In application-workspace/
-ln -sf ../framework-workspace/AxiomFramework AxiomFramework-dev
+**Sparse-Checkout Configuration**:
+```
+# Cone mode enabled
+# Only AxiomFramework tracked
+/AxiomFramework/
 ```
 
-**Status Tracking**:
-- `.workspace-status` files in each workspace
-- Records creation time and last update
-- Used by other protocols for validation
+**Branch Management**:
+- Framework workspace → framework branch only
+- Main repository → coordination and integration
+
+**File Exclusion**:
+- All root files excluded (README, CLAUDE, etc.)
+- All other directories excluded
+- Only AxiomFramework tracked by git
 
 ## Execution Process
 
 ```bash
-# Setup worktrees
-git worktree add framework-workspace framework || {
-    git checkout -b framework
-    git push origin framework  
-    git worktree add framework-workspace framework
-}
+# Validate we're in Axiom git root
+[[ -d .git ]] || { echo "Not in Axiom git root"; exit 1; }
 
-git worktree add application-workspace application || {
-    git checkout -b application
-    git push origin application
-    git worktree add application-workspace application  
-}
+# Setup command
+if [[ "$1" == "setup" ]]; then
+    # Create framework worktree at parent level
+    if ! git worktree list | grep -q framework-workspace; then
+        # Ensure framework branch exists
+        if ! git show-ref --verify --quiet refs/heads/framework; then
+            git checkout -b framework
+            git push -u origin framework || true
+            git checkout main
+        fi
+        git worktree add ../framework-workspace framework
+    fi
+    
+    # Configure precise sparse-checkout
+    cd ../framework-workspace/
+    git sparse-checkout init --cone
+    git sparse-checkout set AxiomFramework
+    
+    # Clean workspace by reapplying sparse-checkout
+    git read-tree -m -u HEAD
+    
+    # Create protocol symlink
+    ln -sf ../Axiom/FrameworkProtocols FrameworkProtocols
+    
+    # Initialize status
+    echo "Created: $(date)" > .workspace-status
+    echo "Branch: framework" >> .workspace-status
+    echo "Type: framework-only" >> .workspace-status
+    
+    cd ../Axiom
+    echo "Framework workspace ready at ../framework-workspace"
+fi
 
-# Create integration symlink
-cd application-workspace/
-ln -sf ../framework-workspace/AxiomFramework AxiomFramework-dev
-cd ..
+# Reset command
+if [[ "$1" == "reset" ]]; then
+    git worktree remove ../framework-workspace --force 2>/dev/null || true
+    exec "$0" setup
+fi
 
-# Initialize status tracking
-echo "Created: $(date)" > framework-workspace/.workspace-status
-echo "Created: $(date)" > application-workspace/.workspace-status
+# Status command
+if [[ "$1" == "status" ]]; then
+    if [[ -d ../framework-workspace ]]; then
+        echo "framework-workspace: active"
+        echo "Branch: $(cd ../framework-workspace && git branch --show-current)"
+        echo "Contents:"
+        (cd ../framework-workspace && ls -la | grep -E "^d|^l" | grep -v "^\.")
+        [[ -f ../framework-workspace/.workspace-status ]] && echo "---" && cat ../framework-workspace/.workspace-status
+    else
+        echo "framework-workspace: not found"
+    fi
+fi
+
+# Cleanup command
+if [[ "$1" == "cleanup" ]]; then
+    git worktree remove ../framework-workspace --force 2>/dev/null || true
+    echo "Framework workspace removed"
+fi
 ```
+
+## Error Handling
+
+**Common Issues**:
+- "Not in Axiom git root" → Navigate to Axiom directory
+- "Worktree already exists" → Use reset command
+- "Extra files in workspace" → Sparse-checkout misconfigured
+
+**Recovery Procedures**:
+1. Extra files → `git sparse-checkout reapply`
+2. Broken symlink → Recreate with correct path
+3. Full reset → `@WORKSPACE reset`
 
 ## Examples
 
 **First Time Setup**:
 ```
+cd Axiom
 @WORKSPACE setup
-# Creates both worktrees
-# Sets up symlinks
-# Shows success status
+# Creating framework worktree...
+# Configuring sparse-checkout...
+# Framework workspace ready at ../framework-workspace
 ```
 
-**Check Health**:
+**Check Contents**:
 ```
 @WORKSPACE status
-# framework-workspace: healthy (framework branch)
-# application-workspace: healthy (application branch)
-# Symlink: active
+# framework-workspace: active
+# Branch: framework
+# Contents:
+# drwxr-xr-x  5 user  staff  160 date time AxiomFramework
+# lrwxr-xr-x  1 user  staff   27 date time FrameworkProtocols -> ../Axiom/FrameworkProtocols
+# ---
+# Created: <timestamp>
+# Branch: framework
+# Type: framework-only
 ```
 
 **Clean Restart**:
 ```
 @WORKSPACE reset
-# Removes existing worktrees
-# Recreates with clean state
-# Preserves uncommitted work warning
+# Removing existing workspace...
+# Setting up fresh workspace...
+# Framework workspace ready at ../framework-workspace
 ```
 
-Creates isolated worktrees for parallel framework and application development.
+Manages minimal framework-only development workspace.
