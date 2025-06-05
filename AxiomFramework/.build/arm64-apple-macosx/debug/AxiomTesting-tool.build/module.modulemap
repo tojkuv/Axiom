@@ -1,4 +1,0 @@
-module AxiomTesting {
-    header "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/AxiomTesting-tool.build/AxiomTesting-Swift.h"
-    requires objc
-}

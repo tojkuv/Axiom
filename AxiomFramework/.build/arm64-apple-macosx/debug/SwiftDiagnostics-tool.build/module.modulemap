@@ -1,4 +1,0 @@
-module SwiftDiagnostics {
-    header "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/SwiftDiagnostics-tool.build/SwiftDiagnostics-Swift.h"
-    requires objc
-}

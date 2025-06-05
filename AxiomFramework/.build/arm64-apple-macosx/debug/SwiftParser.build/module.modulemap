@@ -1,4 +1,0 @@
-module SwiftParser {
-    header "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/SwiftParser.build/SwiftParser-Swift.h"
-    requires objc
-}
