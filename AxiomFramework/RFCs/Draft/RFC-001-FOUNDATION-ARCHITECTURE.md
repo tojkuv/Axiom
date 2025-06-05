@@ -5,7 +5,7 @@
 **Status**: Draft  
 **Type**: Architecture  
 **Created**: 2025-01-06  
-**Updated**: 2025-06-04 16:59  
+**Updated**: 2025-06-05  
 **Supersedes**: None  
 **Superseded-By**: None
 
@@ -65,7 +65,7 @@ Current iOS architectures (MVC, MVVM, VIPER) address some issues but lack strict
 
 - **Presentation-Context Binding**:
   - Requirement: Each Presentation has exactly ONE Context dependency with matching lifetimes
-  - Acceptance: Presentation with multiple contexts fails SwiftUI compilation
+  - Acceptance: Framework's @PresentationContext property wrapper enforces single context binding at runtime initialization
   - Boundary: Presentation-context pairing test shows 1:1 correspondence for 100 presentations
   - Refactoring: Use environment objects for shared state if needed
 
@@ -88,15 +88,15 @@ Current iOS architectures (MVC, MVVM, VIPER) address some issues but lack strict
   - Refactoring: Cache dependency resolution for performance
 
 - **Error Boundaries**:
-  - Requirement: Contexts act as error boundaries and must handle all Client errors
-  - Acceptance: Context error handlers invoked synchronously before client method returns
-  - Boundary: Error boundary test validates all Swift Error types thrown by client methods are caught, excluding fatal errors and system crashes
+  - Requirement: Contexts handle all errors thrown by their associated Clients through async error propagation
+  - Acceptance: Context error handlers receive all errors thrown from Client actor methods within the same Task
+  - Boundary: Error boundary test validates all thrown Swift Error types from Client methods are propagated to Context error handlers
   - Refactoring: Implement error recovery strategies per error type
 
 - **Concurrency Safety**:
-  - Requirement: All state mutations are actor-isolated with no reentrancy deadlocks
-  - Acceptance: Actor isolation pattern prevents circular waiting conditions in framework-controlled paths
-  - Boundary: Stress test with actor contention scenarios
+  - Requirement: All state mutations are actor-isolated with documented await points
+  - Acceptance: No deadlocks occur when Clients call other Clients through defined async protocols
+  - Boundary: Stress test with 10 actors making cross-actor calls shows completion within 1 second
   - Refactoring: Consider priority inversion mitigation
 
 - **State Immutability**:
@@ -166,10 +166,10 @@ Current iOS architectures (MVC, MVVM, VIPER) address some issues but lack strict
 ### Concurrency Model Requirements
 
 - **Actor Reentrancy**:
-  - Requirement: Actor methods complete atomically without reentrancy
-  - Acceptance: Actor methods complete atomically without interleaving from the same task
-  - Boundary: Test with 100 sequential async calls per actor
-  - Refactoring: Consider priority inheritance for critical paths
+  - Requirement: Actor methods handle potential reentrancy through explicit state validation
+  - Acceptance: Actor methods validate preconditions after each await point and handle state changes gracefully
+  - Boundary: Test with 100 concurrent async calls showing consistent state despite reentrancy
+  - Refactoring: Consider using actor-isolated serial queues for critical sections requiring atomicity
 
 - **Task Cancellation**:
   - Requirement: Task cancellation propagates from Context to all associated Clients
@@ -201,7 +201,7 @@ Current iOS architectures (MVC, MVVM, VIPER) address some issues but lack strict
 
 - **Navigation State (E2)**:
   - Requirement: Navigation state is global state owned by Orchestrator
-  - Acceptance: Single navigation state instance across entire application with concurrent requests resolving to consistent final state
+  - Acceptance: Concurrent navigation requests are serialized with last-write-wins semantics, verified by sequential state history
   - Boundary: Navigation state mutations only through Orchestrator methods
   - Refactoring: Implement navigation history stack for back navigation
 
@@ -309,9 +309,9 @@ Framework is currently in MVP stage - breaking changes are acceptable until vers
 
 ## TDD Implementation Checklist
 
-**Last Updated**: 2025-06-04 16:59  
+**Last Updated**: 2025-06-05  
 **Current Focus**: Foundation architecture specification  
-**Session Notes**: Applied [R1-R20] revisions to fix all technical impossibilities and improve testability. Added navigation architecture requirements [E1-E8] for comprehensive navigation support
+**Session Notes**: Applied [R1-R20] revisions to fix all technical impossibilities and improve testability. Added navigation architecture requirements [E1-E8] for comprehensive navigation support. Applied [R1-R5] revisions to address actor reentrancy, error boundaries, concurrency safety, navigation state consistency, and presentation-context binding
 
 ### Component Types
 - [ ] Component Type Definition
@@ -435,43 +435,59 @@ The framework maintains API stability through:
 - Default implementations for backwards compatibility
 - Compile-time availability annotations
 
-### Core Public APIs
+### Core Protocol Interfaces
 
-- **Capability**: Base protocol for all capabilities
-  - Requirement: All public methods use @available annotation with explicit iOS version
-  - Acceptance: Compiler warns when using deprecated APIs after 2 major versions
-  - Boundary: Public API changes tracked in migration guide
-  - Refactoring: Extract shared capability behaviors to protocol extensions
+**Capability Protocol**
+```swift
+public protocol Capability {
+    var isAvailable: Bool { get async }
+    func initialize() async throws
+    func terminate() async
+}
+```
 
-- **State**: Protocol for domain model value types
-  - Requirement: Equatable value types with immutable properties
-  - Acceptance: State mutations create new instances with value semantics
-  - Boundary: No reference types allowed in state definitions
-  - Refactoring: Automatic Codable synthesis for persistence
+**State Protocol**
+```swift
+public protocol State: Equatable, Sendable {
+    // Value type with immutable properties
+}
+```
 
-- **Client**: Actor protocol for business logic
-  - Requirement: Generic over State and Action types with AsyncStream observation
-  - Acceptance: Type inference works for all standard Swift types
-  - Boundary: Error propagation through typed throws
-  - Refactoring: Consider AsyncSequence for flexible streaming
+**Client Protocol**
+```swift
+public protocol Client<StateType, ActionType>: Actor {
+    associatedtype StateType: State
+    associatedtype ActionType
+    
+    var stateStream: AsyncStream<StateType> { get }
+    func process(_ action: ActionType) async throws
+}
+```
 
-- **Context**: MainActor protocol for UI coordination
-  - Requirement: SwiftUI lifecycle integration with type-safe action handling
-  - Acceptance: Context lifecycle matches SwiftUI view lifecycle
-  - Boundary: Environment value support for configuration
-  - Refactoring: Weak observation patterns for memory efficiency
+**Context Protocol**
+```swift
+@MainActor
+public protocol Context: ObservableObject {
+    func onAppear() async
+    func onDisappear() async
+}
+```
 
-- **Orchestrator**: Application coordinator protocol
-  - Requirement: Context factory methods with capability lifecycle management
-  - Acceptance: All contexts created through orchestrator factory
-  - Boundary: Navigation coordination through type-safe routing
-  - Refactoring: Builder pattern for complex initialization flows
+**Orchestrator Protocol**
+```swift
+public protocol Orchestrator: Actor {
+    func createContext<T: Context>(_ type: T.Type) async -> T
+    func navigate(to route: Route) async
+}
+```
 
-- **Presentation**: SwiftUI view protocol for UI components
-  - Requirement: Single context binding with automatic lifecycle management
-  - Acceptance: Presentation compilation fails with multiple context bindings
-  - Boundary: SwiftUI body computation with framework-provided property wrappers
-  - Refactoring: Custom property wrappers for common presentation patterns
+**Presentation Protocol**
+```swift
+public protocol Presentation: View {
+    associatedtype ContextType: Context
+    var context: ContextType { get }
+}
+```
 
 ### API Stability Guarantees
 
@@ -479,6 +495,32 @@ The framework maintains API stability through:
 - Default implementations provided for new requirements
 - Deprecated APIs maintained for 2 major versions
 - Breaking changes require new protocol versions
+- All public APIs marked with @available annotations
+
+### Versioning Strategy
+
+**Major Version (X.0.0)**
+- Breaking changes to protocol requirements
+- Removal of deprecated APIs
+- Fundamental architectural changes
+
+**Minor Version (0.X.0)**
+- New protocol requirements with defaults
+- New optional protocol methods
+- Performance improvements
+
+**Patch Version (0.0.X)**
+- Bug fixes without API changes
+- Documentation updates
+- Internal optimizations
+
+### Migration Support
+
+The framework provides:
+- Automated migration tools for common patterns
+- Deprecation warnings with fix-it suggestions
+- Migration guides for each major version
+- Compatibility mode for gradual adoption
 
 ## Performance Constraints
 
