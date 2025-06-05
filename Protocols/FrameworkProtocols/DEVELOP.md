@@ -18,17 +18,15 @@ Red → Green → Refactor → Checklist Update
 
 ## Workflow
 
-### Workspace Usage
-**Framework Workspace**:
-```bash
-cd framework-workspace/AxiomFramework
-@DEVELOP build RFC-001  # Access via FrameworkProtocols symlink
-```
+### Workspace Requirement
+**MANDATORY**: DEVELOP protocol only runs in framework workspace
+- Automatically navigates to framework workspace if available
+- Errors if workspace not found
 
-**Main Repository**:
+**Usage**:
 ```bash
-cd Axiom
-@DEVELOP build RFC-001  # Automatically navigates to AxiomFramework/
+# From anywhere
+@DEVELOP build RFC-001  # Auto-navigates to framework-workspace/AxiomFramework
 ```
 
 ### TDD Implementation
@@ -54,9 +52,9 @@ cd Axiom
 - TDD Implementation Checklist present
 
 **Execution Context**:
-- From framework workspace: `AxiomFramework/` directory
-- From main repository: Automatically enters `AxiomFramework/`
-- Protocol symlink: Access via `FrameworkProtocols/DEVELOP.md`
+- ONLY runs in framework workspace: `framework-workspace/AxiomFramework/`
+- Auto-navigates to workspace from any location
+- Requires framework workspace to be set up via `@WORKSPACE setup framework`
 
 **Test Requirements**:
 - MANDATORY: All tests pass before proceeding
@@ -71,21 +69,39 @@ cd Axiom
 ## Execution Process
 
 ```bash
-# Determine if we're in framework workspace or main repository
+# DEVELOP only works in framework workspace
 if [ -f "Package.swift" ] && [ -d "RFCs" ]; then
-    # We're in framework workspace already
-    RFC_PATH="RFCs/Proposed/${RFC_NUMBER}*.md"
-elif [ -d "AxiomFramework/RFCs" ]; then
-    # We're in main repository
-    RFC_PATH="AxiomFramework/RFCs/Proposed/${RFC_NUMBER}*.md"
-    cd AxiomFramework || exit 1
+    # Already in framework workspace AxiomFramework directory
+    echo "In framework workspace"
 else
-    echo "ERROR: Not in valid framework directory"
-    echo "Run from framework workspace or main repository"
-    exit 1
+    # Search for framework workspace relative to current location
+    SEARCH_PATHS=(
+        "."
+        ".."
+        "../.."
+        "../../.."
+    )
+    
+    FOUND_WORKSPACE=""
+    for path in "${SEARCH_PATHS[@]}"; do
+        if [ -d "$path/framework-workspace/AxiomFramework" ]; then
+            FOUND_WORKSPACE="$path/framework-workspace/AxiomFramework"
+            break
+        fi
+    done
+    
+    if [ -n "$FOUND_WORKSPACE" ]; then
+        echo "Navigating to framework workspace..."
+        cd "$FOUND_WORKSPACE" || exit 1
+    else
+        echo "ERROR: Framework workspace not found"
+        echo "Run '@WORKSPACE setup framework' first"
+        exit 1
+    fi
 fi
 
 # Validate RFC exists in Proposed/
+RFC_PATH="RFCs/Proposed/${RFC_NUMBER}*.md"
 if ! ls $RFC_PATH 1> /dev/null 2>&1; then
     echo "RFC not found in Proposed/"
     echo "Use '@PLAN propose' first"
