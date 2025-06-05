@@ -53,16 +53,34 @@ Red → Green → Refactor → Checklist Update
 ## Execution Process
 
 ```bash
+# Detect workspace context
+if [[ -L "$0" ]]; then
+    # Called via symlink from workspace
+    WORKSPACE_ROOT="$(dirname "$(dirname "$(readlink -f "$0")")")"
+    while [[ ! -f "$WORKSPACE_ROOT/.workspace-status" && "$WORKSPACE_ROOT" != "/" ]]; do
+        WORKSPACE_ROOT="$(dirname "$WORKSPACE_ROOT")"
+    done
+else
+    # Called directly - find framework-workspace
+    WORKSPACE_ROOT="$(cd "$(dirname "$0")/../../../../framework-workspace" 2>/dev/null && pwd)"
+fi
+
+# Verify we're in framework workspace
+if [[ ! -f "$WORKSPACE_ROOT/.workspace-status" ]] || ! grep -q "Type: framework" "$WORKSPACE_ROOT/.workspace-status"; then
+    echo "Error: Must be run from framework-workspace"
+    exit 1
+fi
+
+# Enter framework directory
+cd "$WORKSPACE_ROOT/AxiomFramework" || exit 1
+
 # Validate RFC exists in Proposed/
-RFC_PATH="AxiomFramework/RFCs/Proposed/${RFC_NUMBER}*.md"
+RFC_PATH="RFCs/Proposed/${RFC_NUMBER}*.md"
 if ! ls $RFC_PATH 1> /dev/null 2>&1; then
     echo "RFC not found in Proposed/"
     echo "Use '@PLAN propose' first"
     exit 1
 fi
-
-# Enter framework workspace
-cd framework-workspace/AxiomFramework || exit 1
 
 # MANDATORY: Run test suite
 if ! swift test; then
@@ -71,7 +89,7 @@ if ! swift test; then
     exit 1
 fi
 
-echo "Ready for TDD implementation"
+echo "Ready for TDD implementation in workspace: $WORKSPACE_ROOT"
 ```
 
 ## Examples

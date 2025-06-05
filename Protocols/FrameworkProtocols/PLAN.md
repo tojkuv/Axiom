@@ -21,6 +21,7 @@ Draft/ → Proposed/ → Active/ → Deprecated/ → Archive/
 **Philosophy**: Stabilization before expansion with strict format compliance.
 **Constraint**: Minimum 3-5 stable requirements before propose.
 **Requirement**: Every command validates against current RFC_FORMAT.md.
+**Context**: All operations occur within framework-workspace only.
 
 ## Dependencies
 
@@ -75,6 +76,35 @@ Draft/ → Proposed/ → Active/ → Deprecated/ → Archive/
 - `accept RFC-001 E2,E4-6` → Apply explorations
 - `accept RFC-001 all-revisions` → Apply all
 - Post-accept format validation always runs
+
+## Execution Process
+
+```bash
+# Detect workspace context
+if [[ -L "$0" ]]; then
+    # Called via symlink from workspace
+    WORKSPACE_ROOT="$(dirname "$(dirname "$(readlink -f "$0")")")"
+    while [[ ! -f "$WORKSPACE_ROOT/.workspace-status" && "$WORKSPACE_ROOT" != "/" ]]; do
+        WORKSPACE_ROOT="$(dirname "$WORKSPACE_ROOT")"
+    done
+else
+    # Called directly - find framework-workspace
+    WORKSPACE_ROOT="$(cd "$(dirname "$0")/../../../../framework-workspace" 2>/dev/null && pwd)"
+fi
+
+# Verify we're in framework workspace
+if [[ ! -f "$WORKSPACE_ROOT/.workspace-status" ]] || ! grep -q "Type: framework" "$WORKSPACE_ROOT/.workspace-status"; then
+    echo "Error: Must be run from framework-workspace"
+    exit 1
+fi
+
+# Set working directory to framework
+FRAMEWORK_DIR="$WORKSPACE_ROOT/AxiomFramework"
+cd "$FRAMEWORK_DIR" || exit 1
+
+# All RFC operations happen within workspace
+RFC_DIR="$FRAMEWORK_DIR/RFCs"
+```
 
 ## Known Impossibilities
 
