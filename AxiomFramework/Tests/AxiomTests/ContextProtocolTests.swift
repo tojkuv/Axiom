@@ -8,7 +8,7 @@ final class ContextProtocolTests: XCTestCase {
     
     func testContextLifecycleMethods() async throws {
         // Test that context lifecycle methods are called appropriately
-        let context = ProtocolTestContext()
+        let context = await ProtocolTestContext()
         
         // Test onAppear
         await context.onAppear()
@@ -34,7 +34,7 @@ final class ContextProtocolTests: XCTestCase {
     
     func testContextObservationPatterns() async throws {
         // Requirement: MainActor-bound coordinator with observation
-        let context = ObservableProtocolTestContext()
+        let context = await ObservableProtocolTestContext()
         
         // Set up observation
         var observedChanges = 0
@@ -70,7 +70,7 @@ final class ContextProtocolTests: XCTestCase {
     func testContextClientObservation() async throws {
         // Test that context can observe client state changes
         let client = MockContextClient()
-        let context = ClientObservingContext(client: client)
+        let context = await ClientObservingContext(client: client)
         
         await context.onAppear()
         
@@ -98,10 +98,10 @@ final class ContextProtocolTests: XCTestCase {
     
     func testContextMemoryStability() async throws {
         // Requirement: Memory usage remains stable (±10%) after processing 1000 actions
-        let context = MemoryProtocolTestContext()
+        let context = await MemoryProtocolTestContext()
         
         // Measure initial memory
-        let initialMemory = context.currentMemoryUsage()
+        let initialMemory = await context.currentMemoryUsage()
         
         // Process 1000 actions
         for i in 0..<1000 {
@@ -109,7 +109,7 @@ final class ContextProtocolTests: XCTestCase {
         }
         
         // Measure final memory
-        let finalMemory = context.currentMemoryUsage()
+        let finalMemory = await context.currentMemoryUsage()
         
         // Calculate percentage change
         let percentageChange = abs(Double(finalMemory - initialMemory)) / Double(initialMemory) * 100
@@ -128,7 +128,7 @@ final class ContextProtocolTests: XCTestCase {
         var client: MockContextClient? = MockContextClient()
         weak var weakClient = client
         
-        let context = WeakReferenceContext()
+        let context = await WeakReferenceContext()
         await context.attachClient(client!)
         
         // Verify client is attached
@@ -439,7 +439,7 @@ actor ErrorThrowingContextClient {
 }
 
 // Supporting types
-struct ContextClientState: State {
+struct ContextClientState: Axiom.State {
     var value: Int = 0
     var message: String = ""
 }

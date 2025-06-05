@@ -50,7 +50,9 @@ public protocol ExtendedOrchestrator: Orchestrator {
 // MARK: - Route Definition
 
 /// Type-safe route definition for navigation
-public enum Route: Hashable, Sendable {
+/// @frozen ensures compile-time exhaustive switching and prevents runtime additions
+@frozen
+public enum Route: Hashable, Sendable, CaseIterable {
     /// Home/root route
     case home
     /// Detail route with identifier
@@ -59,6 +61,32 @@ public enum Route: Hashable, Sendable {
     case settings
     /// Custom route with path
     case custom(path: String)
+    
+    /// All cases for compile-time exhaustive switching
+    public static var allCases: [Route] {
+        return [
+            .home,
+            .detail(id: "sample"),
+            .settings,
+            .custom(path: "sample")
+        ]
+    }
+    
+    /// Validate route construction for type safety
+    public func validate() throws {
+        switch self {
+        case .home, .settings:
+            break // Always valid
+        case .detail(let id):
+            guard !id.isEmpty else {
+                throw RouteValidationError.invalidParameter("Detail ID cannot be empty")
+            }
+        case .custom(let path):
+            guard !path.isEmpty else {
+                throw RouteValidationError.invalidParameter("Custom path cannot be empty")
+            }
+        }
+    }
 }
 
 // MARK: - Base Orchestrator Implementation

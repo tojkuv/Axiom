@@ -37,7 +37,10 @@ final class OrchestratorProtocolTests: XCTestCase {
         let contextIds = await withTaskGroup(of: String.self) { group in
             for context in contexts {
                 group.addTask {
-                    await context.identifier
+                    if let testContext = context as? TestOrchestratorContext {
+                        return await testContext.identifier
+                    }
+                    return "unknown"
                 }
             }
             
@@ -89,14 +92,14 @@ final class OrchestratorProtocolTests: XCTestCase {
         
         // Register routes
         await orchestrator.registerRoute(.home, handler: { _ in
-            TestOrchestratorContext(identifier: "home")
+            await TestOrchestratorContext(identifier: "home")
         })
         
         await orchestrator.registerRoute(.detail(id: "test"), handler: { route in
             if case .detail(let id) = route {
-                return TestOrchestratorContext(identifier: "detail-\(id)")
+                return await TestOrchestratorContext(identifier: "detail-\(id)")
             }
-            return TestOrchestratorContext(identifier: "unknown")
+            return await TestOrchestratorContext(identifier: "unknown")
         })
         
         // Navigate to home
@@ -158,11 +161,11 @@ final class OrchestratorProtocolTests: XCTestCase {
             .withDependency("client1")
             .withDependency("client2")
             .withConfiguration { context in
-                await context.configure(option: "test-value")
+                await context.configure(option: "test-value", value: "test-value")
             }
         
         // Build context
-        let context = await builder.build()
+        let context = try await builder.build()
         
         // Verify configuration
         let identifier = await context.identifier
@@ -214,8 +217,19 @@ final class OrchestratorProtocolTests: XCTestCase {
 // MARK: - Test Support Types
 
 // Test orchestrator implementation
-actor TestOrchestrator: BaseOrchestrator {
-    override func createContext<T: Context>(
+actor TestOrchestrator: ExtendedOrchestrator {
+    private var contexts: [String: any Context] = [:]
+    private var clients: [String: any Client] = [:]
+    private var capabilities: [String: any Capability] = [:]
+    public private(set) var currentRoute: Route?
+    public private(set) var navigationHistory: [Route] = []
+    private var routeHandlers: [Route: (Route) async -> any Context] = [:]
+    
+    func createContext<P: Presentation>(for presentation: P.Type) async -> P.ContextType {
+        fatalError("Not implemented in test orchestrator")
+    }
+    
+    func createContext<T: Context>(
         type: T.Type,
         identifier: String? = nil,
         dependencies: [String] = []
@@ -224,11 +238,11 @@ actor TestOrchestrator: BaseOrchestrator {
         
         if T.self == TestOrchestratorContext.self {
             let depClients: [any Client] = []  // Simplified for testing
-            let context = TestOrchestratorContext(
+            let context = await TestOrchestratorContext(
                 identifier: id,
                 dependencies: depClients
             ) as! T
-            await storeContext(context, for: id)
+            contexts[id] = context
             return context
         } else if T.self == DependencyInjectedContext.self {
             let depClients = await withTaskGroup(of: TestOrchestratorClient?.self) { group in
@@ -246,23 +260,123 @@ actor TestOrchestrator: BaseOrchestrator {
                 }
                 return clients
             }
-            let context = DependencyInjectedContext(clients: depClients) as! T
-            await storeContext(context, for: id)
+            let context = await DependencyInjectedContext(clients: depClients) as! T
+            contexts[id] = context
             return context
         }
         
         fatalError("Unknown context type")
     }
+    
+    func client<C: Client>(for key: String, as type: C.Type) async -> C? {
+        return clients[key] as? C
+    }
+    
+    func registerClient<C: Client>(_ client: C, for key: String) async {
+        clients[key] = client
+    }
+    
+    func navigate(to route: Route) async {
+        navigationHistory.append(route)
+        currentRoute = route
+    }
+    
+    func registerRoute(_ route: Route, handler: @escaping (Route) async -> any Context) async {
+        routeHandlers[route] = handler
+    }
+    
+    func registerCapability<C: Capability>(_ capability: C, for key: String) async {
+        capabilities[key] = capability
+    }
+    
+    func isCapabilityAvailable(_ key: String) async -> Bool {
+        if let capability = capabilities[key] {
+            return await capability.isAvailable
+        }
+        return false
+    }
+    
+    func contextBuilder<T: Context>(for type: T.Type) async -> ContextBuilder<T> {
+        return ContextBuilder<T>(orchestrator: self, contextType: type)
+    }
+    
+    func activateAllContexts() async {
+        for context in contexts.values {
+            await context.onAppear()
+        }
+    }
+    
+    func deactivateAllContexts() async {
+        for context in contexts.values {
+            await context.onDisappear()
+        }
+    }
 }
 
 // Navigation orchestrator
-actor NavigationOrchestrator: BaseOrchestrator {
-    func registerRoute(_ route: Route, handler: @escaping (Route) async -> any Context) async {
-        await super.registerRoute(route, handler: handler)
+actor NavigationOrchestrator: ExtendedOrchestrator {
+    private var contexts: [String: any Context] = [:]
+    private var clients: [String: any Client] = [:]
+    private var capabilities: [String: any Capability] = [:]
+    public private(set) var currentRoute: Route?
+    public private(set) var navigationHistory: [Route] = []
+    private var routeHandlers: [Route: (Route) async -> any Context] = [:]
+    
+    func createContext<P: Presentation>(for presentation: P.Type) async -> P.ContextType {
+        fatalError("Not implemented for navigation orchestrator")
     }
     
-    override func createContext<P>(for presentation: P.Type) async -> P.ContextType where P : Presentation {
+    func createContext<T: Context>(type: T.Type, identifier: String?, dependencies: [String]) async -> T {
         fatalError("Not implemented for navigation orchestrator")
+    }
+    
+    func client<C: Client>(for key: String, as type: C.Type) async -> C? {
+        return clients[key] as? C
+    }
+    
+    func registerClient<C: Client>(_ client: C, for key: String) async {
+        clients[key] = client
+    }
+    
+    func navigate(to route: Route) async {
+        navigationHistory.append(route)
+        currentRoute = route
+        
+        if let handler = routeHandlers[route] {
+            let context = await handler(route)
+            contexts[UUID().uuidString] = context
+        }
+    }
+    
+    func registerRoute(_ route: Route, handler: @escaping (Route) async -> any Context) async {
+        routeHandlers[route] = handler
+    }
+    
+    func registerCapability<C: Capability>(_ capability: C, for key: String) async {
+        capabilities[key] = capability
+    }
+    
+    func isCapabilityAvailable(_ key: String) async -> Bool {
+        if let capability = capabilities[key] {
+            return await capability.isAvailable
+        }
+        return false
+    }
+    
+    func contextBuilder<T: Context>(for type: T.Type) async -> ContextBuilder<T> {
+        return ContextBuilder<T>(orchestrator: self, contextType: type)
+    }
+    
+    func activateAllContexts() async {
+        for context in contexts.values {
+            await context.onAppear()
+        }
+    }
+    
+    func deactivateAllContexts() async {
+        for context in contexts.values {
+            await context.onDisappear()
+        }
     }
 }
 
@@ -346,7 +460,7 @@ actor MonitoredCapability: Capability {
 
 
 // Supporting types
-struct OrchestratorClientState: State {
+struct OrchestratorClientState: Axiom.State {
     var value: Int = 0
 }
 
