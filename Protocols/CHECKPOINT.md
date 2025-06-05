@@ -1,6 +1,6 @@
 # @CHECKPOINT.md
 
-**Trigger**: `@CHECKPOINT [workspace]`
+**Trigger**: `@CHECKPOINT <command>`
 
 ## Commands
 
@@ -8,14 +8,15 @@
 - `framework` → Commit and integrate framework workspace only
 - `application` → Commit and integrate application workspace only
 - `protocols` → Commit and integrate protocols workspace only
-- `(no args)` → Commit and integrate all workspaces
+- `all` → Commit and integrate all workspaces
 
 ## Core Process
 
 Sync branches → Commit worktrees → Integration branch → Single commit to main → Push to remote
 
 **Philosophy**: Single clean commit to main with protocol file preservation and proper conflict resolution.
-**Constraint**: Located at repository root to prevent workspace duplication.
+**Constraint**: Operates from Axiom repository root regardless of invocation location.
+**Safety**: Automatically navigates to correct directory before executing operations.
 
 ## Workflow
 
@@ -63,6 +64,33 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ## Execution Process
 
 ```bash
+# Determine correct Axiom directory
+AXIOM_DIR="/Users/tojkuv/Documents/GitHub/axiom-apple/Axiom"
+
+# Validate Axiom directory exists
+if [[ ! -d "$AXIOM_DIR" ]]; then
+    echo "ERROR: Axiom directory not found at $AXIOM_DIR"
+    echo "Cannot perform checkpoint operations"
+    exit 1
+fi
+
+# Change to Axiom directory for all operations
+cd "$AXIOM_DIR" || exit 1
+
+# Verify we're in the correct git repository
+if [[ ! -d .git ]]; then
+    echo "ERROR: Not in a git repository"
+    echo "Expected to be in Axiom git root"
+    exit 1
+fi
+
+# Safety check: Verify expected directory structure
+if [[ ! -d "AxiomFramework" ]] || [[ ! -d "AxiomExampleApp" ]] || [[ ! -d "Protocols" ]]; then
+    echo "ERROR: Expected Axiom directory structure not found"
+    echo "Missing AxiomFramework, AxiomExampleApp, or Protocols directories"
+    exit 1
+fi
+
 # Status command
 if [[ "$1" == "status" ]]; then
     echo "=== Workspace Status ==="
@@ -134,11 +162,23 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
     INTEGRATE_FRAMEWORK=$([[ "$WORKSPACE_TYPE" == "framework" ]] && echo "true" || echo "false")
     INTEGRATE_APPLICATION=$([[ "$WORKSPACE_TYPE" == "application" ]] && echo "true" || echo "false")
     INTEGRATE_PROTOCOLS=$([[ "$WORKSPACE_TYPE" == "protocols" ]] && echo "true" || echo "false")
-else
-    # Process all workspaces
+elif [[ "$1" == "all" ]]; then
+    # Process all workspaces (explicit "all" command)
     INTEGRATE_FRAMEWORK="true"
     INTEGRATE_APPLICATION="true"
     INTEGRATE_PROTOCOLS="true"
+elif [[ -z "$1" ]]; then
+    # No command provided
+    echo "Error: No command provided"
+    echo "Usage: @CHECKPOINT <command>"
+    echo "Commands: status, framework, application, protocols, all"
+    exit 1
+else
+    # Unknown command
+    echo "Error: Unknown command '$1'"
+    echo "Usage: @CHECKPOINT <command>"
+    echo "Commands: status, framework, application, protocols, all"
+    exit 1
 fi
 
 # 1. Sync and commit framework workspace
@@ -321,7 +361,7 @@ git push origin main || echo "Local integration complete - remote push failed"
 
 **Full Integration**:
 ```
-@CHECKPOINT
+@CHECKPOINT all
 # Syncs all three workspaces
 # Creates integration branch
 # Preserves protocol files

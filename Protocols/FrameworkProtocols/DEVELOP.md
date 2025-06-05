@@ -16,6 +16,13 @@ Red → Green → Refactor → Checklist Update
 **Philosophy**: Test-driven development with RFC requirement tracking.
 **Constraint**: All tests must pass before checklist updates.
 
+## CRITICAL SAFETY RULES
+
+1. **NEVER** modify files in `/Protocols/FrameworkProtocols/` directory
+2. **ALWAYS** operate in framework workspace: `/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace`
+3. **VERIFY** working directory before any file operations
+4. **ABORT** if not in framework workspace
+
 ## Workflow
 
 ### TDD Implementation
@@ -35,6 +42,11 @@ Red → Green → Refactor → Checklist Update
 
 ## Technical Details
 
+**Protocol Dependencies**:
+- Requires framework workspace setup via `@WORKSPACE framework setup`
+- Integrations committed via `@CHECKPOINT framework` or `@CHECKPOINT`
+- All protocols can be invoked from any directory
+
 **Input Requirements**:
 - RFC in `Proposed/` directory
 - Valid RFC_FORMAT.md structure
@@ -53,8 +65,18 @@ Red → Green → Refactor → Checklist Update
 ## Execution Process
 
 ```bash
+# Determine framework workspace path
+FRAMEWORK_WORKSPACE="/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace"
+
+# Validate framework workspace exists
+if [[ ! -d "$FRAMEWORK_WORKSPACE" ]]; then
+    echo "ERROR: Framework workspace not found at $FRAMEWORK_WORKSPACE"
+    echo "Run '@WORKSPACE framework setup' first"
+    exit 1
+fi
+
 # Validate RFC exists in Proposed/
-RFC_PATH="AxiomFramework/RFCs/Proposed/${RFC_NUMBER}*.md"
+RFC_PATH="$FRAMEWORK_WORKSPACE/AxiomFramework/RFCs/Proposed/${RFC_NUMBER}*.md"
 if ! ls $RFC_PATH 1> /dev/null 2>&1; then
     echo "RFC not found in Proposed/"
     echo "Use '@PLAN propose' first"
@@ -62,7 +84,23 @@ if ! ls $RFC_PATH 1> /dev/null 2>&1; then
 fi
 
 # Enter framework workspace
-cd framework-workspace/AxiomFramework || exit 1
+cd "$FRAMEWORK_WORKSPACE/AxiomFramework" || exit 1
+
+# SAFETY CHECK: Verify we're in the correct workspace
+CURRENT_DIR=$(pwd)
+if [[ ! "$CURRENT_DIR" == "$FRAMEWORK_WORKSPACE/AxiomFramework" ]]; then
+    echo "ERROR: Not in framework workspace!"
+    echo "Expected: $FRAMEWORK_WORKSPACE/AxiomFramework"
+    echo "Current: $CURRENT_DIR"
+    exit 1
+fi
+
+# SAFETY CHECK: Ensure we're NOT in protocols directory
+if [[ "$CURRENT_DIR" == *"/Protocols/"* ]]; then
+    echo "ERROR: Operating in Protocols directory is forbidden!"
+    echo "Must work in framework workspace only"
+    exit 1
+fi
 
 # MANDATORY: Run test suite
 if ! swift test; then
@@ -71,7 +109,7 @@ if ! swift test; then
     exit 1
 fi
 
-echo "Ready for TDD implementation"
+echo "Ready for TDD implementation in: $CURRENT_DIR"
 ```
 
 ## Examples
