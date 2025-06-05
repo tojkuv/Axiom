@@ -1,0 +1,4 @@
+module _SwiftSyntaxTestSupport {
+    header "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/_SwiftSyntaxTestSupport-tool.build/_SwiftSyntaxTestSupport-Swift.h"
+    requires objc
+}

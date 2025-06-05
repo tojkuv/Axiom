@@ -1,0 +1,4 @@
+module SwiftRefactor {
+    header "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/SwiftRefactor.build/SwiftRefactor-Swift.h"
+    requires objc
+}

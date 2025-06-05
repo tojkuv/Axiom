@@ -1,0 +1,11 @@
+{
+  "": {
+    "swift-dependencies": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/AxiomMacros-tool.build/master.swiftdeps"
+  },
+  "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/Sources/AxiomMacros/AxiomMacros.swift": {
+    "dependencies": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/AxiomMacros-tool.build/AxiomMacros.d",
+    "object": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/AxiomMacros-tool.build/AxiomMacros.swift.o",
+    "swiftmodule": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/AxiomMacros-tool.build/AxiomMacros~partial.swiftmodule",
+    "swift-dependencies": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/AxiomMacros-tool.build/AxiomMacros.swiftdeps"
+  }
+}

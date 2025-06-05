@@ -1,0 +1,4 @@
+module SwiftSyntaxMacroExpansion {
+    header "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/SwiftSyntaxMacroExpansion.build/SwiftSyntaxMacroExpansion-Swift.h"
+    requires objc
+}

@@ -1,0 +1,35 @@
+{
+  "": {
+    "swift-dependencies": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/master.swiftdeps"
+  },
+  "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/Sources/Axiom/ClientIsolation.swift": {
+    "dependencies": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/ClientIsolation.d",
+    "object": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/ClientIsolation.swift.o",
+    "swiftmodule": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/ClientIsolation~partial.swiftmodule",
+    "swift-dependencies": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/ClientIsolation.swiftdeps"
+  },
+  "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/Sources/Axiom/ComponentType.swift": {
+    "dependencies": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/ComponentType.d",
+    "object": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/ComponentType.swift.o",
+    "swiftmodule": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/ComponentType~partial.swiftmodule",
+    "swift-dependencies": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/ComponentType.swiftdeps"
+  },
+  "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/Sources/Axiom/ContextDependencies.swift": {
+    "dependencies": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/ContextDependencies.d",
+    "object": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/ContextDependencies.swift.o",
+    "swiftmodule": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/ContextDependencies~partial.swiftmodule",
+    "swift-dependencies": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/ContextDependencies.swiftdeps"
+  },
+  "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/Sources/Axiom/DependencyRules.swift": {
+    "dependencies": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/DependencyRules.d",
+    "object": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/DependencyRules.swift.o",
+    "swiftmodule": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/DependencyRules~partial.swiftmodule",
+    "swift-dependencies": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/DependencyRules.swiftdeps"
+  },
+  "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/Sources/Axiom/UnidirectionalFlow.swift": {
+    "dependencies": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/UnidirectionalFlow.d",
+    "object": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/UnidirectionalFlow.swift.o",
+    "swiftmodule": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/UnidirectionalFlow~partial.swiftmodule",
+    "swift-dependencies": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/Axiom.build/UnidirectionalFlow.swiftdeps"
+  }
+}

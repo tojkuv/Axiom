@@ -1,0 +1,4 @@
+module SwiftIDEUtils {
+    header "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/SwiftIDEUtils.build/SwiftIDEUtils-Swift.h"
+    requires objc
+}

@@ -1,0 +1,11 @@
+{
+  "": {
+    "swift-dependencies": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/AxiomTesting-tool.build/master.swiftdeps"
+  },
+  "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/Sources/AxiomTesting/TestHelpers.swift": {
+    "dependencies": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/AxiomTesting-tool.build/TestHelpers.d",
+    "object": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/AxiomTesting-tool.build/TestHelpers.swift.o",
+    "swiftmodule": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/AxiomTesting-tool.build/TestHelpers~partial.swiftmodule",
+    "swift-dependencies": "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/AxiomTesting-tool.build/TestHelpers.swiftdeps"
+  }
+}

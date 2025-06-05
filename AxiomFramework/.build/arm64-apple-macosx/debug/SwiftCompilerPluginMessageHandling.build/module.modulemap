@@ -1,0 +1,4 @@
+module SwiftCompilerPluginMessageHandling {
+    header "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/SwiftCompilerPluginMessageHandling.build/SwiftCompilerPluginMessageHandling-Swift.h"
+    requires objc
+}

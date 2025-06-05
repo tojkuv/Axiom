@@ -1,0 +1,4 @@
+module SwiftCompilerPlugin {
+    header "/Users/tojkuv/Documents/GitHub/axiom-apple/framework-workspace/AxiomFramework/.build/arm64-apple-macosx/debug/SwiftCompilerPlugin-tool.build/SwiftCompilerPlugin-Swift.h"
+    requires objc
+}
