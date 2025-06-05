@@ -55,7 +55,8 @@ axiom-apple/                        # Top-level directory
 4. Configure cone sparse-checkout for specific directory
 5. Reapply sparse-checkout to clean workspace
 6. Create protocol symlinks (for framework/application workspaces)
-7. Initialize status tracking
+7. Create workspace-specific .gitignore file
+8. Initialize status tracking
 
 ### Key Features
 - **Minimal**: Only specified directory and protocol symlink
@@ -89,6 +90,58 @@ axiom-apple/                        # Top-level directory
 - All root files excluded (README, etc.)
 - All other directories excluded
 - Only specified directory tracked by git
+
+## Gitignore Configuration
+
+Each workspace requires a tailored .gitignore file to prevent committing build artifacts and temporary files:
+
+**Framework Workspace** (.gitignore):
+```
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+DerivedData/
+
+# macOS
+.DS_Store
+```
+
+**Application Workspace** (.gitignore):
+```
+# Xcode
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+DerivedData/
+build/
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# macOS
+.DS_Store
+```
+
+**Protocols Workspace** (.gitignore):
+```
+# macOS
+.DS_Store
+
+# Temporary files
+*.tmp
+*.swp
+```
 
 ## Execution Process
 
