@@ -1,26 +1,27 @@
 # @WORKSPACE.md
 
-**Trigger**: `@WORKSPACE [workspace] [command]`
+**Trigger**: `@WORKSPACE [command] [workspace]`
 
 ## Commands
 
-- `setup` → Create workspace worktree
-- `reset` → Recreate worktree with clean state
-- `status` → Show worktree details and health
-- `cleanup` → Remove workspace worktree
+- `setup [workspace|all]` → Create workspace worktree(s)
+- `reset [workspace|all]` → Recreate worktree(s) with clean state
+- `status [workspace|all]` → Show worktree details and health
+- `cleanup [workspace|all]` → Remove workspace worktree(s)
 
 ## Workspaces
 
 - `framework` → AxiomFramework development (with FrameworkProtocols symlink)
 - `application` → AxiomExampleApp development (with ApplicationProtocols symlink)
 - `protocols` → Protocols management (entire Protocols directory)
+- `all` → All workspaces
 
 ## Core Process
 
 Create worktree → Configure sparse-checkout → Create protocol symlink → Track status
 
 **Philosophy**: Isolated development environments for each component.
-**Constraint**: Each workspace contains only its specific directory and protocol symlink.
+**Constraint**: Uses external script to manage workspace complexity and supports batch operations.
 
 ## Workspace Structure
 
@@ -64,6 +65,8 @@ axiom-apple/                        # Top-level directory
 
 ## Technical Details
 
+**Script Location**: `Protocols/workspace.sh`
+
 **Sparse-Checkout Configuration**:
 ```
 # Framework workspace
@@ -90,103 +93,9 @@ axiom-apple/                        # Top-level directory
 ## Execution Process
 
 ```bash
-# Validate we're in Axiom git root
-[[ -d .git ]] || { echo "Not in Axiom git root"; exit 1; }
-
-# Parse arguments
-WORKSPACE_TYPE="$1"
-COMMAND="$2"
-
-# Validate workspace type
-if [[ ! "$WORKSPACE_TYPE" =~ ^(framework|application|protocols)$ ]]; then
-    echo "Usage: @WORKSPACE [framework|application|protocols] [setup|reset|status|cleanup]"
-    exit 1
-fi
-
-# Set workspace-specific variables
-case "$WORKSPACE_TYPE" in
-    framework)
-        WORKSPACE_DIR="../framework-workspace"
-        BRANCH_NAME="framework"
-        SPARSE_PATH="AxiomFramework"
-        PROTOCOL_SOURCE="../Axiom/Protocols/FrameworkProtocols"
-        PROTOCOL_LINK="FrameworkProtocols"
-        ;;
-    application)
-        WORKSPACE_DIR="../application-workspace"
-        BRANCH_NAME="application"
-        SPARSE_PATH="AxiomExampleApp"
-        PROTOCOL_SOURCE="../Axiom/Protocols/ApplicationProtocols"
-        PROTOCOL_LINK="ApplicationProtocols"
-        ;;
-    protocols)
-        WORKSPACE_DIR="../protocols-workspace"
-        BRANCH_NAME="protocols"
-        SPARSE_PATH="Protocols"
-        PROTOCOL_SOURCE=""
-        PROTOCOL_LINK=""
-        ;;
-esac
-
-# Setup command
-if [[ "$COMMAND" == "setup" ]]; then
-    # Create worktree at parent level
-    if ! git worktree list | grep -q "$WORKSPACE_DIR"; then
-        # Ensure branch exists
-        if ! git show-ref --verify --quiet "refs/heads/$BRANCH_NAME"; then
-            git checkout -b "$BRANCH_NAME"
-            git push -u origin "$BRANCH_NAME" || true
-            git checkout main
-        fi
-        git worktree add "$WORKSPACE_DIR" "$BRANCH_NAME"
-    fi
-    
-    # Configure precise sparse-checkout
-    cd "$WORKSPACE_DIR"
-    git sparse-checkout init --cone
-    git sparse-checkout set "$SPARSE_PATH"
-    
-    # Clean workspace by reapplying sparse-checkout
-    git read-tree -m -u HEAD
-    
-    # Create protocol symlink (not for protocols workspace)
-    if [[ -n "$PROTOCOL_LINK" ]]; then
-        ln -sf "$PROTOCOL_SOURCE" "$PROTOCOL_LINK"
-    fi
-    
-    # Initialize status
-    echo "Created: $(date)" > .workspace-status
-    echo "Branch: $BRANCH_NAME" >> .workspace-status
-    echo "Type: $WORKSPACE_TYPE" >> .workspace-status
-    
-    cd ../Axiom
-    echo "$WORKSPACE_TYPE workspace ready at $WORKSPACE_DIR"
-fi
-
-# Reset command
-if [[ "$COMMAND" == "reset" ]]; then
-    git worktree remove "$WORKSPACE_DIR" --force 2>/dev/null || true
-    exec "$0" "$WORKSPACE_TYPE" setup
-fi
-
-# Status command
-if [[ "$COMMAND" == "status" ]]; then
-    if [[ -d "$WORKSPACE_DIR" ]]; then
-        echo "$WORKSPACE_TYPE-workspace: active"
-        echo "Branch: $(cd "$WORKSPACE_DIR" && git branch --show-current)"
-        echo "Contents:"
-        (cd "$WORKSPACE_DIR" && ls -la | grep -E "^d|^l" | grep -v "^\.")
-        [[ -f "$WORKSPACE_DIR/.workspace-status" ]] && echo "---" && cat "$WORKSPACE_DIR/.workspace-status"
-    else
-        echo "$WORKSPACE_TYPE-workspace: not found"
-    fi
-fi
-
-# Cleanup command
-if [[ "$COMMAND" == "cleanup" ]]; then
-    git worktree remove "$WORKSPACE_DIR" --force 2>/dev/null || true
-    echo "$WORKSPACE_TYPE workspace removed"
-fi
+# Execute workspace script with command and workspace
+PROTOCOL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+bash "$PROTOCOL_DIR/workspace.sh" "$1" "$2"
 ```
 
 ## Error Handling
@@ -200,53 +109,61 @@ fi
 **Recovery Procedures**:
 1. Extra files → `git sparse-checkout reapply`
 2. Broken symlink → Recreate with correct path
-3. Full reset → `@WORKSPACE [workspace] reset`
+3. Full reset → `@WORKSPACE reset [workspace]`
 
 ## Examples
 
 **Framework Setup**:
 ```
-cd Axiom
-@WORKSPACE framework setup
+@WORKSPACE setup framework
+# Setting up framework workspace...
 # Creating framework worktree...
 # Configuring sparse-checkout...
 # framework workspace ready at ../framework-workspace
 ```
 
-**Application Status**:
+**All Workspaces Status**:
 ```
-@WORKSPACE application status
-# application-workspace: active
+@WORKSPACE status all
+# === framework workspace ===
+# Status: active
+# Branch: framework
+# === application workspace ===
+# Status: active
 # Branch: application
-# Contents:
-# drwxr-xr-x  4 user  staff  128 date time AxiomExampleApp
-# lrwxr-xr-x  1 user  staff   32 date time ApplicationProtocols -> ../Axiom/Protocols/ApplicationProtocols
-# ---
-# Created: <timestamp>
-# Branch: application
-# Type: application
-```
-
-**Protocols Workspace**:
-```
-@WORKSPACE protocols setup
-# Creating protocols worktree...
-# Configuring sparse-checkout...
-# protocols workspace ready at ../protocols-workspace
-
-@WORKSPACE protocols status
-# protocols-workspace: active
+# === protocols workspace ===
+# Status: active
 # Branch: protocols
-# Contents:
-# drwxr-xr-x  5 user  staff  160 date time Protocols
+```
+
+**Setup All Workspaces**:
+```
+@WORKSPACE setup all
+# Setting up framework workspace...
+# framework workspace ready at ../framework-workspace
+# Setting up application workspace...
+# application workspace ready at ../application-workspace
+# Setting up protocols workspace...
+# protocols workspace ready at ../protocols-workspace
 ```
 
 **Clean Restart**:
 ```
-@WORKSPACE framework reset
-# Removing existing workspace...
-# Setting up fresh workspace...
+@WORKSPACE reset framework
+# Removing framework workspace...
+# Setting up framework workspace...
 # framework workspace ready at ../framework-workspace
+```
+
+**Remove All Workspaces**:
+```
+@WORKSPACE cleanup all
+# Removing framework workspace...
+# framework workspace removed
+# Removing application workspace...
+# application workspace removed
+# Removing protocols workspace...
+# protocols workspace removed
 ```
 
 Manages isolated development workspaces for framework, application, and protocols.

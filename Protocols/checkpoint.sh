@@ -224,10 +224,13 @@ if [[ "$INTEGRATE_PROTOCOLS" == "true" ]] && [ -d "../protocols-workspace" ]; th
     }
 fi
 
-# Restore protocol files if they were affected
-if [ -d "/tmp/protocols-backup" ]; then
+# Restore protocol files if they were affected (but not when integrating protocols workspace)
+if [ -d "/tmp/protocols-backup" ] && [[ "$INTEGRATE_PROTOCOLS" != "true" ]]; then
     rm -rf Protocols
     cp -r /tmp/protocols-backup Protocols
+    rm -rf /tmp/protocols-backup
+elif [ -d "/tmp/protocols-backup" ]; then
+    # Clean up backup if protocols workspace is being integrated
     rm -rf /tmp/protocols-backup
 fi
 

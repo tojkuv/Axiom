@@ -141,9 +141,10 @@ bash "$PROTOCOL_DIR/checkpoint.sh" "$1"
 
 **Protocol File Protection**:
 1. **Backup Strategy**: Entire Protocols/ directory copied to /tmp before integration
-2. **Automatic Restoration**: Protocols directory restored if affected by merge
-3. **Conflict Cleanup**: Merge artifacts (Protocols~branch) removed automatically
-4. **Root Preservation**: Protocols directory maintained at repository root
+2. **Selective Restoration**: Protocols directory restored only when integrating framework/application workspaces
+3. **Protocols Workspace Exception**: When integrating protocols workspace, protocol changes are preserved
+4. **Conflict Cleanup**: Merge artifacts (Protocols~branch) removed automatically
+5. **Root Preservation**: Protocols directory maintained at repository root
 
 **Benefits**:
 1. **Single Commit**: Clean remote history with one commit per checkpoint
