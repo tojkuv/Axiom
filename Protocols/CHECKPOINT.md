@@ -7,6 +7,7 @@
 - `status` → Show pending changes in all workspaces
 - `framework` → Commit and integrate framework workspace only
 - `application` → Commit and integrate application workspace only
+- `protocols` → Commit and integrate protocols workspace only
 - `(no args)` → Commit and integrate all workspaces
 
 ## Core Process
@@ -28,10 +29,11 @@ Sync branches → Commit worktrees → Integration branch → Single commit to m
 7. Push single commit to remote
 
 ### Workspace Isolation
-- **Framework workspace**: Only sees `AxiomFramework/` (with symlink to `FrameworkProtocols`)
-- **Application workspace**: Only sees `AxiomExampleApp/` (with symlink to `ApplicationProtocols`)
+- **Framework workspace**: Only sees `AxiomFramework/` (with symlink to `Protocols/FrameworkProtocols`)
+- **Application workspace**: Only sees `AxiomExampleApp/` (with symlink to `Protocols/ApplicationProtocols`)
+- **Protocols workspace**: Only sees `Protocols/` directory (all protocol management)
 - **Sparse-checkout**: Prevents cross-boundary file access
-- **Protocol Protection**: Root protocol files preserved during integration
+- **Protocol Protection**: Protocol files preserved during integration
 
 ## Technical Details
 
@@ -81,6 +83,14 @@ if [[ "$1" == "status" ]]; then
         echo -e "\nApplication workspace: not found"
     fi
     
+    # Check protocols workspace
+    if [ -d "../protocols-workspace" ]; then
+        echo -e "\nProtocols workspace:"
+        (cd ../protocols-workspace && git status --short)
+    else
+        echo -e "\nProtocols workspace: not found"
+    fi
+    
     # Check main repository
     echo -e "\nMain repository:"
     git status --short
@@ -90,7 +100,7 @@ fi
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M')
 
 # Handle workspace-specific commands
-if [[ "$1" == "framework" ]] || [[ "$1" == "application" ]]; then
+if [[ "$1" == "framework" ]] || [[ "$1" == "application" ]] || [[ "$1" == "protocols" ]]; then
     WORKSPACE_TYPE="$1"
     WORKSPACE_DIR="../${WORKSPACE_TYPE}-workspace"
     
@@ -123,10 +133,12 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
     # Continue with integration for single workspace
     INTEGRATE_FRAMEWORK=$([[ "$WORKSPACE_TYPE" == "framework" ]] && echo "true" || echo "false")
     INTEGRATE_APPLICATION=$([[ "$WORKSPACE_TYPE" == "application" ]] && echo "true" || echo "false")
+    INTEGRATE_PROTOCOLS=$([[ "$WORKSPACE_TYPE" == "protocols" ]] && echo "true" || echo "false")
 else
     # Process all workspaces
     INTEGRATE_FRAMEWORK="true"
     INTEGRATE_APPLICATION="true"
+    INTEGRATE_PROTOCOLS="true"
 fi
 
 # 1. Sync and commit framework workspace
@@ -173,13 +185,34 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
     cd ../Axiom
 fi
 
-# 3. Create integration branch and merge workspaces
+# 3. Sync and commit protocols workspace
+if [[ "$INTEGRATE_PROTOCOLS" == "true" ]] && [ -d "../protocols-workspace" ]; then
+    cd ../protocols-workspace
+    git fetch origin main
+    git merge origin/main -m "Sync with main: $TIMESTAMP" || {
+        echo "Auto-resolving conflicts in favor of protocols"
+        git checkout --theirs .
+        git add --sparse .
+        git commit -m "Sync with main: $TIMESTAMP - protocols preserved"
+    }
+    
+    if [ -n "$(git status --porcelain)" ]; then
+        git add --sparse .
+        git commit -m "Protocols development checkpoint: $TIMESTAMP
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+    fi
+    cd ../Axiom
+fi
+
+# 4. Create integration branch and merge workspaces
 git checkout main
 git pull origin main || true
 
 # Preserve protocol files before integration
-cp -r FrameworkProtocols /tmp/framework-protocols-backup 2>/dev/null || true
-cp -r ApplicationProtocols /tmp/application-protocols-backup 2>/dev/null || true
+cp -r Protocols /tmp/protocols-backup 2>/dev/null || true
 
 # Create integration branch
 git checkout -b "integration-$TIMESTAMP" main
@@ -203,21 +236,24 @@ if [[ "$INTEGRATE_APPLICATION" == "true" ]] && [ -d "../application-workspace" ]
     }
 fi
 
-# Restore protocol files if they were affected
-if [ -d "/tmp/framework-protocols-backup" ]; then
-    rm -rf FrameworkProtocols
-    cp -r /tmp/framework-protocols-backup FrameworkProtocols
-    rm -rf /tmp/framework-protocols-backup
+if [[ "$INTEGRATE_PROTOCOLS" == "true" ]] && [ -d "../protocols-workspace" ]; then
+    git merge protocols --no-ff --strategy=recursive -X ours \
+        -m "Integrate protocols workspace: $TIMESTAMP" || {
+        echo "Resolving protocols conflicts"
+        git add .
+        git commit -m "Integrate protocols workspace: $TIMESTAMP"
+    }
 fi
 
-if [ -d "/tmp/application-protocols-backup" ]; then
-    rm -rf ApplicationProtocols  
-    cp -r /tmp/application-protocols-backup ApplicationProtocols
-    rm -rf /tmp/application-protocols-backup
+# Restore protocol files if they were affected
+if [ -d "/tmp/protocols-backup" ]; then
+    rm -rf Protocols
+    cp -r /tmp/protocols-backup Protocols
+    rm -rf /tmp/protocols-backup
 fi
 
 # Clean up any merge artifacts
-rm -rf FrameworkProtocols~* ApplicationProtocols~* 2>/dev/null || true
+rm -rf Protocols~* 2>/dev/null || true
 
 # Commit protocol restoration if needed
 if [ -n "$(git status --porcelain)" ]; then
@@ -230,12 +266,17 @@ git checkout main
 git merge --squash "integration-$TIMESTAMP"
 
 # Determine commit message based on what was integrated
-if [[ "$INTEGRATE_FRAMEWORK" == "true" ]] && [[ "$INTEGRATE_APPLICATION" == "true" ]]; then
-    INTEGRATION_MSG="Integrated framework and application workspace changes"
-elif [[ "$INTEGRATE_FRAMEWORK" == "true" ]]; then
-    INTEGRATION_MSG="Integrated framework workspace changes"
-elif [[ "$INTEGRATE_APPLICATION" == "true" ]]; then
-    INTEGRATION_MSG="Integrated application workspace changes"
+INTEGRATED_PARTS=()
+[[ "$INTEGRATE_FRAMEWORK" == "true" ]] && INTEGRATED_PARTS+=("framework")
+[[ "$INTEGRATE_APPLICATION" == "true" ]] && INTEGRATED_PARTS+=("application")
+[[ "$INTEGRATE_PROTOCOLS" == "true" ]] && INTEGRATED_PARTS+=("protocols")
+
+if [[ ${#INTEGRATED_PARTS[@]} -eq 3 ]]; then
+    INTEGRATION_MSG="Integrated framework, application, and protocols workspace changes"
+elif [[ ${#INTEGRATED_PARTS[@]} -eq 2 ]]; then
+    INTEGRATION_MSG="Integrated ${INTEGRATED_PARTS[0]} and ${INTEGRATED_PARTS[1]} workspace changes"
+elif [[ ${#INTEGRATED_PARTS[@]} -eq 1 ]]; then
+    INTEGRATION_MSG="Integrated ${INTEGRATED_PARTS[0]} workspace changes"
 fi
 
 git commit -m "Development checkpoint: $TIMESTAMP
@@ -281,7 +322,7 @@ git push origin main || echo "Local integration complete - remote push failed"
 **Full Integration**:
 ```
 @CHECKPOINT
-# Syncs both workspaces
+# Syncs all three workspaces
 # Creates integration branch
 # Preserves protocol files
 # Single commit to main
@@ -293,7 +334,16 @@ git push origin main || echo "Local integration complete - remote push failed"
 @CHECKPOINT framework
 # Commits framework changes only
 # Integrates framework workspace
-# Leaves application untouched
+# Leaves application and protocols untouched
+# Single commit approach
+```
+
+**Protocols Only**:
+```
+@CHECKPOINT protocols
+# Commits protocol changes only
+# Integrates protocols workspace
+# Leaves framework and application untouched
 # Single commit approach
 ```
 
@@ -308,15 +358,16 @@ git push origin main || echo "Local integration complete - remote push failed"
 ## Workspace Configuration
 
 **Sparse-Checkout Setup**:
-- Framework workspace: `/AxiomFramework/` (symlink to `../Axiom/FrameworkProtocols/`)
-- Application workspace: `/AxiomExampleApp/` (symlink to `../Axiom/ApplicationProtocols/`)
-- Protocol files at root only: Protected during integration
+- Framework workspace: `/AxiomFramework/` (symlink to `../Axiom/Protocols/FrameworkProtocols/`)
+- Application workspace: `/AxiomExampleApp/` (symlink to `../Axiom/Protocols/ApplicationProtocols/`)
+- Protocols workspace: `/Protocols/` (entire protocols directory)
+- Protocol files at root: Protected during integration
 
 **Protocol File Protection**:
-1. **Backup Strategy**: Files copied to /tmp before integration
-2. **Automatic Restoration**: Protocol files restored if affected by merge
-3. **Conflict Cleanup**: Merge artifacts (Protocol~branch) removed automatically
-4. **Root Preservation**: Protocol files maintained at repository root
+1. **Backup Strategy**: Entire Protocols/ directory copied to /tmp before integration
+2. **Automatic Restoration**: Protocols directory restored if affected by merge
+3. **Conflict Cleanup**: Merge artifacts (Protocols~branch) removed automatically
+4. **Root Preservation**: Protocols directory maintained at repository root
 
 **Benefits**:
 1. **Single Commit**: Clean remote history with one commit per checkpoint
