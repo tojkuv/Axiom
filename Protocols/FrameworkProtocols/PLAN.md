@@ -9,8 +9,8 @@
 - `propose [RFC-XXX]` → Move to Proposed/ (requires format compliance)
 - `activate [RFC-XXX]` → Move to Active/ (final format check)
 - `deprecate [RFC-XXX] [RFC-YYY]` → Replace with new
-- `revise [RFC-XXX]` → Fix unstable requirements (format-aware)
-- `explore [RFC-XXX]` → Suggest changes (requires STABLE & format compliance)
+- `revise [RFC-XXX]` → Fix unstable requirements if any (format-aware)
+- `explore [RFC-XXX]` → Suggest meaningful improvements if any (requires STABLE)
 - `accept [RFC-XXX] [selections]` → Apply suggestions (maintains format)
 - `ready [RFC-XXX]` → Verify ready for development (includes format validation)
 
@@ -19,8 +19,10 @@
 Draft/ → Proposed/ → Active/ → Deprecated/ → Archive/
 
 **Philosophy**: Stabilization before expansion with strict format compliance.
+**Principle**: Quality over quantity - no suggestions is better than forced suggestions.
 **Constraint**: Minimum 3-5 stable requirements before propose.
 **Requirement**: Every command validates against current RFC_FORMAT.md.
+**Guidance**: Commands should report "no issues found" when appropriate rather than inventing problems.
 
 ## Dependencies
 
@@ -56,19 +58,25 @@ Draft/ → Proposed/ → Active/ → Deprecated/ → Archive/
 
 **Revise Command**:
 - Loads RFC_FORMAT.md before analysis
-- Provides numbered fixes [R1], [R2]...
-- Technical impossibilities → achievable versions
-- Missing acceptance criteria → complete criteria
-- Untestable specs → testable versions
-- Format violations → compliant versions
+- Analyzes for actual instabilities only
+- Returns "No revisions needed" if RFC is stable
+- When issues found, provides numbered fixes [R1], [R2]...
+  - Technical impossibilities → achievable versions
+  - Missing acceptance criteria → complete criteria
+  - Untestable specs → testable versions
+  - Format violations → compliant versions
+- Quality over quantity: 0-8 critical fixes better than 20 minor ones
 
 **Explore Command**:
-- Requires format compliance before suggestions
-- Provides numbered changes [E1], [E2]...
-- Removals → requirements to delete
-- Simplifications → consolidated versions
-- Additions → new requirements with criteria
-- All changes maintain format compliance
+- Requires STABLE RFC with format compliance
+- Evaluates for meaningful improvements only
+- Returns "No enhancements recommended" if RFC is optimal
+- When improvements exist, provides numbered changes [E1], [E2]...
+  - Removals → requirements that add complexity without value
+  - Simplifications → only if significantly reduce complexity
+  - Additions → only if critical gap identified
+- All changes must maintain format compliance
+- Fewer high-impact suggestions preferred over many trivial ones
 
 **Accept Command**:
 - `accept RFC-001 R1,R3` → Apply specific revisions
@@ -122,6 +130,15 @@ Draft/ → Proposed/ → Active/ → Deprecated/ → Archive/
 # All suggestions maintain format compliance
 @PLAN accept RFC-001 E2
 # Post-accept validation ensures format intact
+```
+
+**No Changes Needed**:
+```
+@PLAN revise RFC-002
+# Shows: No revisions needed - RFC is stable
+
+@PLAN explore RFC-003
+# Shows: No enhancements recommended - RFC is optimal
 ```
 
 **Format Update Workflow**:
