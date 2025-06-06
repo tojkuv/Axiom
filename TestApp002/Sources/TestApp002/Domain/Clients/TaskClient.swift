@@ -19,6 +19,9 @@ enum TaskValidationError: Error, Equatable, LocalizedError {
     case categoryNotFound(String)
     case invalidColorFormat(String)
     case noTasksFoundForBatchUpdate
+    case sharePermissionDenied(userId: String)
+    case userAlreadyHasAccess(userId: String)
+    case cannotShareWithSelf
     
     var errorDescription: String? {
         switch self {
@@ -52,6 +55,12 @@ enum TaskValidationError: Error, Equatable, LocalizedError {
             return "Invalid color format '\(color)'. Expected format: #RRGGBB"
         case .noTasksFoundForBatchUpdate:
             return "No tasks found for batch category assignment"
+        case .sharePermissionDenied(let userId):
+            return "Permission denied: cannot share with user '\(userId)'"
+        case .userAlreadyHasAccess(let userId):
+            return "User '\(userId)' already has access to this task"
+        case .cannotShareWithSelf:
+            return "Cannot share task with yourself"
         }
     }
 }
@@ -172,6 +181,19 @@ actor TaskClient: Client {
             
         case .batchAssignCategory(let taskIds, let categoryId):
             try await processBatchAssignCategory(taskIds: taskIds, categoryId: categoryId)
+            
+        // MARK: - Sharing Operations
+        case .shareTask(let taskId, let userId, let permission):
+            try await processShareTask(taskId: taskId, userId: userId, permission: permission)
+            
+        case .shareTaskList(let userId, let permission):
+            try await processShareTaskList(userId: userId, permission: permission)
+            
+        case .unshareTask(let taskId, let userId):
+            try await processUnshareTask(taskId: taskId, userId: userId)
+            
+        case .updateSharePermission(let taskId, let userId, let permission):
+            try await processUpdateSharePermission(taskId: taskId, userId: userId, permission: permission)
         }
     }
     
@@ -725,5 +747,221 @@ actor TaskClient: Client {
     private func cancelNotificationForTask(_ taskId: String) async {
         let notificationId = "task-due-\(taskId)"
         await notificationCapability.cancel(notificationId: notificationId)
+    }
+    
+    // MARK: - Sharing Implementation (GREEN Phase)
+    
+    /// Shares a task with another user
+    private func processShareTask(taskId: String, userId: String, permission: SharePermission) async throws {
+        // Validate sharing request
+        guard userId != self.userId else {
+            throw TaskValidationError.cannotShareWithSelf
+        }
+        
+        guard let taskIndex = state.tasks.firstIndex(where: { $0.id == taskId }) else {
+            throw TaskValidationError.taskNotFound(taskId)
+        }
+        
+        let task = state.tasks[taskIndex]
+        
+        // Check if user already has access
+        if task.sharedWith.contains(where: { $0.userId == userId }) {
+            throw TaskValidationError.userAlreadyHasAccess(userId: userId)
+        }
+        
+        // Create share record
+        let share = TaskShare(
+            taskId: taskId,
+            userId: userId,
+            permission: permission,
+            sharedBy: self.userId
+        )
+        
+        // Queue share immediately (as per RFC requirement)
+        let pendingShare = PendingShare(
+            taskId: taskId,
+            userId: userId,
+            permission: permission,
+            sharedBy: self.userId
+        )
+        
+        // Update task with share
+        let updatedShares = task.sharedWith + [share]
+        let updatedTask = task.updated(sharedWith: updatedShares)
+        
+        // Update state immediately for responsiveness
+        var updatedTasks = state.tasks
+        updatedTasks[taskIndex] = updatedTask
+        
+        let updatedPendingShares = state.pendingShares + [pendingShare]
+        
+        updateState(
+            tasks: updatedTasks,
+            pendingShares: updatedPendingShares
+        )
+        
+        // Initiate sync (within 100ms as per RFC)
+        _ = _Concurrency.Task {
+            try await syncShareToNetwork(share)
+        }
+    }
+    
+    /// Shares the entire task list with another user
+    private func processShareTaskList(userId: String, permission: SharePermission) async throws {
+        // Validate sharing request
+        guard userId != self.userId else {
+            throw TaskValidationError.cannotShareWithSelf
+        }
+        
+        let activeTasks = state.tasks.filter { !$0.isDeleted }
+        
+        // Create shares for all active tasks
+        var updatedTasks = state.tasks
+        var pendingShares = state.pendingShares
+        
+        for (index, task) in updatedTasks.enumerated() {
+            guard !task.isDeleted else { continue }
+            
+            // Skip if user already has access
+            if task.sharedWith.contains(where: { $0.userId == userId }) {
+                continue
+            }
+            
+            let share = TaskShare(
+                taskId: task.id,
+                userId: userId,
+                permission: permission,
+                sharedBy: self.userId
+            )
+            
+            let pendingShare = PendingShare(
+                taskId: task.id,
+                userId: userId,
+                permission: permission,
+                sharedBy: self.userId
+            )
+            
+            // Update task with share
+            let updatedShares = task.sharedWith + [share]
+            updatedTasks[index] = task.updated(sharedWith: updatedShares)
+            pendingShares.append(pendingShare)
+        }
+        
+        updateState(
+            tasks: updatedTasks,
+            pendingShares: pendingShares
+        )
+        
+        // Initiate sync for all shares
+        _ = _Concurrency.Task {
+            for share in pendingShares.suffix(activeTasks.count) {
+                try await syncShareToNetwork(TaskShare(
+                    taskId: share.taskId,
+                    userId: share.userId,
+                    permission: share.permission,
+                    sharedBy: share.sharedBy
+                ))
+            }
+        }
+    }
+    
+    /// Removes a user's access to a task
+    private func processUnshareTask(taskId: String, userId: String) async throws {
+        guard let taskIndex = state.tasks.firstIndex(where: { $0.id == taskId }) else {
+            throw TaskValidationError.taskNotFound(taskId)
+        }
+        
+        let task = state.tasks[taskIndex]
+        
+        // Remove the share
+        let updatedShares = task.sharedWith.filter { $0.userId != userId }
+        let updatedTask = task.updated(sharedWith: updatedShares)
+        
+        var updatedTasks = state.tasks
+        updatedTasks[taskIndex] = updatedTask
+        
+        updateState(tasks: updatedTasks)
+        
+        // Sync removal to network
+        _ = _Concurrency.Task {
+            try await syncUnshareToNetwork(taskId: taskId, userId: userId)
+        }
+    }
+    
+    /// Updates a user's permission level for a task
+    private func processUpdateSharePermission(taskId: String, userId: String, permission: SharePermission) async throws {
+        guard let taskIndex = state.tasks.firstIndex(where: { $0.id == taskId }) else {
+            throw TaskValidationError.taskNotFound(taskId)
+        }
+        
+        let task = state.tasks[taskIndex]
+        
+        // Find and update the share
+        guard let shareIndex = task.sharedWith.firstIndex(where: { $0.userId == userId }) else {
+            throw TaskValidationError.taskNotFound("Share not found for user \(userId)")
+        }
+        
+        var updatedShares = task.sharedWith
+        let existingShare = updatedShares[shareIndex]
+        let updatedShare = TaskShare(
+            id: existingShare.id,
+            taskId: existingShare.taskId,
+            userId: existingShare.userId,
+            permission: permission,
+            sharedAt: existingShare.sharedAt,
+            sharedBy: existingShare.sharedBy
+        )
+        updatedShares[shareIndex] = updatedShare
+        
+        let updatedTask = task.updated(sharedWith: updatedShares)
+        
+        var updatedTasks = state.tasks
+        updatedTasks[taskIndex] = updatedTask
+        
+        updateState(tasks: updatedTasks)
+        
+        // Sync permission update to network
+        _ = _Concurrency.Task {
+            try await syncShareToNetwork(updatedShare)
+        }
+    }
+    
+    /// Simulates network sync for sharing (placeholder implementation)
+    private func syncShareToNetwork(_ share: TaskShare) async throws {
+        // In a real implementation, this would make network calls
+        // For now, we simulate network delay and success
+        try await _Concurrency.Task.sleep(nanoseconds: 50_000_000) // 50ms delay
+        
+        // Remove from pending shares after successful sync
+        let updatedPendingShares = state.pendingShares.filter { $0.id != share.id }
+        updateState(pendingShares: updatedPendingShares)
+    }
+    
+    /// Simulates network sync for unsharing (placeholder implementation)
+    private func syncUnshareToNetwork(taskId: String, userId: String) async throws {
+        // In a real implementation, this would make network calls
+        try await _Concurrency.Task.sleep(nanoseconds: 50_000_000) // 50ms delay
+    }
+    
+    /// Updates state with sharing information
+    private func updateState(
+        tasks: [Task]? = nil,
+        categories: [Category]? = nil,
+        searchQuery: String? = nil,
+        sortCriteria: SortCriteria? = nil,
+        selectedCategoryId: String?? = nil,
+        pendingShares: [PendingShare]? = nil,
+        collaborationInfo: [CollaborationInfo]? = nil
+    ) {
+        state = TaskListState(
+            tasks: tasks ?? state.tasks,
+            categories: categories ?? state.categories,
+            searchQuery: searchQuery ?? state.searchQuery,
+            sortCriteria: sortCriteria ?? state.sortCriteria,
+            selectedCategoryId: selectedCategoryId ?? state.selectedCategoryId,
+            pendingShares: pendingShares ?? state.pendingShares,
+            collaborationInfo: collaborationInfo ?? state.collaborationInfo
+        )
+        stateStreamContinuation.yield(state)
     }
 }

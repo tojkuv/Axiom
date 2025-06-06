@@ -18,6 +18,10 @@ struct Task: Equatable, Identifiable, Codable, Hashable, Sendable {
     let retentionDays: Int?
     let scheduledPurgeDate: Date?
     
+    // Sharing properties
+    let sharedWith: [TaskShare]
+    let sharedBy: String?
+    
     // Convenience initializer with defaults
     init(
         id: String = UUID().uuidString,
@@ -33,7 +37,9 @@ struct Task: Equatable, Identifiable, Codable, Hashable, Sendable {
         isDeleted: Bool = false,
         deletedAt: Date? = nil,
         retentionDays: Int? = nil,
-        scheduledPurgeDate: Date? = nil
+        scheduledPurgeDate: Date? = nil,
+        sharedWith: [TaskShare] = [],
+        sharedBy: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -49,6 +55,8 @@ struct Task: Equatable, Identifiable, Codable, Hashable, Sendable {
         self.deletedAt = deletedAt
         self.retentionDays = retentionDays
         self.scheduledPurgeDate = scheduledPurgeDate
+        self.sharedWith = sharedWith
+        self.sharedBy = sharedBy
     }
     
     // MARK: - Computed Properties
@@ -57,6 +65,11 @@ struct Task: Equatable, Identifiable, Codable, Hashable, Sendable {
     var isOverdue: Bool {
         guard let dueDate = dueDate, !isCompleted else { return false }
         return dueDate < Date()
+    }
+    
+    /// Whether the task is shared with other users
+    var isShared: Bool {
+        return !sharedWith.isEmpty || sharedBy != nil
     }
     
     // Helper to create an updated version with incremented version number
@@ -69,7 +82,9 @@ struct Task: Equatable, Identifiable, Codable, Hashable, Sendable {
         isCompleted: Bool? = nil,
         isDeleted: Bool? = nil,
         deletedAt: Date?? = nil,
-        retentionDays: Int?? = nil
+        retentionDays: Int?? = nil,
+        sharedWith: [TaskShare]? = nil,
+        sharedBy: String?? = nil
     ) -> Task {
         let purgeDate: Date?
         if let deleted = deletedAt ?? self.deletedAt,
@@ -93,7 +108,9 @@ struct Task: Equatable, Identifiable, Codable, Hashable, Sendable {
             isDeleted: isDeleted ?? self.isDeleted,
             deletedAt: deletedAt ?? self.deletedAt,
             retentionDays: retentionDays ?? self.retentionDays,
-            scheduledPurgeDate: purgeDate
+            scheduledPurgeDate: purgeDate,
+            sharedWith: sharedWith ?? self.sharedWith,
+            sharedBy: sharedBy ?? self.sharedBy
         )
     }
 }

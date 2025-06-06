@@ -22,6 +22,12 @@ enum TaskAction {
     case updateCategory(Category)
     case deleteCategory(categoryId: String)
     case batchAssignCategory(taskIds: Set<String>, categoryId: String?)
+    
+    // Sharing actions
+    case shareTask(taskId: String, userId: String, permission: SharePermission)
+    case shareTaskList(userId: String, permission: SharePermission)
+    case unshareTask(taskId: String, userId: String)
+    case updateSharePermission(taskId: String, userId: String, permission: SharePermission)
 }
 
 enum SortCriteria: Hashable {

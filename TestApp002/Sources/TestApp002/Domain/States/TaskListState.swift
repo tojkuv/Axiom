@@ -9,6 +9,10 @@ struct TaskListState: State, Hashable {
     let sortCriteria: SortCriteria
     let selectedCategoryId: String?
     
+    // Sharing properties
+    let pendingShares: [PendingShare]
+    let collaborationInfo: [CollaborationInfo]
+    
     // Performance optimization: cache computed values for fast equality checks
     private let taskCount: Int
     private let lastModified: Date?
@@ -21,13 +25,17 @@ struct TaskListState: State, Hashable {
         categories: [Category] = [],
         searchQuery: String = "",
         sortCriteria: SortCriteria = .createdDate,
-        selectedCategoryId: String? = nil
+        selectedCategoryId: String? = nil,
+        pendingShares: [PendingShare] = [],
+        collaborationInfo: [CollaborationInfo] = []
     ) {
         self.tasks = tasks
         self.categories = categories
         self.searchQuery = searchQuery
         self.sortCriteria = sortCriteria
         self.selectedCategoryId = selectedCategoryId
+        self.pendingShares = pendingShares
+        self.collaborationInfo = collaborationInfo
         
         // Cache computed values for performance
         self.taskCount = tasks.count
@@ -74,6 +82,35 @@ struct TaskListState: State, Hashable {
         return filtered
     }
     
+    /// Tasks that are shared with other users (owned by current user)
+    var sharedTasks: [Task] {
+        return tasks.filter { !$0.sharedWith.isEmpty }
+    }
+    
+    /// Tasks that are shared with the current user (owned by others)
+    var tasksSharedWithMe: [Task] {
+        return tasks.filter { $0.sharedBy != nil }
+    }
+    
+    /// Tasks that have active collaborators
+    var collaborativeTasks: [Task] {
+        let collaborativeTaskIds = Set(collaborationInfo.map { $0.taskId })
+        return tasks.filter { collaborativeTaskIds.contains($0.id) }
+    }
+    
+    /// Tasks with active editing sessions
+    var activelyEditedTasks: [Task] {
+        let activeTaskIds = Set(collaborationInfo.compactMap { info in
+            info.activeCollaborators.contains { $0.isCurrentlyEditing } ? info.taskId : nil
+        })
+        return tasks.filter { activeTaskIds.contains($0.id) }
+    }
+    
+    /// Get collaboration info for a specific task
+    func collaborationInfo(for taskId: String) -> CollaborationInfo? {
+        return collaborationInfo.first { $0.taskId == taskId }
+    }
+    
     /// Tasks that are overdue (past their due date)
     var overdueTasks: [Task] {
         let now = Date()
@@ -96,6 +133,8 @@ extension TaskListState: Equatable {
               lhs.sortCriteria == rhs.sortCriteria,
               lhs.selectedCategoryId == rhs.selectedCategoryId,
               lhs.categories == rhs.categories,
+              lhs.pendingShares == rhs.pendingShares,
+              lhs.collaborationInfo == rhs.collaborationInfo,
               lhs.searchIndex == rhs.searchIndex else {
             return false
         }
