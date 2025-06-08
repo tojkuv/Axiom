@@ -1,0 +1,1 @@
+- test applications should be generated in the application cycle folder
