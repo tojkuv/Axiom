@@ -1,10 +1,8 @@
-mission: revise our protocol template : /Users/tojkuv/Documents/GitHub/axiom-apple/workspace-constraints/Constraints/PROTOCOLS_TEMPLATE.md .
+- remove protocol evolution considerations
+- protocols do not have access to previous cycles (only the framework analysis gets passed to the next cycle)
+-
 
-context: framework PLAN (may or may not take a framework ANALYSIS artifact) to generate a framework RFC artifact. framework DEVELOP (takes a framework RFC artifact) and implements the requirements into the current framework (during multiple development sessions) . framework DOCUMENT (looks at the current framework implementation) and creates a framework DOCUMENTATION artifact . application PLAN (takes a framework DOCUMENTATION artifact) and generates an application RFC artifact (for a comprehensive Task Manager application to test all current aspects of the framework) . application DEVELOP (takes the application RFC artifact) and creates a new application (during multiple development sessions) (will all that it needs to run on an iOS device) . application ANALYZE (takes the created application, the application RFC artifact, and the framework documentation artifact) and generates an application ANALYSIS artifact . framework ANALYZE (takes an application ANALYSIS artifact and the current framework implementation) and generates a framework ANALYSIS artifact .
 
-purpose: we use this cycle to interate on the framework that we are working on so we stabilize into a framework implementation that you are really good using to make applications .
-
-references: feel free to use our current protocols for reference (they are outdated as of now) . /Users/tojkuv/Documents/GitHub/axiom-apple/workspace-constraints/Constraints/Framework and /Users/tojkuv/Documents/GitHub/axiom-apple/workspace-constraints/Constraints/Application .
 
 ultrathink
 
