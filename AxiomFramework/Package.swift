@@ -1,69 +1,60 @@
-// swift-tools-version:5.9
+// swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 import CompilerPluginSupport
 
 let package = Package(
-    name: "Axiom",
+    name: "AxiomFramework",
     platforms: [
         .iOS(.v16),
-        .macOS(.v13)
+        .macOS(.v13),
+        .tvOS(.v16),
+        .watchOS(.v9)
     ],
     products: [
-        // Main framework product
+        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "Axiom",
             targets: ["Axiom"]
         ),
-        // Testing utilities
         .library(
             name: "AxiomTesting",
             targets: ["AxiomTesting"]
-        )
+        ),
     ],
     dependencies: [
-        // SwiftSyntax for macro implementation
-        .package(url: "https://github.com/apple/swift-syntax", from: "509.0.0")
+        // Dependencies declare other packages that this package depends on.
+        .package(url: "https://github.com/apple/swift-syntax.git", from: "509.0.0"),
     ],
     targets: [
-        // Main framework target
+        // Targets are the basic building blocks of a package, defining a module or a test suite.
+        // Targets can depend on other targets in this package and products from dependencies.
         .target(
             name: "Axiom",
-            dependencies: ["AxiomMacros"],
-            path: "Sources/Axiom"
+            dependencies: ["AxiomMacros"]
         ),
-        
-        // Macro implementation target
+        .target(
+            name: "AxiomTesting",
+            dependencies: ["Axiom"]
+        ),
         .macro(
             name: "AxiomMacros",
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
-            ],
-            path: "Sources/AxiomMacros"
+            ]
         ),
-        
-        // Testing utilities target
-        .target(
-            name: "AxiomTesting",
-            dependencies: ["Axiom"],
-            path: "Sources/AxiomTesting"
-        ),
-        
-        // Test targets (re-enabled for comprehensive testing framework implementation)
         .testTarget(
-            name: "AxiomTests", 
-            dependencies: ["Axiom", "AxiomTesting"],
-            path: "Tests/AxiomTests"
+            name: "AxiomTests",
+            dependencies: ["Axiom", "AxiomTesting"]
         ),
         .testTarget(
             name: "AxiomMacrosTests",
             dependencies: [
                 "AxiomMacros",
-                .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax")
-            ],
-            path: "Tests/AxiomMacrosTests"
+                .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
+            ]
         ),
     ]
 )

@@ -82,7 +82,9 @@ public enum ClientError: Error, Sendable {
 /// - State management with automatic streaming
 /// - Thread-safe state mutations
 /// - Performance guarantees for state propagation
-public actor BaseClient<S: State, A> where S: Equatable {
+public actor BaseClient<S: State, A>: Client where S: Equatable {
+    public typealias StateType = S
+    public typealias ActionType = A
     /// Current state of the client
     public private(set) var state: S
     
@@ -141,6 +143,12 @@ public actor BaseClient<S: State, A> where S: Equatable {
             continuation.finish()
         }
         streamContinuations.removeAll()
+    }
+    
+    /// Process an action - base implementation does nothing
+    /// Override in subclasses to handle specific actions
+    public func process(_ action: A) async throws {
+        // Base implementation - subclasses should override
     }
 }
 

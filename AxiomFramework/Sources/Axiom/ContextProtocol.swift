@@ -25,6 +25,10 @@ public protocol Context: ObservableObject {
     
     /// Called when the associated presentation disappears
     func onDisappear() async
+    
+    /// Handle actions from child contexts
+    /// Called automatically by the framework when children emit actions
+    func handleChildAction<T>(_ action: T, from child: any Context)
 }
 
 // MARK: - Context Extensions
@@ -38,6 +42,12 @@ extension Context {
     /// Default implementation for contexts that don't need disappear logic
     public func onDisappear() async {
         // Default no-op implementation
+    }
+    
+    /// Default implementation for handling child actions
+    public func handleChildAction<T>(_ action: T, from child: any Context) {
+        // Default implementation does nothing
+        // Override in contexts to handle specific actions
     }
     
     /// Process multiple actions with stable memory usage
@@ -93,6 +103,12 @@ open class BaseContext: Context {
     /// Lifecycle appearance count for idempotency
     private var appearanceCount = 0
     
+    /// Weak reference to parent context for child-to-parent communication
+    public weak var parentContext: (any Context)?
+    
+    /// Child contexts for parent-child relationships
+    public private(set) var childContexts: [WeakContextWrapper] = []
+    
     public init() {}
     
     /// Called when context appears
@@ -123,6 +139,56 @@ open class BaseContext: Context {
     /// Trigger a UI update
     public func notifyUpdate() {
         updateTrigger = UUID()
+    }
+    
+    /// Override to handle actions from child contexts
+    open func handleChildAction<T>(_ action: T, from child: any Context) {
+        // Default implementation does nothing
+        // Override in subclasses to handle specific actions
+    }
+    
+    /// Add a child context
+    public func addChild(_ child: any Context) {
+        let wrapper = WeakContextWrapper(child)
+        childContexts.append(wrapper)
+        
+        if let baseChild = child as? BaseContext {
+            baseChild.parentContext = self
+        }
+        
+        cleanupDeallocatedChildren()
+    }
+    
+    /// Remove a child context
+    public func removeChild(_ child: any Context) {
+        childContexts.removeAll { wrapper in
+            wrapper.context === child
+        }
+        
+        if let baseChild = child as? BaseContext {
+            baseChild.parentContext = nil
+        }
+    }
+    
+    /// Send action to parent context
+    public func sendToParent<T>(_ action: T) async {
+        await parentContext?.handleChildAction(action, from: self)
+    }
+    
+    /// Clean up deallocated child contexts
+    private func cleanupDeallocatedChildren() {
+        let beforeCount = childContexts.count
+        childContexts.removeAll { $0.context == nil }
+        
+        if childContexts.count < beforeCount {
+            notifyUpdate()
+        }
+    }
+    
+    /// Get active child contexts
+    public var activeChildren: [any Context] {
+        cleanupDeallocatedChildren()
+        return childContexts.compactMap { $0.context }
     }
 }
 
@@ -178,6 +244,8 @@ open class ClientObservingContext<C: Client>: BaseContext {
 }
 
 // MARK: - Weak Reference Support
+
+// WeakContextWrapper is defined in ImplicitActionSubscription.swift
 
 /// Wrapper for weak references to clients
 public struct WeakClient<C: Client> {

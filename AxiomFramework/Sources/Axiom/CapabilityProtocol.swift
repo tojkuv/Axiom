@@ -39,7 +39,7 @@ public enum CapabilityState: Equatable, Sendable {
 // MARK: - Capability Errors
 
 /// Errors that can occur during capability operations
-public enum CapabilityError: Error, Sendable {
+public enum CapabilityError: Error, Sendable, Equatable {
     /// Initialization of the capability failed
     case initializationFailed(reason: String)
     /// Resource allocation for the capability failed
