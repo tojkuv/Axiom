@@ -5,6 +5,7 @@ import SwiftSyntaxMacros
 struct AxiomMacrosPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         ContextMacro.self,
+        PresentationMacro.self,
         NavigationOrchestratorMacro.self,
         AutoMockableMacro.self,
         ErrorBoundaryMacro.self,

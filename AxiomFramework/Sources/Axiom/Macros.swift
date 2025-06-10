@@ -6,9 +6,34 @@ import Foundation
 @attached(peer, names: arbitrary)
 public macro AutoMockable() = #externalMacro(module: "AxiomMacros", type: "AutoMockableMacro")
 
-/// Macro for automatic context setup
-@attached(member, names: arbitrary)
-public macro Context(observing: Any.Type) = #externalMacro(module: "AxiomMacros", type: "ContextMacro")
+/// Enhanced macro for automatic context setup with client-based initialization
+@attached(member, names: named(client), named(observationTask), named(init), named(viewAppeared), named(viewDisappeared), named(handleStateUpdate))
+@attached(extension, conformances: ObservableObject)
+public macro Context<C: PresentationClient>(client: C.Type) = #externalMacro(module: "AxiomMacros", type: "ContextMacro")
+
+/// Macro that enforces single-context presentation architecture with compile-time safety
+///
+/// Usage:
+/// ```swift
+/// @Presentation(context: TaskListContext.self)
+/// struct TaskListView {
+///     var body: some View {
+///         List(context.tasks) { task in
+///             TaskRow(task: task)
+///         }
+///     }
+/// }
+/// ```
+///
+/// This macro:
+/// - Enforces single context per presentation
+/// - Generates context property and initializer
+/// - Provides compile-time architectural safety
+/// - Prevents architectural violations
+@attached(member, names: named(context), named(init))
+@attached(extension, conformances: PresentationProtocol)
+@attached(peer, names: prefixed(_ValidatePresentation))
+public macro Presentation<C: ObservableObject>(context: C.Type) = #externalMacro(module: "AxiomMacros", type: "PresentationMacro")
 
 // MARK: - Capability Pattern Macro
 

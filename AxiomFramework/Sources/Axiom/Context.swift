@@ -6,6 +6,17 @@ import Darwin
 import Darwin
 #endif
 
+// MARK: - Lifecycle Protocol
+
+/// Universal lifecycle protocol for consistent activation/deactivation across all framework components
+public protocol Lifecycle {
+    /// Activate the component and prepare it for use
+    func activate() async throws
+    
+    /// Deactivate the component and clean up resources
+    func deactivate() async
+}
+
 // MARK: - Context Protocol
 
 /// Core protocol for MainActor-bound coordinators with lifecycle and observation.
@@ -19,13 +30,7 @@ import Darwin
 /// - Supports observation through ObservableObject
 /// - Memory usage must remain stable after processing actions
 @MainActor
-public protocol Context: ObservableObject {
-    /// Called when the associated presentation appeared
-    func viewAppeared() async
-    
-    /// Called when the associated presentation disappeared
-    func viewDisappeared() async
-    
+public protocol Context: ObservableObject, Lifecycle {
     /// Handle actions from child contexts
     /// Called automatically by the framework when children emit actions
     func handleChildAction<T>(_ action: T, from child: any Context)
@@ -34,13 +39,13 @@ public protocol Context: ObservableObject {
 // MARK: - Context Extensions
 
 extension Context {
-    /// Default implementation for contexts that don't need appear logic
-    public func viewAppeared() async {
+    /// Default implementation for contexts that don't need activation logic
+    public func activate() async throws {
         // Default no-op implementation
     }
     
-    /// Default implementation for contexts that don't need disappear logic
-    public func viewDisappeared() async {
+    /// Default implementation for contexts that don't need deactivation logic
+    public func deactivate() async {
         // Default no-op implementation
     }
     
@@ -111,16 +116,16 @@ open class ObservableContext: Context {
     
     public init() {}
     
-    /// Called when context appeared
-    open func viewAppeared() async {
+    /// Activate the context
+    open func activate() async throws {
         guard appearanceCount == 0 else { return }
         appearanceCount += 1
         isActive = true
         await appeared()
     }
     
-    /// Called when context disappeared
-    open func viewDisappeared() async {
+    /// Deactivate the context
+    open func deactivate() async {
         guard isActive else { return }
         isActive = false
         await disappeared()
@@ -474,14 +479,14 @@ public final class ContextLifecycleManager {
     /// Activate all contexts
     public func activateAll() async {
         for (_, context) in contexts {
-            await context.viewAppeared()
+            try? await context.activate()
         }
     }
     
     /// Deactivate all contexts
     public func deactivateAll() async {
         for (_, context) in contexts {
-            await context.viewDisappeared()
+            await context.deactivate()
         }
     }
     

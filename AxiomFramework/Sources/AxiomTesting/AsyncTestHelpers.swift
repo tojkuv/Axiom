@@ -1,6 +1,13 @@
 import XCTest
 @testable import Axiom
 
+// MARK: - Helper Types for Delegation
+
+/// Empty test context for delegating to TestAssertions protocol
+private struct EmptyTestContext: TestAssertions {
+    typealias TestedType = Any
+}
+
 // MARK: - Helper Actors
 
 fileprivate actor ResultsCollector<T> {
@@ -33,69 +40,39 @@ fileprivate actor CountTracker {
 public struct AsyncTestHelpers {
     
     /// Collect a specific number of states from a stream
+    /// - Note: Deprecated in favor of TestAssertions.collectStates
+    @available(*, deprecated, message: "Use TestAssertions.collectStates instead")
     public static func collectStates<C: Client>(
         from client: C,
         count: Int,
         timeout: Duration = .seconds(1),
         while executing: (C) async throws -> Void = { _ in }
     ) async throws -> [C.StateType] {
-        var collected: [C.StateType] = []
-        
-        let task = Task {
-            for await state in await client.stateStream {
-                collected.append(state)
-                if collected.count >= count { 
-                    break 
-                }
-            }
-        }
-        
-        // Execute the actions
-        try await executing(client)
-        
-        // Allow state propagation
-        try await Task.sleep(for: .milliseconds(10))
-        
-        // Wait for collection with timeout
-        let deadline = ContinuousClock.now + timeout
-        while collected.count < count && ContinuousClock.now < deadline {
-            try await Task.sleep(for: .milliseconds(10))
-        }
-        
-        task.cancel()
-        
-        if collected.count < count {
-            throw AsyncTestError.timeout("Only collected \(collected.count) of \(count) states within \(timeout)")
-        }
-        
-        return collected
+        // Delegate to TestAssertions protocol implementation
+        let testContext = EmptyTestContext()
+        return try await testContext.collectStates(
+            from: client,
+            count: count,
+            timeout: timeout,
+            while: executing
+        )
     }
     
     /// Wait for a specific state condition
+    /// - Note: Deprecated in favor of TestAssertions.observeStates
+    @available(*, deprecated, message: "Use TestAssertions.observeStates instead")
     public static func waitForState<C: Client>(
         in client: C,
         timeout: Duration = .seconds(1),
         condition: @escaping (C.StateType) -> Bool
     ) async throws -> C.StateType {
-        let deadline = ContinuousClock.now + timeout
-        
-        let task = Task { () -> C.StateType? in
-            for await state in await client.stateStream {
-                if condition(state) { 
-                    return state 
-                }
-                if ContinuousClock.now >= deadline {
-                    break
-                }
-            }
-            return nil
-        }
-        
-        if let result = await task.value {
-            return result
-        }
-        
-        throw AsyncTestError.timeout("State condition not met within \(timeout)")
+        // Delegate to TestAssertions protocol implementation
+        let testContext = EmptyTestContext()
+        return try await testContext.observeStates(
+            from: client,
+            timeout: timeout,
+            until: condition
+        )
     }
     
     /// Assert a sequence of state transitions
@@ -138,6 +115,7 @@ public struct AsyncTestHelpers {
 // MARK: - Test Errors
 
 /// Errors specific to async testing
+/// - Note: Consider using TestError from TestAssertions for new code
 public enum AsyncTestError: Error, LocalizedError {
     case timeout(String)
     case streamEnded
@@ -228,43 +206,38 @@ public actor ActionRecorder<ActionType> {
 public struct TimingHelpers {
     
     /// Wait until a condition is met
+    /// - Note: Deprecated in favor of TestAssertions.waitFor
+    @available(*, deprecated, message: "Use TestAssertions.waitFor instead")
     public static func waitUntil(
         timeout: Duration = .seconds(1),
         pollingInterval: Duration = .milliseconds(10),
         condition: () async -> Bool
     ) async throws {
-        let deadline = ContinuousClock.now + timeout
-        
-        while ContinuousClock.now < deadline {
-            if await condition() { 
-                return 
-            }
-            try await Task.sleep(for: pollingInterval)
-        }
-        
-        throw AsyncTestError.timeout("Condition not met within \(timeout)")
+        // Delegate to TestAssertions protocol implementation
+        let testContext = EmptyTestContext()
+        _ = try await testContext.waitFor({
+            await condition() ? true : nil
+        }, timeout: timeout)
     }
     
     /// Eventually assert (retries assertion until it passes)
+    /// - Note: Deprecated in favor of TestAssertions.assertEventually
+    @available(*, deprecated, message: "Use TestAssertions.assertEventually instead")
     public static func eventually(
         within timeout: Duration = .seconds(1),
         pollingInterval: Duration = .milliseconds(10),
         assertion: () async throws -> Void
     ) async throws {
-        let deadline = ContinuousClock.now + timeout
-        var lastError: Error?
-        
-        while ContinuousClock.now < deadline {
+        // Delegate to TestAssertions protocol implementation
+        let testContext = EmptyTestContext()
+        try await testContext.assertEventually({
             do {
                 try await assertion()
-                return
+                return true
             } catch {
-                lastError = error
-                try await Task.sleep(for: pollingInterval)
+                return false
             }
-        }
-        
-        throw AsyncTestError.eventuallyFailed(lastError)
+        }, timeout: timeout)
     }
 }
 
@@ -273,23 +246,16 @@ public struct TimingHelpers {
 public extension XCTestCase {
     
     /// Run async test with automatic timeout
+    /// - Note: Consider using TestAssertions.waitFor for individual operations
     func runAsyncTest(
         timeout: Duration = .seconds(5),
         _ test: @escaping () async throws -> Void
     ) async throws {
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            group.addTask {
-                try await test()
-            }
-            
-            group.addTask {
-                try await Task.sleep(for: timeout)
-                throw AsyncTestError.timeout("Test exceeded timeout of \(timeout)")
-            }
-            
-            try await group.next()
-            group.cancelAll()
-        }
+        // Delegate to TestAssertions protocol (since XCTestCase conforms to TestAssertions)
+        _ = try await self.waitFor({
+            try await test()
+            return true
+        }, timeout: timeout, message: "Test exceeded timeout of \(timeout)")
     }
 }
 

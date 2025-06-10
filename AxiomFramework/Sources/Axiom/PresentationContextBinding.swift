@@ -115,15 +115,6 @@ public final class PresentationContextBindingManager {
         contextToPresentationMap.count
     }
     
-    // MARK: - Testing Support
-    
-    /// Resets all bindings for testing purposes
-    internal func resetForTesting() {
-        bindings.removeAll()
-        contextToPresentationMap.removeAll()
-        lifecycleObservers.removeAll()
-        lastError = nil
-    }
 }
 
 // MARK: - Property Wrapper

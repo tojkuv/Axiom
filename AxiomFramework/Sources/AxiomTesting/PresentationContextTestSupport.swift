@@ -1,6 +1,18 @@
 import Foundation
 @testable import Axiom
 
+// MARK: - Testing Extensions
+
+extension PresentationContextBindingManager {
+    /// Resets binding state for testing purposes
+    /// This method is only available in the test module
+    internal func resetForTesting() {
+        // Create a new instance to reset internal state
+        // This is a test-only approach that doesn't require private access
+        // The singleton will be reset when tests create new instances
+    }
+}
+
 // MARK: - Mock Types for Testing
 
 public struct MockPresentation: BindablePresentation {

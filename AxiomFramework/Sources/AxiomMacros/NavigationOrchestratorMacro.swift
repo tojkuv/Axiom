@@ -181,7 +181,7 @@ public struct NavigationOrchestratorMacro: MemberMacro {
                 registrations.append("""
                     await registerRoute(.admin) { _ in
                         guard await checkAdminAccess() else { 
-                            throw NavigationError.unauthorized 
+                            throw AxiomError.navigationError(.unauthorized("Admin access required")) 
                         }
                         return AdminContext()
                     }

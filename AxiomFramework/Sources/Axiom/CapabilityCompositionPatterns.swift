@@ -960,7 +960,7 @@ public actor ExampleCompositeCapability: DomainCapability {
                 configuration: _configuration.analyticsConfig,
                 environment: _environment
             )
-            try await analyticsCapability?.initialize()
+            try await analyticsCapability?.activate()
         }
         
         if _configuration.enableML {
@@ -968,7 +968,7 @@ public actor ExampleCompositeCapability: DomainCapability {
                 configuration: _configuration.mlConfig,
                 environment: _environment
             )
-            try await mlCapability?.initialize()
+            try await mlCapability?.activate()
         }
         
         
@@ -977,8 +977,8 @@ public actor ExampleCompositeCapability: DomainCapability {
     }
     
     public func terminate() async {
-        await analyticsCapability?.terminate()
-        await mlCapability?.terminate()
+        await analyticsCapability?.deactivate()
+        await mlCapability?.deactivate()
         
         await _resources.release()
         _state = .unavailable

@@ -150,7 +150,7 @@ public actor StandardOrchestrator: ExtendedOrchestrator {
         await withTaskGroup(of: Void.self) { group in
             for (_, context) in contexts {
                 group.addTask {
-                    await context.viewAppeared()
+                    try? await context.activate()
                 }
             }
         }
@@ -161,7 +161,7 @@ public actor StandardOrchestrator: ExtendedOrchestrator {
         await withTaskGroup(of: Void.self) { group in
             for (_, context) in contexts {
                 group.addTask {
-                    await context.viewDisappeared()
+                    await context.deactivate()
                 }
             }
         }

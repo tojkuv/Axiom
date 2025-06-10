@@ -5,17 +5,21 @@ Test-driven application implementation with focused framework insight capture du
 ## Protocol Activation
 
 ```text
-@APPLICATION_DEVELOP generate [framework-doc] [api-reference] [requirements] [session-template]
+@APPLICATION_DEVELOP generate [cycle-folder] [framework-doc] [api-reference] [requirements] [session-template]
 ```
 
 ## Process Flow
 
 ```text
-1. Load requirements with TDD checklists and framework validation goals
-2. Execute RED-GREEN-REFACTOR cycles with insight tracking
-3. Document framework pain points and successes in real-time
-4. Create session reports focused on actionable improvements
-5. Maintain high test coverage while identifying framework gaps
+1. Check cycle folder for existing session files to determine state:
+   - No session files: Start new application development
+   - Existing session files with incomplete requirements: Continue development
+   - All requirements completed: Report cycle completion
+2. Load requirements with TDD checklists and framework validation goals
+3. Execute RED-GREEN-REFACTOR cycles with insight tracking
+4. Document framework pain points and successes in real-time
+5. Create/update session reports in cycle folder
+6. Maintain high test coverage while identifying framework gaps
 ```
 
 ## Command Details
@@ -25,14 +29,21 @@ Test-driven application implementation with focused framework insight capture du
 The protocol guides TDD implementation while capturing framework insights:
 
 ```bash
-@APPLICATION_DEVELOP generate /Users/tojkuv/Documents/GitHub/axiom-apple/workspace-framework/AxiomFramework/DOCUMENTATION.md /Users/tojkuv/Documents/GitHub/axiom-apple/workspace-framework/AxiomFramework/API_REFERENCE.md /Users/tojkuv/Documents/GitHub/axiom-apple/workspace-application/CYCLE-001-TASK-MANAGER-MVP/REQUIREMENTS-001-TASK-MANAGER-MVP.md /Users/tojkuv/Documents/GitHub/axiom-apple/workspace-meta-workspace/workspaces/app-session-template.md
+@APPLICATION_DEVELOP generate /Users/tojkuv/Documents/GitHub/axiom-apple/workspace-application/CYCLE-001-TASK-MANAGER-MVP /Users/tojkuv/Documents/GitHub/axiom-apple/workspace-framework/AxiomFramework/DOCUMENTATION.md /Users/tojkuv/Documents/GitHub/axiom-apple/workspace-framework/AxiomFramework/API_REFERENCE.md /Users/tojkuv/Documents/GitHub/axiom-apple/workspace-application/CYCLE-001-TASK-MANAGER-MVP/REQUIREMENTS-001-TASK-MANAGER-MVP.md /Users/tojkuv/Documents/GitHub/axiom-apple/workspace-meta-workspace/workspaces/app-session-template.md
 ```
 
 **Parameters:**
+- `cycle-folder`: Development cycle directory where application and session files are created
 - `framework-doc`: Framework documentation for reference during development
 - `api-reference`: API reference for implementation details
 - `requirements`: Application requirements with TDD checklists
 - `session-template`: Template for capturing development insights
+
+**Session State Detection**:
+The generate command now intelligently determines the development state by scanning the cycle folder:
+- **New Application**: No APP-SESSION-*.md files exist - creates initial session and starts from REQ-001
+- **Continuing Development**: Finds existing sessions with incomplete requirements - resumes from last completed requirement
+- **Cycle Complete**: All requirements marked as completed in latest session - reports completion status
 
 **Enhanced Session Tracking**:
 Each session now emphasizes capturing framework insights during TDD cycles, with specific sections for pain points discovered during test writing, successful patterns that should be framework features, missing test utilities or helpers, and performance observations with framework overhead. Session files focus on actionable insights rather than routine development details.
@@ -47,14 +58,19 @@ REFACTOR phase improvements now focus on identifying repeated patterns that indi
 
 **Streamlined Output**:
 ```
+Checking cycle folder: /Users/tojkuv/.../CYCLE-001-TASK-MANAGER-MVP
+Detected state: New Application (no existing sessions)
+
 Loading resources:
+- Cycle folder: CYCLE-001-TASK-MANAGER-MVP
 - Framework documentation: DOCUMENTATION.md
 - API reference: API_REFERENCE.md  
 - Requirements: REQUIREMENTS-001-TASK-MANAGER-MVP.md
 - Session template: app-session-template.md
 
+Creating application structure in cycle folder...
 Starting implementation for REQUIREMENTS-001-TASK-MANAGER-MVP
-Session: ./APP-SESSION-001.md
+Session: ./CYCLE-001-TASK-MANAGER-MVP/APP-SESSION-001.md
 
 Focus: Capturing framework insights during TDD
 - Document pain points when encountered
@@ -67,6 +83,29 @@ Framework APIs under test: DataStore, Model protocols
 Watch for: Test setup complexity, missing utilities
 ```
 
+**Alternative outputs for different states**:
+
+*Continuing Development*:
+```
+Checking cycle folder: /Users/tojkuv/.../CYCLE-001-TASK-MANAGER-MVP
+Detected state: Continuing Development
+Latest session: APP-SESSION-003.md
+Last completed: REQ-007 (7 of 15 requirements)
+
+Resuming from REQ-008...
+```
+
+*Cycle Complete*:
+```
+Checking cycle folder: /Users/tojkuv/.../CYCLE-001-TASK-MANAGER-MVP
+Detected state: All Requirements Complete
+Total sessions: 5
+All 15 requirements implemented and tested
+
+Cycle CYCLE-001-TASK-MANAGER-MVP completed successfully.
+Review APP-ANALYSIS-001.md for framework insights summary.
+```
+
 ## Enhanced Session Management
 
 ### Real-Time Insight Capture
@@ -77,6 +116,15 @@ Session reports prioritize high-value information about framework pain points di
 
 ### Cross-Session Pattern Tracking
 The protocol now maintains awareness of patterns across sessions within a cycle, including recurring pain points that indicate systematic issues, successful workarounds that suggest framework features, consistent performance bottlenecks, and frequently accessed documentation sections indicating gaps.
+
+### Application Structure in Cycle Folder
+All application development occurs within the designated cycle folder:
+- **Application Code**: Created as a subdirectory (e.g., `TaskManagerApp/`) within the cycle folder
+- **Session Files**: APP-SESSION-*.md files stored at the cycle folder root for easy access
+- **Test Files**: Organized within the application subdirectory following TDD practices
+- **Analysis Files**: APP-ANALYSIS-*.md generated at cycle completion in the cycle folder
+
+This structure ensures all cycle artifacts remain together, simplifying navigation and review.
 
 ## Integration Improvements
 

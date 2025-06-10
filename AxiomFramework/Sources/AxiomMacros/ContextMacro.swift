@@ -347,11 +347,6 @@ extension ContextMacro: ExtensionMacro {
             "extension \(raw: typeName): ObservableObject {}"
         )
         
-        // Generate Context protocol conformance if needed
-        let contextExtension = try ExtensionDeclSyntax(
-            "extension \(raw: typeName): Context {}"
-        )
-        
-        return [observableObjectExtension, contextExtension]
+        return [observableObjectExtension]
     }
 }

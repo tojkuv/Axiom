@@ -79,11 +79,11 @@ public actor AdapterBasedPersistence: PersistenceCapability {
         // For now, this is a no-op
     }
     
-    public func initialize() async throws {
+    public func activate() async throws {
         // Adapter is ready to use
     }
     
-    public func terminate() async {
+    public func deactivate() async {
         // Clean up if needed
     }
     

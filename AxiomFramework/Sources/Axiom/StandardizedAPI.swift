@@ -46,18 +46,6 @@ public protocol StandardizedNavigation {
     func navigateToRoot(animated: Bool) async -> AxiomResult<Void>
 }
 
-/// Options for navigation operations
-public struct NavigationOptions: Sendable {
-    public let animated: Bool
-    public let completion: (() -> Void)?
-    
-    public static let `default` = NavigationOptions(animated: true, completion: nil)
-    
-    public init(animated: Bool = true, completion: (() -> Void)? = nil) {
-        self.animated = animated
-        self.completion = completion
-    }
-}
 
 // MARK: - Core API Enumeration
 

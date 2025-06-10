@@ -142,7 +142,7 @@ public class RealTestService: TestService {
 // MARK: - AutoMockable Examples
 
 /// When @AutoMockable macro is implemented, this will generate MockTestDataSource
-// TODO: Uncomment when @AutoMockable macro is properly configured
+/// Deferred until AutoMockable macro is available in AxiomMacros module
 // @AutoMockable
 public protocol TestDataSource {
     func fetchData(id: String) async throws -> TestData

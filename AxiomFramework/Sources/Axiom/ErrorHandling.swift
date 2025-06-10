@@ -4,7 +4,7 @@ import Foundation
 
 /// Unified error hierarchy for the Axiom framework
 public enum AxiomError: Error, Codable, Equatable {
-    case contextError(ContextError)
+    case contextError(AxiomContextError)
     case clientError(AxiomClientError)
     case navigationError(AxiomNavigationError)
     case persistenceError(PersistenceError)
@@ -51,7 +51,7 @@ public enum AxiomError: Error, Codable, Equatable {
 // MARK: - Specific Error Types
 
 /// Context-related errors
-public enum ContextError: Error, Codable, Equatable {
+public enum AxiomContextError: Error, Codable, Equatable {
     case lifecycleError(String)
     case initializationFailed(String)
     case childContextError(String)
@@ -445,106 +445,6 @@ extension AxiomError {
         }
     }
     
-    // Navigation error mappers - temporarily disabled during consolidation
-    /*
-    private static func mapNavigationError(_ error: NavigationError) -> AxiomError {
-        switch error {
-        case .unauthorized:
-            return .navigationError(.unauthorized(""))
-        case .routeNotFound:
-            return .navigationError(.routeNotFound(""))
-        case .invalidParameters:
-            return .navigationError(.invalidParameter(field: nil, reason: "Invalid parameters"))
-        case .validationFailed:
-            return .navigationError(.guardFailed("Validation failed"))
-        }
-    }
-    
-    private static func mapDeepLinkingError(_ error: DeepLinkingError) -> AxiomError {
-        switch error {
-        case .invalidURLScheme(let scheme):
-            return .navigationError(.invalidURL(component: "scheme", value: scheme))
-        case .invalidPath(let path):
-            return .navigationError(.invalidURL(component: "path", value: path))
-        case .patternNotFound(let pattern):
-            return .navigationError(.patternNotFound(pattern))
-        case .parameterExtractionFailed(let details):
-            return .navigationError(.invalidParameter(field: nil, reason: details))
-        case .urlValidationFailed(let details):
-            return .navigationError(.invalidURL(component: "validation", value: details))
-        case .parsingFailed(let details):
-            return .navigationError(.parsingFailed(details))
-        case .routeConstructionFailed(let details):
-            return .navigationError(.compilationFailure(details))
-        }
-    }
-    
-    // NavigationFlowError mapping removed - now uses AxiomError directly
-    
-    private static func mapNavigationPatternError(_ error: NavigationPatternError) -> AxiomError {
-        switch error {
-        case .patternConflict(let details):
-            return .navigationError(.patternConflict(details))
-        case .invalidContext(let details):
-            return .navigationError(.invalidHierarchy(details))
-        case .circularNavigation(let routes):
-            return .navigationError(.circularNavigation(routes.map { String(describing: $0) }.joined(separator: " -> ")))
-        case .emptyStack:
-            return .navigationError(.stackError("Empty stack"))
-        case .noModalPresented:
-            return .navigationError(.stackError("No modal presented"))
-        case .tabNotFound(let tab):
-            return .navigationError(.tabError("Tab not found: \(tab)"))
-        case .invalidHierarchy(let details):
-            return .navigationError(.invalidHierarchy(details))
-        case .depthLimitExceeded(let limit):
-            return .navigationError(.depthLimitExceeded(limit: limit))
-        case .missingPresentingRoute:
-            return .navigationError(.stackError("Missing presenting route"))
-        case .tabsNotConfigured:
-            return .navigationError(.tabError("Tabs not configured"))
-        case .insufficientTabs(let count):
-            return .navigationError(.tabError("Insufficient tabs: \(count)"))
-        }
-    }
-    
-    private static func mapNavigationCancellationError(_ error: NavigationCancellationError) -> AxiomError {
-        switch error {
-        case .navigationCancelled:
-            return .navigationError(.navigationCancelled(""))
-        case .operationCancelled(let details):
-            return .navigationError(.navigationCancelled(details))
-        }
-    }
-    
-    private static func mapRouteValidationError(_ error: RouteValidationError) -> AxiomError {
-        switch error {
-        case .invalidParameter(let param):
-            return .navigationError(.invalidParameter(field: param, reason: "Invalid"))
-        case .missingRequiredParameter(let param):
-            return .navigationError(.missingRequiredParameter(param))
-        case .invalidRouteType:
-            return .navigationError(.invalidRoute("Invalid type"))
-        case .compilationFailure(let details):
-            return .navigationError(.compilationFailure(details))
-        }
-    }
-    
-    private static func mapNavigationGraphError(_ error: NavigationGraphError) -> AxiomError {
-        switch error {
-        case .cycleDetected(let path):
-            return .navigationError(.cycleDetected(path: path.joined(separator: " -> ")))
-        case .invalidEdge(let from, let to):
-            return .navigationError(.invalidTransition(from: from, to: to))
-        case .nodeNotFound(let node):
-            return .navigationError(.nodeNotFound(node))
-        case .invalidNodeType:
-            return .navigationError(.invalidRoute("Invalid node type"))
-        }
-    }
-    
-    // NavigationMiddlewareError mapping removed - now uses AxiomError directly
-    */
     
     // Legacy error mapping functions removed - error types have been consolidated into AxiomError
     // ClientError and ValidationError enums no longer exist

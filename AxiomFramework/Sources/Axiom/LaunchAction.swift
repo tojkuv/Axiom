@@ -132,7 +132,8 @@ public struct URLLaunchAction: QuickAction {
     }
     
     public func toRoute() -> Route? {
-        // TODO: Use existing URLToRouteParser when available
+        // URL-to-route conversion deferred until URLToRouteParser is integrated
+        // This will be implemented in navigation enhancement phase
         nil
     }
 }

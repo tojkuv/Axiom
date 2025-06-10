@@ -14,12 +14,12 @@ public protocol Capability: Actor {
     /// Indicates whether the capability is currently available for use
     var isAvailable: Bool { get async }
     
-    /// Initialize the capability and prepare it for use
-    /// - Throws: If initialization fails
-    func initialize() async throws
+    /// Activate the capability and prepare it for use
+    /// - Throws: If activation fails
+    func activate() async throws
     
-    /// Terminate the capability and clean up resources
-    func terminate() async
+    /// Deactivate the capability and clean up resources
+    func deactivate() async
 }
 
 // MARK: - Capability State
@@ -61,7 +61,8 @@ public enum CapabilityType: String, CaseIterable, Sendable {
 /// - State management with thread-safe transitions
 /// - Default lifecycle implementations
 /// - State observation support
-public actor StandardCapability: Capability {
+/// - Unified lifecycle protocol adoption
+public actor StandardCapability: Capability, Lifecycle {
     /// Current state of the capability
     public private(set) var state: CapabilityState = .unknown
     
@@ -91,17 +92,17 @@ public actor StandardCapability: Capability {
         state == .available
     }
     
-    /// Initialize the capability
-    /// Subclasses should override to provide specific initialization
-    public func initialize() async throws {
+    /// Activate the capability
+    /// Subclasses should override to provide specific activation logic
+    public func activate() async throws {
         // Default implementation transitions to available
-        // Subclasses can override for specific initialization logic
+        // Subclasses can override for specific activation logic
         await transitionTo(.available)
     }
     
-    /// Terminate the capability and clean up resources
+    /// Deactivate the capability and clean up resources
     /// Subclasses should override to provide specific cleanup
-    public func terminate() async {
+    public func deactivate() async {
         await transitionTo(.unavailable)
         stateStreamContinuation?.finish()
     }
@@ -147,16 +148,16 @@ extension Capability {
         }
     }
     
-    /// Initialize with timeout
-    public func initialize(timeout: Duration) async throws {
+    /// Activate with timeout
+    public func activate(timeout: Duration) async throws {
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
-                try await self.initialize()
+                try await self.activate()
             }
             
             group.addTask {
                 try await Task.sleep(for: timeout)
-                throw CapabilityError.initializationFailed("Initialization timed out")
+                throw CapabilityError.initializationFailed("Activation timed out")
             }
             
             try await group.next()
@@ -229,7 +230,7 @@ public actor DefaultCapabilityManager: CapabilityManager {
         for key in initializationOrder {
             if let capability = capabilities[key] {
                 do {
-                    try await capability.initialize()
+                    try await capability.activate()
                 } catch {
                     // Log error but continue with other capabilities
                     print("Failed to initialize capability \(key): \(error)")
@@ -242,7 +243,7 @@ public actor DefaultCapabilityManager: CapabilityManager {
         // Terminate in reverse order
         for key in initializationOrder.reversed() {
             if let capability = capabilities[key] {
-                await capability.terminate()
+                await capability.deactivate()
             }
         }
         capabilities.removeAll()

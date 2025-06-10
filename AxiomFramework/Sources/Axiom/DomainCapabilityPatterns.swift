@@ -309,7 +309,7 @@ public actor MLCapability: DomainCapability {
         get async { _state == .available }
     }
     
-    public func initialize() async throws {
+    public func activate() async throws {
         _state = .unknown
         
         guard await isSupported() else {
@@ -321,7 +321,7 @@ public actor MLCapability: DomainCapability {
         _state = .available
     }
     
-    public func terminate() async {
+    public func deactivate() async {
         await _resources.release()
         predictionQueue.removeAll()
         _state = .unavailable
@@ -542,7 +542,7 @@ public actor PaymentCapability: DomainCapability {
         get async { _state == .available }
     }
     
-    public func initialize() async throws {
+    public func activate() async throws {
         guard await isSupported() else {
             _state = .unavailable
             throw CapabilityError.notAvailable("Apple Pay not supported")
@@ -552,7 +552,7 @@ public actor PaymentCapability: DomainCapability {
         _state = .available
     }
     
-    public func terminate() async {
+    public func deactivate() async {
         await _resources.release()
         _state = .unavailable
     }
@@ -826,13 +826,13 @@ public actor AnalyticsCapability: DomainCapability {
         get async { _state == .available }
     }
     
-    public func initialize() async throws {
+    public func activate() async throws {
         try await _resources.allocate()
         await startFlushTimer()
         _state = .available
     }
     
-    public func terminate() async {
+    public func deactivate() async {
         await _resources.flushEvents() // Flush remaining events
         await _resources.release()
         flushTimer?.cancel()

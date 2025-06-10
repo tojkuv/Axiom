@@ -128,27 +128,26 @@ public class StandardizedNavigator: StandardizedNavigation {
     
     /// Navigate to a destination with consistent error handling (replaces multiple navigation methods)
     public func navigate(to destination: Route, options: NavigationOptions = .default) async -> AxiomResult<Void> {
-        let result = await navigationService.navigate(to: destination)
-        // Already returns Result<Void, AxiomError>
-        return result
+        let result = await navigationService.navigate(to: destination, options: options)
+        return result.toAxiomResult()
     }
     
     /// Navigate back with consistent error handling
     public func navigateBack(options: NavigationOptions = .default) async -> AxiomResult<Void> {
         let result = await navigationService.navigateBack()
-        return result
+        return result.toAxiomResult()
     }
     
     /// Dismiss current view with consistent error handling
     public func dismiss(animated: Bool = true) async -> AxiomResult<Void> {
         let result = await navigationService.dismiss()
-        return result
+        return result.toAxiomResult()
     }
     
     /// Navigate to root with consistent error handling (replaces popToRoot)
     public func navigateToRoot(animated: Bool = true) async -> AxiomResult<Void> {
-        let result = await navigationService.popToRoot()
-        return result
+        let result = await navigationService.navigateToRoot()
+        return result.toAxiomResult()
     }
 }
 

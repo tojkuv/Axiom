@@ -69,12 +69,12 @@ public actor MockPersistenceCapability: PersistenceCapability {
     
     public var isAvailable: Bool { true }
     
-    public func initialize() async throws {
-        // No initialization needed for mock
+    public func activate() async throws {
+        // No activation needed for mock
     }
     
-    public func terminate() async {
-        // Clear storage on termination
+    public func deactivate() async {
+        // Clear storage on deactivation
         storage.removeAll()
     }
     

@@ -3,6 +3,13 @@ import Foundation
 import SwiftUI
 @testable import Axiom
 
+// MARK: - Helper Types for Delegation
+
+/// Empty test context for delegating to TestAssertions protocol
+private struct EmptyTestContext: TestAssertions {
+    typealias TestedType = Any
+}
+
 // MARK: - Context Testing Framework
 
 /// Comprehensive testing utilities for Axiom contexts
@@ -12,6 +19,8 @@ public struct ContextTestHelpers {
     // MARK: - State Testing
     
     /// Assert a condition on context state
+    /// - Note: Deprecated in favor of TestAssertions.assertEventually
+    @available(*, deprecated, message: "Use TestAssertions.assertEventually instead")
     public static func assertState<C: Context>(
         in context: C,
         timeout: Duration = .seconds(1),
@@ -20,16 +29,11 @@ public struct ContextTestHelpers {
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
-        let deadline = ContinuousClock.now + timeout
-        
-        while ContinuousClock.now < deadline {
-            if condition(context) {
-                return
-            }
-            try await Task.sleep(for: .milliseconds(10))
-        }
-        
-        XCTFail("State condition failed: \(description)", file: file, line: line)
+        // Delegate to TestAssertions protocol implementation
+        let testContext = EmptyTestContext()
+        try await testContext.assertEventually({
+            condition(context)
+        }, timeout: timeout, message: description, file: file, line: line)
     }
     
     /// Assert context state equals expected value
@@ -183,6 +187,8 @@ public struct ContextTestHelpers {
     // MARK: - Memory Testing
     
     /// Assert no memory leaks in context usage
+    /// - Note: Deprecated in favor of TestAssertions.assertNoMemoryLeaks
+    @available(*, deprecated, message: "Use TestAssertions.assertNoMemoryLeaks for objects, or create test objects to track")
     public static func assertNoMemoryLeaks<T>(
         operation: () async throws -> T,
         file: StaticString = #file,
@@ -271,20 +277,17 @@ public struct ContextTestHelpers {
     
     // MARK: - Utility Functions
     
+    /// - Note: Deprecated in favor of TestAssertions.waitFor
+    @available(*, deprecated, message: "Use TestAssertions.waitFor instead")
     private static func waitUntil(
         timeout: Duration = .seconds(1),
         condition: () async -> Bool
     ) async throws {
-        let deadline = ContinuousClock.now + timeout
-        
-        while ContinuousClock.now < deadline {
-            if await condition() {
-                return
-            }
-            try await Task.sleep(for: .milliseconds(10))
-        }
-        
-        throw ContextTestError.timeout("Condition not met within timeout")
+        // Delegate to TestAssertions protocol implementation
+        let testContext = EmptyTestContext()
+        _ = try await testContext.waitFor({
+            await condition() ? true : nil
+        }, timeout: timeout, message: "Condition not met within timeout")
     }
     
     private static func getCurrentMemoryUsage() -> Int {

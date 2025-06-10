@@ -63,9 +63,9 @@ public final class NavigationService: ObservableObject {
         }
     }
     
-    /// Navigate to route with Result return type
-    public func navigate(to route: Route) async -> Result<Void, AxiomError> {
-        return await withErrorContext("NavigationService.navigateToRoute") {
+    /// Navigate to route with options and consistent return type
+    public func navigate(to route: Route, options: NavigationOptions = .default) async -> NavigationResult {
+        return await withErrorContext("NavigationService.navigate") {
             // Add to history
             if let current = currentRoute, current != route {
                 navigationHistory.append(current)
@@ -78,12 +78,12 @@ public final class NavigationService: ObservableObject {
                 _ = try await handler()
             }
             
-            return ()
-        }
+            return .success
+        }.mapToNavigationResult()
     }
     
     /// Navigate back in history
-    public func navigateBack() async -> Result<Void, AxiomError> {
+    public func navigateBack() async -> NavigationResult {
         return await withErrorContext("NavigationService.navigateBack") {
             guard !navigationHistory.isEmpty else {
                 throw AxiomError.navigationError(.stackError("No previous route to navigate back to"))
@@ -92,53 +92,44 @@ public final class NavigationService: ObservableObject {
             let previousRoute = navigationHistory.removeLast()
             currentRoute = previousRoute
             
-            return ()
-        }
+            return .success
+        }.mapToNavigationResult()
     }
     
     /// Pop to root of navigation stack
-    public func popToRoot() async -> Result<Void, AxiomError> {
-        return await withErrorContext("NavigationService.popToRoot") {
+    public func navigateToRoot() async -> NavigationResult {
+        return await withErrorContext("NavigationService.navigateToRoot") {
             guard !navigationHistory.isEmpty else {
-                return ()
+                return .success
             }
             
             navigationHistory.removeAll()
-            currentRoute = navigationHistory.first
+            currentRoute = nil
             
-            return ()
-        }
+            return .success
+        }.mapToNavigationResult()
     }
     
     /// Dismiss current presentation
-    public func dismiss() async -> Result<Void, AxiomError> {
-        return await withErrorContext("NavigationService.dismiss") {
-            // Simple dismiss implementation
-            let result = await navigateBack()
-            switch result {
-            case .success:
-                return ()
-            case .failure(let error):
-                throw error
-            }
-        }
+    public func dismiss() async -> NavigationResult {
+        return await navigateBack()
     }
     
     // MARK: - Deep Linking Support
     
-    /// Handle deep link URL
-    public func handleDeepLink(_ url: URL) async -> Result<Route, AxiomError> {
-        return await withErrorContext("NavigationService.handleDeepLink") {
+    /// Process deep link URL
+    public func processDeepLink(_ url: URL) async -> NavigationResult {
+        return await withErrorContext("NavigationService.processDeepLink") {
             let route = try parseURL(url)
             
             // Navigate to the parsed route
-            switch await navigate(to: route) {
-            case .success:
-                return route
-            case .failure(let error):
-                throw error
+            let result = await navigate(to: route)
+            if result.isSuccess {
+                return .success
+            } else {
+                return result
             }
-        }
+        }.mapToNavigationResult()
     }
     
     /// Register deep link pattern
@@ -252,6 +243,110 @@ public final class NavigationService: ObservableObject {
         registerDeepLink(pattern: "/detail", routeType: .detail)
         registerDeepLink(pattern: "/custom", routeType: .custom)
     }
+}
+
+// MARK: - Result Conversion Helper
+
+extension Result where Success == Void, Failure == AxiomError {
+    func mapToNavigationResult() -> NavigationResult {
+        switch self {
+        case .success:
+            return .success
+        case .failure(let error):
+            switch error {
+            case .navigationError(let navError):
+                return .failed(navError)
+            default:
+                return .failed(.invalidRoute("Operation failed: \(error.localizedDescription)"))
+            }
+        }
+    }
+}
+
+extension Result where Success == NavigationResult, Failure == AxiomError {
+    func mapToNavigationResult() -> NavigationResult {
+        switch self {
+        case .success(let navResult):
+            return navResult
+        case .failure(let error):
+            switch error {
+            case .navigationError(let navError):
+                return .failed(navError)
+            default:
+                return .failed(.invalidRoute("Operation failed: \(error.localizedDescription)"))
+            }
+        }
+    }
+}
+
+
+// MARK: - API Consistency Improvements (REQUIREMENTS-003)
+
+/// Unified navigation result type for consistent API returns
+public enum NavigationResult {
+    case success
+    case cancelled
+    case failed(AxiomNavigationError)
+    
+    /// Check if navigation was successful
+    public var isSuccess: Bool {
+        if case .success = self { return true }
+        return false
+    }
+    
+    /// Check if navigation was cancelled
+    public var isCancelled: Bool {
+        if case .cancelled = self { return true }
+        return false
+    }
+    
+    /// Check if navigation failed
+    public var isFailed: Bool {
+        if case .failed = self { return true }
+        return false
+    }
+}
+
+// Note: AxiomNavigationError is defined in ErrorHandling.swift
+// This file uses the framework's unified error type
+
+extension NavigationResult {
+    /// Convert NavigationResult to AxiomResult<Void> for API consistency
+    public func toAxiomResult() -> Result<Void, AxiomError> {
+        switch self {
+        case .success:
+            return .success(())
+        case .cancelled:
+            return .failure(.navigationError(.navigationCancelled("Navigation was cancelled")))
+        case .failed(let navError):
+            return .failure(.navigationError(navError))
+        }
+    }
+}
+
+
+/// Navigation options for consistent API
+public struct NavigationOptions {
+    public let animated: Bool
+    public let replace: Bool
+    public let retry: Bool
+    
+    public static let `default` = NavigationOptions(animated: true, replace: false, retry: false)
+    
+    public init(animated: Bool = true, replace: Bool = false, retry: Bool = false) {
+        self.animated = animated
+        self.replace = replace
+        self.retry = retry
+    }
+}
+
+/// Navigation action types for consistent processing
+public enum NavigationAction {
+    case deepLink(URL)
+    case route(Route, NavigationOptions)
+    case back
+    case root
+    case dismiss
 }
 
 // MARK: - Supporting Types
@@ -458,6 +553,7 @@ public struct NavigationCoordinator {
     }
 }
 
+
 // MARK: - Extensions for Error Propagation Integration
 
 extension NavigationService {
@@ -475,8 +571,10 @@ extension NavigationService {
             switch await navigate(to: route) {
             case .success:
                 return ()
-            case .failure(let error):
-                throw error
+            case .cancelled:
+                throw AxiomError.navigationError(.navigationCancelled("Navigation was cancelled"))
+            case .failed(let navError):
+                throw AxiomError.navigationError(navError)
             }
         }
     }
