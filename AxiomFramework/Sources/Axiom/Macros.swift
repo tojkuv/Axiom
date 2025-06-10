@@ -24,7 +24,7 @@ public macro Context(observing: Any.Type) = #externalMacro(module: "AxiomMacros"
 /// }
 /// ```
 @attached(member, names: named(routes), named(navigate), named(canNavigate), named(currentRoute), named(navigationStack))
-@attached(extension, conformances: NavigationService)
+// @attached(extension, conformances: NavigationService) // Disabled - NavigationService is now a class
 public macro NavigationOrchestrator() = #externalMacro(
     module: "AxiomMacros",
     type: "NavigationOrchestratorMacro"
@@ -37,7 +37,7 @@ public macro NavigationOrchestrator() = #externalMacro(
 /// Example:
 /// ```swift
 /// @ErrorBoundary(strategy: .retry(attempts: 3))
-/// class TaskContext: BaseContext {
+/// class TaskContext: ObservableContext {
 ///     func loadTasks() async throws {
 ///         // Errors automatically handled by boundary
 ///     }
@@ -50,4 +50,52 @@ public macro ErrorBoundary(
 ) = #externalMacro(
     module: "AxiomMacros",
     type: "ErrorBoundaryMacro"
+)
+
+// MARK: - Error Handling Macros
+
+/// Macro that generates automatic retry logic with configurable backoff strategies
+/// 
+/// Example:
+/// ```swift
+/// @ErrorHandling(retry: 3, backoff: .exponential(initial: 0.5))
+/// class APIClient {
+///     func fetchUser(_ id: String) async throws -> User {
+///         // Use the generated executeWithRetry method
+///         try await executeWithRetry {
+///             try await network.get("/users/\(id)")
+///         }
+///     }
+/// }
+/// ```
+@attached(member, names: named(executeWithRetry), named(calculateBackoffDelay))
+public macro ErrorHandling(
+    retry: Int = 3,
+    backoff: BackoffStrategy = .exponential()
+) = #externalMacro(
+    module: "AxiomMacros",
+    type: "ErrorHandlingMacro"
+)
+
+/// Macro that automatically adds error context to function calls
+/// 
+/// Example:
+/// ```swift
+/// @ErrorContext(operation: "processData")
+/// class DataProcessor {
+///     func processData(_ data: Data) throws -> ProcessedData {
+///         // Use the generated executeWithContext method
+///         try await executeWithContext {
+///             try validate(data)
+///             return try transform(data)
+///         }
+///     }
+/// }
+/// ```
+@attached(member, names: named(executeWithContext))
+public macro ErrorContext(
+    operation: String? = nil
+) = #externalMacro(
+    module: "AxiomMacros",
+    type: "ErrorContextMacro"
 )

@@ -29,7 +29,7 @@ final class MockingTests: XCTestCase {
     }
     
     @MainActor
-    final class TestContext: BaseContext {
+    final class TestContext: ObservableContext {
         let service: TestService
         let dataSource: TestDataSource
         var lastResult: String?

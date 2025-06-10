@@ -351,7 +351,7 @@ final class PerformanceFrameworkTests: XCTestCase {
 // MARK: - Test Support Contexts
 
 @MainActor
-class StatePropagationTestContext: BaseContext {
+class StatePropagationTestContext: ObservableContext {
     private let client: PerformanceTestClient
     @Published private(set) var latestState: PerformanceTestState?
     @Published private(set) var hasReceivedLatestState = false
@@ -383,7 +383,7 @@ class StatePropagationTestContext: BaseContext {
 }
 
 @MainActor
-class FrameRateTestContext: BaseContext {
+class FrameRateTestContext: ObservableContext {
     private let client: PerformanceTestClient
     @Published private(set) var frameCount = 0
     @Published private(set) var totalFrameTime: Duration = .zero
@@ -412,7 +412,7 @@ class FrameRateTestContext: BaseContext {
 }
 
 @MainActor
-class MemoryOptimizedTestContext: BaseContext {
+class MemoryOptimizedTestContext: ObservableContext {
     private let client: MemoryOptimizedTestClient
     @Published private(set) var state: PerformanceTestState?
     private var observationTask: Task<Void, Never>?
@@ -442,7 +442,7 @@ class MemoryOptimizedTestContext: BaseContext {
 }
 
 @MainActor
-class MemoryLeakTestContext: BaseContext {
+class MemoryLeakTestContext: ObservableContext {
     private let client: MemoryOptimizedTestClient
     @Published private(set) var processedCount = 0
     private var observationTask: Task<Void, Never>?
@@ -472,7 +472,7 @@ class MemoryLeakTestContext: BaseContext {
 }
 
 @MainActor
-class FastInitTestContext: BaseContext {
+class FastInitTestContext: ObservableContext {
     private let client: FastInitTestClient
     @Published private(set) var initializationTime: Duration?
     
@@ -485,7 +485,7 @@ class FastInitTestContext: BaseContext {
 }
 
 @MainActor
-class ConcurrentInitTestContext: BaseContext {
+class ConcurrentInitTestContext: ObservableContext {
     private let client: FastInitTestClient
     @Published private(set) var isReady = false
     
@@ -497,7 +497,7 @@ class ConcurrentInitTestContext: BaseContext {
 }
 
 @MainActor
-class ComplexTestContext: BaseContext {
+class ComplexTestContext: ObservableContext {
     private let client: FastInitTestClient
     @Published private(set) var dependencyEstablished = false
     @Published private(set) var dependentContext: ComplexTestContext?

@@ -1,5 +1,4 @@
 import Foundation
-import Combine
 
 /// High-performance state propagation system
 /// 
@@ -37,7 +36,7 @@ public actor StatePropagationEngine {
         initialState: StateType
     ) -> (stream: AsyncStream<StateType>, yield: (StateType) -> Void) {
         
-        let (stream, continuation) = AsyncStream.makeStream(
+        let (stream, yield) = AsyncStream.makeStream(
             of: StateType.self,
             bufferingPolicy: .bufferingOldest(1)  // Only keep latest state
         )
@@ -46,7 +45,7 @@ public actor StatePropagationEngine {
             let startTime = CFAbsoluteTimeGetCurrent()
             
             // Immediate propagation with minimal overhead
-            continuation.yield(newState)
+            yield(newState)
             
             // Track performance metrics
             Task { [weak self] in
@@ -116,7 +115,7 @@ public class OptimizedClientStream<StateType: State> {
         self.streamId = UUID()
         
         // Create stream with minimal buffering for fastest propagation
-        let (stream, continuation) = AsyncStream.makeStream(
+        let (stream, continuation) = AsyncStream.makeStreamWithContinuation(
             of: StateType.self,
             bufferingPolicy: .bufferingOldest(1)
         )

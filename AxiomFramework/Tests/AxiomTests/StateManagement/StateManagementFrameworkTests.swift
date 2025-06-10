@@ -716,7 +716,7 @@ struct DependencyAnalyzer {
 
 // Action Subscription Testing
 @MainActor
-class TestParentSubscriptionContext: BaseContext {
+class TestParentSubscriptionContext: ObservableContext {
     @Published private(set) var capturedActions: [Any] = []
     @Published private(set) var handledActionTypes: Set<String> = []
     
@@ -727,7 +727,7 @@ class TestParentSubscriptionContext: BaseContext {
 }
 
 @MainActor
-class TestChildSubscriptionContext: BaseContext {
+class TestChildSubscriptionContext: ObservableContext {
     enum Action: Equatable {
         case itemSelected(id: String)
         case itemDeleted(id: String)
@@ -792,7 +792,7 @@ actor StateFlowTestClient: Client {
 }
 
 @MainActor
-class StateFlowTestContext: BaseContext {
+class StateFlowTestContext: ObservableContext {
     private let client: StateFlowTestClient
     @Published private(set) var observationWasCancelled = false
     private var observationTask: Task<Void, Never>?

@@ -9,9 +9,9 @@ extension Context {
     /// The framework automatically delivers this to the parent's handleChildAction
     @MainActor
     public func emit<Action>(_ action: Action) {
-        // Get parent context reference from BaseContext
-        if let baseContext = self as? BaseContext,
-           let parent = baseContext.parentContext {
+        // Get parent context reference from ObservableContext
+        if let observableContext = self as? ObservableContext,
+           let parent = observableContext.parentContext {
             Task { @MainActor in
                 parent.handleChildAction(action, from: self)
             }
@@ -54,23 +54,23 @@ private class WeakParentWrapper {
 
 // MARK: - Parent-Child Relationship Extensions
 
-extension BaseContext {
+extension ObservableContext {
     // Associated object keys for storing parent/child relationships
     private static var parentContextKey: UInt8 = 0
     private static var childrenKey: UInt8 = 1
     
-    // parentContext is already defined in BaseContext
+    // parentContext is already defined in ObservableContext
     // This extension provides additional functionality using associated objects
     // when needed for advanced use cases
     
-    // childContexts is already defined in BaseContext as an array
+    // childContexts is already defined in ObservableContext as an array
     // This extension could provide Set-based access if needed for advanced use cases
     
-    // addChild and removeChild are already defined in BaseContext
+    // addChild and removeChild are already defined in ObservableContext
     // This extension provides advanced child management using NSHashTable
     // for scenarios requiring weak object collections
     
-    // cleanupDeallocatedChildren is already defined as private in BaseContext
+    // cleanupDeallocatedChildren is already defined as private in ObservableContext
     // NSHashTable with weak references automatically removes deallocated objects
 }
 

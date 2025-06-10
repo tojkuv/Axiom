@@ -53,7 +53,7 @@ extension Client {
             
             group.addTask {
                 try await Task.sleep(for: timeout)
-                throw ClientError.timeout
+                throw AxiomError.clientError(.timeout(duration: Double(timeout.components.seconds)))
             }
             
             try await group.next()
@@ -62,27 +62,24 @@ extension Client {
     }
 }
 
-// MARK: - Client Errors
+// MARK: - Client Error Types Consolidated into AxiomError
+// 
+// All client error types have been consolidated into AxiomError.clientError
+// Legacy ClientError enum removed - use AxiomError.clientError with appropriate cases:
+//
+// ClientError.timeout -> AxiomError.clientError(.timeout(duration: Double))
+// ClientError.notInitialized -> AxiomError.clientError(.notInitialized)
+// ClientError.invalidAction(String) -> AxiomError.clientError(.invalidAction(String))
 
-/// Errors that can occur during client operations
-public enum ClientError: Error, Sendable {
-    /// Action processing timed out
-    case timeout
-    /// Client is not initialized
-    case notInitialized
-    /// Action is invalid for current state
-    case invalidAction(String)
-}
+// MARK: - Observable Client Implementation
 
-// MARK: - Base Client Implementation
-
-/// Base actor implementation providing common client behaviors
+/// Observable actor implementation providing common client behaviors
 /// 
 /// This actor provides:
 /// - State management with automatic streaming
 /// - Thread-safe state mutations
 /// - Performance guarantees for state propagation
-public actor BaseClient<S: State, A>: Client where S: Equatable {
+public actor ObservableClient<S: State, A>: Client where S: Equatable {
     public typealias StateType = S
     public typealias ActionType = A
     /// Current state of the client
@@ -184,11 +181,11 @@ public struct ClientIdentifier<C: Client>: Hashable, Sendable {
 /// Helper to batch multiple actions for atomic processing
 public struct ActionBatch<Action> {
     public let actions: [Action]
-    public let atomicExecution: Bool
+    public let isAtomicExecution: Bool
     
     public init(actions: [Action], atomic: Bool = false) {
         self.actions = actions
-        self.atomicExecution = atomic
+        self.isAtomicExecution = atomic
     }
 }
 
@@ -207,6 +204,15 @@ public protocol ClientPerformanceMonitor: Actor {
 }
 
 /// Performance metrics for a client
+// MARK: - Duration Extensions
+
+extension Duration {
+    /// Zero duration
+    public static var zero: Duration {
+        .seconds(0)
+    }
+}
+
 public struct ClientPerformanceMetrics: Sendable {
     public let averageStateUpdateTime: Duration
     public let averageActionProcessingTime: Duration

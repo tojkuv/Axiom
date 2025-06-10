@@ -445,7 +445,7 @@ func testContextMemoryIsReleasedAfterDisappear() async throws { }
 ### 2. Setup and Teardown
 
 ```swift
-class BaseContextTests: XCTestCase {
+class ObservableContextTests: XCTestCase {
     var context: TestableContext!
     
     override func setUp() async throws {

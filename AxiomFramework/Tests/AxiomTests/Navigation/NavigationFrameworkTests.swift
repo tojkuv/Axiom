@@ -324,7 +324,7 @@ final class NavigationFrameworkTests: XCTestCase {
 // MARK: - Test Support Contexts
 
 @MainActor
-class TestNavigationContext: BaseContext {
+class TestNavigationContext: ObservableContext {
     private let orchestrator: TestNavigationOrchestrator
     
     init(orchestrator: TestNavigationOrchestrator) {
@@ -338,7 +338,7 @@ class TestNavigationContext: BaseContext {
 }
 
 @MainActor
-class NavigationMediationTestContext: BaseContext {
+class NavigationMediationTestContext: ObservableContext {
     private let orchestrator: TestNavigationOrchestrator
     @Published private(set) var mediatedRequests: [TestRoute] = []
     
@@ -354,7 +354,7 @@ class NavigationMediationTestContext: BaseContext {
 }
 
 @MainActor
-class RestrictiveNavigationContext: BaseContext {
+class RestrictiveNavigationContext: ObservableContext {
     private let orchestrator: TestNavigationOrchestrator
     @Published private(set) var allowedNavigations: [TestRoute] = []
     @Published private(set) var blockedNavigations: [TestRoute] = []
@@ -377,7 +377,7 @@ class RestrictiveNavigationContext: BaseContext {
 }
 
 @MainActor
-class RouteValidationTestContext: BaseContext {
+class RouteValidationTestContext: ObservableContext {
     @Published private(set) var validRoutes: [TestRoute] = []
     @Published private(set) var invalidRoutes: [TestRoute] = []
     
@@ -392,7 +392,7 @@ class RouteValidationTestContext: BaseContext {
 }
 
 @MainActor
-class ErrorHandlingNavigationContext: BaseContext {
+class ErrorHandlingNavigationContext: ObservableContext {
     private let orchestrator: FailingNavigationOrchestrator
     @Published private(set) var handledErrors: [Error] = []
     @Published private(set) var lastError: Error?
@@ -413,7 +413,7 @@ class ErrorHandlingNavigationContext: BaseContext {
 }
 
 @MainActor
-class PerformanceNavigationContext: BaseContext {
+class PerformanceNavigationContext: ObservableContext {
     private let orchestrator: TestNavigationOrchestrator
     @Published private(set) var navigationCount = 0
     
@@ -430,7 +430,7 @@ class PerformanceNavigationContext: BaseContext {
 }
 
 @MainActor
-class MemoryTestNavigationContext: BaseContext {
+class MemoryTestNavigationContext: ObservableContext {
     private let orchestrator: TestNavigationOrchestrator
     @Published private(set) var processedRoutes: [TestRoute] = []
     
@@ -448,7 +448,7 @@ class MemoryTestNavigationContext: BaseContext {
 }
 
 @MainActor
-class DeepLinkNavigationContext: BaseContext {
+class DeepLinkNavigationContext: ObservableContext {
     private let orchestrator: TestNavigationOrchestrator
     @Published private(set) var processedDeepLinks: [String] = []
     @Published private(set) var parsedRoutes: [TestRoute] = []

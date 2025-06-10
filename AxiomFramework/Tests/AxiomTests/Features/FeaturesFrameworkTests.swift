@@ -865,7 +865,7 @@ actor FormValidationTestClient: Client {
 
 // Launch Action Processor Context
 @MainActor
-class LaunchActionProcessorContext: BaseContext {
+class LaunchActionProcessorContext: ObservableContext {
     private let manager: TestLaunchActionManager<TestQuickAction>
     private(set) var processedActions: Set<TestQuickAction> = []
     private var observationTask: Task<Void, Never>?

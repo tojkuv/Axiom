@@ -62,7 +62,7 @@ final class PerformanceTestingTests: XCTestCase {
     }
     
     @MainActor
-    final class TestContext: BaseContext {
+    final class TestContext: ObservableContext {
         let client: TestClient
         var items: [String] = []
         

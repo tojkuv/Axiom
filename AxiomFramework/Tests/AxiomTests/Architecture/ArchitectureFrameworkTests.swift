@@ -657,7 +657,7 @@ actor TestOrchestrator: Orchestrator {
 
 // Test Context for Orchestrator
 @MainActor
-class TestOrchestratorContext: BaseContext {
+class TestOrchestratorContext: ObservableContext {
     let identifier: String
     let dependencies: [String]
     
@@ -670,7 +670,7 @@ class TestOrchestratorContext: BaseContext {
 
 // Dependency Test Context
 @MainActor
-class DependencyTestContext: BaseContext {
+class DependencyTestContext: ObservableContext {
     let identifier: String
     let injectedDependencies: [String]
     
@@ -683,7 +683,7 @@ class DependencyTestContext: BaseContext {
 
 // Concurrency Test Context
 @MainActor
-class ConcurrencyTestContext: BaseContext {
+class ConcurrencyTestContext: ObservableContext {
     private let client: ArchitectureTestClient
     @Published private(set) var currentTestState = "initial"
     
@@ -699,7 +699,7 @@ class ConcurrencyTestContext: BaseContext {
 
 // Presentation Test Context
 @MainActor
-class PresentationTestContext: BaseContext {
+class PresentationTestContext: ObservableContext {
     @Published private(set) var testValue = "default"
     
     func updateTestValue(_ value: String) {

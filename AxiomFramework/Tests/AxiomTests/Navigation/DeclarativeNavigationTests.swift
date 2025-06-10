@@ -8,13 +8,13 @@ final class DeclarativeNavigationTests: XCTestCase {
     
     /// Test context for home
     @MainActor
-    final class HomeContext: BaseContext {
+    final class HomeContext: ObservableContext {
         var data: String = "Home"
     }
     
     /// Test context for detail
     @MainActor
-    final class DetailContext: BaseContext {
+    final class DetailContext: ObservableContext {
         let id: String
         
         init(id: String) {
@@ -25,7 +25,7 @@ final class DeclarativeNavigationTests: XCTestCase {
     
     /// Test context for settings
     @MainActor
-    final class SettingsContext: BaseContext {
+    final class SettingsContext: ObservableContext {
         var theme: String = "Light"
     }
     

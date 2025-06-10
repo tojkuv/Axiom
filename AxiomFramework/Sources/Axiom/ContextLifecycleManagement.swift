@@ -9,10 +9,10 @@ public protocol ManagedContext: Context {
     nonisolated var id: AnyHashable { get }
     
     /// Called when context is attached to view
-    func onAttach()
+    func attached()
     
     /// Called when context is detached from view
-    func onDetach()
+    func detached()
 }
 
 // MARK: - Context Provider
@@ -37,7 +37,7 @@ public final class ContextProvider: ObservableObject {
         
         let new = create()
         contexts[id] = new
-        new.onAttach()
+        new.attached()
         return new
     }
     
@@ -47,7 +47,7 @@ public final class ContextProvider: ObservableObject {
         defer { lock.unlock() }
         
         if let context = contexts.removeValue(forKey: id) {
-            context.onDetach()
+            context.detached()
         }
     }
     
@@ -56,7 +56,7 @@ public final class ContextProvider: ObservableObject {
         lock.lock()
         defer { lock.unlock() }
         
-        contexts.values.forEach { $0.onDetach() }
+        contexts.values.forEach { $0.detached() }
         contexts.removeAll()
     }
 }
@@ -216,13 +216,13 @@ public struct ListContextManager<Item: Identifiable, C: ListItemContext> where C
 public extension Context {
     /// Automatically clean up child contexts with deallocated references
     func cleanupDetachedChildren() {
-        // Only BaseContext has childContexts property
-        if let baseContext = self as? BaseContext {
-            let cleanedContexts = baseContext.childContexts.filter { wrapper in
+        // Only ObservableContext has childContexts property
+        if let observableContext = self as? ObservableContext {
+            let cleanedContexts = observableContext.childContexts.filter { wrapper in
                 wrapper.context != nil
             }
             // Note: This would require making childContexts settable
-            // baseContext.childContexts = cleanedContexts
+            // observableContext.childContexts = cleanedContexts
         }
     }
 }
@@ -270,9 +270,9 @@ public func assertNoContextLeaks<T>(
 }
 
 /// Test context for leak detection
-private class TestLeakContext: BaseContext, ManagedContext {
+private class TestLeakContext: ObservableContext, ManagedContext {
     nonisolated let id: AnyHashable = "test-leak"
     
-    func onAttach() {}
-    func onDetach() {}
+    func attached() {}
+    func detached() {}
 }

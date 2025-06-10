@@ -53,7 +53,7 @@ final class AxiomErrorTests: XCTestCase {
     func testErrorBoundaryMacroGeneration() async throws {
         // Test that @ErrorBoundary generates proper error handling
         @ErrorBoundary
-        class TestContext: BaseContext {
+        class TestContext: ObservableContext {
             func riskyOperation() async throws {
                 throw AxiomError.contextError(.lifecycleError("Test error"))
             }
@@ -77,7 +77,7 @@ final class AxiomErrorTests: XCTestCase {
     func testErrorRecoveryStrategies() async throws {
         // Test different recovery strategies
         @ErrorBoundary(strategy: .retry(attempts: 2))
-        class RetryContext: BaseContext {
+        class RetryContext: ObservableContext {
             var attemptCount = 0
             
             func failingOperation() async throws {
@@ -98,7 +98,7 @@ final class AxiomErrorTests: XCTestCase {
     @MainActor
     func testErrorPropagation() async throws {
         // Test error propagation through boundaries
-        class ParentContext: BaseContext {
+        class ParentContext: ObservableContext {
             var receivedError: Error?
             
             override func handleBoundaryError(_ error: Error) async {
@@ -107,7 +107,7 @@ final class AxiomErrorTests: XCTestCase {
         }
         
         @ErrorBoundary(strategy: .propagate)
-        class ChildContext: BaseContext {
+        class ChildContext: ObservableContext {
             func throwError() async throws {
                 throw AxiomError.navigationError(.routeNotFound("/test"))
             }

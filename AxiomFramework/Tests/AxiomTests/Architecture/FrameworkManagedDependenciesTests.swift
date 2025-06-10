@@ -129,7 +129,7 @@ final class FrameworkManagedDependenciesTests: XCTestCase {
 // MARK: - Test Contexts
 
 @MainActor
-class AutoManagedParentContext: BaseContext {
+class AutoManagedParentContext: ObservableContext {
     private(set) var listContext: IdentifiableChildContext?
     private(set) var detailContext: IdentifiableChildContext?
     
@@ -158,7 +158,7 @@ class AutoManagedParentContext: BaseContext {
 }
 
 @MainActor
-class MultiChildParentContext: BaseContext {
+class MultiChildParentContext: ObservableContext {
     private var childrenById: [String: IdentifiableChildContext] = [:]
     
     func createChild(id: String) -> IdentifiableChildContext {
@@ -174,7 +174,7 @@ class MultiChildParentContext: BaseContext {
 }
 
 @MainActor
-class LazyParentContext: BaseContext {
+class LazyParentContext: ObservableContext {
     private var _lazyDetailContext: IdentifiableChildContext?
     
     var lazyDetailContext: IdentifiableChildContext {
@@ -190,7 +190,7 @@ class LazyParentContext: BaseContext {
 }
 
 @MainActor
-class IdentifiableChildContext: BaseContext {
+class IdentifiableChildContext: ObservableContext {
     let id: String
     
     init(id: String) {

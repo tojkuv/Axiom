@@ -19,7 +19,7 @@ final class TestTemplateGeneratorTests: XCTestCase {
     }
     
     @MainActor
-    final class SampleContext: BaseContext {
+    final class SampleContext: ObservableContext {
         var value: Int = 0
         var text: String = ""
     }

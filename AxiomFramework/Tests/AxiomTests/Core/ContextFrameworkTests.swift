@@ -487,7 +487,7 @@ class ErrorHandlingTestContext: Context, ObservableObject {
 }
 
 @MainActor
-class ParentTestContext: BaseContext {
+class ParentTestContext: ObservableContext {
     @Published private(set) var receivedMessages: [String] = []
     
     override func handleChildAction<T>(_ action: T, from child: any Context) {
@@ -501,7 +501,7 @@ class ParentTestContext: BaseContext {
 }
 
 @MainActor
-class ChildTestContext: BaseContext {
+class ChildTestContext: ObservableContext {
     enum Action: Equatable {
         case notifyParent(String)
     }
@@ -526,7 +526,7 @@ class PerformanceTestContext: Context, ObservableObject {
 }
 
 @MainActor
-class ClientObservingTestContext: BaseContext {
+class ClientObservingTestContext: ObservableContext {
     private let client: MockContextClient
     @Published private(set) var observedStates: [ContextClientState] = []
     private var observationTask: Task<Void, Never>?
@@ -556,7 +556,7 @@ class ClientObservingTestContext: BaseContext {
 }
 
 @MainActor
-class MemoryStabilityTestContext: BaseContext {
+class MemoryStabilityTestContext: ObservableContext {
     @Published private(set) var processedActionCount = 0
     
     func processAction(_ action: ProtocolTestContextAction) {
@@ -572,7 +572,7 @@ class MemoryStabilityTestContext: BaseContext {
 }
 
 @MainActor
-class WeakReferenceTestContext: BaseContext {
+class WeakReferenceTestContext: ObservableContext {
     private weak var client: MockContextClient?
     
     var hasAttachedClient: Bool {
@@ -585,7 +585,7 @@ class WeakReferenceTestContext: BaseContext {
 }
 
 @MainActor
-class MainActorTestContext: BaseContext {
+class MainActorTestContext: ObservableContext {
     @Published private(set) var uiState = ""
     
     func updateUIState(_ state: String) {
@@ -594,7 +594,7 @@ class MainActorTestContext: BaseContext {
 }
 
 @MainActor
-class AdvancedErrorHandlingTestContext: BaseContext {
+class AdvancedErrorHandlingTestContext: ObservableContext {
     private let client: ErrorThrowingContextClient
     @Published private(set) var handledErrorCount = 0
     @Published private(set) var lastError: Error?

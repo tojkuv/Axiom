@@ -62,9 +62,9 @@ extension Client {
     }
 }
 
-// MARK: - BaseClient Mutation Implementation
+// MARK: - ObservableClient Mutation Implementation
 
-extension BaseClient: MutableClient {
+extension ObservableClient: MutableClient {
     /// Perform a state mutation with automatic immutability preservation
     @MainActor
     @discardableResult
@@ -248,17 +248,17 @@ public struct StateValidator<S> {
             do {
                 try rule.validate(state)
             } catch {
-                let wrappedError = ValidationError.ruleFailed(
-                    index: index,
-                    description: rule.description,
-                    underlyingError: error
-                )
+                let wrappedError = AxiomError.validationError(.ruleFailed(
+                    field: "rule_\(index)",
+                    rule: rule.description,
+                    reason: error.localizedDescription
+                ))
                 validationErrors.append(wrappedError)
             }
         }
         
         if !validationErrors.isEmpty {
-            throw ValidationError.multipleFailures(validationErrors)
+            throw AxiomError.validationError(.invalidInput("state", "Multiple validation rules failed: \(validationErrors.count) errors"))
         }
     }
     
@@ -319,11 +319,13 @@ public struct StateValidationRule<S> {
     }
 }
 
-/// Validation errors
-public enum ValidationError: Error {
-    case ruleFailed(index: Int, description: String, underlyingError: Error)
-    case multipleFailures([Error])
-}
+// MARK: - Validation Error Types Consolidated into AxiomError
+// 
+// All validation error types have been consolidated into AxiomError.validationError
+// Legacy ValidationError enum removed - use AxiomError.validationError with appropriate cases:
+//
+// ValidationError.ruleFailed(index, description, underlyingError) -> AxiomError.validationError(.ruleFailed(field: String, rule: String, reason: String))
+// ValidationError.multipleFailures([Error]) -> AxiomError.validationError(.invalidInput(String, String))
 
 /// Represents the difference between two states
 public struct StateDiff<S> {
@@ -360,9 +362,9 @@ public struct StateDiff<S> {
     }
 }
 
-// MARK: - Enhanced BaseClient with Stream Builder
+// MARK: - Enhanced ObservableClient with Stream Builder
 
-extension BaseClient {
+extension ObservableClient {
     /// Create an optimized state stream using the builder pattern
     public var optimizedStateStream: AsyncStream<S> {
         get async {
@@ -398,11 +400,10 @@ extension StateValidationRule {
             description: description ?? "Collection at \(keyPath) should not be empty"
         ) { state in
             guard !state[keyPath: keyPath].isEmpty else {
-                throw ValidationError.ruleFailed(
-                    index: 0,
-                    description: "Empty collection",
-                    underlyingError: NSError(domain: "StateValidation", code: 1)
-                )
+                throw AxiomError.validationError(.invalidInput(
+                    String(describing: keyPath), 
+                    "collection should not be empty"
+                ))
             }
         }
     }
@@ -418,11 +419,10 @@ extension StateValidationRule {
         ) { state in
             let value = state[keyPath: keyPath]
             guard range.contains(value) else {
-                throw ValidationError.ruleFailed(
-                    index: 0,
-                    description: "Value \(value) out of range \(range)",
-                    underlyingError: NSError(domain: "StateValidation", code: 2)
-                )
+                throw AxiomError.validationError(.invalidInput(
+                    String(describing: keyPath), 
+                    "value \(value) must be in range \(range)"
+                ))
             }
         }
     }

@@ -18,7 +18,7 @@ final class ErrorBoundaryTests: XCTestCase {
     
     @MainActor
     func testErrorBoundaryInContext() async {
-        class TestContext: BaseContext {}
+        class TestContext: ObservableContext {}
         
         let context = TestContext()
         XCTAssertNotNil(context.errorBoundary)
@@ -31,7 +31,7 @@ final class ErrorBoundaryTests: XCTestCase {
     
     @MainActor
     func testErrorPropagationToParent() async {
-        class ParentContext: BaseContext {
+        class ParentContext: ObservableContext {
             var receivedError: Error?
             
             override func handleBoundaryError(_ error: Error) async {
@@ -39,7 +39,7 @@ final class ErrorBoundaryTests: XCTestCase {
             }
         }
         
-        class ChildContext: BaseContext {}
+        class ChildContext: ObservableContext {}
         
         let parent = ParentContext()
         let child = ChildContext()
@@ -112,7 +112,7 @@ final class ErrorBoundaryTests: XCTestCase {
     
     @MainActor
     func testErrorBoundaryChain() async {
-        class RootContext: BaseContext {
+        class RootContext: ObservableContext {
             var errors: [Error] = []
             
             override func handleBoundaryError(_ error: Error) async {
@@ -120,7 +120,7 @@ final class ErrorBoundaryTests: XCTestCase {
             }
         }
         
-        class MiddleContext: BaseContext {
+        class MiddleContext: ObservableContext {
             override func handleBoundaryError(_ error: Error) async {
                 // Transform error
                 let wrappedError = AxiomError.contextError(.childContextError(error.localizedDescription))
@@ -128,7 +128,7 @@ final class ErrorBoundaryTests: XCTestCase {
             }
         }
         
-        class LeafContext: BaseContext {}
+        class LeafContext: ObservableContext {}
         
         let root = RootContext()
         let middle = MiddleContext()

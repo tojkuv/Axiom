@@ -9,6 +9,7 @@ public enum AxiomError: Error, Codable, Equatable {
     case navigationError(AxiomNavigationError)
     case persistenceError(PersistenceError)
     case validationError(AxiomValidationError)
+    case capabilityError(CapabilityError)
     
     /// Human-readable error description
     public var localizedDescription: String {
@@ -23,6 +24,8 @@ public enum AxiomError: Error, Codable, Equatable {
             return "Persistence Error: \(error.localizedDescription)"
         case .validationError(let error):
             return "Validation Error: \(error.localizedDescription)"
+        case .capabilityError(let error):
+            return "Capability Error: \(error.localizedDescription)"
         }
     }
     
@@ -39,6 +42,8 @@ public enum AxiomError: Error, Codable, Equatable {
             return .retry(attempts: 3)
         case .validationError:
             return .userPrompt(message: "Please correct the input")
+        case .capabilityError:
+            return .silent
         }
     }
 }
@@ -95,10 +100,47 @@ public enum AxiomClientError: Error, Codable, Equatable {
 
 /// Navigation-related errors
 public enum AxiomNavigationError: Error, Codable, Equatable {
+    // Route errors
     case invalidRoute(String)
     case routeNotFound(String)
+    case invalidParameter(field: String?, reason: String)
+    case missingRequiredParameter(String)
+    case compilationFailure(String)
+    
+    // Deep linking
+    case invalidURL(component: String, value: String)
+    case patternNotFound(String)
+    case parsingFailed(String)
+    
+    // Navigation flow
     case navigationBlocked(String)
-    case guardFailed(String)
+    case guardFailed(String) 
+    case directNavigationNotAllowed(String)
+    case contextMediationRequired(String)
+    
+    // Auth errors
+    case unauthorized(String)
+    case authenticationRequired(String)
+    
+    // Navigation patterns
+    case patternConflict(String)
+    case invalidHierarchy(String)
+    case circularNavigation(String)
+    case stackError(String) // empty stack, no modal, etc
+    case tabError(String) // tab not found, insufficient tabs
+    case depthLimitExceeded(limit: Int)
+    
+    // Navigation graph
+    case cycleDetected(path: String)
+    case invalidTransition(from: String, to: String)
+    case nodeNotFound(String)
+    
+    // Cancellation
+    case navigationCancelled(String)
+    
+    // Middleware
+    case middlewareRejected(reason: String)
+    case rateLimitExceeded(String)
     
     public var localizedDescription: String {
         switch self {
@@ -106,10 +148,54 @@ public enum AxiomNavigationError: Error, Codable, Equatable {
             return "Invalid route: \(route)"
         case .routeNotFound(let route):
             return "Route not found: \(route)"
+        case .invalidParameter(let field, let reason):
+            return "Invalid parameter\(field.map { " '\($0)'" } ?? ""): \(reason)"
+        case .missingRequiredParameter(let param):
+            return "Missing required parameter: \(param)"
+        case .compilationFailure(let details):
+            return "Route compilation failed: \(details)"
+        case .invalidURL(let component, let value):
+            return "Invalid URL \(component): \(value)"
+        case .patternNotFound(let pattern):
+            return "Pattern not found: \(pattern)"
+        case .parsingFailed(let details):
+            return "URL parsing failed: \(details)"
         case .navigationBlocked(let reason):
             return "Navigation blocked: \(reason)"
         case .guardFailed(let reason):
             return "Navigation guard failed: \(reason)"
+        case .directNavigationNotAllowed(let details):
+            return "Direct navigation not allowed: \(details)"
+        case .contextMediationRequired(let context):
+            return "Context mediation required: \(context)"
+        case .unauthorized(let resource):
+            return "Unauthorized access to: \(resource)"
+        case .authenticationRequired(let resource):
+            return "Authentication required for: \(resource)"
+        case .patternConflict(let details):
+            return "Navigation pattern conflict: \(details)"
+        case .invalidHierarchy(let details):
+            return "Invalid navigation hierarchy: \(details)"
+        case .circularNavigation(let path):
+            return "Circular navigation detected: \(path)"
+        case .stackError(let details):
+            return "Navigation stack error: \(details)"
+        case .tabError(let details):
+            return "Tab navigation error: \(details)"
+        case .depthLimitExceeded(let limit):
+            return "Navigation depth limit exceeded: \(limit)"
+        case .cycleDetected(let path):
+            return "Navigation cycle detected: \(path)"
+        case .invalidTransition(let from, let to):
+            return "Invalid transition from \(from) to \(to)"
+        case .nodeNotFound(let node):
+            return "Navigation node not found: \(node)"
+        case .navigationCancelled(let details):
+            return "Navigation cancelled: \(details)"
+        case .middlewareRejected(let reason):
+            return "Navigation middleware rejected: \(reason)"
+        case .rateLimitExceeded(let details):
+            return "Navigation rate limit exceeded: \(details)"
         }
     }
 }
@@ -141,6 +227,8 @@ public enum AxiomValidationError: Error, Codable, Equatable {
     case missingRequired(String)
     case formatError(String, String) // field, expected format
     case rangeError(String, String) // field, valid range
+    case ruleFailed(field: String, rule: String, reason: String)
+    case multipleFailures([String]) // simplified from [Error] for Codable
     
     public var localizedDescription: String {
         switch self {
@@ -152,6 +240,37 @@ public enum AxiomValidationError: Error, Codable, Equatable {
             return "\(field) must be in format: \(format)"
         case .rangeError(let field, let range):
             return "\(field) must be within: \(range)"
+        case .ruleFailed(let field, let rule, let reason):
+            return "Validation rule '\(rule)' failed for \(field): \(reason)"
+        case .multipleFailures(let failures):
+            return "Multiple validation failures: \(failures.joined(separator: ", "))"
+        }
+    }
+}
+
+/// Capability-related errors
+public enum CapabilityError: Error, Codable, Equatable {
+    case initializationFailed(String)
+    case resourceAllocationFailed(String)
+    case invalidStateTransition(String)
+    case notAvailable(String)
+    case restricted(String)
+    case permissionRequired(String)
+    
+    public var localizedDescription: String {
+        switch self {
+        case .initializationFailed(let reason):
+            return "Capability initialization failed: \(reason)"
+        case .resourceAllocationFailed(let reason):
+            return "Resource allocation failed: \(reason)"
+        case .invalidStateTransition(let details):
+            return "Invalid state transition: \(details)"
+        case .notAvailable(let capability):
+            return "Capability not available: \(capability)"
+        case .restricted(let capability):
+            return "Capability restricted: \(capability)"
+        case .permissionRequired(let capability):
+            return "Permission required for: \(capability)"
         }
     }
 }
@@ -297,6 +416,140 @@ public class AxiomErrorBoundary {
     }
 }
 
+// MARK: - Error Migration Support
+
+/// Extension to support migration from legacy NSError types
+extension AxiomError {
+    /// Create AxiomError from legacy error types
+    public init(legacy error: Error) {
+        switch error {
+        // Already AxiomError
+        case let axiomError as AxiomError:
+            self = axiomError
+            
+        // Legacy NSError types
+        case let nsError as NSError:
+            // Map common NSError domains to appropriate AxiomError types
+            switch nsError.domain {
+            case NSURLErrorDomain:
+                self = .navigationError(.invalidURL(component: "network", value: nsError.localizedDescription))
+            case NSCocoaErrorDomain:
+                self = .persistenceError(.saveFailed(nsError.localizedDescription))
+            default:
+                self = .contextError(.lifecycleError("NSError: \(nsError.localizedDescription)"))
+            }
+            
+        // Unknown
+        default:
+            self = .contextError(.lifecycleError("Unknown error: \(error)"))
+        }
+    }
+    
+    // Navigation error mappers - temporarily disabled during consolidation
+    /*
+    private static func mapNavigationError(_ error: NavigationError) -> AxiomError {
+        switch error {
+        case .unauthorized:
+            return .navigationError(.unauthorized(""))
+        case .routeNotFound:
+            return .navigationError(.routeNotFound(""))
+        case .invalidParameters:
+            return .navigationError(.invalidParameter(field: nil, reason: "Invalid parameters"))
+        case .validationFailed:
+            return .navigationError(.guardFailed("Validation failed"))
+        }
+    }
+    
+    private static func mapDeepLinkingError(_ error: DeepLinkingError) -> AxiomError {
+        switch error {
+        case .invalidURLScheme(let scheme):
+            return .navigationError(.invalidURL(component: "scheme", value: scheme))
+        case .invalidPath(let path):
+            return .navigationError(.invalidURL(component: "path", value: path))
+        case .patternNotFound(let pattern):
+            return .navigationError(.patternNotFound(pattern))
+        case .parameterExtractionFailed(let details):
+            return .navigationError(.invalidParameter(field: nil, reason: details))
+        case .urlValidationFailed(let details):
+            return .navigationError(.invalidURL(component: "validation", value: details))
+        case .parsingFailed(let details):
+            return .navigationError(.parsingFailed(details))
+        case .routeConstructionFailed(let details):
+            return .navigationError(.compilationFailure(details))
+        }
+    }
+    
+    // NavigationFlowError mapping removed - now uses AxiomError directly
+    
+    private static func mapNavigationPatternError(_ error: NavigationPatternError) -> AxiomError {
+        switch error {
+        case .patternConflict(let details):
+            return .navigationError(.patternConflict(details))
+        case .invalidContext(let details):
+            return .navigationError(.invalidHierarchy(details))
+        case .circularNavigation(let routes):
+            return .navigationError(.circularNavigation(routes.map { String(describing: $0) }.joined(separator: " -> ")))
+        case .emptyStack:
+            return .navigationError(.stackError("Empty stack"))
+        case .noModalPresented:
+            return .navigationError(.stackError("No modal presented"))
+        case .tabNotFound(let tab):
+            return .navigationError(.tabError("Tab not found: \(tab)"))
+        case .invalidHierarchy(let details):
+            return .navigationError(.invalidHierarchy(details))
+        case .depthLimitExceeded(let limit):
+            return .navigationError(.depthLimitExceeded(limit: limit))
+        case .missingPresentingRoute:
+            return .navigationError(.stackError("Missing presenting route"))
+        case .tabsNotConfigured:
+            return .navigationError(.tabError("Tabs not configured"))
+        case .insufficientTabs(let count):
+            return .navigationError(.tabError("Insufficient tabs: \(count)"))
+        }
+    }
+    
+    private static func mapNavigationCancellationError(_ error: NavigationCancellationError) -> AxiomError {
+        switch error {
+        case .navigationCancelled:
+            return .navigationError(.navigationCancelled(""))
+        case .operationCancelled(let details):
+            return .navigationError(.navigationCancelled(details))
+        }
+    }
+    
+    private static func mapRouteValidationError(_ error: RouteValidationError) -> AxiomError {
+        switch error {
+        case .invalidParameter(let param):
+            return .navigationError(.invalidParameter(field: param, reason: "Invalid"))
+        case .missingRequiredParameter(let param):
+            return .navigationError(.missingRequiredParameter(param))
+        case .invalidRouteType:
+            return .navigationError(.invalidRoute("Invalid type"))
+        case .compilationFailure(let details):
+            return .navigationError(.compilationFailure(details))
+        }
+    }
+    
+    private static func mapNavigationGraphError(_ error: NavigationGraphError) -> AxiomError {
+        switch error {
+        case .cycleDetected(let path):
+            return .navigationError(.cycleDetected(path: path.joined(separator: " -> ")))
+        case .invalidEdge(let from, let to):
+            return .navigationError(.invalidTransition(from: from, to: to))
+        case .nodeNotFound(let node):
+            return .navigationError(.nodeNotFound(node))
+        case .invalidNodeType:
+            return .navigationError(.invalidRoute("Invalid node type"))
+        }
+    }
+    
+    // NavigationMiddlewareError mapping removed - now uses AxiomError directly
+    */
+    
+    // Legacy error mapping functions removed - error types have been consolidated into AxiomError
+    // ClientError and ValidationError enums no longer exist
+}
+
 // MARK: - Fallback Storage
 
 /// Type-erased fallback container
@@ -316,19 +569,19 @@ private class FallbackContainer {
     }
 }
 
-// MARK: - Enhanced Base Context
+// MARK: - Enhanced Observable Context
 
-/// Extension to BaseContext for error boundary support
-extension BaseContext: ErrorBoundaryManaged {
+/// Extension to ObservableContext for error boundary support
+extension ObservableContext: ErrorBoundaryManaged {
     private static var errorBoundaryKey: UInt8 = 0
     
     /// Error boundary for this context
     public var errorBoundary: AxiomErrorBoundary {
-        if let boundary = objc_getAssociatedObject(self, &BaseContext.errorBoundaryKey) as? AxiomErrorBoundary {
+        if let boundary = objc_getAssociatedObject(self, &ObservableContext.errorBoundaryKey) as? AxiomErrorBoundary {
             return boundary
         }
         let boundary = AxiomErrorBoundary()
-        objc_setAssociatedObject(self, &BaseContext.errorBoundaryKey, boundary, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        objc_setAssociatedObject(self, &ObservableContext.errorBoundaryKey, boundary, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         return boundary
     }
     

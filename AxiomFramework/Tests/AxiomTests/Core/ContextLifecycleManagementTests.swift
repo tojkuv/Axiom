@@ -149,7 +149,7 @@ final class ContextLifecycleManagementTests: XCTestCase {
 
 // MARK: - Test Support Types
 
-class TestManagedContext: BaseContext, ManagedContext {
+class TestManagedContext: ObservableContext, ManagedContext {
     nonisolated let id: AnyHashable
     private let tracker: LifecycleTracker
     private(set) var isAttached = false

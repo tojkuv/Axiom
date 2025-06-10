@@ -132,8 +132,8 @@ final class ContextDependenciesTests: XCTestCase {
         let contextModule = BuildDependencyValidator.ScannedModule(
             name: "UserProfileContext",
             type: .context,
-            imports: ["Foundation", "SwiftUI", "UserClient", "BaseContext"],
-            dependencies: ["UserClient", "BaseContext"]
+            imports: ["Foundation", "SwiftUI", "UserClient", "ObservableContext"],
+            dependencies: ["UserClient", "ObservableContext"]
         )
         
         let errors = buildValidator.validateModule(contextModule)

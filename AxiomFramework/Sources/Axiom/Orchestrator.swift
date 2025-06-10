@@ -20,7 +20,7 @@ public protocol Orchestrator: Actor {
     ) async -> P.ContextType
     
     /// Navigate to a route
-    func navigate(to route: Route) async
+    func navigate(to route: TypeSafeRoute) async
 }
 
 // MARK: - Extended Orchestrator Protocol
@@ -47,52 +47,11 @@ public protocol ExtendedOrchestrator: Orchestrator {
     func contextBuilder<T: Context>(for type: T.Type) async -> ContextBuilder<T>
 }
 
-// MARK: - Route Definition
 
-/// Type-safe route definition for navigation
-/// @frozen ensures compile-time exhaustive switching and prevents runtime additions
-@frozen
-public enum Route: Hashable, Sendable, CaseIterable {
-    /// Home/root route
-    case home
-    /// Detail route with identifier
-    case detail(id: String)
-    /// Settings route
-    case settings
-    /// Custom route with path
-    case custom(path: String)
-    
-    /// All cases for compile-time exhaustive switching
-    public static var allCases: [Route] {
-        return [
-            .home,
-            .detail(id: "sample"),
-            .settings,
-            .custom(path: "sample")
-        ]
-    }
-    
-    /// Validate route construction for type safety
-    public func validate() throws {
-        switch self {
-        case .home, .settings:
-            break // Always valid
-        case .detail(let id):
-            guard !id.isEmpty else {
-                throw RouteValidationError.invalidParameter("Detail ID cannot be empty")
-            }
-        case .custom(let path):
-            guard !path.isEmpty else {
-                throw RouteValidationError.invalidParameter("Custom path cannot be empty")
-            }
-        }
-    }
-}
+// MARK: - Standard Orchestrator Implementation
 
-// MARK: - Base Orchestrator Implementation
-
-/// Base implementation providing common orchestrator behaviors
-public actor BaseOrchestrator: ExtendedOrchestrator {
+/// Standard implementation providing common orchestrator behaviors
+public actor StandardOrchestrator: ExtendedOrchestrator {
     /// Registered contexts
     private var contexts: [String: any Context] = [:]
     
@@ -103,13 +62,13 @@ public actor BaseOrchestrator: ExtendedOrchestrator {
     private var capabilities: [String: any Capability] = [:]
     
     /// Current navigation route
-    public private(set) var currentRoute: Route?
+    public private(set) var currentRoute: TypeSafeRoute?
     
     /// Navigation history
-    public private(set) var navigationHistory: [Route] = []
+    public private(set) var navigationHistory: [TypeSafeRoute] = []
     
     /// Route handlers
-    private var routeHandlers: [Route: (Route) async -> any Context] = [:]
+    private var routeHandlers: [TypeSafeRoute: (TypeSafeRoute) async -> any Context] = [:]
     
     public init() {}
     
@@ -167,7 +126,7 @@ public actor BaseOrchestrator: ExtendedOrchestrator {
     }
     
     /// Navigate to route
-    public func navigate(to route: Route) async {
+    public func navigate(to route: TypeSafeRoute) async {
         currentRoute = route
         navigationHistory.append(route)
         
@@ -180,8 +139,8 @@ public actor BaseOrchestrator: ExtendedOrchestrator {
     
     /// Register route handler
     public func registerRoute(
-        _ route: Route,
-        handler: @escaping (Route) async -> any Context
+        _ route: TypeSafeRoute,
+        handler: @escaping (TypeSafeRoute) async -> any Context
     ) async {
         routeHandlers[route] = handler
     }
@@ -191,7 +150,7 @@ public actor BaseOrchestrator: ExtendedOrchestrator {
         await withTaskGroup(of: Void.self) { group in
             for (_, context) in contexts {
                 group.addTask {
-                    await context.onAppear()
+                    await context.viewAppeared()
                 }
             }
         }
@@ -202,7 +161,7 @@ public actor BaseOrchestrator: ExtendedOrchestrator {
         await withTaskGroup(of: Void.self) { group in
             for (_, context) in contexts {
                 group.addTask {
-                    await context.onDisappear()
+                    await context.viewDisappeared()
                 }
             }
         }
@@ -304,36 +263,19 @@ public enum LifecycleHook {
     case afterConfiguration
 }
 
-// MARK: - Route Extensions
-
-extension Route {
-    /// Unique identifier for the route
-    public var identifier: String {
-        switch self {
-        case .home:
-            return "home"
-        case .detail(let id):
-            return "detail-\(id)"
-        case .settings:
-            return "settings"
-        case .custom(let path):
-            return "custom-\(path)"
-        }
-    }
-}
 
 // MARK: - Navigation Manager
 
 /// Dedicated navigation management
 public actor NavigationManager {
     /// Current route stack
-    private var routeStack: [Route] = []
+    private var routeStack: [TypeSafeRoute] = []
     
     /// Navigation handlers
-    private var handlers: [Route: () async -> Void] = [:]
+    private var handlers: [TypeSafeRoute: () async -> Void] = [:]
     
     /// Push a route
-    public func push(_ route: Route) async {
+    public func push(_ route: TypeSafeRoute) async {
         routeStack.append(route)
         if let handler = handlers[route] {
             await handler()
@@ -353,12 +295,12 @@ public actor NavigationManager {
     }
     
     /// Register navigation handler
-    public func registerHandler(for route: Route, handler: @escaping () async -> Void) {
+    public func registerHandler(for route: TypeSafeRoute, handler: @escaping () async -> Void) {
         handlers[route] = handler
     }
     
     /// Current route
-    public var currentRoute: Route? {
+    public var currentRoute: TypeSafeRoute? {
         routeStack.last
     }
     
@@ -388,7 +330,7 @@ public protocol DependencyResolver: Actor {
 public struct OrchestratorFactory {
     /// Create a default orchestrator
     public static func createDefault() -> any Orchestrator {
-        BaseOrchestrator()
+        StandardOrchestrator()
     }
     
     /// Create an orchestrator with custom configuration
@@ -396,7 +338,7 @@ public struct OrchestratorFactory {
         with configuration: OrchestratorConfiguration
     ) -> any Orchestrator {
         // In production, this would create configured orchestrators
-        BaseOrchestrator()
+        StandardOrchestrator()
     }
     
     /// Create orchestrator with builder
@@ -453,7 +395,7 @@ public final class OrchestratorBuilder {
             maxContextCount: maxContextCount
         )
         
-        let orchestrator = BaseOrchestrator()
+        let orchestrator = StandardOrchestrator()
         
         // Register pre-configured items
         for (key, client) in preregisteredClients {

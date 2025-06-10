@@ -143,7 +143,7 @@ final class ImplicitActionSubscriptionTests: XCTestCase {
 // MARK: - Test Contexts
 
 @MainActor
-class TestParentContext: BaseContext {
+class TestParentContext: ObservableContext {
     private(set) var capturedActions: [Any] = []
     private(set) var handledActionTypes: Set<String> = []
     
@@ -154,7 +154,7 @@ class TestParentContext: BaseContext {
 }
 
 @MainActor
-class TestChildContext: BaseContext {
+class TestChildContext: ObservableContext {
     enum Action {
         case itemSelected(id: String)
         case itemDeleted(id: String)

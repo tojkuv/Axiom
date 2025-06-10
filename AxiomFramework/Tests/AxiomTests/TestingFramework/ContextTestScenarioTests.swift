@@ -170,7 +170,7 @@ final class ContextTestScenarioTests: XCTestCase {
     func testContextWithMultipleClients() async throws {
         // Test context managing multiple clients
         @MainActor
-        final class MultiClientContext: BaseContext {
+        final class MultiClientContext: ObservableContext {
             let userClient: UserClient
             let settingsClient: SettingsClient
             
@@ -230,7 +230,7 @@ final class ContextTestScenarioTests: XCTestCase {
     func testContextChildParentCommunication() async throws {
         // Test child-parent context communication
         @MainActor
-        final class ParentContext: BaseContext {
+        final class ParentContext: ObservableContext {
             var receivedActions: [String] = []
             
             override func handleChildAction<T>(_ action: T, from child: any Context) {
@@ -242,7 +242,7 @@ final class ContextTestScenarioTests: XCTestCase {
         }
         
         @MainActor
-        final class ChildContext: BaseContext {
+        final class ChildContext: ObservableContext {
             func sendMessage(_ message: String) async {
                 await sendToParent(message)
             }

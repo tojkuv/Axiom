@@ -196,7 +196,7 @@ public struct ErrorPerformanceMetrics {
 
 /// A test context for error handling scenarios
 @MainActor
-public class TestContext: BaseContext {
+public class TestContext: ObservableContext {
     public var testState: String = ""
     
     public override init() {

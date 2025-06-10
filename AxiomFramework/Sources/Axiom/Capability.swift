@@ -37,32 +37,17 @@ public enum CapabilityState: Equatable, Sendable {
 }
 
 // MARK: - Capability Errors
+// CapabilityError is now defined in ErrorHandling.swift as part of AxiomError hierarchy
 
-/// Errors that can occur during capability operations
-public enum CapabilityError: Error, Sendable, Equatable {
-    /// Initialization of the capability failed
-    case initializationFailed(reason: String)
-    /// Resource allocation for the capability failed
-    case resourceAllocationFailed(reason: String)
-    /// Invalid state transition was attempted
-    case invalidStateTransition(from: CapabilityState, to: CapabilityState)
-    /// The capability is not available on this device
-    case notAvailable
-    /// The capability is restricted by system policy
-    case restricted
-    /// The capability requires user permission
-    case permissionRequired
-}
+// MARK: - Standard Capability Implementation
 
-// MARK: - Base Capability Implementation
-
-/// Base actor implementation providing common capability behaviors
+/// Standard actor implementation providing common capability behaviors
 /// 
 /// This actor provides:
 /// - State management with thread-safe transitions
 /// - Default lifecycle implementations
 /// - State observation support
-public actor BaseCapability: Capability {
+public actor StandardCapability: Capability {
     /// Current state of the capability
     public private(set) var state: CapabilityState = .unknown
     
@@ -157,7 +142,7 @@ extension Capability {
             
             group.addTask {
                 try await Task.sleep(for: timeout)
-                throw CapabilityError.initializationFailed(reason: "Initialization timed out")
+                throw CapabilityError.initializationFailed("Initialization timed out")
             }
             
             try await group.next()
@@ -183,7 +168,7 @@ extension ExtendedCapability {
             
             if ContinuousClock.now - startTime > timeout {
                 throw CapabilityError.initializationFailed(
-                    reason: "Timeout waiting for state \(targetState)"
+                    "Timeout waiting for state \(targetState)"
                 )
             }
         }

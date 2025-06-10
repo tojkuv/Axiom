@@ -20,11 +20,11 @@ import Darwin
 /// - Memory usage must remain stable after processing actions
 @MainActor
 public protocol Context: ObservableObject {
-    /// Called when the associated presentation appears
-    func onAppear() async
+    /// Called when the associated presentation appeared
+    func viewAppeared() async
     
-    /// Called when the associated presentation disappears
-    func onDisappear() async
+    /// Called when the associated presentation disappeared
+    func viewDisappeared() async
     
     /// Handle actions from child contexts
     /// Called automatically by the framework when children emit actions
@@ -35,12 +35,12 @@ public protocol Context: ObservableObject {
 
 extension Context {
     /// Default implementation for contexts that don't need appear logic
-    public func onAppear() async {
+    public func viewAppeared() async {
         // Default no-op implementation
     }
     
     /// Default implementation for contexts that don't need disappear logic
-    public func onDisappear() async {
+    public func viewDisappeared() async {
         // Default no-op implementation
     }
     
@@ -68,32 +68,32 @@ public struct ContextMemoryOptions {
     public let maxRetainedStates: Int
     
     /// Whether to use weak references for clients
-    public let useWeakClientReferences: Bool
+    public let shouldUseWeakClientReferences: Bool
     
     /// Memory warning threshold in bytes
     public let memoryWarningThreshold: Int
     
     public init(
         maxRetainedStates: Int = 10,
-        useWeakClientReferences: Bool = true,
+        shouldUseWeakClientReferences: Bool = true,
         memoryWarningThreshold: Int = 50_000_000 // 50MB
     ) {
         self.maxRetainedStates = maxRetainedStates
-        self.useWeakClientReferences = useWeakClientReferences
+        self.shouldUseWeakClientReferences = shouldUseWeakClientReferences
         self.memoryWarningThreshold = memoryWarningThreshold
     }
 }
 
-// MARK: - Base Context Implementation
+// MARK: - Observable Context Implementation
 
-/// Base implementation providing common context behaviors
+/// Observable implementation providing common context behaviors
 /// 
 /// This class provides:
 /// - Lifecycle state management
 /// - Automatic observation support
 /// - Memory-efficient operation
 @MainActor
-open class BaseContext: Context {
+open class ObservableContext: Context {
     /// Published property to trigger SwiftUI updates
     @Published private var updateTrigger = UUID()
     
@@ -111,28 +111,28 @@ open class BaseContext: Context {
     
     public init() {}
     
-    /// Called when context appears
-    open func onAppear() async {
+    /// Called when context appeared
+    open func viewAppeared() async {
         guard appearanceCount == 0 else { return }
         appearanceCount += 1
         isActive = true
-        await performAppearance()
+        await appeared()
     }
     
-    /// Called when context disappears
-    open func onDisappear() async {
+    /// Called when context disappeared
+    open func viewDisappeared() async {
         guard isActive else { return }
         isActive = false
-        await performDisappearance()
+        await disappeared()
     }
     
     /// Override point for subclasses to perform appearance logic
-    open func performAppearance() async {
+    open func appeared() async {
         // Subclasses override to add custom logic
     }
     
     /// Override point for subclasses to perform disappearance logic
-    open func performDisappearance() async {
+    open func disappeared() async {
         // Subclasses override to add custom logic
     }
     
@@ -152,8 +152,8 @@ open class BaseContext: Context {
         let wrapper = WeakContextWrapper(child)
         childContexts.append(wrapper)
         
-        if let baseChild = child as? BaseContext {
-            baseChild.parentContext = self
+        if let observableChild = child as? ObservableContext {
+            observableChild.parentContext = self
         }
         
         cleanupDeallocatedChildren()
@@ -165,8 +165,8 @@ open class BaseContext: Context {
             wrapper.context === child
         }
         
-        if let baseChild = child as? BaseContext {
-            baseChild.parentContext = nil
+        if let observableChild = child as? ObservableContext {
+            observableChild.parentContext = nil
         }
     }
     
@@ -194,9 +194,9 @@ open class BaseContext: Context {
 
 // MARK: - Client Observing Context
 
-/// Base context that observes a client's state stream
+/// Observable context that observes a client's state stream
 @MainActor
-open class ClientObservingContext<C: Client>: BaseContext {
+open class ClientObservingContext<C: Client>: ObservableContext {
     /// The client being observed
     public let client: C
     
@@ -209,13 +209,13 @@ open class ClientObservingContext<C: Client>: BaseContext {
         super.init()
     }
     
-    open override func performAppearance() async {
-        await super.performAppearance()
+    open override func appeared() async {
+        await super.appeared()
         startObservation()
     }
     
-    open override func performDisappearance() async {
-        await super.performDisappearance()
+    open override func disappeared() async {
+        await super.disappeared()
         stopObservation()
     }
     
@@ -258,7 +258,7 @@ public struct WeakClient<C: Client> {
 
 /// Context that manages weak references to prevent retain cycles
 @MainActor
-open class WeakReferenceContext<C: Client>: BaseContext {
+open class WeakReferenceContext<C: Client>: ObservableContext {
     /// Weakly held clients
     private var weakClients: [WeakClient<C>] = []
     
@@ -273,7 +273,7 @@ open class WeakReferenceContext<C: Client>: BaseContext {
     
     /// Add a client with weak reference
     public func addClient(_ client: C) {
-        if memoryOptions.useWeakClientReferences {
+        if memoryOptions.shouldUseWeakClientReferences {
             weakClients.append(WeakClient(client))
             cleanupDeallocatedClients()
         }
@@ -316,7 +316,7 @@ open class WeakReferenceContext<C: Client>: BaseContext {
 
 /// Context that provides error handling capabilities
 @MainActor
-open class ErrorHandlingContext: BaseContext {
+open class ErrorHandlingContext: ObservableContext {
     /// Errors encountered during operation
     @Published public private(set) var errors: [Error] = []
     
@@ -395,7 +395,7 @@ extension Context {
 
 /// Optimized observation with batching support
 @MainActor
-public final class BatchingContext: BaseContext {
+public final class BatchingContext: ObservableContext {
     /// Batch size for updates
     public let batchSize: Int
     
@@ -474,14 +474,14 @@ public final class ContextLifecycleManager {
     /// Activate all contexts
     public func activateAll() async {
         for (_, context) in contexts {
-            await context.onAppear()
+            await context.viewAppeared()
         }
     }
     
     /// Deactivate all contexts
     public func deactivateAll() async {
         for (_, context) in contexts {
-            await context.onDisappear()
+            await context.viewDisappeared()
         }
     }
     

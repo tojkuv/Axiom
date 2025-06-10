@@ -20,7 +20,7 @@ import Foundation
 /// }
 /// ```
 @MainActor
-open class AutoObservingContext<C: Client>: BaseContext {
+open class AutoObservingContext<C: Client>: ObservableContext {
     /// The client being observed
     public let client: C
     

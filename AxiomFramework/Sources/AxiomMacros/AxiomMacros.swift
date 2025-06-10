@@ -8,5 +8,7 @@ struct AxiomMacrosPlugin: CompilerPlugin {
         NavigationOrchestratorMacro.self,
         AutoMockableMacro.self,
         ErrorBoundaryMacro.self,
+        ErrorHandlingMacro.self,
+        ErrorContextMacro.self,
     ]
 }

@@ -138,7 +138,7 @@ struct SampleChildPresentationView: PresentationView {
 // MARK: - Test Contexts
 
 @MainActor
-class TestPresentationContext: BaseContext {
+class TestPresentationContext: ObservableContext {
     private(set) var receivedActions: [Any] = []
     
     override func handleChildAction<T>(_ action: T, from child: any Context) {
@@ -147,7 +147,7 @@ class TestPresentationContext: BaseContext {
 }
 
 @MainActor
-class TestChildPresentationContext: BaseContext {
+class TestChildPresentationContext: ObservableContext {
     enum Action {
         case buttonTapped
         case valueChanged(String)
@@ -155,7 +155,7 @@ class TestChildPresentationContext: BaseContext {
 }
 
 @MainActor
-class TestRootContext: BaseContext {
+class TestRootContext: ObservableContext {
     @Published var childContext = TestPresentationContext()
     @Published var anotherChildContext = TestChildPresentationContext()
     

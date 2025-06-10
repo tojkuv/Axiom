@@ -591,7 +591,7 @@ enum ErrorTestAction: Equatable {
 
 // Error Boundary Context
 @MainActor
-class ErrorTestContext: BaseContext {
+class ErrorTestContext: ObservableContext {
     private let errorHandler: TestErrorHandler
     private var attachedClients: [ErrorTestClient] = []
     private weak var parentContext: ErrorTestContext?

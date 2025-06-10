@@ -8,7 +8,7 @@ final class TestScenarioTests: XCTestCase {
     // MARK: - Test Context Types
     
     @MainActor
-    final class TestTaskContext: BaseContext {
+    final class TestTaskContext: ObservableContext {
         let client: TestTaskClient
         var tasks: [TestTask] = []
         
