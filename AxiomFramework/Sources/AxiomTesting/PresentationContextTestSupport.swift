@@ -30,7 +30,7 @@ public struct MockPresentation: BindablePresentation {
     }
 }
 
-public class MockContext: PresentationBindable {
+public class MockPresentationContext: PresentationBindable {
     public let id: String
     public var isActive = false
     
@@ -65,7 +65,7 @@ public class PresentationContextValidator {
     }
     
     public func getContext<P: BindablePresentation>(for presentation: P) -> AnyObject? {
-        manager.context(for: presentation, as: MockContext.self)
+        manager.context(for: presentation, as: MockPresentationContext.self)
     }
     
     public var bindingCount: Int {

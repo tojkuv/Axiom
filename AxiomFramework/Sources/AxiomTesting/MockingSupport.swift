@@ -17,7 +17,7 @@ public actor MockMethod<Input, Output> {
     private var sequenceValues: [Output] = []
     private var sequenceIndex = 0
     private var conditionalBehaviors: [(condition: (Input) -> Bool, value: Output)] = []
-    private var delay: Duration?
+    private var delay: TestDuration?
     private var passthroughHandler: ((Input) async throws -> Output)?
     
     public init() {}
@@ -53,7 +53,7 @@ public actor MockMethod<Input, Output> {
         return ConditionalMockBuilder(mockMethod: self, condition: { !condition($0) })
     }
     
-    public func withDelay(_ delay: Duration) -> Self {
+    public func withDelay(_ delay: TestDuration) -> Self {
         self.delay = delay
         return self
     }
@@ -72,7 +72,7 @@ public actor MockMethod<Input, Output> {
         
         // Apply delay if configured
         if let delay = delay {
-            try await Task.sleep(for: delay)
+            try await Task.sleep(nanoseconds: UInt64(delay.components.seconds * 1_000_000_000 + delay.components.attoseconds / 1_000_000_000))
         }
         
         // Check for error
@@ -168,8 +168,8 @@ public struct ConditionalMockBuilder<Input, Output> {
     let condition: (Input) -> Bool
     
     public func returns(_ value: Output) {
-        Task {
-            await mockMethod.addConditionalBehavior(condition: condition, value: value)
+        Task.detached {
+            await self.mockMethod.addConditionalBehavior(condition: self.condition, value: value)
         }
     }
 }
@@ -285,7 +285,7 @@ public struct MockCallOrderVerifier {
 public enum CallRelation {
     case calledBefore(any MockMethodProtocol)
     case calledAfter(any MockMethodProtocol)
-    case calledBefore(any MockMethodProtocol, onCall: Int)
+    case calledBeforeSpecificCall(any MockMethodProtocol, onCall: Int)
     
     var description: String {
         switch self {
@@ -293,7 +293,7 @@ public enum CallRelation {
             return "called before \(type(of: mock))"
         case .calledAfter(let mock):
             return "called after \(type(of: mock))"
-        case .calledBefore(let mock, let call):
+        case .calledBeforeSpecificCall(let mock, let call):
             return "called before \(type(of: mock)) call #\(call)"
         }
     }

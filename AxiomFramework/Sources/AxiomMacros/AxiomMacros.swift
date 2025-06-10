@@ -10,5 +10,6 @@ struct AxiomMacrosPlugin: CompilerPlugin {
         ErrorBoundaryMacro.self,
         ErrorHandlingMacro.self,
         ErrorContextMacro.self,
+        CapabilityMacro.self,
     ]
 }

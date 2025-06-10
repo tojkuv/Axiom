@@ -125,4 +125,73 @@ final class MacroTests: XCTestCase {
             macros: ["Context": ContextMacro.self]
         )
     }
+    
+    // MARK: - Capability Macro Tests
+    
+    func testCapabilityMacroGeneratesLifecycleManagement() throws {
+        assertMacroExpansion(
+            """
+            @Capability(.network)
+            actor NetworkCapability {
+                func fetchData(from url: URL) async throws -> Data {
+                    return try await URLSession.shared.data(from: url).0
+                }
+            }
+            """,
+            expandedSource: """
+            actor NetworkCapability {
+                func fetchData(from url: URL) async throws -> Data {
+                    return try await URLSession.shared.data(from: url).0
+                }
+                
+                // Note: Add 'extension NetworkCapability: ExtendedCapability {}' to conform to the protocol
+                
+                private var _state: CapabilityState = .unknown
+                
+                private var stateStreamContinuation: AsyncStream<CapabilityState>.Continuation?
+                
+                public var state: CapabilityState {
+                    get async { _state }
+                }
+                
+                public var stateStream: AsyncStream<CapabilityState> {
+                    get async {
+                        AsyncStream { continuation in
+                            self.stateStreamContinuation = continuation
+                            continuation.yield(_state)
+                        }
+                    }
+                }
+                
+                public var isAvailable: Bool {
+                    get async { await state == .available }
+                }
+                
+                public func initialize() async throws {
+                    await transitionTo(.available)
+                }
+                
+                public func terminate() async {
+                    await transitionTo(.unavailable)
+                    stateStreamContinuation?.finish()
+                }
+                
+                public func isSupported() async -> Bool {
+                    return true
+                }
+                
+                public func requestPermission() async throws {
+                    // Network capability doesn't require permission
+                }
+                
+                private func transitionTo(_ newState: CapabilityState) async {
+                    guard _state != newState else { return }
+                    _state = newState
+                    stateStreamContinuation?.yield(newState)
+                }
+            }
+            """,
+            macros: ["Capability": CapabilityMacro.self]
+        )
+    }
 }

@@ -72,7 +72,7 @@ public struct NavigationTestHelpers {
         using navigator: N,
         sequence: [NavigationAction],
         expectedStack: [Route],
-        timeout: Duration = .seconds(5),
+        timeout: TestDuration = .seconds(5),
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
@@ -217,7 +217,7 @@ public struct NavigationTestHelpers {
         action: Any,
         expectedRoute: Route,
         expectedContextState: (C) -> Bool,
-        timeout: Duration = .seconds(1),
+        timeout: TestDuration = .seconds(1),
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
@@ -225,7 +225,7 @@ public struct NavigationTestHelpers {
         // This would need context action processing
         
         // Wait for navigation and state changes
-        let deadline = ContinuousClock.now + timeout
+        let deadline = ContinuousClock.now + Swift.Duration.seconds(timeout.nanoseconds / 1_000_000_000)
         while ContinuousClock.now < deadline {
             if expectedContextState(context) {
                 break
@@ -249,11 +249,11 @@ public struct NavigationTestHelpers {
         navigator: N,
         context: C,
         expectedState: (C) -> Bool,
-        timeout: Duration = .seconds(1),
+        timeout: TestDuration = .seconds(1),
         file: StaticString = #file,
         line: UInt = #line
     ) async throws {
-        let deadline = ContinuousClock.now + timeout
+        let deadline = ContinuousClock.now + Swift.Duration.seconds(timeout.nanoseconds / 1_000_000_000)
         while ContinuousClock.now < deadline {
             if expectedState(context) {
                 return
@@ -287,7 +287,7 @@ public struct NavigationTestHelpers {
         let endMemory = getCurrentMemoryUsage()
         
         return NavigationBenchmark(
-            totalDuration: endTime - startTime,
+            totalDuration: TestDuration(nanoseconds: UInt64(max(0, (endTime - startTime).components.seconds * 1_000_000_000))),
             memoryGrowth: endMemory - startMemory,
             averageNavigationTime: 0.0 // Would calculate based on navigation count
         )
@@ -410,7 +410,7 @@ public class NavigationTracker<N: NavigationService> {
 
 /// Navigation performance benchmark
 public struct NavigationBenchmark {
-    public let totalDuration: Duration
+    public let totalDuration: TestDuration
     public let memoryGrowth: Int
     public let averageNavigationTime: TimeInterval
 }

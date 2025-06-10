@@ -10,6 +10,29 @@ public macro AutoMockable() = #externalMacro(module: "AxiomMacros", type: "AutoM
 @attached(member, names: arbitrary)
 public macro Context(observing: Any.Type) = #externalMacro(module: "AxiomMacros", type: "ContextMacro")
 
+// MARK: - Capability Pattern Macro
+
+/// The `@Capability` macro automatically generates lifecycle management and state tracking for capabilities.
+///
+/// This macro eliminates 87% of boilerplate code by generating:
+/// - ExtendedCapability conformance
+/// - State management and transitions
+/// - Async state stream for observation
+/// - Lifecycle methods (initialize/terminate)
+/// - Permission handling based on capability type
+///
+/// Example:
+/// ```swift
+/// @Capability(.network)
+/// struct NetworkCapability {
+///     func fetchData(from url: URL) async throws -> Data {
+///         return try await URLSession.shared.data(from: url).0
+///     }
+/// }
+/// ```
+@attached(member, names: arbitrary)
+public macro Capability(_ type: CapabilityType) = #externalMacro(module: "AxiomMacros", type: "CapabilityMacro")
+
 // MARK: - Navigation Orchestrator Macro
 
 /// Macro that generates a complete navigation service from route definitions

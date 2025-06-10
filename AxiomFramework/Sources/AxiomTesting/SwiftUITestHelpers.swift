@@ -15,7 +15,7 @@ public struct SwiftUITestHelpers {
         for view: V,
         frame: CGSize = CGSize(width: 320, height: 568)
     ) async throws -> ViewTestHost<V> {
-        return ViewTestHost(view: view, frame: frame)
+        return await ViewTestHost(view: view, frame: frame)
     }
     
     // MARK: - Context Binding Testing
@@ -60,7 +60,7 @@ public struct SwiftUITestHelpers {
     // MARK: - Presentation Testing
     
     /// Bind presentation to context for testing
-    public static func bindPresentationToContext<P: BindablePresentation, C: Context>(
+    public static func bindPresentationToContext<P: BindablePresentation, C: Context & PresentationBindable>(
         presentation: P,
         context: C
     ) async throws {
@@ -290,7 +290,7 @@ public struct SwiftUITestHelpers {
         let startTime = ContinuousClock.now
         let startMemory = getCurrentMemoryUsage()
         
-        let testHost = try await createTestHost(for: view)
+        _ = try await createTestHost(for: view)
         
         try await operation()
         
@@ -508,7 +508,7 @@ public class PresentationStateTracker<P: ObservableObject> {
     
     public init(presentation: P) {
         self.presentation = presentation
-        self.cancellable = presentation.objectWillChange.sink { [weak self] _ in
+        self.cancellable = presentation.objectWillChange.sink { _ in
             // Track state changes
         }
     }

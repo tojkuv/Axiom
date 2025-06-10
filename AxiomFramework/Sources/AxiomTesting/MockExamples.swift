@@ -31,11 +31,11 @@ public class MockTestService: TestService {
     }
     
     public func reset() {
-        Task {
-            await performActionMock.reset()
-            await getCountMock.reset()
-            await updateStateMock.reset()
-            await isActiveMock.reset()
+        Task.detached {
+            await self.performActionMock.reset()
+            await self.getCountMock.reset()
+            await self.updateStateMock.reset()
+            await self.isActiveMock.reset()
         }
     }
 }
@@ -183,10 +183,10 @@ public class MockTestDataSource: TestDataSource {
     }
     
     public func reset() {
-        Task {
-            await fetchDataMock.reset()
-            await saveDataMock.reset()
-            await deleteDataMock.reset()
+        Task.detached {
+            await self.fetchDataMock.reset()
+            await self.saveDataMock.reset()
+            await self.deleteDataMock.reset()
         }
     }
 }

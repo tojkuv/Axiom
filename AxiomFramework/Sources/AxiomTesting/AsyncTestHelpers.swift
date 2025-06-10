@@ -1,6 +1,32 @@
 import XCTest
 @testable import Axiom
 
+// MARK: - Helper Actors
+
+fileprivate actor ResultsCollector<T> {
+    var results: [T] = []
+    
+    func add(_ result: T) {
+        results.append(result)
+    }
+    
+    func getAll() -> [T] {
+        results
+    }
+}
+
+fileprivate actor CountTracker {
+    var count = 0
+    
+    func increment() {
+        count += 1
+    }
+    
+    func getCount() -> Int {
+        count
+    }
+}
+
 // MARK: - Core Async Test Helpers
 
 /// Utilities for testing async state streams and actions
@@ -284,7 +310,7 @@ public struct DebouncingTestHelpers {
         let resultsLock = NSLock()
         
         // Create a debounced operation
-        let debouncedOperation = DebouncedOperation(
+        let debouncedOperation = await DebouncedOperation(
             duration: debounceDuration,
             operation: { result in
                 resultsLock.lock()
@@ -317,15 +343,12 @@ public struct DebouncingTestHelpers {
         rapidCallInterval: Duration = .milliseconds(10),
         expectedCallCount: Int = 2
     ) async throws -> [T] {
-        var results: [T] = []
-        let resultsLock = NSLock()
+        let collector = ResultsCollector<T>()
         
-        let throttledOperation = ThrottledOperation(
+        let throttledOperation = await ThrottledOperation<T>(
             duration: throttleDuration,
-            operation: { result in
-                resultsLock.lock()
-                results.append(result)
-                resultsLock.unlock()
+            operation: { (result: T) in
+                await collector.add(result)
             }
         )
         
@@ -340,13 +363,14 @@ public struct DebouncingTestHelpers {
         try await Task.sleep(for: throttleDuration + .milliseconds(50))
         
         // Should have limited results due to throttling
+        let finalResults = await collector.getAll()
         XCTAssertLessThanOrEqual(
-            results.count,
+            finalResults.count,
             expectedCallCount,
             "Throttling should limit \(rapidCallCount) calls to ~\(expectedCallCount)"
         )
         
-        return results
+        return finalResults
     }
 }
 
@@ -362,15 +386,12 @@ public struct AsyncStreamTestHelpers {
         fastProducerCount: Int = 100,
         expectedBufferedCount: Int = 10
     ) async throws {
-        var receivedCount = 0
-        let countLock = NSLock()
+        let tracker = CountTracker()
         
         // Start slow consumer
         let consumerTask = Task {
             for await _ in stream {
-                countLock.lock()
-                receivedCount += 1
-                countLock.unlock()
+                await tracker.increment()
                 
                 try? await Task.sleep(for: slowConsumerDelay)
             }
@@ -379,9 +400,7 @@ public struct AsyncStreamTestHelpers {
         // Wait briefly then check buffer behavior
         try await Task.sleep(for: .seconds(1))
         
-        countLock.lock()
-        let currentCount = receivedCount
-        countLock.unlock()
+        let currentCount = await tracker.getCount()
         
         // Should have buffered items without blocking
         XCTAssertLessThan(currentCount, fastProducerCount)
@@ -396,13 +415,11 @@ public struct AsyncStreamTestHelpers {
         timeout: Duration = .seconds(1)
     ) async throws {
         let stream = createStream()
-        var streamEnded = false
         
         let streamTask = Task {
             for await _ in stream {
                 // Process items
             }
-            streamEnded = true
         }
         
         // Cancel after short delay
@@ -416,11 +433,11 @@ public struct AsyncStreamTestHelpers {
     }
     
     /// Test stream error handling
-    public static func assertStreamErrorHandling<T>(
+    public static func assertStreamErrorHandling<T, E: Error & Equatable>(
         stream: AsyncThrowingStream<T, Error>,
-        expectedError: Error,
+        expectedError: E,
         beforeErrorCount: Int = 5
-    ) async throws where Error: Equatable {
+    ) async throws {
         var receivedCount = 0
         var caughtError: Error?
         
@@ -438,8 +455,10 @@ public struct AsyncStreamTestHelpers {
         XCTAssertEqual(receivedCount, beforeErrorCount, "Should receive items before error")
         XCTAssertNotNil(caughtError, "Should catch error from stream")
         
-        if let error = caughtError as? Error {
+        if let error = caughtError as? E {
             XCTAssertEqual(error, expectedError, "Should catch expected error")
+        } else {
+            XCTFail("Caught error is not of expected type")
         }
     }
 }
@@ -556,7 +575,7 @@ public func XCTAssertStateEqual<S: State & Equatable>(
 /// Assert async operations complete within timeout
 public func XCTAssertAsyncCompletes<T>(
     timeout: Duration = .seconds(5),
-    operation: () async throws -> T,
+    operation: @escaping () async throws -> T,
     file: StaticString = #file,
     line: UInt = #line
 ) async throws -> T {
@@ -579,7 +598,7 @@ public func XCTAssertAsyncCompletes<T>(
 /// Assert async operation throws specific error
 public func XCTAssertAsyncThrows<T, E: Error & Equatable>(
     _ expectedError: E,
-    operation: () async throws -> T,
+    operation: @escaping () async throws -> T,
     file: StaticString = #file,
     line: UInt = #line
 ) async {

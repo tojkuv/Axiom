@@ -7,7 +7,7 @@ import XCTest
 public struct ErrorTestHelpers {
     
     /// Assert that an error boundary properly catches and handles errors
-    public static func assertErrorBoundary<C: Context>(
+    public static func assertErrorBoundary<C: Context & ErrorBoundaryManaged>(
         in context: C,
         when operation: () async throws -> Void,
         catchesError expectedError: AxiomError,
@@ -16,8 +16,10 @@ public struct ErrorTestHelpers {
     ) async throws {
         var caughtError: Error?
         
-        context.errorBoundary.onError = { error in
-            caughtError = error
+        await MainActor.run {
+            context.errorBoundary.onError = { error in
+                caughtError = error
+            }
         }
         
         do {
@@ -26,7 +28,7 @@ public struct ErrorTestHelpers {
                     file: file, line: line)
         } catch {
             // Error should be caught by boundary
-            await Task.yield() // Allow boundary to process
+            try? await Task.sleep(nanoseconds: 1_000_000) // Allow boundary to process (1ms)
             
             if let axiomError = caughtError as? AxiomError {
                 XCTAssertEqual(axiomError, expectedError, file: file, line: line)
@@ -38,7 +40,7 @@ public struct ErrorTestHelpers {
     }
     
     /// Simulate and validate error recovery
-    public static func simulateErrorRecovery<C: Context>(
+    public static func simulateErrorRecovery<C: Context & ErrorBoundaryManaged>(
         in context: C,
         with strategy: ErrorRecoveryStrategy,
         for error: AxiomError,
@@ -75,8 +77,10 @@ public struct ErrorTestHelpers {
         // Set up tracking at each boundary
         for actor in path {
             if let boundary = actor as? ErrorBoundaryManaged {
-                boundary.errorBoundary.onError = { error in
-                    propagationPath.append(String(describing: type(of: actor)))
+                await MainActor.run {
+                    boundary.errorBoundary.onError = { error in
+                        propagationPath.append(String(describing: type(of: actor)))
+                    }
                 }
             }
         }
@@ -90,7 +94,7 @@ public struct ErrorTestHelpers {
         }
         
         // Allow propagation to complete
-        await Task.yield()
+        try? await Task.sleep(nanoseconds: 1_000_000)
         
         XCTAssertEqual(propagationPath.count, path.count, 
                       "Error should propagate through all boundaries", 
@@ -149,6 +153,7 @@ public struct ErrorTestHelpers {
     }
     
     /// Create a test context with error boundary configuration
+    @MainActor
     public static func createTestContext(
         with strategy: ErrorRecoveryStrategy = .propagate
     ) async -> TestContext {

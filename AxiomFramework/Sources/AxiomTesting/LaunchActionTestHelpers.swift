@@ -17,7 +17,7 @@ public struct LaunchActionTestHelpers {
         storage.queueAction(action)
         
         // Simulate initialization delay
-        try? await Task.sleep(for: readyAfter)
+        try? await Task.sleep(nanoseconds: UInt64(readyAfter.components.seconds * 1_000_000_000 + readyAfter.components.attoseconds / 1_000_000_000))
         
         // Mark ready
         storage.markReady()
@@ -38,7 +38,7 @@ public struct LaunchActionTestHelpers {
             if storage.currentAction == expected {
                 return
             }
-            try? await Task.sleep(for: .milliseconds(10))
+            try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
         }
         
         XCTFail(
@@ -57,7 +57,7 @@ public struct LaunchActionTestHelpers {
     ) async {
         for action in actions {
             storage.queueAction(action)
-            try? await Task.sleep(for: delayBetween)
+            try? await Task.sleep(nanoseconds: UInt64(delayBetween.components.seconds * 1_000_000_000 + delayBetween.components.attoseconds / 1_000_000_000))
         }
     }
     

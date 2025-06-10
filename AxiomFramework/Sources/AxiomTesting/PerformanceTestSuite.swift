@@ -437,12 +437,13 @@ public struct BenchmarkStatistics {
         }
         
         let durations = measurements.map { $0.duration }.sorted()
-        self.averageDuration = durations.reduce(0, +) / Double(durations.count)
+        let avgDuration = durations.reduce(0, +) / Double(durations.count)
+        self.averageDuration = avgDuration
         self.medianDuration = durations[durations.count / 2]
         self.minDuration = durations.first!
         self.maxDuration = durations.last!
         
-        let variance = durations.map { pow($0 - averageDuration, 2) }.reduce(0, +) / Double(durations.count)
+        let variance = durations.map { pow($0 - avgDuration, 2) }.reduce(0, +) / Double(durations.count)
         self.standardDeviation = sqrt(variance)
         
         self.averageCPUTime = measurements.map { $0.cpuTime }.reduce(0, +) / Double(measurements.count)

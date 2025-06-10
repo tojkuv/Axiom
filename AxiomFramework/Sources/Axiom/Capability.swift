@@ -36,6 +36,20 @@ public enum CapabilityState: Equatable, Sendable {
     case unknown
 }
 
+// MARK: - Capability Type
+
+/// Represents different types of capabilities supported by the framework
+public enum CapabilityType: String, CaseIterable, Sendable {
+    case network
+    case persistence
+    case hardware
+    case media
+    case analytics
+    case payment
+    case ml
+    case service
+}
+
 // MARK: - Capability Errors
 // CapabilityError is now defined in ErrorHandling.swift as part of AxiomError hierarchy
 

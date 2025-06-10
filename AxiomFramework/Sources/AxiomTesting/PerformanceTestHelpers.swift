@@ -2,6 +2,32 @@ import XCTest
 import Foundation
 @testable import Axiom
 
+// MARK: - Result Collectors
+
+actor LoadTestResultsCollector {
+    var results: [LoadTestResult] = []
+    
+    func add(_ result: LoadTestResult) {
+        results.append(result)
+    }
+    
+    func getAll() -> [LoadTestResult] {
+        results
+    }
+}
+
+actor TestDurationsCollector {
+    var durations: [TestDuration] = []
+    
+    func add(_ duration: TestDuration) {
+        durations.append(duration)
+    }
+    
+    func getAll() -> [TestDuration] {
+        durations
+    }
+}
+
 // MARK: - Performance Testing Framework
 
 /// Comprehensive performance and memory testing utilities for Axiom
@@ -205,8 +231,7 @@ public struct PerformanceTestHelpers {
         let startTime = ContinuousClock.now
         let endTime = startTime + duration
         
-        var results: [LoadTestResult] = []
-        let resultsLock = NSLock()
+        let resultsCollector = LoadTestResultsCollector()
         
         try await withThrowingTaskGroup(of: Void.self) { group in
             // Start concurrent workers
@@ -241,9 +266,7 @@ public struct PerformanceTestHelpers {
                         averageDuration: operationCount > 0 ? totalDuration / operationCount : .zero
                     )
                     
-                    resultsLock.lock()
-                    results.append(result)
-                    resultsLock.unlock()
+                    await resultsCollector.add(result)
                 }
             }
         }
@@ -254,7 +277,7 @@ public struct PerformanceTestHelpers {
             concurrency: concurrency,
             requestedDuration: duration,
             actualDuration: actualDuration,
-            results: results
+            results: await resultsCollector.getAll()
         )
     }
     
@@ -350,8 +373,7 @@ public struct PerformanceTestHelpers {
         let startTime = ContinuousClock.now
         let startMemory = getCurrentMemoryUsage()
         
-        var actionDurations: [Duration] = []
-        let durationsLock = NSLock()
+        let durationsCollector = TestDurationsCollector()
         
         try await withThrowingTaskGroup(of: Void.self) { group in
             for _ in 0..<concurrentClients {
@@ -365,11 +387,10 @@ public struct PerformanceTestHelpers {
                         }
                         
                         let actionEnd = ContinuousClock.now
-                        let actionDuration = actionEnd - actionStart
+                        let swiftDuration = actionEnd - actionStart
+                        let actionDuration = TestDuration(nanoseconds: UInt64(swiftDuration.components.seconds * 1_000_000_000 + swiftDuration.components.attoseconds / 1_000_000_000))
                         
-                        durationsLock.lock()
-                        actionDurations.append(actionDuration)
-                        durationsLock.unlock()
+                        await durationsCollector.add(actionDuration)
                         
                         // Brief pause
                         try? await Task.sleep(for: .milliseconds(1))
@@ -381,12 +402,18 @@ public struct PerformanceTestHelpers {
         let endTime = ContinuousClock.now
         let endMemory = getCurrentMemoryUsage()
         
+        let allDurations = await durationsCollector.getAll()
+        
+        let totalDurationNanos = allDurations.reduce(UInt64(0)) { $0 + $1.nanoseconds }
+        let avgDurationNanos = allDurations.isEmpty ? 0 : totalDurationNanos / UInt64(allDurations.count)
+        let avgDuration = TestDuration(nanoseconds: avgDurationNanos)
+        
         return ContextPerformanceResults(
             totalDuration: endTime - startTime,
-            actionCount: actionDurations.count,
-            averageActionDuration: actionDurations.isEmpty ? .zero : actionDurations.reduce(.zero, +) / actionDurations.count,
+            actionCount: allDurations.count,
+            averageActionDuration: avgDuration,
             memoryGrowth: endMemory - startMemory,
-            throughput: Double(actionDurations.count) / (endTime - startTime).timeInterval
+            throughput: Double(allDurations.count) / (endTime - startTime).timeInterval
         )
     }
     
@@ -538,7 +565,7 @@ public struct StressTestResults {
 public struct ContextPerformanceResults {
     public let totalDuration: Duration
     public let actionCount: Int
-    public let averageActionDuration: Duration
+    public let averageActionDuration: TestDuration
     public let memoryGrowth: Int
     public let throughput: Double
     

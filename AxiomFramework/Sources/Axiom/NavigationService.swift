@@ -233,15 +233,15 @@ public final class NavigationService: ObservableObject {
         // Default route parsing
         switch path {
         case "/", "/home":
-            return TypeSafeRoute.home
+            return StandardRoute.home
         case "/settings":
-            return TypeSafeRoute.settings
+            return StandardRoute.settings
         default:
             if path.hasPrefix("/detail/") {
                 let id = String(path.dropFirst("/detail/".count))
-                return TypeSafeRoute.detail(id: id)
+                return StandardRoute.detail(id: id)
             }
-            return TypeSafeRoute.custom(path: path)
+            return StandardRoute.custom(path: path)
         }
     }
     

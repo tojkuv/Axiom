@@ -20,7 +20,7 @@ public protocol Orchestrator: Actor {
     ) async -> P.ContextType
     
     /// Navigate to a route
-    func navigate(to route: TypeSafeRoute) async
+    func navigate(to route: StandardRoute) async
 }
 
 // MARK: - Extended Orchestrator Protocol
@@ -62,13 +62,13 @@ public actor StandardOrchestrator: ExtendedOrchestrator {
     private var capabilities: [String: any Capability] = [:]
     
     /// Current navigation route
-    public private(set) var currentRoute: TypeSafeRoute?
+    public private(set) var currentRoute: StandardRoute?
     
     /// Navigation history
-    public private(set) var navigationHistory: [TypeSafeRoute] = []
+    public private(set) var navigationHistory: [StandardRoute] = []
     
     /// Route handlers
-    private var routeHandlers: [TypeSafeRoute: (TypeSafeRoute) async -> any Context] = [:]
+    private var routeHandlers: [StandardRoute: (StandardRoute) async -> any Context] = [:]
     
     public init() {}
     
@@ -126,7 +126,7 @@ public actor StandardOrchestrator: ExtendedOrchestrator {
     }
     
     /// Navigate to route
-    public func navigate(to route: TypeSafeRoute) async {
+    public func navigate(to route: StandardRoute) async {
         currentRoute = route
         navigationHistory.append(route)
         
@@ -139,8 +139,8 @@ public actor StandardOrchestrator: ExtendedOrchestrator {
     
     /// Register route handler
     public func registerRoute(
-        _ route: TypeSafeRoute,
-        handler: @escaping (TypeSafeRoute) async -> any Context
+        _ route: StandardRoute,
+        handler: @escaping (StandardRoute) async -> any Context
     ) async {
         routeHandlers[route] = handler
     }
@@ -269,13 +269,13 @@ public enum LifecycleHook {
 /// Dedicated navigation management
 public actor NavigationManager {
     /// Current route stack
-    private var routeStack: [TypeSafeRoute] = []
+    private var routeStack: [StandardRoute] = []
     
     /// Navigation handlers
-    private var handlers: [TypeSafeRoute: () async -> Void] = [:]
+    private var handlers: [StandardRoute: () async -> Void] = [:]
     
     /// Push a route
-    public func push(_ route: TypeSafeRoute) async {
+    public func push(_ route: StandardRoute) async {
         routeStack.append(route)
         if let handler = handlers[route] {
             await handler()
@@ -295,12 +295,12 @@ public actor NavigationManager {
     }
     
     /// Register navigation handler
-    public func registerHandler(for route: TypeSafeRoute, handler: @escaping () async -> Void) {
+    public func registerHandler(for route: StandardRoute, handler: @escaping () async -> Void) {
         handlers[route] = handler
     }
     
     /// Current route
-    public var currentRoute: TypeSafeRoute? {
+    public var currentRoute: StandardRoute? {
         routeStack.last
     }
     

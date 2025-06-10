@@ -3,49 +3,144 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-/// A macro that generates context lifecycle management boilerplate
+/// Enhanced macro that generates comprehensive context boilerplate
 ///
 /// Usage:
 /// ```swift
-/// @Context(observing: ClientType.self)
-/// class MyContext: AutoObservingContext<ClientType> {
-///     // Custom implementation
+/// @Context(client: TaskClient.self)
+/// struct TaskListContext {
+///     func loadTasks() async {
+///         await client.process(.loadTasks)
+///     }
 /// }
 /// ```
 ///
 /// This macro generates:
-/// - Update trigger property for SwiftUI observation
-/// - Lifecycle state management (isActive, appearanceCount)
-/// - Observation task management
-/// - Automatic client state observation setup
+/// - Client property and initialization
+/// - @Published properties from client state
+/// - Automatic client state observation
+/// - Lifecycle management (viewAppeared/viewDisappeared)
+/// - SwiftUI ObservableObject conformance
+/// - Error boundary integration
 public struct ContextMacro: MemberMacro {
     public static func expansion(
         of node: AttributeSyntax,
         providingMembersOf declaration: some DeclGroupSyntax,
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
-        // Validate this is being applied to a class
-        guard declaration.is(ClassDeclSyntax.self) else {
+        // Support both struct and class declarations
+        let isStruct = declaration.is(StructDeclSyntax.self)
+        let isClass = declaration.is(ClassDeclSyntax.self)
+        
+        guard isStruct || isClass else {
             throw MacroError.unsupportedDeclaration
         }
         
-        // Extract the client type from the macro arguments
-        guard let argument = node.arguments?.as(LabeledExprListSyntax.self)?.first,
-              argument.label?.text == "observing" else {
+        // Extract macro parameters
+        let parameters = try extractParameters(from: node)
+        
+        // Generate organized member groups
+        let clientMember = generateClientMember(parameters.clientType)
+        let publishedProperties = generatePublishedProperties(parameters)
+        let stateMembers = generateStateMembers()
+        let lifecycleMethods = generateEnhancedLifecycleMethods(parameters)
+        let observationMethods = generateEnhancedObservationMethods(parameters)
+        let initMethod = generateInitializer(parameters)
+        let errorHandling = generateErrorHandling(parameters)
+        
+        // Combine all members
+        return [clientMember] + publishedProperties + stateMembers + 
+               [initMethod] + lifecycleMethods + observationMethods + errorHandling
+    }
+    
+    // MARK: - Parameter Extraction
+    
+    private struct MacroParameters {
+        let clientType: String
+        let observedKeyPaths: [String]
+        let errorHandling: ErrorHandlingStrategy
+    }
+    
+    private static func extractParameters(from node: AttributeSyntax) throws -> MacroParameters {
+        guard let arguments = node.arguments?.as(LabeledExprListSyntax.self) else {
             throw MacroError.invalidArguments
         }
         
-        // Generate organized member groups
-        let stateMembers = generateStateMembers()
-        let lifecycleMethods = generateLifecycleMethods()
-        let observationMethods = generateObservationMethods()
-        let utilityMethods = generateUtilityMethods()
+        var clientType: String?
+        var observedKeyPaths: [String] = []
+        var errorHandling = ErrorHandlingStrategy.automatic
         
-        // Combine all members with proper organization
-        return stateMembers + lifecycleMethods + observationMethods + utilityMethods
+        for argument in arguments {
+            switch argument.label?.text {
+            case "client":
+                if let memberAccess = argument.expression.as(MemberAccessExprSyntax.self) {
+                    clientType = memberAccess.base?.description.trimmingCharacters(in: .whitespaces)
+                }
+            case "observes":
+                // Parse observed key paths if provided
+                if let arrayExpr = argument.expression.as(ArrayExprSyntax.self) {
+                    observedKeyPaths = arrayExpr.elements.compactMap { element in
+                        element.expression.description.trimmingCharacters(in: .whitespaces)
+                    }
+                }
+            case "errorHandling":
+                if let memberAccess = argument.expression.as(MemberAccessExprSyntax.self) {
+                    let strategy = memberAccess.declName.baseName.text
+                    errorHandling = ErrorHandlingStrategy(rawValue: strategy) ?? .automatic
+                }
+            default:
+                break
+            }
+        }
+        
+        guard let client = clientType else {
+            throw MacroError.missingClientType
+        }
+        
+        // If no observed keypaths specified, generate defaults
+        if observedKeyPaths.isEmpty {
+            observedKeyPaths = ["tasks", "isLoading", "error"]
+        }
+        
+        return MacroParameters(
+            clientType: client,
+            observedKeyPaths: observedKeyPaths,
+            errorHandling: errorHandling
+        )
     }
     
     // MARK: - Member Generation Helpers
+    
+    private static func generateClientMember(_ clientType: String) -> DeclSyntax {
+        return """
+        
+        // MARK: - Generated Client
+        
+        /// The client this context observes
+        public let client: \(raw: clientType)
+        """
+    }
+    
+    private static func generatePublishedProperties(_ parameters: MacroParameters) -> [DeclSyntax] {
+        var properties: [DeclSyntax] = [
+            """
+            
+            // MARK: - Generated Published Properties
+            """
+        ]
+        
+        // Generate @Published properties based on observed keypaths
+        for keyPath in parameters.observedKeyPaths {
+            let propertyName = keyPath.split(separator: ".").last ?? Substring(keyPath)
+            properties.append("""
+            
+            /// Auto-generated from client state
+            @Published public var \(raw: propertyName): Any?
+            """)
+        }
+        
+        return properties
+    }
     
     private static func generateStateMembers() -> [DeclSyntax] {
         return [
@@ -53,53 +148,86 @@ public struct ContextMacro: MemberMacro {
             
             // MARK: - Generated State Management
             
-            /// Trigger for SwiftUI updates
-            @Published private var updateTrigger = UUID()
-            """,
-            """
-            
             /// Tracks if context is currently active
             public private(set) var isActive = false
             """,
             """
             
-            /// Tracks appearance count for idempotency
-            private var appearanceCount = 0
+            /// Task managing client state observation
+            private var observationTask: Task<Void, Never>?
             """,
             """
             
-            /// Task managing client state observation
-            private var observationTask: Task<Void, Never>?
+            /// Tracks initialization state
+            private var isInitialized = false
             """
         ]
     }
     
-    private static func generateLifecycleMethods() -> [DeclSyntax] {
+    private static func generateInitializer(_ parameters: MacroParameters) -> DeclSyntax {
+        return """
+        
+        // MARK: - Generated Initializer
+        
+        public init(client: \(raw: parameters.clientType)) {
+            self.client = client
+            setupInitialState()
+        }
+        """
+    }
+    
+    private static func generateEnhancedLifecycleMethods(_ parameters: MacroParameters) -> [DeclSyntax] {
         return [
             """
             
             // MARK: - Generated Lifecycle Methods
             
-            public override func performAppearance() async {
-                guard appearanceCount == 0 else { return }
-                appearanceCount += 1
+            /// Called when view appears
+            public func viewAppeared() async {
+                guard !isActive else { return }
                 isActive = true
                 startObservation()
-                await super.performAppearance()
+                await handleAppearance()
             }
             """,
             """
             
-            public override func performDisappearance() async {
+            /// Called when view disappears
+            public func viewDisappeared() async {
                 stopObservation()
                 isActive = false
-                await super.performDisappearance()
+                await handleDisappearance()
+            }
+            """,
+            """
+            
+            /// Setup initial state
+            private func setupInitialState() {
+                // Initialize @Published properties with default values
+                \(raw: parameters.observedKeyPaths.map { keyPath in
+                    let propertyName = keyPath.split(separator: ".").last ?? Substring(keyPath)
+                    return "self.\(propertyName) = nil"
+                }.joined(separator: "\n        "))
+            }
+            """,
+            """
+            
+            /// Handle appearance logic
+            private func handleAppearance() async {
+                // Override in concrete implementation if needed
+            }
+            """,
+            """
+            
+            /// Handle disappearance logic  
+            private func handleDisappearance() async {
+                // Override in concrete implementation if needed
             }
             """
         ]
     }
     
-    private static func generateObservationMethods() -> [DeclSyntax] {
+    private static func generateEnhancedObservationMethods(_ parameters: MacroParameters) -> [DeclSyntax] {
         return [
             """
             
@@ -120,23 +248,60 @@ public struct ContextMacro: MemberMacro {
                 observationTask?.cancel()
                 observationTask = nil
             }
-            """
-        ]
-    }
-    
-    private static func generateUtilityMethods() -> [DeclSyntax] {
-        return [
+            """,
             """
             
-            // MARK: - Generated Utility Methods
-            
-            /// Manually trigger a UI update
-            public func triggerUpdate() {
-                updateTrigger = UUID()
+            @MainActor
+            private func handleStateUpdate(_ state: Any) async {
+                // Update @Published properties from client state
+                \(raw: parameters.observedKeyPaths.map { keyPath in
+                    let propertyName = keyPath.split(separator: ".").last ?? Substring(keyPath)
+                    return """
+                if let value = (state as? AnyObject)?.value(forKeyPath: "\(keyPath)") {
+                    self.\(propertyName) = value
+                }
+                """
+                }.joined(separator: "\n        "))
+                
+                // Trigger SwiftUI update
+                objectWillChange.send()
             }
             """
         ]
     }
+    
+    private static func generateErrorHandling(_ parameters: MacroParameters) -> [DeclSyntax] {
+        guard parameters.errorHandling == .automatic else {
+            return []
+        }
+        
+        return [
+            """
+            
+            // MARK: - Generated Error Handling
+            
+            /// Captures and handles errors from client operations
+            @Published public var error: Error?
+            
+            /// Execute an action with automatic error handling
+            public func withErrorHandling(_ action: () async throws -> Void) async {
+                do {
+                    try await action()
+                } catch {
+                    self.error = error
+                }
+            }
+            """
+        ]
+    }
+}
+
+// MARK: - Supporting Types
+
+enum ErrorHandlingStrategy: String {
+    case automatic
+    case custom
+    case none
 }
 
 // MARK: - Error Types
@@ -144,13 +309,16 @@ public struct ContextMacro: MemberMacro {
 enum MacroError: Error, CustomStringConvertible {
     case invalidArguments
     case unsupportedDeclaration
+    case missingClientType
     
     var description: String {
         switch self {
         case .invalidArguments:
-            return "@Context requires 'observing' parameter with a Client type"
+            return "@Context requires 'client' parameter with a Client type"
         case .unsupportedDeclaration:
-            return "@Context can only be applied to classes"
+            return "@Context can only be applied to structs or classes"
+        case .missingClientType:
+            return "@Context requires a client type parameter"
         }
     }
 }
@@ -165,7 +333,25 @@ extension ContextMacro: ExtensionMacro {
         conformingTo protocols: [TypeSyntax],
         in context: some MacroExpansionContext
     ) throws -> [ExtensionDeclSyntax] {
-        // No extensions needed for now
-        return []
+        // Extract type name
+        let typeName = if let structDecl = declaration.as(StructDeclSyntax.self) {
+            structDecl.name.text
+        } else if let classDecl = declaration.as(ClassDeclSyntax.self) {
+            classDecl.name.text
+        } else {
+            throw MacroError.unsupportedDeclaration
+        }
+        
+        // Generate ObservableObject conformance
+        let observableObjectExtension = try ExtensionDeclSyntax(
+            "extension \(raw: typeName): ObservableObject {}"
+        )
+        
+        // Generate Context protocol conformance if needed
+        let contextExtension = try ExtensionDeclSyntax(
+            "extension \(raw: typeName): Context {}"
+        )
+        
+        return [observableObjectExtension, contextExtension]
     }
 }
