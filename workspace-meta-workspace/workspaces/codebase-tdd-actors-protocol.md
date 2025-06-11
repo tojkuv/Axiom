@@ -5,15 +5,21 @@ Execute rapid test-driven development cycles for parallel-worker codebase develo
 ## Protocol Activation
 
 ```text
-@CODEBASE_TDD_ACTORS execute <codebase_directory> <worker_directory> <session_template>
+@CODEBASE_TDD_ACTORS execute <provisioner_directory> <worker_directory> <session_template>
 ```
 
 **Parameters:**
-- `<codebase_directory>`: Path to directory containing source code to develop
-- `<worker_directory>`: Path to worker's isolated directory containing requirements and for storing session artifacts
+- `<provisioner_directory>`: PROVISIONER/ directory to inherit baseline from
+- `<worker_directory>`: WORKERS/WORKER-XX/ workspace directory (creates CODEBASE/ + ARTIFACTS/)
 - `<session_template>`: Path to TDD actor session template
 
-**Prerequisites**: Provisioner requirements must be completed before actors begin
+**Prerequisites**: `<provisioner_directory>/CODEBASE/` must be completed before actors begin
+
+**Explicit Input/Output Structure:**
+- **INPUT**: `<provisioner_directory>/CODEBASE/` - Foundation codebase to inherit (READ-ONLY)
+- **INPUT**: `<worker_directory>/ARTIFACTS/` - Worker requirements and development cycle (READ-ONLY)
+- **OUTPUT**: `<worker_directory>/CODEBASE/` - Worker's isolated development workspace
+- **OUTPUT**: `<worker_directory>/ARTIFACTS/` - Worker session artifacts (updated)
 
 **EXPLICITLY EXCLUDED FROM PARALLEL DEVELOPMENT (MVP FOCUS):**
 - Version control integration (development focuses on current codebase state)
@@ -31,17 +37,12 @@ Execute rapid test-driven development cycles for parallel-worker codebase develo
 - Rollback procedures (no rollback concerns for MVP)
 - Multi-version support (single current version)
 
-**Parallel-Worker Isolated Development Philosophy:**
-- Zero compatibility constraints - breaking changes welcomed for MVP clarity
-- No versioning considerations - focus purely on current MVP needs  
-- No migration paths - optimize for simplicity over backward compatibility
-- Fix don't deprecate - transform problematic code into better solutions
-- Active improvement mindset - every problem gets fixed, not marked obsolete
+**Worker Development Philosophy:**
+- Active improvement mindset - every problem gets fixed
 - Parallel worker isolation - each worker operates on isolated requirements folder
 - Workers unaware of each other - complete development independence
 - Folder-specific development cycles - no cross-folder coordination or dependencies
 - Worker-scoped validation - build and test validation within worker's changes only
-- Aggressive development with isolated quality checks
 - Zero tolerance for errors within worker's scope
 - Session artifact generation - records documenting worker's isolated development
 - Integration documentation - capture dependencies and API changes for stabilizer
@@ -51,43 +52,38 @@ Execute rapid test-driven development cycles for parallel-worker codebase develo
 
 ### Execute - Parallel Worker TDD Development from Folder Requirements
 
-The execute command performs isolated parallel-worker TDD development with worker-scoped validation:
+The execute command performs isolated parallel-worker TDD development with explicit workspace isolation:
 
-1. Loads folder-specific development cycle index with phase-organized requirements
-2. Identifies current development phase within folder and validates prerequisites
-3. Executes TDD cycles with integration documentation:
+1. **Workspace Setup**: Copies `<provisioner_directory>/CODEBASE/` to `<worker_directory>/CODEBASE/` for isolated development
+2. **Requirements Loading**: Loads `<worker_directory>/ARTIFACTS/DEVELOPMENT-CYCLE-INDEX.md` with phase-organized requirements
+3. **Development Phase Validation**: Identifies current development phase and validates prerequisites
+4. **Isolated TDD Cycles**: Executes development in `<worker_directory>/CODEBASE/` with integration documentation:
    - RED: Write focused failing test for worker's requirement
    - GREEN: Implement minimal viable solution with worker-scope build validation
-   - REFACTOR: Optimize within worker's scope with local test validation
-   - VALIDATE: Worker-scope build and test verification only
-4. Documents development decisions and integration points for stabilizer
-5. Updates folder cycle index with phase progress
-6. Ensures zero issues within worker's development scope
-7. Documents dependencies and API changes for stabilizer review
-8. Generates session artifacts in worker's requirements folder
-9. Worker-isolated completion validation
+   - REFACTOR: Optimize within worker's isolated scope with local test validation
+   - VALIDATE: Worker-scope build and test verification only within isolated workspace
+5. **Decision Documentation**: Documents development decisions and integration points for stabilizer
+6. **Progress Tracking**: Updates `<worker_directory>/ARTIFACTS/` cycle index with phase progress
+7. **Quality Assurance**: Ensures zero issues within worker's isolated development scope
+8. **Integration Documentation**: Documents dependencies and API changes for stabilizer review
+9. **Artifact Generation**: Generates session artifacts in `<worker_directory>/ARTIFACTS/`
+10. **Completion Validation**: Worker-isolated completion validation
 
 ```bash
 @CODEBASE_TDD_ACTORS execute \
-  /path/to/codebase-source \
-  /path/to/worker-directory \
+  /path/to/PROVISIONER \
+  /path/to/WORKERS/WORKER-01 \
   /path/to/codebase-tdd-actors-template.md
 ```
 
-### Parallel-Worker Isolated MVP Development
+### Worker Development Execution
 
-This protocol **executes TDD development for isolated parallel-worker MVP delivery**:
-- Writes focused failing tests for worker's requirements
-- Implements minimal viable solutions with worker-scope build validation
-- Refactors within worker's scope with local test verification
-- Validates build and tests for worker's changes only
-- Eliminates all compatibility concerns in favor of MVP clarity
-- Operates in complete isolation from other parallel workers
-- Measures improvements within worker's development scope
-- Documents patterns and integration points for stabilizer
-- Produces working MVP-ready code within worker's requirements
-- Ensures completion with zero errors in worker's scope
-- Generates all session artifacts within worker's isolated requirements folder
+This protocol **executes isolated TDD development for assigned technical areas**:
+- Implements requirements within worker's technical area
+- Maintains complete isolation from other parallel workers
+- Validates changes within worker scope only
+- Documents integration points for stabilizer
+- Produces working code within worker's technical area
 
 ### Fix Don't Deprecate Principle
 
@@ -127,44 +123,53 @@ This protocol **executes TDD development for isolated parallel-worker MVP delive
 **Parallel Worker Examples (2-8 workers operating simultaneously):**
 
 ```bash
-# Worker 1 operates on its isolated directory
+# Worker 01 operates with complete isolation from same provisioner foundation
 @CODEBASE_TDD_ACTORS execute \
-  /path/to/codebase-source \
-  /path/to/worker-01-directory \
+  /path/to/PROVISIONER \
+  /path/to/WORKERS/WORKER-01 \
   /path/to/codebase-tdd-actors-template.md
 
-# Worker 2 operates on its isolated directory
+# Worker 02 operates with complete isolation from same provisioner foundation
 @CODEBASE_TDD_ACTORS execute \
-  /path/to/codebase-source \
-  /path/to/worker-02-directory \
+  /path/to/PROVISIONER \
+  /path/to/WORKERS/WORKER-02 \
   /path/to/codebase-tdd-actors-template.md
 
-# Additional workers with their own isolated directories
+# Worker 03 operates with complete isolation from same provisioner foundation
 @CODEBASE_TDD_ACTORS execute \
-  /path/to/codebase-source \
-  /path/to/worker-XX-directory \
+  /path/to/PROVISIONER \
+  /path/to/WORKERS/WORKER-03 \
+  /path/to/codebase-tdd-actors-template.md
+
+# Additional workers up to WORKER-08 with their own isolated workspaces
+@CODEBASE_TDD_ACTORS execute \
+  /path/to/PROVISIONER \
+  /path/to/WORKERS/WORKER-XX \
   /path/to/codebase-tdd-actors-template.md
 ```
 
-**Key Parallel Worker Isolation Features:**
-- Each worker accesses codebase from: `<codebase_directory>/`
-- Each worker operates on isolated directory: `<worker_directory>/`
-- Each worker reads only its directory's DEVELOPMENT-CYCLE-INDEX.md
-- Each worker generates session artifacts (CB-SESSION-XXX.md) in its directory
-- Workers are completely unaware of each other's work and progress
-- No coordination or communication between parallel workers
+**Key Parallel Worker Explicit Isolation Features:**
+- **Foundation Inheritance**: Each worker copies `<provisioner_directory>/CODEBASE/` to `<worker_directory>/CODEBASE/`
+- **Isolated Development**: Each worker develops exclusively in `<worker_directory>/CODEBASE/`
+- **Isolated Requirements**: Each worker reads only `<worker_directory>/ARTIFACTS/DEVELOPMENT-CYCLE-INDEX.md`
+- **Isolated Artifacts**: Each worker generates session artifacts (CB-SESSION-XXX.md) in `<worker_directory>/ARTIFACTS/`
+- **Complete Isolation**: Workers are completely unaware of each other's work and progress
+- **No Cross-Worker Communication**: No coordination or communication between parallel workers
+- **Foundation-Based Development**: All workers start from same `<provisioner_directory>/CODEBASE/` foundation
+- **Explicit Control**: User controls exactly which directories are input and output for each worker
 
 ## Parallel-Worker Isolated Process Flow
 
 ```text
-1. FOLDER-ISOLATED CYCLE INITIALIZATION
-   - Load folder-specific development cycle index to identify current phase and requirements
-   - Validate folder prerequisites satisfied
-   - Check for existing session progress within folder's current phase
-   - Establish worker-scope baselines (build/test status for worker's code)
+1. WORKER WORKSPACE SETUP AND INITIALIZATION
+   - Copy PROVISIONER/CODEBASE/ to WORKERS/WORKER-XX/CODEBASE/ for isolated development
+   - Load WORKERS/WORKER-XX/ARTIFACTS/DEVELOPMENT-CYCLE-INDEX.md to identify current phase and requirements
+   - Validate worker prerequisites satisfied (provisioner completion)
+   - Check for existing session progress in WORKERS/WORKER-XX/ARTIFACTS/
+   - Establish worker-scope baselines (build/test status for worker's isolated code)
    - Operate in complete isolation from other parallel workers
 
-2. FOLDER-ISOLATED TDD EXECUTION
+2. ISOLATED WORKSPACE TDD EXECUTION (in WORKERS/WORKER-XX/CODEBASE/)
    
    IMPLEMENTATION (MVP features):
    - RED: Write focused test for worker's requirement
@@ -184,71 +189,73 @@ This protocol **executes TDD development for isolated parallel-worker MVP delive
    - REFACTOR: Transform and improve worker's code
    - VALIDATE: Worker-scope build + test verification
    
-3. FOLDER-ISOLATED DOCUMENTATION
-   - Document development patterns and decisions
-   - Document integration points for stabilizer
-   - Update folder cycle index with phase progress
-   - Track worker-scope quality metrics
+3. ISOLATED WORKSPACE DOCUMENTATION
+   - Document development patterns and decisions in WORKERS/WORKER-XX/ARTIFACTS/
+   - Document integration points for stabilizer consumption
+   - Update WORKERS/WORKER-XX/ARTIFACTS/cycle index with phase progress
+   - Track worker-scope quality metrics within isolated workspace
    - Maintain complete isolation from other parallel workers
 
-4. FOLDER PHASE COMPLETION
-   - Worker-scope build validation
-   - Worker's test suite execution
-   - Coverage tracking for worker's code
-   - Document dependencies for stabilizer
+4. WORKER PHASE COMPLETION (in WORKERS/WORKER-XX/CODEBASE/)
+   - Worker-scope build validation within isolated workspace
+   - Worker's test suite execution in isolated environment
+   - Coverage tracking for worker's isolated code
+   - Document dependencies for stabilizer in WORKERS/WORKER-XX/ARTIFACTS/
    - No coordination with other parallel workers
 
-5. FOLDER CYCLE COMPLETION
-   - Final worker-scope validation
-   - Zero errors in worker's changes
-   - Zero test failures for worker's tests
-   - Worker coverage thresholds met
-   - Integration points documented
-   - Session artifacts generated in worker's folder
+5. WORKER CYCLE COMPLETION
+   - Final worker-scope validation in WORKERS/WORKER-XX/CODEBASE/
+   - Zero errors in worker's isolated changes
+   - Zero test failures for worker's isolated tests
+   - Worker coverage thresholds met within isolated workspace
+   - Integration points documented in WORKERS/WORKER-XX/ARTIFACTS/
+   - Session artifacts generated in WORKERS/WORKER-XX/ARTIFACTS/
 ```
 
-## Folder Development Cycle Index Format
+## Development Cycle Index Format
 
-The protocol works directly with folder-specific development cycle indexes generated by the requirements protocol:
+The protocol works with worker-specific development cycle indexes:
 
 ```markdown
-# DEVELOPMENT-CYCLE-INDEX (WORKER-XX Folder)
+# DEVELOPMENT-CYCLE-INDEX
 
 ## Executive Summary  
-- [N] requirements generated from folder's assigned improvement areas
-- [N] development phases identified within folder
-- Estimated timeline: [N] weeks MVP development (folder-isolated)
-- Parallel Worker: WORKER-XX (isolated from other workers)
+- [N] requirements for assigned technical area
+- [N] development phases for isolated development
+- Estimated timeline: [N] weeks development
+- Worker: WORKER-XX (isolated from other workers)
+- Workspace: `<worker_directory>/CODEBASE/`
 
-## Current Folder Phase Status
-**Phase 1: Foundation** - IN PROGRESS (within folder)
-**Phase 2: Integration** - PENDING (within folder)
+## Current Worker Phase Status
+**Phase 1: Foundation** - IN PROGRESS (within isolated workspace)
+**Phase 2: Integration** - PENDING (within isolated workspace)
 
-## Folder Implementation Roadmap
+## Worker Implementation Roadmap
 
-### Phase 1: Foundation (Weeks 1-2) - CURRENT FOLDER PHASE
+### Phase 1: Foundation (Weeks 1-2) - CURRENT WORKER PHASE
 - REQUIREMENTS-001-ASYNCSTREAM-TEST-UTILITIES [COMPLETED]
 - REQUIREMENTS-002-STATE-ERROR-HANDLING [IN PROGRESS]
-- Dependencies: None (within folder)
-- Exit Criteria: Core testing and error handling enhanced
-- MVP Focus: Essential utilities for folder's assigned improvement areas
+- Dependencies: PROVISIONER/CODEBASE/ inherited
+- Exit Criteria: Core testing and error handling enhanced in WORKERS/WORKER-XX/CODEBASE/
+- MVP Focus: Essential utilities for worker's assigned improvement areas
 
 ### Phase 2: Integration (Weeks 3)
 - REQUIREMENTS-003-TESTING-CODEBASE-UTILITIES
-- Dependencies: Phase 1 complete (within folder)
-- Exit Criteria: Folder requirements integrated and complete
-- MVP Focus: Final integration of folder's assigned capabilities
+- Dependencies: Phase 1 complete (within isolated workspace)
+- Exit Criteria: Worker requirements integrated and complete in isolated workspace
+- MVP Focus: Final integration of worker's assigned capabilities
 
-## Folder Development Session History
-- WORKER-XX/CB-SESSION-001.md [COMPLETED] - Phase 1 start
-- WORKER-XX/CB-SESSION-002.md [COMPLETED] - REQUIREMENTS-001 completion  
-- WORKER-XX/CB-SESSION-003.md [IN PROGRESS] - REQUIREMENTS-002 development
+## Development Session History
+- CB-SESSION-001.md [COMPLETED] - Phase 1 start
+- CB-SESSION-002.md [COMPLETED] - REQUIREMENTS-001 completion  
+- CB-SESSION-003.md [IN PROGRESS] - REQUIREMENTS-002 development
 
-## Next Folder Session Plan
+## Next Worker Session Plan
 **Target**: Complete REQUIREMENTS-002, advance Phase 1 toward completion
 **Estimated Duration**: 2-3 hours
-**MVP Priority**: Complete folder's testing and error handling foundation
+**MVP Priority**: Complete worker's testing and error handling foundation
 **Isolation Note**: No coordination with other parallel workers required
+**Workspace**: All development in WORKERS/WORKER-XX/CODEBASE/
 ```
 
 ## Phase-Driven Development Process
@@ -835,37 +842,49 @@ The protocol ensures each issue is truly resolved through active fixing:
    - Save in worker's session directory
    - **Overall**: Track worker's completion
 
-7. **Worker Completion Assurance**
-   - **Build Validation**: Zero errors in worker's code
-   - **Test Validation**: Worker's tests pass
-   - **Coverage Validation**: Worker's thresholds met
-   - **Performance Validation**: No regressions in worker
-   - **Integration Documentation**: Dependencies documented
-   - **Documentation**: Worker decisions recorded
+7. **Completion Gates**
+   - Build: Zero compilation errors ✓
+   - Tests: All worker tests passing ✓
+   - Coverage: Minimum 85% achieved ✓
+   - Integration: Dependencies documented ✓
 
 ## Worker Session Artifact Storage
 
-Generated session artifacts are stored in the worker's directory for future consumption by stabilization processes:
+Generated session artifacts are stored using workspace isolation structure for future consumption by stabilization processes:
 
 ```
-<codebase_directory>/
-└── [Source code files being developed]
-
-<worker_directory>/
-├── DEVELOPMENT-CYCLE-INDEX.md (worker-specific cycle)
-├── REQUIREMENTS-001-[DESCRIPTIVE-TITLE].md
-├── REQUIREMENTS-002-[DESCRIPTIVE-TITLE].md
-├── REQUIREMENTS-003-[DESCRIPTIVE-TITLE].md
-├── CB-SESSION-001.md (session 1 artifacts)
-├── CB-SESSION-002.md (session 2 artifacts)
-└── CB-SESSION-003.md (session 3 artifacts)
+<project_root>/
+├── SOURCE/                                    # Original source codebase (READ-ONLY)
+├── PROVISIONER/
+│   ├── CODEBASE/                             # Foundation codebase (READ-only for workers)
+│   └── ARTIFACTS/                            # Provisioner session artifacts
+├── WORKERS/
+│   ├── WORKER-01/
+│   │   ├── CODEBASE/                         # Worker-01's isolated development workspace
+│   │   │   └── [Source code files with worker-01 changes]
+│   │   └── ARTIFACTS/                        # Worker-01's session artifacts and requirements
+│   │       ├── DEVELOPMENT-CYCLE-INDEX.md   # Worker-01-specific cycle
+│   │       ├── REQUIREMENTS-001-[DESCRIPTIVE-TITLE].md
+│   │       ├── REQUIREMENTS-002-[DESCRIPTIVE-TITLE].md
+│   │       ├── REQUIREMENTS-003-[DESCRIPTIVE-TITLE].md
+│   │       ├── CB-SESSION-001.md           # Worker-01 session 1 artifacts
+│   │       ├── CB-SESSION-002.md           # Worker-01 session 2 artifacts
+│   │       └── CB-SESSION-003.md           # Worker-01 session 3 artifacts
+│   ├── WORKER-02/
+│   │   ├── CODEBASE/                         # Worker-02's isolated development workspace
+│   │   └── ARTIFACTS/                        # Worker-02's session artifacts
+│   └── WORKER-XX/                            # Additional workers as needed
+└── STABILIZER/                               # Reserved for future stabilizer integration
 ```
 
-**Directory Usage:**
-- `<codebase_directory>/`: Source code being developed (read/write)
-- `<worker_directory>/`: Worker's isolated requirements and session artifacts
+**Workspace Isolation Usage:**
+- `SOURCE/`: Original source code (READ-ONLY, never modified by protocols)
+- `PROVISIONER/CODEBASE/`: Foundation codebase (READ-ONLY for workers, inherited as baseline)
+- `WORKERS/WORKER-XX/CODEBASE/`: Worker's isolated development workspace (copy of PROVISIONER/CODEBASE/ + worker changes)
+- `WORKERS/WORKER-XX/ARTIFACTS/`: Worker's isolated requirements and session artifacts
+- Complete isolation: Workers cannot see each other's code changes or session artifacts
 
-This enables tracking of worker-specific progress and provides complete development history for this worker. The worker directory contains complete isolation with its own requirements and session artifacts. These session artifacts are available for consumption by external processes such as stabilization cycles.
+This enables tracking of worker-specific progress with complete workspace isolation and provides development history for each worker. Each worker directory contains complete isolation with its own codebase and artifacts. These session artifacts and isolated codebase changes are available for consumption by stabilization processes.
 
 ## Index Progress Management
 
@@ -946,3 +965,4 @@ This protocol enforces a strict "Fix Don't Deprecate" policy throughout all deve
 - MVP development benefits from clean, fixed code rather than deprecated APIs with warnings
 
 The result: A codebase that gets progressively better through active problem-solving, not one that accumulates technical debt through deprecation.
+

@@ -5,13 +5,18 @@ Execute minimal foundational test-driven development cycles to establish only cr
 ## Protocol Activation
 
 ```text
-@CODEBASE_TDD_PROVISIONER execute <codebase_directory> <provisioner_directory> <session_template>
+@CODEBASE_TDD_PROVISIONER execute <source_directory> <provisioner_directory> <session_template>
 ```
 
 **Parameters:**
-- `<codebase_directory>`: Path to directory containing source code to establish foundation for
-- `<provisioner_directory>`: Path to provisioner's directory containing requirements and for storing session artifacts
+- `<source_directory>`: SOURCE/ directory to copy from (READ-ONLY)
+- `<provisioner_directory>`: PROVISIONER/ workspace directory (creates CODEBASE/ + ARTIFACTS/)
 - `<session_template>`: Provisioner session template for documentation
+
+**Explicit Input/Output Structure:**
+- **INPUT**: `<source_directory>/` - Original source codebase (READ-ONLY)
+- **OUTPUT**: `<provisioner_directory>/CODEBASE/` - Provisioner's isolated development workspace
+- **OUTPUT**: `<provisioner_directory>/ARTIFACTS/` - Provisioner session artifacts and requirements
 
 **Provisioner Role**: Establish minimal foundational infrastructure that enables parallel development
 
@@ -33,58 +38,46 @@ Execute minimal foundational test-driven development cycles to establish only cr
 
 **Foundational Development Philosophy:**
 - **Minimal Infrastructure Only**: Create only what parallel workers absolutely need
-- **Dependency-Focused**: Establish core dependencies, not features
 - **Foundation-Only Scope**: Build infrastructure, not application functionality
 - **Enable Parallel Work**: Focus on what allows parallel development to begin
-- **No Feature Implementation**: Leave all feature development to parallel workers
-- Zero compatibility constraints - breaking changes welcomed for MVP clarity
-- No versioning considerations - focus purely on current MVP needs  
-- No migration paths - optimize for simplicity over backward compatibility
-- Single provisioner worker - executes minimal foundation requirements
-- Critical path execution - completes before any parallel actor begins
-- Foundation-ready artifact generation - session records enable parallel work
+- **Critical Path Execution**: Must complete before any parallel work begins
 
 ## Command
 
 ### Execute - Foundational TDD Development from Provisioner Requirements
 
-The execute command performs single-worker foundational TDD development with continuous quality validation, generating foundation-ready session artifacts:
+The execute command performs single-worker foundational TDD development with explicit workspace isolation and continuous quality validation:
 
-1. Loads provisioner directory development cycle index with foundational requirements
-2. Identifies critical infrastructure requirements that must complete first
-3. Executes quality-validated TDD cycles establishing foundation:
+1. **Workspace Setup**: Copies `<source_directory>/` to `<provisioner_directory>/CODEBASE/` for isolated development
+2. **Requirements Loading**: Loads `<provisioner_directory>/ARTIFACTS/DEVELOPMENT-CYCLE-INDEX.md` with foundational requirements
+3. **Critical Infrastructure Development**: Identifies infrastructure requirements that must complete first
+4. **Quality-Validated TDD Cycles**: Executes foundation development in `<provisioner_directory>/CODEBASE/`:
    - RED: Write focused failing test for foundational capability
    - GREEN: Implement minimal viable foundation with build validation
    - REFACTOR: Optimize foundation with comprehensive test suite validation
-   - VALIDATE: Continuous build, test, coverage verification
-4. Documents foundational decisions and architectural choices
-5. Updates provisioner directory cycle index with validated progress
-6. Ensures zero quality issues before parallel actors can begin
-7. Establishes critical infrastructure all parallel workers will use
-8. Generates session artifacts in provisioner directory
-9. Comprehensive foundation validation before parallel work begins
+   - VALIDATE: Continuous build, test, coverage verification within isolated workspace
+5. **Decision Documentation**: Documents foundational decisions and architectural choices
+6. **Progress Tracking**: Updates `<provisioner_directory>/ARTIFACTS/` cycle index with validated progress
+7. **Quality Assurance**: Ensures zero quality issues before parallel actors can begin
+8. **Infrastructure Foundation**: Establishes critical infrastructure for parallel workers to inherit
+9. **Artifact Generation**: Generates session artifacts in `<provisioner_directory>/ARTIFACTS/`
+10. **Validation**: Comprehensive foundation validation before parallel work begins
 
 ```bash
 @CODEBASE_TDD_PROVISIONER execute \
-  /path/to/codebase-source \
-  /path/to/provisioner-directory \
+  /path/to/SOURCE \
+  /path/to/PROVISIONER \
   /path/to/codebase-tdd-provisioner-template.md
 ```
 
-### Single-Worker Foundational MVP Development
+### Foundational Development Execution
 
-This protocol **executes quality-assured TDD development for foundational MVP infrastructure**:
-- Writes focused failing tests for critical foundation capabilities
-- Implements minimal viable foundation with continuous build validation
-- Refactors aggressively with full test suite verification after each change
-- Validates build integrity, test completeness, and coverage thresholds continuously
-- Eliminates all compatibility concerns in favor of MVP clarity and quality
-- Establishes infrastructure patterns parallel actors will follow
-- Measures real performance and quality improvements throughout development
-- Documents foundational patterns and architectural decisions
-- Produces working MVP-ready foundational code with zero quality defects
-- Ensures foundation completion with zero build errors, test failures, or coverage gaps
-- Generates all session artifacts within provisioner directory
+This protocol **executes foundational TDD development for parallel work enablement**:
+- Implements minimal infrastructure for parallel worker dependencies
+- Establishes core patterns and abstractions
+- Validates foundation through comprehensive testing
+- Documents architectural decisions for parallel workers
+- Produces stable foundation with zero quality defects
 
 ### Foundational Requirements Focus
 
@@ -108,29 +101,34 @@ This protocol **executes quality-assured TDD development for foundational MVP in
 ```bash
 # Provisioner executes foundational requirements before parallel actors
 @CODEBASE_TDD_PROVISIONER execute \
-  /path/to/codebase-workspace \
+  /path/to/SOURCE \
+  /path/to/PROVISIONER \
   /path/to/codebase-tdd-provisioner-template.md
 ```
 
-**Key Provisioner Features:**
-- Accesses codebase from: `<codebase_workspace>/[CodebaseName]/`
-- Operates on isolated PROVISIONER/ requirements folder: `<codebase_workspace>/PROVISIONER/`
-- Reads only PROVISIONER/DEVELOPMENT-CYCLE-INDEX.md
-- Generates session artifacts (CB-PROVISIONER-SESSION-XXX.md) in PROVISIONER/ folder
-- Must complete before any parallel actors begin
-- Establishes foundation all parallel workers will use
+**Key Provisioner Explicit Workspace Features:**
+- **Source Protection**: Reads from `<source_directory>/` (READ-ONLY, never modified)
+- **Isolated Development**: Copies `<source_directory>/` to `<provisioner_directory>/CODEBASE/` for development
+- **Development Workspace**: All TDD work performed in `<provisioner_directory>/CODEBASE/`
+- **Artifact Storage**: Stores requirements in `<provisioner_directory>/ARTIFACTS/DEVELOPMENT-CYCLE-INDEX.md`
+- **Session Tracking**: Generates session artifacts (CB-SESSION-XXX.md) in `<provisioner_directory>/ARTIFACTS/`
+- **Foundation Preparation**: `<provisioner_directory>/CODEBASE/` becomes baseline for parallel workers
+- **Execution Order**: Must complete before any parallel actors begin
+- **Explicit Control**: User controls exactly which directories are input and output
 
 ## Provisioner Quality-Validated Process Flow
 
 ```text
-1. PROVISIONER CYCLE INITIALIZATION
-   - Load PROVISIONER/ development cycle index for foundational requirements
+1. EXPLICIT WORKSPACE SETUP AND INITIALIZATION
+   - Copy `<source_directory>/` to `<provisioner_directory>/CODEBASE/` for isolated development
+   - Create `<provisioner_directory>/ARTIFACTS/` for session artifacts and requirements
+   - Load `<provisioner_directory>/ARTIFACTS/DEVELOPMENT-CYCLE-INDEX.md` for foundational requirements
    - Validate no prerequisites (provisioner runs first)
-   - Check for existing provisioner session progress
-   - Establish quality baselines (current build, test, coverage status)
-   - Prepare to establish foundation for parallel work
+   - Check for existing provisioner session progress in `<provisioner_directory>/ARTIFACTS/`
+   - Establish quality baselines (build, test, coverage status in isolated workspace)
+   - Prepare isolated foundation development for parallel work
 
-2. FOUNDATIONAL QUALITY-VALIDATED TDD EXECUTION
+2. FOUNDATIONAL QUALITY-VALIDATED TDD EXECUTION (in `<provisioner_directory>/CODEBASE/`)
    
    IMPLEMENTATION (Foundational MVP features):
    - RED: Write focused test validating foundational behavior
@@ -150,45 +148,46 @@ This protocol **executes quality-assured TDD development for foundational MVP in
    - REFACTOR: Transform and improve foundational patterns
    - VALIDATE: Comprehensive build + test + coverage verification
    
-3. FOUNDATIONAL CONTINUOUS QUALITY ASSURANCE
+3. FOUNDATIONAL CONTINUOUS QUALITY ASSURANCE (in `<provisioner_directory>/CODEBASE/`)
    - Document foundational patterns and architectural decisions
    - Validate quality gates before proceeding to next requirement
-   - Update PROVISIONER cycle index with validated progress
-   - Track build integrity, test completeness, and coverage throughout
+   - Update `<provisioner_directory>/ARTIFACTS/` cycle index with validated progress
+   - Track build integrity, test completeness, and coverage throughout isolated workspace
    - Establish patterns for parallel actors to follow
 
-4. PROVISIONER PHASE COMPLETION VALIDATION
-   - Comprehensive build validation across all codebase components
-   - Complete test suite execution with zero failures
+4. PROVISIONER PHASE COMPLETION VALIDATION (in `<provisioner_directory>/CODEBASE/`)
+   - Comprehensive build validation across all isolated codebase components
+   - Complete test suite execution with zero failures in workspace
    - Coverage threshold validation and gap identification
    - Foundation testing across all provisioner requirements
-   - Performance benchmarking and baseline establishment
-   - Verify foundation ready for parallel work
+   - Performance benchmarking and baseline establishment in isolated environment
+   - Verify foundation ready for parallel work inheritance
 
 5. PROVISIONER COMPLETION ASSURANCE
-   - Final comprehensive quality validation across entire codebase
-   - Zero build errors across all configurations and platforms
-   - Zero test failures across complete test suite
+   - Final comprehensive quality validation across entire `<provisioner_directory>/CODEBASE/`
+   - Zero build errors across all configurations in isolated workspace
+   - Zero test failures across complete test suite in `<provisioner_directory>/CODEBASE/`
    - Coverage thresholds met or exceeded for all components
-   - Performance benchmarks validated
+   - Performance benchmarks validated in isolated environment
    - Foundation testing completed successfully
    - Documentation updated with architectural decisions
-   - Session artifacts generated within PROVISIONER/ folder
-   - Foundation ready for parallel actors to build upon
+   - Session artifacts generated within `<provisioner_directory>/ARTIFACTS/`
+   - `<provisioner_directory>/CODEBASE/` ready for parallel workers to inherit
 ```
 
 ## PROVISIONER Development Cycle Index Format
 
-The protocol works with PROVISIONER-specific development cycle index:
+The protocol works with PROVISIONER-specific development cycle index stored in `<provisioner_directory>/ARTIFACTS/`:
 
 ```markdown
-# DEVELOPMENT-CYCLE-INDEX (PROVISIONER Folder)
+# DEVELOPMENT-CYCLE-INDEX (<provisioner_directory>/ARTIFACTS/ Folder)
 
 ## Executive Summary  
 - [N] foundational requirements identified for provisioner execution
-- [N] development phases for foundation establishment
+- [N] development phases for foundation establishment in `<provisioner_directory>/CODEBASE/`
 - Estimated timeline: [N] week(s) foundational development
 - Role: Codebase Foundation Provisioner (executes before parallel actors)
+- Workspace: Isolated development in `<provisioner_directory>/CODEBASE/`
 
 ## Current PROVISIONER Phase Status
 **Phase 1: Core Foundation** - IN PROGRESS
@@ -201,37 +200,38 @@ The protocol works with PROVISIONER-specific development cycle index:
 - REQUIREMENTS-002-[DESCRIPTIVE-TITLE] [PENDING]
 - REQUIREMENTS-003-[DESCRIPTIVE-TITLE] [PENDING]
 - Dependencies: None (provisioner runs first)
-- Exit Criteria: Core codebase foundation established
+- Exit Criteria: Core codebase foundation established in `<provisioner_directory>/CODEBASE/`
 - MVP Focus: Essential infrastructure all parallel work depends on
 
 ### Phase 2: Infrastructure Setup (Days N-N)
 - REQUIREMENTS-004-[DESCRIPTIVE-TITLE] [PENDING]
 - REQUIREMENTS-005-[DESCRIPTIVE-TITLE] [PENDING]
 - Dependencies: Phase 1 complete
-- Exit Criteria: Foundation ready for parallel actor work
+- Exit Criteria: `<provisioner_directory>/CODEBASE/` ready for parallel worker inheritance
 - MVP Focus: Testing and build infrastructure established
 
-## PROVISIONER Development Session History
-- PROVISIONER/CB-PROVISIONER-SESSION-001.md [IN PROGRESS] - Bootstrap implementation
+## Development Session History
+- `<provisioner_directory>/ARTIFACTS/`CB-SESSION-001.md [IN PROGRESS] - Bootstrap implementation
 
 ## Next PROVISIONER Session Plan
 **Target**: Complete codebase bootstrap, begin error handling foundation
 **Estimated Duration**: X-Y hours
 **MVP Priority**: Establish core patterns for parallel work
-**Completion Gate**: Must finish before parallel actors begin
+**Completion Gate**: `<provisioner_directory>/CODEBASE/` must be ready before parallel actors begin
 ```
 
 ## Provisioner-to-Actor Handoff
 
 Upon provisioner completion:
-- All foundational requirements implemented and tested
-- Core infrastructure patterns established
-- Base utilities and helpers available
-- Architectural decisions documented
-- Codebase foundation stable with zero quality issues
-- PROVISIONER/ folder contains complete session history
-- Parallel actors can safely begin their isolated work
-- No further coordination needed with provisioner
+- All foundational requirements implemented and tested in `<provisioner_directory>/CODEBASE/`
+- Core infrastructure patterns established for inheritance
+- Base utilities and helpers available in foundation codebase
+- Architectural decisions documented in `<provisioner_directory>/ARTIFACTS/`
+- `<provisioner_directory>/CODEBASE/` foundation stable with zero quality issues
+- `<provisioner_directory>/ARTIFACTS/` contains complete session history and requirements
+- `<provisioner_directory>/CODEBASE/` ready for parallel workers to copy and extend
+- Parallel actors inherit `<provisioner_directory>/CODEBASE/` as their starting point
+- No further coordination needed with provisioner during parallel work
 
 ## Best Practices
 
@@ -247,36 +247,40 @@ Upon provisioner completion:
    - Document architectural decisions clearly
    - Create examples of proper codebase usage
 
-3. **Provisioner Completion Gates**
-   - All foundational requirements must complete successfully
-   - Zero tolerance for quality issues in foundation
-   - Comprehensive validation before parallel work begins
-   - Clear handoff documentation for parallel actors
+3. **Completion Gates**
+   - Build: Zero compilation errors ✓
+   - Tests: All foundation tests passing ✓
+   - Coverage: Minimum 85% achieved ✓
+   - Foundation: Ready for parallel worker inheritance ✓
 
 ## Provisioner Session Artifact Storage
 
-Generated artifacts are stored in the provisioner directory:
+Generated artifacts are stored using explicit workspace directories:
 
 ```
-<codebase_directory>/
-└── [Source code files being developed]
+<source_directory>/                           # Original source codebase (READ-ONLY)
+└── [Source code files - never modified]
 
 <provisioner_directory>/
-├── DEVELOPMENT-CYCLE-INDEX.md (provisioner-specific cycle)
-├── REQUIREMENTS-001-[DESCRIPTIVE-TITLE].md
-├── REQUIREMENTS-002-[DESCRIPTIVE-TITLE].md
-├── REQUIREMENTS-003-[DESCRIPTIVE-TITLE].md
-├── REQUIREMENTS-004-[DESCRIPTIVE-TITLE].md
-├── REQUIREMENTS-005-[DESCRIPTIVE-TITLE].md
-├── CB-PROVISIONER-SESSION-001.md
-├── CB-PROVISIONER-SESSION-002.md
-├── CB-PROVISIONER-SESSION-003.md
-├── CB-PROVISIONER-SESSION-004.md
-└── CB-PROVISIONER-SESSION-005.md
+├── CODEBASE/                                # Provisioner's isolated development workspace
+│   └── [Source code files with foundation established]
+└── ARTIFACTS/                               # Provisioner's session artifacts and requirements
+    ├── DEVELOPMENT-CYCLE-INDEX.md          # Provisioner-specific cycle
+    ├── REQUIREMENTS-001-[DESCRIPTIVE-TITLE].md
+    ├── REQUIREMENTS-002-[DESCRIPTIVE-TITLE].md
+    ├── REQUIREMENTS-003-[DESCRIPTIVE-TITLE].md
+    ├── REQUIREMENTS-004-[DESCRIPTIVE-TITLE].md
+    ├── REQUIREMENTS-005-[DESCRIPTIVE-TITLE].md
+    ├── CB-SESSION-001.md
+    ├── CB-SESSION-002.md
+    ├── CB-SESSION-003.md
+    ├── CB-SESSION-004.md
+    └── CB-SESSION-005.md
 ```
 
-**Directory Usage:**
-- `<codebase_directory>/`: Source code where foundation is established (read/write)
-- `<provisioner_directory>/`: Provisioner's requirements and session artifacts
+**Explicit Workspace Usage:**
+- `<source_directory>/`: Original source code (READ-ONLY, never modified by protocols)
+- `<provisioner_directory>/CODEBASE/`: Foundation development workspace (copy of `<source_directory>/` + foundation changes)
+- `<provisioner_directory>/ARTIFACTS/`: Provisioner's requirements and session artifacts
 
-This enables tracking of foundational development and provides complete history of infrastructure establishment before parallel work begins.
+This enables explicit workspace isolation with foundational development tracking and provides `<provisioner_directory>/CODEBASE/` as the inheritance point for parallel work while preserving original `<source_directory>/` unchanged.

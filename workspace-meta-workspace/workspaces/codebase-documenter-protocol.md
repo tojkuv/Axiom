@@ -5,35 +5,33 @@ Documentation generation protocol that runs after stabilizer completion to creat
 ## Protocol Activation
 
 ```text
-@CODEBASE_DOCUMENTER execute <codebase_directory> <development_artifacts_directory> <documentation_directory> <documenter_template>
+@CODEBASE_DOCUMENTER execute <source_directory> <documentation_directory> <documenter_template>
 ```
 
 **Parameters:**
-- `<codebase_directory>`: Path to directory containing stabilized codebase source code
-- `<development_artifacts_directory>`: Path to directory containing completed development artifacts (stabilizer, worker, provisioner session files)
-- `<documentation_directory>`: Path to directory where documentation will be generated
+- `<source_directory>`: Directory containing the final codebase to document
+- `<documentation_directory>`: Directory where documentation will be generated
 - `<documenter_template>`: Path to the documenter template for structuring documentation
 
 **Prerequisites:**
-- Development artifacts directory must contain completed stabilizer session files
-- Codebase must be fully stabilized and application-ready
-- All parallel workers and provisioner work must be finished
+- Final codebase must be available in `<source_directory>/` (typically the stabilized result)
+
+**Explicit Input/Output Structure:**
+- **INPUT**: `<source_directory>/` - Final codebase to document (READ-ONLY)
+- **OUTPUT**: `<documentation_directory>/` - Generated documentation structure
 
 ## Command
 
-### Execute - Codebase Documentation Generation
+### Execute - Documentation Generation
 
-The execute command generates comprehensive markdown documentation for the stabilized codebase. It reads the completed development artifacts, analyzes the final codebase structure, and creates user-friendly documentation for application developers.
-
-**Directory Usage:**
-- Reads stabilized code from: `<codebase_directory>/`
-- Reads development artifacts from: `<development_artifacts_directory>/`
-- Writes documentation to: `<documentation_directory>/`
+The execute command generates comprehensive markdown documentation:
+- Analyzes codebase structure and APIs
+- Creates user-friendly documentation for developers
+- Generates complete documentation structure
 
 ```bash
 @CODEBASE_DOCUMENTER execute \
-  /path/to/codebase-source \
-  /path/to/development-artifacts \
+  /path/to/final-codebase \
   /path/to/documentation-output \
   /path/to/codebase-documenter-template.md
 ```
@@ -42,45 +40,37 @@ The execute command generates comprehensive markdown documentation for the stabi
 
 ```bash
 @CODEBASE_DOCUMENTER execute \
-  /path/to/stabilized-codebase \
-  /path/to/development-artifacts \
+  /path/to/final-codebase \
   /path/to/documentation \
   /path/to/codebase-documenter-template.md
 
-# Reads: /path/to/stabilized-codebase/
-# Reads: /path/to/development-artifacts/
-# Creates: /path/to/documentation/
+# Reads: /path/to/final-codebase/ (primary documentation source)
+# Creates: /path/to/documentation/ (complete documentation structure)
 ```
 
 ## Documentation Generation Process
 
 ```text
-1. STABILIZER ARTIFACT ANALYSIS
-   - Read all STABILIZER/ session files and artifacts
-   - Extract integration decisions and API stabilization choices
-   - Identify final codebase architecture and patterns
-   - Gather performance optimization results
-   
-2. CODEBASE SOURCE DOCUMENTATION
-   - Analyze stabilized codebase source code
-   - Extract public APIs, protocols, and key abstractions
+1. FINAL CODEBASE ANALYSIS
+   - Analyze final codebase from `<source_directory>/`
+   - Extract public APIs, protocols, and key abstractions from final implementation
    - Document component relationships and dependencies
    - Identify usage patterns and architectural decisions
    
-3. DEVELOPMENT HISTORY SYNTHESIS
-   - Review provisioner foundational decisions from artifacts
-   - Summarize worker feature implementations from artifacts
-   - Document stabilizer integration and optimization work from artifacts
-   - Create narrative of codebase evolution
+2. CODEBASE DOCUMENTATION
+   - Analyze source code structure and organization
+   - Extract all public interfaces and APIs
+   - Identify core components and their relationships
+   - Document configuration and setup requirements
    
-4. DOCUMENTATION STRUCTURE GENERATION
-   - Create documentation in specified documentation directory
+3. DOCUMENTATION STRUCTURE GENERATION
+   - Create documentation in `<documentation_directory>/`
    - Generate README.md with codebase overview
    - Create API reference documentation
-   - Generate usage guides and examples
+   - Generate usage guides and examples based on final codebase
    - Document architectural decisions and patterns
    
-5. MARKDOWN DOCUMENTATION CREATION
+4. MARKDOWN DOCUMENTATION CREATION
    - Write comprehensive getting started guide
    - Document all public APIs with examples
    - Create architectural overview documentation
@@ -117,25 +107,11 @@ The documenter creates a complete documentation hierarchy:
 
 ## Documentation Content Focus
 
-### Application Developer Focus
-- **Getting Started**: Quick setup and basic usage
-- **API Reference**: Complete API documentation with examples
-- **Usage Patterns**: Common development scenarios
-- **Best Practices**: Recommended usage patterns
-- **Performance**: Guidelines for optimal performance
-
-### Codebase Understanding
-- **Architecture**: High-level codebase design
-- **Component Relationships**: How pieces fit together
-- **Design Decisions**: Why specific choices were made
-- **Extension Points**: How to extend the codebase
-- **Testing Strategy**: How to test applications using the codebase
-
-### Generated from Artifacts
-- **Development History**: Story of how codebase was built
-- **Stabilization Decisions**: Integration choices made by stabilizer
-- **Performance Results**: Optimization outcomes
-- **API Evolution**: How APIs were refined during development
+### Documentation Completion Gates
+- Structure: Complete documentation hierarchy created ✓
+- Content: All public APIs documented with examples ✓
+- Guides: Getting started and best practices included ✓
+- Quality: Documentation validated for completeness ✓
 
 ## Integration Points
 

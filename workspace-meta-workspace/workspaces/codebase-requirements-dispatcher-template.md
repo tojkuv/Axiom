@@ -47,7 +47,7 @@ This protocol MUST perform deep code content analysis, not superficial file/fold
 
 **Generated Outputs:**
 - **Codebase Purpose**: [Discovered codebase purpose from technical analysis]
-- **Worker Count**: [3-9 workers based on technical complexity and separable areas]
+- **Worker Count**: [2-8 workers based on technical complexity and separable areas]
 - **Total Requirements Generated**: [Count of all requirements across all workers]
 - **ARTIFACTS Structure**: [Complete folder hierarchy generated in ARTIFACTS/REQUIREMENTS/]
 - **Dispatch Date**: YYYY-MM-DD
@@ -152,7 +152,7 @@ FOUNDATIONAL_NEEDS = extract_infrastructure_needs_from_code(CODEBASE_PURPOSE, TE
 **1.2 Worker Allocation Calculation**
 ```bash
 SEPARABLE_AREAS = count_independent_technical_areas(TECHNICAL_AREAS)
-OPTIMAL_WORKERS = MIN(9, MAX(3, SEPARABLE_AREAS + 2))
+OPTIMAL_WORKERS = MIN(8, MAX(2, SEPARABLE_AREAS + 1))
 WORKER_ASSIGNMENTS = assign_areas_to_workers(TECHNICAL_AREAS, OPTIMAL_WORKERS)
 ```
 
@@ -173,11 +173,9 @@ create_requirements_structure(CODEBASE_DIRECTORY) {
     mkdir -p "${requirements_dir}/WORKER-03"
     
     # Create additional worker directories as needed
-    for worker_id in range(4, OPTIMAL_WORKERS-1):
+    for worker_id in range(4, OPTIMAL_WORKERS):
         mkdir -p "${requirements_dir}/WORKER-${worker_id:02d}"
     done
-    
-    mkdir -p "${requirements_dir}/STABILIZER"
     
     # Create coordination directory for execution management
     mkdir -p "${requirements_dir}/COORDINATION"
@@ -193,7 +191,7 @@ create_requirements_structure(CODEBASE_DIRECTORY) {
 - **WORKER-05 Requirements**: [Count] requirements for [Technical Area 5] → `${CODEBASE_DIRECTORY}/ARTIFACTS/REQUIREMENTS/WORKER-05/` (if needed)
 - **WORKER-06 Requirements**: [Count] requirements for [Technical Area 6] → `${CODEBASE_DIRECTORY}/ARTIFACTS/REQUIREMENTS/WORKER-06/` (if needed)
 - **WORKER-07 Requirements**: [Count] requirements for [Technical Area 7] → `${CODEBASE_DIRECTORY}/ARTIFACTS/REQUIREMENTS/WORKER-07/` (if needed)
-- **STABILIZER Requirements**: [Count] integration and validation requirements → `${CODEBASE_DIRECTORY}/ARTIFACTS/REQUIREMENTS/STABILIZER/`
+- **Note**: Stabilizer requirements are self-assessed during stabilization phase
 
 ### Phase 2: Complete Requirements Generation Matrix
 
@@ -301,54 +299,8 @@ WORKER_REQUIREMENTS_GENERATED = [
 ]
 ```
 
-**2.3 STABILIZER Requirements Generation (MANDATORY)**
-**Must generate ALL integration and validation requirements in ARTIFACTS STABILIZER folder:**
-
-```bash
-stabilizer_folder = "${CODEBASE_DIRECTORY}/ARTIFACTS/REQUIREMENTS/STABILIZER"
-
-# Analyze integration needs from actual code interfaces, dependencies, and technical findings
-cross_area_apis = analyze_cross_area_api_interactions(TECHNICAL_AREAS, APIS, DEPENDENCIES)
-integration_points = identify_integration_points_from_code(cross_area_apis, PATTERNS)
-validation_needs = extract_validation_requirements_from_code(CODEBASE_PURPOSE, CONTENT)
-consistency_requirements = identify_api_consistency_needs(APIS, PATTERNS)
-competitive_validation = extract_competitive_validation_needs(COMPETITIVE_POSITION)
-maturity_validation = extract_maturity_validation_needs(MATURITY_GAPS)
-
-FOR EACH integration_point IN integration_points:
-    # Generate integration requirement based on actual code analysis and technical findings
-    integration_details = analyze_integration_from_code(integration_point, cross_area_apis, CONTENT)
-    current_integration_state = find_existing_integration_code(integration_point, CODEBASE_DIRECTORY, CONTENT)
-    integration_gaps = identify_integration_gaps_from_code(integration_details, current_integration_state)
-    competitive_integration = extract_competitive_integration_benefits(integration_point, COMPETITIVE_POSITION)
-    
-    requirement_file = "${stabilizer_folder}/REQUIREMENTS-S-[ID]-[INTEGRATION_NAME].md"
-    CREATE requirement_file WITH {
-        purpose: integration_details.purpose,
-        current_state: current_integration_state,
-        integration_gaps: integration_gaps,
-        competitive_integration: competitive_integration,
-        api_coordination: analyze_api_coordination_needs(integration_point, cross_area_apis),
-        code_examples: extract_integration_code_snippets(integration_point, CONTENT),
-        validation_approach: derive_validation_approach_from_code(integration_point, PATTERNS),
-        maturity_advancement: extract_maturity_benefits(integration_point, MATURITY_GAPS)
-    }
-    ASSIGN TO STABILIZER
-    SET dependencies = WORKER_REQUIREMENTS_GENERATED
-    VALIDATE ensures_codebase_purpose_fulfillment_from_code()
-END FOR
-
-STABILIZER_REQUIREMENTS_GENERATED = [
-    ${CODEBASE_DIRECTORY}/ARTIFACTS/REQUIREMENTS/STABILIZER/REQUIREMENTS-S-001-API-CONSISTENCY.md
-    ${CODEBASE_DIRECTORY}/ARTIFACTS/REQUIREMENTS/STABILIZER/REQUIREMENTS-S-002-CROSS-AREA-INTEGRATION.md
-    ${CODEBASE_DIRECTORY}/ARTIFACTS/REQUIREMENTS/STABILIZER/REQUIREMENTS-S-003-PERFORMANCE-VALIDATION.md
-    ${CODEBASE_DIRECTORY}/ARTIFACTS/REQUIREMENTS/STABILIZER/REQUIREMENTS-S-004-PURPOSE-FULFILLMENT.md
-    ${CODEBASE_DIRECTORY}/ARTIFACTS/REQUIREMENTS/STABILIZER/REQUIREMENTS-S-005-FINAL-TESTING.md
-    ${CODEBASE_DIRECTORY}/ARTIFACTS/REQUIREMENTS/STABILIZER/REQUIREMENTS-S-006-COMPETITIVE-VALIDATION.md
-    ${CODEBASE_DIRECTORY}/ARTIFACTS/REQUIREMENTS/STABILIZER/REQUIREMENTS-S-007-MATURITY-VALIDATION.md
-    // Additional stabilization requirements based on integration analysis and technical findings
-]
-```
+**Note on Stabilizer Requirements:**
+Stabilizer requirements are no longer generated by the dispatcher. The stabilizer protocol now performs dynamic assessment and opportunity identification during the stabilization phase, adapting to the actual state of the codebase after parallel development completion.
 
 ### Phase 3: Requirements Distribution Validation
 
@@ -507,7 +459,6 @@ COVERAGE_MATRIX = {
     analysis_file_1: {
         finding_1: REQUIREMENTS-P-001,
         finding_2: REQUIREMENTS-W-01-003,
-        finding_3: REQUIREMENTS-S-002,
         // ALL findings must map to requirements
     },
     analysis_file_2: {
@@ -535,10 +486,7 @@ verify_worker_assignment_completeness() {
         assert worker_coverage.covers_all(area_requirements)
     done
     
-    # Check STABILIZER has complete integration coverage
-    integration_requirements = extract_integration_needs(ALL_WORKER_OUTPUTS)
-    stabilizer_coverage = map_requirements_to_integration(STABILIZER_REQUIREMENTS)
-    assert stabilizer_coverage.covers_all(integration_requirements)
+    # Note: Stabilizer integration coverage handled dynamically during stabilization phase
 }
 
 ## Complete Requirements Generation Output
@@ -582,16 +530,6 @@ ${CODEBASE_DIRECTORY}/
 │       │   └── [Additional requirements for Technical Area 3]
 │       │
 │       ├── [WORKER-04/ through WORKER-07/ as needed based on codebase complexity]
-│       │
-│       ├── STABILIZER/
-│       │   ├── REQUIREMENTS-S-001-API-CONSISTENCY.md
-│       │   ├── REQUIREMENTS-S-002-CROSS-AREA-INTEGRATION.md
-│       │   ├── REQUIREMENTS-S-003-PERFORMANCE-VALIDATION.md
-│       │   ├── REQUIREMENTS-S-004-PURPOSE-FULFILLMENT.md
-│       │   ├── REQUIREMENTS-S-005-FINAL-TESTING.md
-│       │   ├── REQUIREMENTS-S-006-COMPETITIVE-VALIDATION.md
-│       │   ├── REQUIREMENTS-S-007-MATURITY-VALIDATION.md
-│       │   └── [Additional integration requirements based on technical findings]
 │       │
 │       └── COORDINATION/
 │           ├── WORKER-ALLOCATION-SUMMARY.md
@@ -640,12 +578,12 @@ execute_codebase_requirements_dispatcher(
 - [ ] **WORKER-05 Requirements Generated**: Requirements for fifth area (if applicable)
 - [ ] **WORKER-06 Requirements Generated**: Requirements for sixth area (if applicable)
 - [ ] **WORKER-07 Requirements Generated**: Requirements for seventh area (if applicable)
-- [ ] **STABILIZER Requirements Generated**: ALL integration and validation requirements created
+- [ ] **Note**: Stabilizer requirements handled dynamically during stabilization phase
 
 ### Post-Generation Validation
 - [ ] **Coverage Matrix Complete**: Every analysis finding maps to a requirement
 - [ ] **No Missing Requirements**: All framework purpose needs addressed
-- [ ] **Dependency Chain Valid**: PROVISIONER → WORKERS → STABILIZER dependency flow correct
+- [ ] **Dependency Chain Valid**: PROVISIONER → WORKERS dependency flow correct
 - [ ] **Worker Load Balanced**: No worker overloaded, workload distributed appropriately
 - [ ] **Purpose Fulfillment Ensured**: Framework purpose fully achievable with generated requirements
 
@@ -656,7 +594,6 @@ execute_final_validation() {
     # Validate complete generation
     assert all_provisioner_requirements_exist()
     assert all_worker_requirements_exist_for_each_area()
-    assert all_stabilizer_requirements_exist()
     
     # Validate coverage
     assert all_analysis_findings_covered()
@@ -681,20 +618,20 @@ execute_final_validation() {
 1. **Comprehensive Code Content Reading**: Read ALL source files, APIs, dependencies, patterns, and configurations
 2. **Framework Purpose Discovery from Code**: Analyze what the code actually does, not just file structure
 3. **Implementation-Based Responsibility Areas**: Extract areas based on actual code clustering and API boundaries
-4. **Code-Driven Worker Optimization**: Calculate optimal workers (3-9) based on code complexity and separable implementations
+4. **Code-Driven Worker Optimization**: Calculate optimal workers (2-8) based on code complexity and separable implementations
 5. **Complete Requirements Generation from Code**: Generate ALL requirements based on actual code analysis evidence
 6. **Zero-Gap Code Validation**: Ensure every code analysis finding is addressed by requirements
 
 **Comprehensive Generation Protocol:**
 - **PROVISIONER**: ALL foundational infrastructure requirements (5+ requirements)
 - **WORKER-01 through WORKER-07**: ALL responsibility area requirements (varies by area)
-- **STABILIZER**: ALL integration and validation requirements (5+ requirements)
+- **Note**: Stabilizer requirements handled dynamically during stabilization phase
 
 **Critical Dispatcher Features:**
 - **Zero Missing Requirements**: Automated validation ensures complete coverage
 - **Purpose-Driven Allocation**: Workers assigned based on actual framework needs
 - **Load Balancing**: Workload distributed across workers optimally
-- **Dependency Validation**: Clear PROVISIONER → WORKERS → STABILIZER flow
+- **Dependency Validation**: Clear PROVISIONER → WORKERS flow
 - **Execution Readiness**: All requirements generated with clear worker assignments
 
 ## Dispatcher Validation Protocol
@@ -738,12 +675,12 @@ assert FRAMEWORK_PURPOSE_ACHIEVABLE(workspace_folder, codebase_folder)
 - [ ] **INPUT VALIDATION**: All three inputs (workspace folder, codebase folder, dispatcher template) validated
 - [ ] **CODEBASE ANALYSIS**: Framework purpose clearly identified from codebase_folder exploration
 - [ ] **RESPONSIBILITY MAPPING**: Responsibility areas mapped with natural boundaries from codebase_folder
-- [ ] **WORKER OPTIMIZATION**: Worker count optimized (3-9) based on separable areas discovered in codebase_folder
+- [ ] **WORKER OPTIMIZATION**: Worker count optimized (2-8) based on separable areas discovered in codebase_folder
 - [ ] **WORKSPACE STRUCTURE**: Complete worker folder structure created in workspace_folder
 - [ ] **PROVISIONER GENERATION**: ALL foundational requirements generated in workspace_folder/PROVISIONER/
 - [ ] **WORKER GENERATION**: ALL responsibility area requirements generated in workspace_folder/WORKER-XX/
-- [ ] **STABILIZER GENERATION**: ALL integration requirements generated in workspace_folder/STABILIZER/
 - [ ] **DOCUMENTATION GENERATION**: Framework analysis documentation generated in workspace_folder/DOCUMENTATION/
+- [ ] **Note**: Stabilizer requirements handled dynamically during stabilization phase
 - [ ] **ZERO GAPS**: Every codebase analysis finding addressed in workspace requirements
 - [ ] **DEPENDENCY VALIDATION**: Clear execution flow validated across workspace structure
 - [ ] **EXECUTION READINESS**: Complete workspace ready for parallel worker execution

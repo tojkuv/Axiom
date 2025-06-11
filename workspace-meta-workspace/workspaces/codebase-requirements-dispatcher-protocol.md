@@ -5,54 +5,88 @@ Comprehensive adaptive distribution protocol to transform technical analysis fin
 ## Protocol Activation
 
 ```text
-@CODEBASE_REQUIREMENTS_DISPATCHER execute <codebase_directory> <analyses_directory> <output_directory> <dispatcher_template>
+@CODEBASE_REQUIREMENTS_DISPATCHER execute <source_directory> <analyses_directory> <provisioner_directory> <workers_directory> <dispatcher_template>
 ```
 
 **Parameters:**
-- `<codebase_directory>`: Path to directory containing source code for analysis
-- `<analyses_directory>`: Path to directory containing analysis artifacts to integrate
-- `<output_directory>`: Path to directory where requirement folders will be created
+- `<source_directory>`: SOURCE/ directory containing codebase to analyze (READ-ONLY)
+- `<analyses_directory>`: Directory containing analysis artifacts to integrate (READ-ONLY)
+- `<provisioner_directory>`: PROVISIONER/ directory where provisioner requirements will be generated
+- `<workers_directory>`: WORKERS/ directory where worker structure and requirements will be generated
 - `<dispatcher_template>`: Requirements template for each generated artifact
+
+**Explicit Input/Output Structure:**
+- **INPUT**: `<source_directory>/` - Source codebase to analyze (READ-ONLY)
+- **INPUT**: `<analyses_directory>/` - Analysis artifacts to integrate (READ-ONLY)
+- **OUTPUT**: `<provisioner_directory>/ARTIFACTS/` - Generated provisioner requirements and development cycle
+- **OUTPUT**: `<workers_directory>/WORKER-XX/ARTIFACTS/` - Generated worker requirements and development cycles
+
+**Generated Requirements Structure:**
+```
+<provisioner_directory>/
+└── ARTIFACTS/                        # Generated provisioner requirements
+    ├── DEVELOPMENT-CYCLE-INDEX.md
+    └── REQUIREMENTS-P-*.md
+
+<workers_directory>/
+├── WORKER-01/
+│   └── ARTIFACTS/                    # Generated worker-01 requirements
+│       ├── DEVELOPMENT-CYCLE-INDEX.md
+│       └── REQUIREMENTS-W-01-*.md
+├── WORKER-02/
+│   └── ARTIFACTS/                    # Generated worker-02 requirements
+│       ├── DEVELOPMENT-CYCLE-INDEX.md
+│       └── REQUIREMENTS-W-02-*.md
+└── WORKER-XX/                        # Additional workers as needed
+    └── ARTIFACTS/                    # Generated worker-XX requirements
+        ├── DEVELOPMENT-CYCLE-INDEX.md
+        └── REQUIREMENTS-W-XX-*.md
+```
 
 **Adaptive Sequential and Parallel Distribution Model**: Runs once to extract ALL technical improvement opportunities from codebase analysis and existing artifacts, then distributes them across specialized worker folders based on technical impact and workload assessment.
 
 **Directory Integration:**
 - Reads analysis artifacts from: `<analyses_directory>/`
-- Reads source code from: `<codebase_directory>/`
-- Generates requirements in: `<output_directory>/`
-- Creates output directory structure as needed
+- Reads source code from: `<source_directory>/`
+- Generates provisioner requirements in: `<provisioner_directory>/ARTIFACTS/`
+- Generates worker structure and requirements in: `<workers_directory>/WORKER-XX/ARTIFACTS/`
+- Creates provisioner and worker directory structures as needed
 
 **Outputs Generated:**
-- 3-9 specialized requirement folders created in output directory (adapts to technical complexity):
-  - provisioner-directory/ (foundational requirements - executes first)
-  - worker-01-directory/ through worker-07-directory/ (parallel technical area requirements - execute in parallel)
-  - stabilizer-directory/ (integration requirements - executes last)
-  - coordination-directory/ (execution management and tracking)
-- Each folder contains: requirements addressing specific technical improvements from analysis
-- Each folder contains: independent development cycle coordination
+- Workspace-isolated requirement artifacts (adapts to technical complexity):
+  - `<provisioner_directory>/ARTIFACTS/` (foundational requirements - executes first)
+  - `<workers_directory>/WORKER-01/ARTIFACTS/` through `<workers_directory>/WORKER-XX/ARTIFACTS/` (parallel technical area requirements)
+  - Each worker artifacts folder contains: requirements addressing specific technical improvements from analysis
+  - Each worker artifacts folder contains: independent development cycle coordination
 - Execution order enforced: PROVISIONER → PARALLEL WORKERS → STABILIZER
+- Note: Stabilizer requirements are handled dynamically during stabilization phase
 
 **Workload-Adaptive Distribution**: Protocol determines optimal number of parallel workers (1-7) based on technical complexity and separable technical areas discovered through codebase analysis.
 
 ## Command
 
-### Execute - Comprehensive Requirements Distribution
+### Execute - Requirements Distribution
 
-The execute command transforms technical analysis insights into actionable requirements distributed across optimal worker allocation. It integrates deep codebase content analysis with existing technical assessments to create a complete requirements distribution for technical excellence advancement.
+The execute command transforms technical analysis insights into actionable requirements:
+- Analyzes codebase and integrates analysis findings
+- Distributes requirements across provisioner and workers
+- Creates optimal worker allocation based on technical complexity
 
 **Core Distribution Process:**
-1. **Deep Codebase Content Analysis**: Read ALL source files, APIs, dependencies, patterns
-2. **Analysis Integration**: Incorporate findings from analyses directory artifacts
+1. **Deep Codebase Content Analysis**: Read ALL source files from `<source_directory>/`, APIs, dependencies, patterns
+2. **Analysis Integration**: Incorporate findings from `<analyses_directory>/` artifacts
 3. **Technical Area Discovery**: Identify separable technical responsibility areas from code structure and analysis insights
-4. **Worker Optimization**: Calculate optimal worker count (3-9) based on technical complexity
-5. **Requirements Generation**: Create complete requirements for ALL workers in output directory
-6. **Coverage Validation**: Ensure zero gaps between analysis findings and generated requirements
+4. **Worker Optimization**: Calculate optimal worker count (2-8) based on technical complexity
+5. **Workspace Structure Creation**: Create `<provisioner_directory>/ARTIFACTS/` and `<workers_directory>/WORKER-XX/ARTIFACTS/` directories
+6. **Requirements Generation**: Create complete requirements for PROVISIONER and ALL workers
+7. **Coverage Validation**: Ensure zero gaps between analysis findings and generated requirements
 
 ```bash
 @CODEBASE_REQUIREMENTS_DISPATCHER execute \
-  /path/to/codebase-source \
+  /path/to/source-directory \
   /path/to/analyses-directory \
-  /path/to/output-directory \
+  /path/to/provisioner-directory \
+  /path/to/workers-directory \
   /path/to/codebase-requirements-dispatcher-template.md
 ```
 
@@ -62,10 +96,10 @@ The execute command transforms technical analysis insights into actionable requi
 
 **Codebase Content and Analysis Integration:**
 ```bash
-integrate_codebase_and_analysis(codebase_directory, analyses_directory) {
+integrate_codebase_and_analysis(source_directory, analyses_directory) {
     
-    # Deep codebase content analysis
-    SOURCE_FILES = find_all_source_files(codebase_directory)
+    # Deep codebase content analysis from source directory
+    SOURCE_FILES = find_all_source_files("${source_directory}/")
     for file in SOURCE_FILES:
         CONTENT[file] = read_file_content(file)
         APIS[file] = extract_public_apis(CONTENT[file])
@@ -126,26 +160,27 @@ discover_technical_areas(CONTENT, APIS, PATTERNS, TECHNICAL_FINDINGS) {
 
 # Optimal worker allocation based on separable technical areas
 SEPARABLE_AREAS = count_independent_technical_areas(TECHNICAL_AREAS)
-OPTIMAL_WORKERS = MIN(9, MAX(3, SEPARABLE_AREAS + 2)) # +2 for PROVISIONER and STABILIZER
+OPTIMAL_WORKERS = MIN(8, MAX(2, SEPARABLE_AREAS + 1)) # +1 for PROVISIONER
 WORKER_ASSIGNMENTS = assign_technical_areas_to_workers(TECHNICAL_AREAS, OPTIMAL_WORKERS)
 ```
 
-### Phase 3: Output Directory Structure Generation
+### Phase 3: Workspace Structure Generation
 
-**Requirements Directory Creation:**
+**Requirements Workspace Creation:**
 ```bash
-create_requirements_structure(output_directory, optimal_workers) {
+create_workspace_structure(provisioner_directory, workers_directory, optimal_workers) {
     
-    # Create output directory structure
-    mkdir -p "${output_directory}"
+    # Create provisioner artifacts directory
+    mkdir -p "${provisioner_directory}/ARTIFACTS"
     
-    # Create worker directories
-    mkdir -p "${output_directory}/provisioner-directory"
-    for worker_id in range(1, optimal_workers-1):
-        mkdir -p "${output_directory}/worker-${worker_id:02d}-directory"
+    # Create worker directories with artifacts folders
+    for worker_id in range(1, optimal_workers):
+        mkdir -p "${workers_directory}/WORKER-${worker_id:02d}/ARTIFACTS"
     done
-    mkdir -p "${output_directory}/stabilizer-directory"
-    mkdir -p "${output_directory}/coordination-directory"
+    
+    # Note: CODEBASE directories will be created by protocols during execution
+    # PROVISIONER/CODEBASE/ created by provisioner protocol
+    # WORKERS/WORKER-XX/CODEBASE/ created by worker protocols
 }
 ```
 
@@ -153,9 +188,9 @@ create_requirements_structure(output_directory, optimal_workers) {
 
 **PROVISIONER Requirements (Foundational Infrastructure):**
 ```bash
-generate_provisioner_requirements(output_directory, technical_areas, competitive_position, maturity_assessment) {
+generate_provisioner_requirements(provisioner_directory, technical_areas, competitive_position, maturity_assessment) {
     
-    provisioner_folder = "${output_directory}/provisioner-directory"
+    provisioner_artifacts = "${provisioner_directory}/ARTIFACTS"
     foundational_needs = extract_infrastructure_needs_from_code_and_analysis(
         CODEBASE_PURPOSE, TECHNICAL_AREAS, COMPETITIVE_POSITION, MATURITY_ASSESSMENT
     )
@@ -165,18 +200,22 @@ generate_provisioner_requirements(output_directory, technical_areas, competitive
             need, CONTENT, APIS, PATTERNS, TECHNICAL_FINDINGS
         )
         
-        requirement_file = "${provisioner_folder}/REQUIREMENTS-P-[ID]-[NEED_NAME].md"
+        requirement_file = "${provisioner_artifacts}/REQUIREMENTS-P-[ID]-[NEED_NAME].md"
         create_requirement_with_comprehensive_analysis(requirement_file, requirement_details)
     done
+    
+    # Generate provisioner development cycle index
+    cycle_index_file = "${provisioner_artifacts}/DEVELOPMENT-CYCLE-INDEX.md"
+    create_provisioner_cycle_index(cycle_index_file, foundational_needs)
 }
 ```
 
 **PARALLEL WORKER Requirements (Technical Area Specific):**
 ```bash
-generate_worker_requirements(output_directory, worker_assignments, technical_areas) {
+generate_worker_requirements(workers_directory, worker_assignments, technical_areas) {
     
     for worker in PARALLEL_WORKERS:
-        worker_folder = "${output_directory}/${worker}-directory"
+        worker_artifacts = "${workers_directory}/${worker}/ARTIFACTS"
         technical_area = WORKER_ASSIGNMENTS[worker]
         area_data = TECHNICAL_AREAS[technical_area]
         
@@ -194,42 +233,19 @@ generate_worker_requirements(output_directory, worker_assignments, technical_are
                 requirement, CONTENT, APIS, PATTERNS, TECHNICAL_FINDINGS
             )
             
-            requirement_file = "${worker_folder}/REQUIREMENTS-W-[WORKER_NUM]-[ID]-[REQ_NAME].md"
+            requirement_file = "${worker_artifacts}/REQUIREMENTS-W-[WORKER_NUM]-[ID]-[REQ_NAME].md"
             create_requirement_with_comprehensive_analysis(requirement_file, requirement_details)
         done
+        
+        # Generate worker development cycle index
+        cycle_index_file = "${worker_artifacts}/DEVELOPMENT-CYCLE-INDEX.md"
+        create_worker_cycle_index(cycle_index_file, area_requirements, technical_area)
     done
 }
 ```
 
-**STABILIZER Requirements (Integration and Validation):**
-```bash
-generate_stabilizer_requirements(output_directory, technical_areas, competitive_position, maturity_assessment) {
-    
-    stabilizer_folder = "${output_directory}/stabilizer-directory"
-    
-    # Integration requirements from cross-area analysis
-    integration_needs = identify_integration_requirements(TECHNICAL_AREAS, APIS, DEPENDENCIES)
-    
-    # Competitive validation requirements
-    competitive_validation = extract_competitive_validation_requirements(COMPETITIVE_POSITION)
-    
-    # Maturity validation requirements  
-    maturity_validation = extract_maturity_validation_requirements(MATURITY_ASSESSMENT)
-    
-    all_stabilizer_requirements = merge_stabilizer_requirements(
-        integration_needs, competitive_validation, maturity_validation
-    )
-    
-    for requirement in all_stabilizer_requirements:
-        requirement_details = analyze_stabilizer_requirement_comprehensively(
-            requirement, TECHNICAL_AREAS, COMPETITIVE_POSITION, MATURITY_ASSESSMENT
-        )
-        
-        requirement_file = "${stabilizer_folder}/REQUIREMENTS-S-[ID]-[REQ_NAME].md"
-        create_requirement_with_comprehensive_analysis(requirement_file, requirement_details)
-    done
-}
-```
+**Note on Stabilizer Requirements:**
+Stabilizer requirements are no longer generated by the dispatcher. The stabilizer protocol now performs dynamic assessment and opportunity identification during the stabilization phase, adapting to the actual state of the codebase after parallel development completion.
 
 ### Phase 5: Coverage Validation and Execution Readiness
 
@@ -248,7 +264,7 @@ validate_comprehensive_coverage(codebase_directory) {
         endif
     done
     
-    # Validate all code improvement opportunities are addressed
+    # Validate all code improvement opportunities are addressed by workers
     all_code_opportunities = extract_all_code_improvement_opportunities(CONTENT, APIS, PATTERNS)
     for opportunity in all_code_opportunities:
         addressing_requirement = find_requirement_addressing_opportunity(opportunity, all_generated_requirements)
@@ -257,7 +273,7 @@ validate_comprehensive_coverage(codebase_directory) {
         endif
     done
     
-    # Validate execution readiness
+    # Validate execution readiness for parallel workers
     validate_dependency_chains_complete(all_generated_requirements)
     validate_worker_load_balanced(WORKER_ASSIGNMENTS, all_generated_requirements)
     validate_technical_area_coverage_complete(TECHNICAL_AREAS, all_generated_requirements)
@@ -272,23 +288,11 @@ validate_comprehensive_coverage(codebase_directory) {
 - [ ] Technical responsibility areas discovered from actual code structure and analysis insights
 - [ ] Optimal worker allocation calculated based on separable technical complexity
 
-### Complete Requirements Coverage
-- [ ] ALL foundational infrastructure requirements generated in PROVISIONER/
-- [ ] ALL technical area requirements generated for each WORKER/
-- [ ] ALL integration and validation requirements generated in STABILIZER/
-- [ ] ALL technical findings and improvement opportunities addressed by requirements
-
-### ARTIFACTS Structure Integrity
-- [ ] Clean ARTIFACTS folder organization with ANALYSES/ and REQUIREMENTS/ separation
-- [ ] Complete worker folder structure generated in ARTIFACTS/REQUIREMENTS/
-- [ ] Coordination artifacts generated for execution management
-- [ ] No interference with source code or version control
-
-### Execution Readiness Validation
-- [ ] Zero gaps between analysis findings and generated requirements
-- [ ] Clear dependency chains: PROVISIONER → WORKERS → STABILIZER
-- [ ] Balanced workload distribution across parallel workers
-- [ ] Technical area coverage validated for completeness
+### Requirements Generation Completion Gates
+- Coverage: All analysis findings addressed by requirements ✓
+- Structure: Provisioner and worker directories created ✓
+- Distribution: Optimal workload allocation achieved ✓
+- Readiness: Clear execution dependencies established ✓
 
 ## Protocol Guarantees
 
@@ -300,9 +304,10 @@ validate_comprehensive_coverage(codebase_directory) {
 
 **Complete Requirements Coverage:**
 - Zero-gap coverage validation ensures no technical finding goes unaddressed
-- All code improvement opportunities translated into actionable requirements
+- All code improvement opportunities translated into actionable provisioner and worker requirements
 - Competitive advantages and maturity improvements integrated into requirements
-- Complete execution readiness with clear dependency management
+- Complete execution readiness: PROVISIONER → PARALLEL WORKERS → STABILIZER
+- Provisioner and worker structures properly organized for protocol consumption
 
 **EXPLICITLY EXCLUDED FROM REQUIREMENTS GENERATION (MVP FOCUS):**
 - Version control integration (requirements focus on current codebase state)
@@ -320,8 +325,15 @@ validate_comprehensive_coverage(codebase_directory) {
 - Documentation versioning (document current state only)
 - Rollback procedures (no rollback concerns for MVP)
 
-**Clean ARTIFACTS Management:**
-- All generated artifacts contained within ARTIFACTS folder structure
+**Clean Directory Management:**
+- All generated provisioner artifacts contained within provisioner directory structure
+- All generated worker artifacts contained within workers directory structure
 - Clear separation between analysis inputs and requirements outputs
 - No impact on source code organization
-- Scalable structure supports additional analysis and requirements cycles
+- Scalable structure supports additional requirements cycles
+
+**Explicit Directory Usage:**
+- `<source_directory>/`: Source codebase (READ-ONLY, analyzed for technical areas)
+- `<analyses_directory>/`: Analysis artifacts (READ-ONLY, integrated for requirements)
+- `<provisioner_directory>/ARTIFACTS/`: Generated provisioner requirements and development cycle
+- `<workers_directory>/WORKER-XX/ARTIFACTS/`: Generated worker requirements and development cycles
