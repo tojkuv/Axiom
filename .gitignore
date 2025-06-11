@@ -78,6 +78,8 @@ SharedPrecompiledHeaders/
 .build
 **/.build/
 **/.build
+.build-*
+**/.build-*
 Package.resolved
 .package.resolved
 
