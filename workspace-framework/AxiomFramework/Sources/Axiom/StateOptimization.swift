@@ -242,7 +242,7 @@ extension Client where StateType: DiffableState {
 
 extension AxiomError {
     /// Create error with context
-    public static func withContext(_ context: String, _ error: Error) -> AxiomError {
+    public static func withContext(_ context: String, _ error: any Error) -> AxiomError {
         if let axiomError = error as? AxiomError {
             return axiomError
         } else {

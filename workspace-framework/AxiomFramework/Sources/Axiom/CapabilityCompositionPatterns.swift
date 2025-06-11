@@ -34,7 +34,7 @@ public protocol CapabilityDependency: Sendable {
 }
 
 /// Types of capability dependencies
-public enum CapabilityDependencyType: String, Codable, CaseIterable {
+public enum CapabilityDependencyType: String, Codable, CaseIterable, Sendable {
     case required       // Must be available before this capability can initialize
     case optional       // Enhances functionality but not required
     case exclusive      // Cannot coexist with this capability
@@ -179,12 +179,13 @@ public actor DefaultAggregatedCapability: AggregatedCapability {
     public typealias ConfigurationType = AggregatedConfiguration
     public typealias ResourceType = AggregatedResource
     
-    private var capabilities: [String: any DomainCapability] = [:]
+    public var capabilities: [String: any DomainCapability] = [:]
     private var _configuration: AggregatedConfiguration
     private var _resources: AggregatedResource
     private var _environment: CapabilityEnvironment
     private var _state: CapabilityState = .unknown
     private var orchestrationStrategy: OrchestrationStrategy
+    private var _activationTimeout: Duration = .milliseconds(10)
     
     public init(
         configuration: AggregatedConfiguration,
@@ -257,6 +258,14 @@ public actor DefaultAggregatedCapability: AggregatedCapability {
         }
     }
     
+    public var activationTimeout: Duration {
+        get async { _activationTimeout }
+    }
+    
+    public func setActivationTimeout(_ timeout: Duration) async {
+        _activationTimeout = timeout
+    }
+    
     // MARK: - Capability Protocol
     
     public var isAvailable: Bool {
@@ -296,7 +305,7 @@ public actor DefaultAggregatedCapability: AggregatedCapability {
     
     // MARK: - Aggregation Methods
     
-    public func addCapability<T: DomainCapability>(_ capability: T, withId id: String) async throws {
+    public func addCapability(_ capability: any DomainCapability, withId id: String) async throws {
         guard !capabilities.keys.contains(id) else {
             throw CapabilityError.initializationFailed("Capability with id '\(id)' already exists")
         }
@@ -424,7 +433,7 @@ public struct AggregatedConfiguration: CapabilityConfiguration {
 }
 
 /// Failure strategies for aggregated capabilities
-public enum FailureStrategy: String, Codable {
+public enum FailureStrategy: String, Codable, Sendable {
     case failFast      // Stop on first failure
     case continueOnError // Continue with available capabilities
     case retryFailed   // Retry failed capabilities
@@ -494,7 +503,7 @@ public actor AggregatedResource: CapabilityResource {
 // MARK: - Configuration and Environment Patterns
 
 /// Environment-aware capability that adapts to different configurations
-public actor AdaptiveCapability<BaseCapability: DomainCapability>: DomainCapability {
+public actor AdaptiveCapabilityActor<BaseCapability: DomainCapability>: DomainCapability {
     public typealias ConfigurationType = AdaptiveConfiguration<BaseCapability.ConfigurationType>
     public typealias ResourceType = BaseCapability.ResourceType
     
@@ -502,6 +511,7 @@ public actor AdaptiveCapability<BaseCapability: DomainCapability>: DomainCapabil
     private var _configuration: AdaptiveConfiguration<BaseCapability.ConfigurationType>
     private var _environment: CapabilityEnvironment
     private var configurationUpdater: Task<Void, Never>?
+    private var _activationTimeout: Duration = .milliseconds(10)
     
     public init(
         baseCapability: BaseCapability,
@@ -560,6 +570,14 @@ public actor AdaptiveCapability<BaseCapability: DomainCapability>: DomainCapabil
     
     public func requestPermission() async throws {
         try await baseCapability.requestPermission()
+    }
+    
+    public var activationTimeout: Duration {
+        get async { _activationTimeout }
+    }
+    
+    public func setActivationTimeout(_ timeout: Duration) async {
+        _activationTimeout = timeout
     }
     
     // MARK: - Capability Protocol
@@ -845,26 +863,26 @@ public enum SDKLifecycleEvent {
 
 /// Callback bridge for converting callback-based APIs to async/await
 public actor CallbackBridge<ResultType> {
-    private var continuations: [String: CheckedContinuation<ResultType, Error>] = [:]
+    private var continuations: [String: CheckedContinuation<ResultType, any Error>] = [:]
     
     /// Start an async operation with a callback
-    public func performAsync<T>(
-        operation: (@escaping (Result<T, Error>) -> Void) -> Void
-    ) async throws -> T where T == ResultType {
+    public func performAsync(
+        operation: (@escaping (Result<ResultType, any Error>) -> Void) -> Void
+    ) async throws -> ResultType {
         let id = UUID().uuidString
         
         return try await withCheckedThrowingContinuation { continuation in
-            continuations[id] = continuation as? CheckedContinuation<ResultType, Error>
+            continuations[id] = continuation as? CheckedContinuation<ResultType, any Error>
             
             operation { result in
                 Task {
-                    await self.complete(id: id, result: result as! Result<ResultType, Error>)
+                    await self.complete(id: id, result: result as! Result<ResultType, any Error>)
                 }
             }
         }
     }
     
-    private func complete(id: String, result: Result<ResultType, Error>) {
+    private func complete(id: String, result: Result<ResultType, any Error>) {
         guard let continuation = continuations.removeValue(forKey: id) else { return }
         
         switch result {

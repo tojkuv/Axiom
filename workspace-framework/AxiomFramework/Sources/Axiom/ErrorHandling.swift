@@ -284,6 +284,7 @@ public enum ActorError: Error, Codable, Equatable {
 public enum CapabilityError: Error, Codable, Equatable {
     case initializationFailed(String)
     case resourceAllocationFailed(String)
+    case resourceUnavailable(String)
     case invalidStateTransition(String)
     case notAvailable(String)
     case restricted(String)
@@ -295,6 +296,8 @@ public enum CapabilityError: Error, Codable, Equatable {
             return "Capability initialization failed: \(reason)"
         case .resourceAllocationFailed(let reason):
             return "Resource allocation failed: \(reason)"
+        case .resourceUnavailable(let reason):
+            return "Resource unavailable: \(reason)"
         case .invalidStateTransition(let details):
             return "Invalid state transition: \(details)"
         case .notAvailable(let capability):

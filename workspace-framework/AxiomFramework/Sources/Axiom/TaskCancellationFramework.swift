@@ -819,28 +819,7 @@ public actor CancellationMetrics {
 
 // MARK: - Performance Alert System
 
-public struct PerformanceAlert {
-    public enum AlertType {
-        case slowCancellation
-        case highHandlerLatency
-        case acknowledgmentTimeout
-        case memoryThreshold
-    }
-    
-    public let type: AlertType
-    public let duration: TimeInterval
-    public let threshold: TimeInterval
-    public let timestamp: CFAbsoluteTime
-    public let details: String
-    
-    public init(type: AlertType, duration: TimeInterval, threshold: TimeInterval, timestamp: CFAbsoluteTime, details: String = "") {
-        self.type = type
-        self.duration = duration
-        self.threshold = threshold
-        self.timestamp = timestamp
-        self.details = details
-    }
-}
+// PerformanceAlert is defined in PerformanceMonitoring.swift - using unified definition
 
 // MARK: - Supporting Types
 

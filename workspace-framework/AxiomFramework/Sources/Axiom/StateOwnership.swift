@@ -336,7 +336,7 @@ public actor StateLifecycleManager<S: State> {
     }
     
     /// Add observer for lifecycle events (weak reference to prevent cycles)
-    public func addObserver(_ observer: LifecycleObserver) {
+    public func addObserver(_ observer: any LifecycleObserver) {
         observers.append(WeakObserver(observer))
         cleanupObservers()
     }

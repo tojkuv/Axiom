@@ -9,6 +9,7 @@ public actor TraditionalNetworkCapability: ExtendedCapability {
     // State management
     private var _state: CapabilityState = .unknown
     private var stateStreamContinuation: AsyncStream<CapabilityState>.Continuation?
+    private var _activationTimeout: Duration = .milliseconds(10)
     
     // Configuration
     private let configuration: NetworkConfiguration
@@ -83,6 +84,14 @@ public actor TraditionalNetworkCapability: ExtendedCapability {
         // Network doesn't require permission
     }
     
+    public var activationTimeout: Duration {
+        get async { _activationTimeout }
+    }
+    
+    public func setActivationTimeout(_ timeout: Duration) async {
+        _activationTimeout = timeout
+    }
+    
     // MARK: - State Management
     
     private func transitionTo(_ newState: CapabilityState) async {
@@ -117,6 +126,7 @@ public actor TraditionalNetworkCapability: ExtendedCapability {
 // Note: Not using @Capability macro due to custom activate/deactivate needs
 public actor ModernNetworkCapability {
     private var _state: CapabilityState = .unknown
+    private var _activationTimeout: Duration = .milliseconds(10)
     private var session: URLSession?
     
     public func fetchData(from url: URL) async throws -> Data {
@@ -164,6 +174,14 @@ extension ModernNetworkCapability: ExtendedCapability {
     
     public func requestPermission() async throws {
         // Network doesn't require permissions
+    }
+    
+    public var activationTimeout: Duration {
+        get async { _activationTimeout }
+    }
+    
+    public func setActivationTimeout(_ timeout: Duration) async {
+        _activationTimeout = timeout
     }
 }
 

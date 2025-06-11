@@ -688,7 +688,7 @@ public struct TimeoutError: Error {
 }
 
 /// Execute with timeout
-public func withTimeout<T>(
+public func withTimeout<T: Sendable>(
     _ timeout: Duration,
     operation: @escaping () async throws -> T
 ) async throws -> T {
@@ -754,9 +754,9 @@ public func withCoordinatedTaskGroup<T>(
 
 // MARK: - Extensions for Task Groups
 
-extension TaskGroup {
+extension ThrowingTaskGroup {
     /// Execute with concurrency limit
-    public func mapWithLimit<T, R>(
+    public mutating func mapWithLimit<T, R>(
         _ items: [T],
         maxConcurrency: Int,
         transform: @escaping @Sendable (T) async throws -> R

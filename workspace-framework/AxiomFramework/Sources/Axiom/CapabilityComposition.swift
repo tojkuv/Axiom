@@ -163,120 +163,7 @@ public actor CapabilityDependencyResolver {
 
 // MARK: - Resource Pool Management
 
-/// Manages shared resources across capabilities
-public actor CapabilityResourcePool {
-    private var resources: [String: any CapabilityResource] = [:]
-    private var allocations: [String: [AllocationRecord]] = [:]
-    private var reservations: [String: [ReservationRecord]] = [:]
-    
-    private struct AllocationRecord {
-        let capabilityId: String
-        let priority: CapabilityResourcePriority
-        let timestamp: Date
-    }
-    
-    private struct ReservationRecord {
-        let capabilityId: String
-        let priority: CapabilityResourcePriority
-        let expiresAt: Date
-    }
-    
-    public init() {}
-    
-    /// Register a resource with the pool
-    public func registerResource<T: CapabilityResource>(_ resource: T, withId id: String) async {
-        resources[id] = resource
-        allocations[id] = []
-        reservations[id] = []
-    }
-    
-    /// Request a resource for a capability
-    public func requestResource(
-        resourceId: String,
-        capabilityId: String,
-        priority: CapabilityResourcePriority
-    ) async throws {
-        guard let resource = resources[resourceId] else {
-            throw CapabilityError.resourceUnavailable("Resource \(resourceId) not found")
-        }
-        
-        // Check if resource is available
-        let isAvailable = await resource.isAvailable
-        
-        // Get current allocations
-        var currentAllocations = allocations[resourceId] ?? []
-        
-        // If resource is limited and not available, check if we can preempt
-        if !isAvailable && !currentAllocations.isEmpty {
-            // Find lowest priority allocation
-            let lowestPriority = currentAllocations.min { $0.priority < $1.priority }
-            
-            // Can only preempt if new request has higher priority
-            if let lowest = lowestPriority, priority > lowest.priority {
-                // Preempt the lowest priority allocation
-                currentAllocations.removeAll { $0.capabilityId == lowest.capabilityId }
-                await resource.release()
-            } else {
-                throw CapabilityError.resourceUnavailable("Resource \(resourceId) not available")
-            }
-        }
-        
-        // Allocate resource
-        try await resource.allocate()
-        
-        // Record allocation
-        currentAllocations.append(AllocationRecord(
-            capabilityId: capabilityId,
-            priority: priority,
-            timestamp: Date()
-        ))
-        allocations[resourceId] = currentAllocations
-    }
-    
-    /// Release a resource
-    public func releaseResource(resourceId: String, capabilityId: String) async {
-        guard let resource = resources[resourceId] else {
-            return
-        }
-        
-        // Remove allocation record
-        var currentAllocations = allocations[resourceId] ?? []
-        let hadAllocation = currentAllocations.contains { $0.capabilityId == capabilityId }
-        currentAllocations.removeAll { $0.capabilityId == capabilityId }
-        allocations[resourceId] = currentAllocations
-        
-        // Release resource if we had an allocation
-        if hadAllocation {
-            await resource.release()
-        }
-    }
-    
-    /// Reserve a resource for future use
-    public func reserveResource(
-        resourceId: String,
-        capabilityId: String,
-        duration: TimeInterval
-    ) async throws {
-        guard resources[resourceId] != nil else {
-            throw CapabilityError.resourceUnavailable("Resource \(resourceId) not found")
-        }
-        
-        // Add reservation
-        var currentReservations = reservations[resourceId] ?? []
-        currentReservations.append(ReservationRecord(
-            capabilityId: capabilityId,
-            priority: .medium,
-            expiresAt: Date().addingTimeInterval(duration)
-        ))
-        reservations[resourceId] = currentReservations
-    }
-    
-    /// Check if a resource is allocated to a capability
-    public func isResourceAllocated(resourceId: String, to capabilityId: String) async -> Bool {
-        let currentAllocations = allocations[resourceId] ?? []
-        return currentAllocations.contains { $0.capabilityId == capabilityId }
-    }
-}
+// CapabilityResourcePool is defined in CapabilityCompositionPatterns.swift
 
 // MARK: - Capability Hierarchy Protocol
 
@@ -334,10 +221,8 @@ public struct CapabilityCriteria {
     }
     
     public func matches<T: DomainCapability>(_ capability: T) async -> Bool {
-        // Check type
-        if let type = type, capability.capabilityType != type {
-            return false
-        }
+        // Note: Type checking removed as capabilityType property doesn't exist on DomainCapability
+        // TODO: Add capabilityType property to protocol hierarchy if type-based filtering is needed
         
         // Check state
         if let state = state, await capability.state != state {

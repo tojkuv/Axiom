@@ -17,7 +17,7 @@ public struct OptimizedCOWContainer<Value> {
     
     /// Optimized access with metrics
     public var value: Value {
-        get {
+        mutating get {
             metrics.recordRead()
             return storage.value
         }
@@ -35,7 +35,7 @@ public struct OptimizedCOWContainer<Value> {
     @discardableResult
     public mutating func batchMutate<T>(
         _ mutations: [(inout Value) throws -> T]
-    ) rethrows -> [T] {
+    ) throws -> [T] {
         if !isKnownUniquelyReferenced(&storage) {
             storage = storage.copy()
         }
@@ -71,7 +71,7 @@ final class OptimizedCOWStorage<Value> {
 }
 
 /// COW optimization strategies
-public enum COWOptimizer {
+public enum COWOptimizer: Sendable {
     case automatic
     case lazyClone
     case eagerClone
@@ -162,18 +162,18 @@ public enum PerformanceTarget {
 enum BatchingDecision {
     case immediate
     case batch(delay: TimeInterval)
-    case defer
+    case deferred
 }
 
 /// Adaptive batch coordinator for intelligent update batching
 public actor AdaptiveBatchCoordinator<S: State> {
     private let predictor: UpdatePredictor
-    private let priorityQueue: PriorityQueue<BatchedUpdate<S>>
+    private var priorityQueue: PriorityQueue<BatchedUpdate<S>>
     private var currentBatch: UpdateBatch<S>?
     private let performanceTarget: PerformanceTarget
     private var currentState: S
     
-    public init(initialState: S = S.init(), target: PerformanceTarget = .fps60) {
+    public init(initialState: S, target: PerformanceTarget = .fps60) {
         self.currentState = initialState
         self.predictor = UpdatePredictor()
         self.priorityQueue = PriorityQueue { $0.priority > $1.priority }
@@ -193,7 +193,7 @@ public actor AdaptiveBatchCoordinator<S: State> {
             await executeImmediate(update)
         case .batch(let delay):
             await addToBatch(update, priority: priority, delay: delay)
-        case .defer:
+        case .deferred:
             priorityQueue.insert(BatchedUpdate(update: update, priority: priority, deadline: deadline))
         }
     }
@@ -246,7 +246,7 @@ public actor AdaptiveBatchCoordinator<S: State> {
         }
         
         // Low frequency - execute immediately
-        return updateRate < 10 ? .immediate : .defer
+        return updateRate < 10 ? .immediate : .deferred
     }
     
     private func isDeadlineNear(_ deadline: Date?) -> Bool {
@@ -379,7 +379,7 @@ public struct PriorityQueue<Element> {
 // MARK: - Memory-Efficient Storage (REQUIREMENTS-W-01-004)
 
 /// Compression levels for state storage
-public enum CompressionLevel {
+public enum CompressionLevel: Sendable {
     case none
     case fast
     case balanced
@@ -405,7 +405,7 @@ public enum CachePolicy {
 }
 
 /// Compressed state storage for memory efficiency
-public actor CompressedStateStorage<S: State> {
+public actor CompressedStateStorage<S: State & Codable> {
     private var compressed: Data?
     private var cache: S?
     private let compressionLevel: CompressionLevel
@@ -430,7 +430,11 @@ public actor CompressedStateStorage<S: State> {
             }
             
             guard let compressed = compressed else {
-                throw AxiomError.stateError(.corruptedState(type: String(describing: S.self)))
+                throw AxiomError.validationError(.ruleFailed(
+                    field: "compressed_state", 
+                    rule: "data_integrity", 
+                    reason: "Failed to decompress state for type \(String(describing: S.self))"
+                ))
             }
             
             let decompressed = try await decompress(compressed, to: S.self)
@@ -596,7 +600,7 @@ public struct PerformanceMetrics {
 }
 
 /// Alert thresholds configuration
-public struct AlertThresholds {
+public struct AlertThresholds: Sendable {
     let maxOperationDuration: TimeInterval
     let maxMemoryGrowth: Int
     
@@ -606,15 +610,10 @@ public struct AlertThresholds {
     )
 }
 
-/// Performance alerts
-public enum PerformanceAlert {
-    case slowOperation(count: Int)
-    case excessiveMemoryGrowth(bytes: Int)
-    case highUpdateFrequency(rate: Double)
-}
+// PerformanceAlert is defined in PerformanceMonitoring.swift - using unified definition
 
 /// Optimization suggestions
-public enum OptimizationSuggestion: Equatable {
+public enum OptimizationSuggestion: Equatable, Sendable {
     case enableBatching(threshold: Double)
     case enableCompression(level: CompressionLevel)
     case optimizeCOW(strategy: COWOptimizer)
@@ -695,10 +694,10 @@ public actor StatePerformanceMonitor {
 }
 
 /// Optimization engine for pattern analysis
-public struct OptimizationEngine {
+public actor OptimizationEngine {
     private var recommendations: [OptimizationSuggestion] = []
     
-    public mutating func analyze(_ metrics: PerformanceMetrics) async -> OptimizationSuggestion? {
+    public func analyze(_ metrics: PerformanceMetrics) async -> OptimizationSuggestion? {
         // Analyze patterns
         let patterns = detectPatterns(in: metrics)
         

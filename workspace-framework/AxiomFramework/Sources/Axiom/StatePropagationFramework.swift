@@ -619,12 +619,7 @@ internal actor AlertingService {
     }
 }
 
-/// Performance alerts
-public enum PerformanceAlert {
-    case slaViolation(streamId: UUID, latency: TimeInterval, timestamp: Date)
-    case highObserverCount(streamId: UUID, count: Int)
-    case backpressureDetected(streamId: UUID)
-}
+// PerformanceAlert is defined in PerformanceMonitoring.swift - using unified definition
 
 /// Adaptive optimizer for performance
 internal actor AdaptiveOptimizer {
@@ -670,12 +665,7 @@ internal actor PropagationOptimizer {
 }
 
 /// Performance monitor
-internal actor PerformanceMonitor {
-    func recordSLAViolation(streamId: UUID, latency: TimeInterval) async {
-        // Record SLA violation for monitoring
-        print("SLA Violation: Stream \(streamId) took \(latency * 1000)ms")
-    }
-}
+// PerformanceMonitor is defined in PerformanceMonitoring.swift - using unified definition
 
 // MARK: - TaskGroup Extensions
 

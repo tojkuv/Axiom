@@ -73,6 +73,14 @@ public struct NetworkConfiguration: CapabilityConfiguration {
         )
     }
     
+    public static let `default` = NetworkConfiguration(
+        baseURL: URL(string: "https://api.example.com")!,
+        timeout: 15.0,
+        maxRetries: 3,
+        enableLogging: false,
+        sslPinningEnabled: true
+    )
+    
     public func adjusted(for environment: CapabilityEnvironment) -> NetworkConfiguration {
         switch environment {
         case .development:

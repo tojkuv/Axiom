@@ -1081,16 +1081,7 @@ public struct ActorIsolationInfo {
 
 // MARK: - Client Isolation Enforcement (W-02-005)
 
-/// Enhanced client identifier for client isolation enforcement
-public struct ClientIdentifier: Hashable, Sendable {
-    public let id: String
-    public let type: String
-    
-    public init(_ id: String, type: String) {
-        self.id = id
-        self.type = type
-    }
-}
+// ClientIdentifier is defined in Client.swift to avoid duplication
 
 /// Isolated client protocol with enforcement (distinct from IsolatedActor)
 public protocol IsolatedClient: Actor {
@@ -1331,10 +1322,7 @@ public enum TestError: Error {
     case isolationNotEnforced
 }
 
-/// Client isolation validator for enforcing isolation rules
-public struct ClientIsolationValidator: Sendable {
-    public init() {}
-}
+// ClientIsolationValidator is defined in ClientIsolation.swift to avoid duplication
 
 /// Property wrapper that prevents cross-client dependencies
 @propertyWrapper
@@ -1443,8 +1431,7 @@ public protocol StateValidator {
 
 // MARK: - Type Aliases for Test Compatibility
 
-/// Type alias for test compatibility
-public typealias IsolationEnforcer = ClientIsolationEnforcer
+// IsolationEnforcer actor is defined above - removed typealias to avoid conflict
 
 /// Type alias for test compatibility
 public typealias IsolatedCommunicationRouter = ClientIsolatedCommunicationRouter

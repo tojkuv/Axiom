@@ -186,16 +186,16 @@ public final class LazyContext<C: Context>: ObservableObject {
 public protocol ListItemContext: ManagedContext {
     associatedtype Item: Identifiable
     var item: Item { get }
-    init(item: Item, parent: Context?)
+    init(item: Item, parent: (any Context)?)
 }
 
 /// Helper for managing list contexts
 @MainActor
 public struct ListContextManager<Item: Identifiable, C: ListItemContext> where C.Item == Item {
     private let provider: ContextProvider
-    private let parent: Context?
+    private let parent: (any Context)?
     
-    public init(provider: ContextProvider, parent: Context?) {
+    public init(provider: ContextProvider, parent: (any Context)?) {
         self.provider = provider
         self.parent = parent
     }
@@ -273,6 +273,6 @@ public func assertNoContextLeaks<T>(
 private class TestLeakContext: ObservableContext, ManagedContext {
     nonisolated let id: AnyHashable = "test-leak"
     
-    func attached() {}
-    func detached() {}
+    @MainActor func attached() {}
+    @MainActor func detached() {}
 }

@@ -29,7 +29,7 @@ public enum ResourceType: String, Sendable {
 }
 
 /// Deadlock cycle information
-public struct DeadlockCycle {
+public struct DeadlockCycle: Sendable {
     public let actors: [ActorIdentifier]
     public let resources: [ResourceIdentifier]
     
@@ -258,7 +258,7 @@ public actor DeadlockPreventionCoordinator {
         if let currentOwner = resourceOwnership[resource] {
             if currentOwner != actor {
                 // Resource is owned by another actor - wait or fail
-                throw DeadlockError.timeout(.milliseconds(100))
+                throw DeadlockError.timeout(Duration.milliseconds(100))
             }
         }
         

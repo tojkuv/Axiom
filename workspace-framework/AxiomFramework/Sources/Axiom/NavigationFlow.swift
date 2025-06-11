@@ -99,7 +99,7 @@ public struct FlowValidation {
 // MARK: - Flow State Management
 
 @propertyWrapper
-public struct FlowState<Value> {
+public struct FlowStateWrapper<Value>: Sendable where Value: Sendable {
     private let key: String
     private let storage: FlowStorage
     private let initialValue: Value
@@ -123,7 +123,7 @@ public struct FlowState<Value> {
     }
 }
 
-public class FlowStorage {
+public class FlowStorage: @unchecked Sendable {
     private var storage: [String: Any] = [:]
     
     public init() {}
@@ -354,7 +354,7 @@ public final class FlowCoordinator<Flow: NavigationFlow>: ObservableObject {
 /// Enhanced NavigationFlow protocol for business logic flows
 public protocol BusinessNavigationFlow {
     var identifier: String { get }
-    var steps: [BusinessFlowStep] { get }
+    var steps: [any BusinessFlowStep] { get }
     var metadata: FlowMetadata { get }
 }
 
@@ -366,7 +366,7 @@ public protocol BusinessFlowStep {
     var order: Int { get }
     var route: (any TypeSafeRoute)? { get }
     
-    func validate(data: FlowData) -> ValidationResult
+    func validate(data: FlowData) -> FlowValidationResult
     func onEnter(data: FlowData) async
     func onExit(data: FlowData) async throws
 }
@@ -392,15 +392,25 @@ public struct FlowMetadata: Equatable {
 }
 
 /// Flow state enumeration
-public enum FlowState: Equatable {
-    case notStarted
-    case inProgress
-    case completed
-    case cancelled
+public enum FlowState: String, CaseIterable, Sendable, Equatable {
+    case notStarted = "not_started"
+    case inProgress = "in_progress"
+    case completed = "completed"
+    case cancelled = "cancelled"
+    case failed = "failed"
+    
+    public var isActive: Bool {
+        switch self {
+        case .inProgress:
+            return true
+        case .notStarted, .completed, .cancelled, .failed:
+            return false
+        }
+    }
 }
 
 /// Validation result for flow steps
-public enum ValidationResult: Equatable {
+public enum FlowValidationResult: Equatable {
     case success
     case failure(message: String)
 }
@@ -415,7 +425,7 @@ public enum FlowError: Error, Equatable {
 
 /// Flow data container for state management
 public class FlowData {
-    private var data: [String: Any] = [:]
+    internal var data: [String: Any] = [:]
     
     public init() {}
     
@@ -472,13 +482,13 @@ public class FlowData {
 /// Enhanced flow coordinator for business logic flows
 @MainActor
 public class BusinessFlowCoordinator: ObservableObject {
-    public let flow: BusinessNavigationFlow
+    public let flow: any BusinessNavigationFlow
     public let flowData: FlowData
     
     @Published public private(set) var currentStepIndex: Int = -1
     @Published public private(set) var flowState: FlowState = .notStarted
     
-    public var currentStep: BusinessFlowStep? {
+    public var currentStep: (any BusinessFlowStep)? {
         guard currentStepIndex >= 0 && currentStepIndex < flow.steps.count else {
             return nil
         }
@@ -493,7 +503,7 @@ public class BusinessFlowCoordinator: ObservableObject {
         return max(0.0, Double(currentStepIndex + 1) / Double(flow.steps.count))
     }
     
-    public init(flow: BusinessNavigationFlow) {
+    public init(flow: any BusinessNavigationFlow) {
         self.flow = flow
         self.flowData = FlowData()
     }
@@ -562,13 +572,13 @@ public class BusinessFlowCoordinator: ObservableObject {
 
 extension NavigationService {
     /// Current active business flow
-    public var currentFlow: BusinessNavigationFlow? {
+    public var currentFlow: (any BusinessNavigationFlow)? {
         // This will be enhanced in future iterations
         return nil
     }
     
     /// Start a business navigation flow
-    public func startFlow(_ flow: BusinessNavigationFlow) async -> Result<Void, AxiomError> {
+    public func startFlow(_ flow: any BusinessNavigationFlow) async -> Result<Void, AxiomError> {
         // Enhanced implementation for business flows
         return await withErrorContext("NavigationService.startBusinessFlow") {
             let coordinator = BusinessFlowCoordinator(flow: flow)
@@ -582,7 +592,7 @@ extension NavigationService {
     }
     
     /// Complete the current business flow
-    public func completeCurrentFlow() async -> Result<Void, AxiomError> {
+    public func completeCurrentBusinessFlow() async -> Result<Void, AxiomError> {
         // Enhanced implementation for business flow completion
         return await withErrorContext("NavigationService.completeCurrentFlow") {
             // Implementation would complete the current flow and clean up state
@@ -605,23 +615,23 @@ extension NavigationService {
 /// Declarative flow builder for constructing flows with DSL syntax
 @resultBuilder
 public struct FlowBuilder {
-    public static func buildBlock(_ steps: BusinessFlowStep...) -> [BusinessFlowStep] {
+    public static func buildBlock(_ steps: any BusinessFlowStep...) -> [any BusinessFlowStep] {
         return steps
     }
     
-    public static func buildOptional(_ step: BusinessFlowStep?) -> [BusinessFlowStep] {
+    public static func buildOptional(_ step: (any BusinessFlowStep)?) -> [any BusinessFlowStep] {
         return step.map { [$0] } ?? []
     }
     
-    public static func buildEither(first step: BusinessFlowStep) -> [BusinessFlowStep] {
+    public static func buildEither(first step: any BusinessFlowStep) -> [any BusinessFlowStep] {
         return [step]
     }
     
-    public static func buildEither(second step: BusinessFlowStep) -> [BusinessFlowStep] {
+    public static func buildEither(second step: any BusinessFlowStep) -> [any BusinessFlowStep] {
         return [step]
     }
     
-    public static func buildArray(_ steps: [[BusinessFlowStep]]) -> [BusinessFlowStep] {
+    public static func buildArray(_ steps: [[any BusinessFlowStep]]) -> [any BusinessFlowStep] {
         return steps.flatMap { $0 }
     }
 }
@@ -633,7 +643,7 @@ public struct EnhancedFlowStep: BusinessFlowStep {
     public let canSkip: Bool
     public let order: Int
     
-    private let validationHandler: (FlowData) -> ValidationResult
+    private let validationHandler: (FlowData) -> FlowValidationResult
     private let enterHandler: (FlowData) async -> Void
     private let exitHandler: (FlowData) async throws -> Void
     private let skipCondition: (FlowData) -> Bool
@@ -643,7 +653,7 @@ public struct EnhancedFlowStep: BusinessFlowStep {
         order: Int,
         isRequired: Bool = true,
         canSkip: Bool = false,
-        validation: @escaping (FlowData) -> ValidationResult = { _ in .success },
+        validation: @escaping (FlowData) -> FlowValidationResult = { _ in .success },
         onEnter: @escaping (FlowData) async -> Void = { _ in },
         onExit: @escaping (FlowData) async throws -> Void = { _ in },
         skipWhen: @escaping (FlowData) -> Bool = { _ in false }
@@ -658,7 +668,7 @@ public struct EnhancedFlowStep: BusinessFlowStep {
         self.skipCondition = skipWhen
     }
     
-    public func validate(data: FlowData) -> ValidationResult {
+    public func validate(data: FlowData) -> FlowValidationResult {
         return validationHandler(data)
     }
     
@@ -675,23 +685,24 @@ public struct EnhancedFlowStep: BusinessFlowStep {
     }
 }
 
-/// Conditional flow step that evaluates conditions at runtime
-public struct ConditionalFlowStep: BusinessFlowStep {
+/// Conditional business flow step that evaluates conditions at runtime
+public struct ConditionalBusinessFlowStep: BusinessFlowStep {
     public let identifier: String
     public let isRequired: Bool = true
     public let canSkip: Bool = false
     public let order: Int
+    public var route: (any TypeSafeRoute)? { nil } // No specific route for conditional steps
     
     private let condition: (FlowData) -> Bool
-    private let trueStep: BusinessFlowStep
-    private let falseStep: BusinessFlowStep?
+    private let trueStep: any BusinessFlowStep
+    private let falseStep: (any BusinessFlowStep)?
     
     public init(
         identifier: String,
         order: Int,
         condition: @escaping (FlowData) -> Bool,
-        trueStep: BusinessFlowStep,
-        falseStep: BusinessFlowStep? = nil
+        trueStep: any BusinessFlowStep,
+        falseStep: (any BusinessFlowStep)? = nil
     ) {
         self.identifier = identifier
         self.order = order
@@ -700,7 +711,7 @@ public struct ConditionalFlowStep: BusinessFlowStep {
         self.falseStep = falseStep
     }
     
-    public func validate(data: FlowData) -> ValidationResult {
+    public func validate(data: FlowData) -> FlowValidationResult {
         let activeStep = getActiveStep(data: data)
         return activeStep?.validate(data: data) ?? .success
     }
@@ -721,7 +732,7 @@ public struct ConditionalFlowStep: BusinessFlowStep {
         return getActiveStep(data: data) == nil
     }
     
-    private func getActiveStep(data: FlowData) -> BusinessFlowStep? {
+    private func getActiveStep(data: FlowData) -> (any BusinessFlowStep)? {
         if condition(data) {
             return trueStep
         } else {
@@ -798,13 +809,13 @@ public class EnhancedFlowData: FlowData {
 /// Declarative flow definition with DSL support
 public struct DeclarativeFlow: BusinessNavigationFlow {
     public let identifier: String
-    public let steps: [BusinessFlowStep]
+    public let steps: [any BusinessFlowStep]
     public let metadata: FlowMetadata
     
     public init(
         identifier: String,
         metadata: FlowMetadata,
-        @FlowBuilder steps: () -> [BusinessFlowStep]
+        @FlowBuilder steps: () -> [any BusinessFlowStep]
     ) {
         self.identifier = identifier
         self.metadata = metadata
@@ -815,22 +826,22 @@ public struct DeclarativeFlow: BusinessNavigationFlow {
 /// Flow composition patterns for nested flows
 public struct CompositeFlow: BusinessNavigationFlow {
     public let identifier: String
-    public let steps: [BusinessFlowStep]
+    public let steps: [any BusinessFlowStep]
     public let metadata: FlowMetadata
     
-    private let subFlows: [BusinessNavigationFlow]
+    private let subFlows: [any BusinessNavigationFlow]
     
     public init(
         identifier: String,
         metadata: FlowMetadata,
-        subFlows: [BusinessNavigationFlow]
+        subFlows: [any BusinessNavigationFlow]
     ) {
         self.identifier = identifier
         self.metadata = metadata
         self.subFlows = subFlows
         
         // Flatten sub-flows into a single step sequence
-        var allSteps: [BusinessFlowStep] = []
+        var allSteps: [any BusinessFlowStep] = []
         for (index, subFlow) in subFlows.enumerated() {
             let offsetSteps = subFlow.steps.map { step in
                 SubFlowStep(
@@ -848,7 +859,7 @@ public struct CompositeFlow: BusinessNavigationFlow {
 /// Wrapper for sub-flow steps in composite flows
 private struct SubFlowStep: BusinessFlowStep {
     let subFlowIdentifier: String
-    let originalStep: BusinessFlowStep
+    let originalStep: any BusinessFlowStep
     let orderOffset: Int
     
     var identifier: String {
@@ -867,7 +878,11 @@ private struct SubFlowStep: BusinessFlowStep {
         return originalStep.order + orderOffset
     }
     
-    func validate(data: FlowData) -> ValidationResult {
+    var route: (any TypeSafeRoute)? {
+        return originalStep.route
+    }
+    
+    func validate(data: FlowData) -> FlowValidationResult {
         return originalStep.validate(data: data)
     }
     
@@ -882,7 +897,7 @@ private struct SubFlowStep: BusinessFlowStep {
 
 /// Flow validation patterns with advanced error handling
 public struct FlowValidationEngine {
-    public static func validateFlowDefinition(_ flow: BusinessNavigationFlow) -> [FlowValidationError] {
+    public static func validateFlowDefinition(_ flow: any BusinessNavigationFlow) -> [FlowValidationError] {
         var errors: [FlowValidationError] = []
         
         // Check for duplicate step identifiers
@@ -933,10 +948,9 @@ public enum FlowValidationError: Error, Equatable {
 
 // MARK: - Type Aliases for Test Compatibility
 
-/// Type aliases for backward compatibility with test expectations
-public typealias NavigationFlow = BusinessNavigationFlow
-public typealias FlowStep = BusinessFlowStep
-public typealias FlowCoordinator = BusinessFlowCoordinator
+/// Legacy type aliases - keeping separate protocol hierarchies
+/// Use original NavigationFlow for view-based flows
+/// Use BusinessNavigationFlow for business logic flows
 
 // MARK: - Supporting Protocols
 
