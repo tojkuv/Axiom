@@ -29,10 +29,39 @@ DerivedData/
 *.ipa
 *.dSYM.zip
 *.dSYM
+*.xcarchive
 
 ## Playgrounds
 timeline.xctimeline
 playground.xcworkspace
+
+## Xcode Patch
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+*.xcodeproj/project.xcworkspace/*
+!*.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+!*.xcodeproj/project.xcworkspace/xcshareddata/
+
+## Xcode 8 and later
+*.xcuserstate
+*.xcscmblueprint
+
+## Build artifacts
+ArchiveIntermediates/
+IntermediateBuildFilesPath/
+SharedPrecompiledHeaders/
+
+## SwiftUI Previews
+*.PreviewDevice.json
+
+## iOS Simulator
+*.app/
+*.app.dSYM/
+
+## Instruments
+*.trace
 
 # Swift Package Manager
 #
@@ -44,8 +73,10 @@ playground.xcworkspace
 #
 # Xcode automatically generates this directory with a .xcworkspacedata file and xcuserdata
 # hence it is not needed unless you have added a package configuration file to your project
-.swiftpm
+.swiftpm/
 .build/
+Package.resolved
+.package.resolved
 
 # CocoaPods
 #
@@ -116,10 +147,7 @@ Temporary Items
 .apdisk
 
 # Swift
-*.swp
-*.lock
-.vscode/
-.idea/
+# (system and IDE patterns moved to bottom sections)
 
 # Testing
 .swiftpm/xcode/xcshareddata/xcbaselines/
@@ -132,9 +160,8 @@ docs/
 .jazzy.yaml
 .sourcedocs
 
-# SPM
-Package.resolved
-.package.resolved
+# SPM (additional patterns)
+# Main SPM patterns covered above
 
 # Tuist
 Derived/
@@ -142,18 +169,90 @@ Dependencies/
 *.xcworkspace
 *.xcodeproj
 
+# Apple Development Tools
+## Xcode Cloud
+*.xccov
+*.xcresultbundle
+
+## Core Data
+*.mom
+*.momd
+*.omo
+
+## watchOS
+*.watchkitapp
+*.watchkitextension
+
+## tvOS
+*.tvos
+
+## Mac Catalyst
+*.maccatalyst
+
+## App Store Connect
+*.appstoreconnect
+
+## Provisioning (be careful with these)
+*.mobileprovision
+*.p12
+*.cer
+*.certSigningRequest
+
+## TestFlight
+TestFlight/
+
+## Archives & Exports
+Archives/
+ExportOptions.plist
+*.xcarchive/
+
+## Simulator Logs
+~/Library/Logs/iOS Simulator/
+~/Library/Developer/CoreSimulator/
+
+## Xcode Server
+*.xcscmblueprint
+Bots/
+
+## Interface Builder
+*.storyboard~
+*.xib~
+
+## Asset Catalogs
+*.actool
+
+## Metal Shaders
+*.metallib
+
+## Reality Composer
+*.reality
+*.rcproject
+
+## Create ML
+*.mlmodel
+*.mlmodelc
+*.mlpackage
+
+## AR Quick Look
+*.usdz
+
 # Others
-*.moved-aside
-*.xcuserstate
 .nvim.lua
 .vim/
 tags
 .elixir_ls/
 .history/
-.vscode/
 node_modules/
 *.log
 *.tmp
 *.temp
 .env
 .env.*
+
+# IDE
+.vscode/
+.idea/
+
+# System
+*.swp
+*.lock
