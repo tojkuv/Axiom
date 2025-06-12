@@ -140,9 +140,9 @@ public class GuaranteedStateStream<S: State> {
     public func observe(
         priority: ObserverPriority = .normal,
         handler: @escaping (S) async -> Void
-    ) -> ObservationToken {
+    ) async -> ObservationToken {
         let observer = Observer(priority: priority, handler: handler)
-        return observers.add(observer: observer)
+        return await observers.add(observer: observer)
     }
     
     /// Optimize stream performance
@@ -168,8 +168,8 @@ public struct MulticastStateStream<S: State> {
     }
     
     /// Efficient multi-cast subscription
-    public func subscribe() -> AsyncStream<S> {
-        broadcaster.createSubscription()
+    public func subscribe() async -> AsyncStream<S> {
+        await broadcaster.createSubscription()
     }
 }
 
@@ -535,12 +535,12 @@ public actor PropagationMonitor {
     }
     
     /// Generate performance dashboard
-    public func dashboard() -> PropagationDashboard {
+    public func dashboard() async -> PropagationDashboard {
         PropagationDashboard(
             currentMetrics: metrics,
             slaCompliance: metrics.slaCompliance,
-            recommendations: optimizer.currentRecommendations,
-            alerts: alerting.activeAlerts
+            recommendations: await optimizer.currentRecommendations,
+            alerts: await alerting.activeAlerts
         )
     }
     
@@ -648,7 +648,7 @@ internal actor AdaptiveOptimizer {
 }
 
 /// Optimization recommendations
-public enum OptimizationRecommendation {
+public enum OptimizationRecommendation: Sendable {
     case enableBatching
     case increasePriority
     case reduceObservers

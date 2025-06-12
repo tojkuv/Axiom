@@ -130,4 +130,16 @@ public final class PerformanceMonitor: @unchecked Sendable {
         enableTracking()
         // Add any application-specific monitoring setup here
     }
+    
+    // MARK: - SLA Monitoring
+    
+    /// Record an SLA violation for state propagation
+    public func recordSLAViolation(streamId: UUID, latency: TimeInterval) {
+        let alert = PerformanceAlert.slaViolation(
+            streamId: streamId,
+            latency: latency,
+            timestamp: Date()
+        )
+        addAlert(alert)
+    }
 }

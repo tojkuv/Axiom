@@ -675,11 +675,6 @@ public class EnhancedErrorBoundary {
 
 // MARK: - Legacy Support and Compatibility
 
-/// Legacy calculateBackoffDelay function - use BackoffStrategy.calculateDelay instead
-@available(*, deprecated, message: "Use BackoffStrategy.calculateDelay(for:) instead")
-public func calculateBackoffDelay(strategy: BackoffStrategy, attempt: Int) -> TimeInterval {
-    return strategy.calculateDelay(for: attempt)
-}
 
 /// Timeout wrapper for operations
 public func withTimeout<T>(_ timeout: TimeInterval, operation: @escaping () async throws -> T) async throws -> T {

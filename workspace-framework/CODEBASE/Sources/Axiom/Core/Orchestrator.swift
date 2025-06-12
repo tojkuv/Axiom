@@ -44,7 +44,7 @@ public protocol ExtendedOrchestrator: Orchestrator {
     func isCapabilityAvailable(_ key: String) async -> Bool
     
     /// Get a context builder for fluent configuration
-    func contextBuilder<T: Context>(for type: T.Type) async -> ContextBuilder<T>
+    func contextBuilder<T: Context>(for type: T.Type) async -> OrchestratorContextBuilder<T>
 }
 
 
@@ -121,8 +121,8 @@ public actor StandardOrchestrator: ExtendedOrchestrator {
     }
     
     /// Get context builder
-    public func contextBuilder<T: Context>(for type: T.Type) async -> ContextBuilder<T> {
-        ContextBuilder(orchestrator: self, contextType: type)
+    public func contextBuilder<T: Context>(for type: T.Type) async -> OrchestratorContextBuilder<T> {
+        OrchestratorContextBuilder(orchestrator: self, contextType: type)
     }
     
     /// Navigate to route
@@ -176,7 +176,7 @@ public actor StandardOrchestrator: ExtendedOrchestrator {
 // MARK: - Context Builder
 
 /// Fluent builder for context configuration with enhanced features
-public final class ContextBuilder<T: Context>: @unchecked Sendable {
+public final class OrchestratorContextBuilder<T: Context>: @unchecked Sendable {
     private let orchestrator: any ExtendedOrchestrator
     private let contextType: T.Type
     private var identifier: String?

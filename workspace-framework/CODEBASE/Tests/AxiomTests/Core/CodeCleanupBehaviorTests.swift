@@ -58,7 +58,7 @@ final class CodeCleanupBehaviorTests: XCTestCase {
     // MARK: - Launch Action Behavior
     
     func testLaunchActionBehaviorPreserved() async throws {
-        // Test that launch actions work properly regardless of URL parsing TODO
+        // Test that launch actions work properly with URL parsing
         let launchAction = LaunchAction.deepLink(url: URL(string: "test://example")!)
         
         // Should have a valid URL

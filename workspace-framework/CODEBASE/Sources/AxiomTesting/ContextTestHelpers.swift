@@ -18,23 +18,6 @@ public struct ContextTestHelpers {
     
     // MARK: - State Testing
     
-    /// Assert a condition on context state
-    /// - Note: Deprecated in favor of TestAssertions.assertEventually
-    @available(*, deprecated, message: "Use TestAssertions.assertEventually instead")
-    public static func assertState<C: Context>(
-        in context: C,
-        timeout: Duration = .seconds(1),
-        condition: @escaping (C) -> Bool,
-        description: String,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) async throws {
-        // Delegate to TestAssertions protocol implementation
-        let testContext = EmptyTestContext()
-        try await testContext.assertEventually({
-            condition(context)
-        }, timeout: timeout, message: description, file: file, line: line)
-    }
     
     /// Assert context state equals expected value
     public static func assertStateEquals<C: Context, S: Equatable>(
@@ -186,32 +169,6 @@ public struct ContextTestHelpers {
     
     // MARK: - Memory Testing
     
-    /// Assert no memory leaks in context usage
-    /// - Note: Deprecated in favor of TestAssertions.assertNoMemoryLeaks
-    @available(*, deprecated, message: "Use TestAssertions.assertNoMemoryLeaks for objects, or create test objects to track")
-    public static func assertNoMemoryLeaks<T>(
-        operation: () async throws -> T,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) async throws -> T {
-        weak var weakReference: AnyObject?
-        
-        // Execute operation in a new scope to allow cleanup
-        let result: T = try await {
-            let testObject = NSObject()
-            weakReference = testObject
-            return try await operation()
-        }()
-        
-        // Allow deallocation
-        try await Task.sleep(for: .milliseconds(100))
-        
-        if weakReference != nil {
-            XCTFail("Memory leak detected", file: file, line: line)
-        }
-        
-        return result
-    }
     
     /// Benchmark context performance
     public static func benchmarkContext<C: Context>(
@@ -277,18 +234,6 @@ public struct ContextTestHelpers {
     
     // MARK: - Utility Functions
     
-    /// - Note: Deprecated in favor of TestAssertions.waitFor
-    @available(*, deprecated, message: "Use TestAssertions.waitFor instead")
-    private static func waitUntil(
-        timeout: Duration = .seconds(1),
-        condition: () async -> Bool
-    ) async throws {
-        // Delegate to TestAssertions protocol implementation
-        let testContext = EmptyTestContext()
-        _ = try await testContext.waitFor({
-            await condition() ? true : nil
-        }, timeout: timeout, message: "Condition not met within timeout")
-    }
     
     private static func getCurrentMemoryUsage() -> Int {
         var info = mach_task_basic_info()

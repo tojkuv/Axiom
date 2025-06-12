@@ -1,10 +1,6 @@
 import SwiftUI
 import Foundation
-#if os(macOS)
 import Darwin
-#elseif os(iOS) || os(tvOS) || os(watchOS)
-import Darwin
-#endif
 
 // MARK: - Lifecycle Protocol
 

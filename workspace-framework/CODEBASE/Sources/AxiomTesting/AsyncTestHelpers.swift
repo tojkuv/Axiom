@@ -39,33 +39,7 @@ fileprivate actor CountTracker {
 /// Utilities for testing async state streams and actions
 public struct AsyncTestHelpers {
     
-    /// Collect a specific number of states from a stream
-    /// - Note: Deprecated in favor of TestAssertions.collectStates
-    @available(*, deprecated, message: "Use TestAssertions.collectStates instead")
-    public static func collectStates<C: Client>(
-        from client: C,
-        count: Int,
-        timeout: Duration = .seconds(1),
-        while executing: (C) async throws -> Void = { _ in }
-    ) async throws -> [C.StateType] {
-        // Delegate to TestAssertions protocol implementation
-        let testContext = EmptyTestContext()
-        return try await testContext.collectStates(
-            from: client,
-            count: count,
-            timeout: timeout,
-            while: executing
-        )
-    }
     
-    /// Wait for a specific state condition
-    /// - Note: Deprecated in favor of TestAssertions.observeStates
-    @available(*, deprecated, message: "Use TestAssertions.observeStates instead")
-    public static func waitForState<C: Client>(
-        in client: C,
-        timeout: Duration = .seconds(1),
-        condition: @escaping (C.StateType) -> Bool
-    ) async throws -> C.StateType {
         // Delegate to TestAssertions protocol implementation
         let testContext = EmptyTestContext()
         return try await testContext.observeStates(
@@ -205,40 +179,7 @@ public actor ActionRecorder<ActionType> {
 /// Utilities for timing and synchronization in tests
 public struct TimingHelpers {
     
-    /// Wait until a condition is met
-    /// - Note: Deprecated in favor of TestAssertions.waitFor
-    @available(*, deprecated, message: "Use TestAssertions.waitFor instead")
-    public static func waitUntil(
-        timeout: Duration = .seconds(1),
-        pollingInterval: Duration = .milliseconds(10),
-        condition: () async -> Bool
-    ) async throws {
-        // Delegate to TestAssertions protocol implementation
-        let testContext = EmptyTestContext()
-        _ = try await testContext.waitFor({
-            await condition() ? true : nil
-        }, timeout: timeout)
-    }
     
-    /// Eventually assert (retries assertion until it passes)
-    /// - Note: Deprecated in favor of TestAssertions.assertEventually
-    @available(*, deprecated, message: "Use TestAssertions.assertEventually instead")
-    public static func eventually(
-        within timeout: Duration = .seconds(1),
-        pollingInterval: Duration = .milliseconds(10),
-        assertion: () async throws -> Void
-    ) async throws {
-        // Delegate to TestAssertions protocol implementation
-        let testContext = EmptyTestContext()
-        try await testContext.assertEventually({
-            do {
-                try await assertion()
-                return true
-            } catch {
-                return false
-            }
-        }, timeout: timeout)
-    }
 }
 
 // MARK: - XCTest Extensions
