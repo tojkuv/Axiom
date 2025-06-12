@@ -4,15 +4,15 @@ Transform source codebase through systematic refactoring to eliminate technical 
 
 ## Activation
 ```
-@CODEBASE_REFACTORER execute <source_directory> <refactoring_directory>
+@CODEBASE_REFACTORER execute <refactoring_directory>
 ```
 
 ## Process
-1. **Assess** - Analyze code quality, technical debt, and organization issues
-2. **Clean** - Remove dead code, unused imports, obsolete tests
-3. **Reorganize** - Improve folder structure, file locations, naming conventions
+1. **Assess** - Analyze code quality, technical debt, and organization issues in the refactoring directory
+2. **Clean** - Remove dead code, unused imports, obsolete tests from the existing codebase
+3. **Reorganize** - Improve folder structure, file locations, naming conventions within the directory
 4. **Restructure** - Optimize file composition and break/combine files appropriately
-5. **Validate** - Ensure zero functionality loss while improving quality
+5. **Validate** - Ensure zero functionality loss while improving quality in the refactored codebase
 
 ## Refactoring Areas
 - **Dead Code Elimination** - Remove unused classes, methods, imports, variables
@@ -57,7 +57,7 @@ This protocol focuses on current codebase transformation and deliberately exclud
 
 ## Summary
 - **Date**: {DATE}
-- **Source**: {SOURCE_DIRECTORY}
+- **Refactoring Directory**: {REFACTORING_DIRECTORY}
 - **Refactoring Type**: {REFACTORING_TYPE}
 - **Areas Addressed**: {REFACTORING_AREAS}
 

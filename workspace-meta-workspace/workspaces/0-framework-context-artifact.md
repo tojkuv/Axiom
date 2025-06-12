@@ -13,7 +13,7 @@
 
 ## Competitive Context
 
-**Primary Competitors**: TCA (The Composable Architecture), VIPER  
+**Primary Competitors**: TCA (The Composable Architecture), VIPER
 **Differentiation**: Stricter architectural guarantees, comprehensive testing framework, performance guarantees, compile-time validation
 
 ## Core Principles
@@ -28,7 +28,7 @@
 
 **Critical**: Core component protocols, unidirectional flow validation, state management performance
 **Important**: Testing framework completeness, memory leak prevention, actor safety guarantees
-**Enhancement**: Developer experience, API ergonomics, debugging tools
+**Enhancement**: Developer experience, API ergonomics
 
 ## MVP Focus - Explicitly Excluded
 

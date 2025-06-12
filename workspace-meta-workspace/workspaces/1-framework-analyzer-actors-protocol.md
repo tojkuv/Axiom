@@ -4,16 +4,19 @@ Parallel framework analysis actors that coordinate to avoid duplicate work and e
 
 ## Activation
 ```
-@FRAMEWORK_ANALYSIS_ACTOR execute <source_directory> <analyses_directory> <context_artifact> <unique_actor_id>
+@FRAMEWORK_ANALYSIS_ACTOR execute <workspace_directory>
 ```
 
+*Note: The workspace directory contains CODEBASE (required) and may contain ANALYSES folder with previous analyses*
+
 ## Process
-1. **Context** - Read framework context artifact to understand user preferences, constraints, and focus areas
-2. **Discover** - Read existing analyses in analyses_directory to identify covered scopes
-3. **Select** - Choose unexplored scope area
-4. **Assess** - Identify critical gaps, incomplete features, enhancement opportunities in selected scope
-5. **Analyze** - Generate specific suggestions with code samples following context guidance
-6. **Document** - Create uniquely-named analysis report: `framework-analysis-{scope}-{actor_id}-{timestamp}.md`
+1. **Setup** - Create ANALYSES folder if it doesn't exist in the workspace directory
+2. **Discover** - Read existing analyses in ANALYSES folder (if any) to identify covered scopes
+3. **Analyze Codebase** - Examine the CODEBASE directory to understand framework structure and identify analysis opportunities
+4. **Select** - Choose unexplored scope area based on codebase structure and existing analysis coverage
+5. **Assess** - Identify critical gaps, incomplete features, enhancement opportunities in selected scope within the codebase
+6. **Generate** - Create specific suggestions with code samples based on codebase analysis
+7. **Document** - Create uniquely-named analysis report: `ANALYSIS-{SCOPE}-{TIMESTAMP}.md` in the ANALYSES folder
 
 ## Outputs
 - Scope-focused analysis with critical gaps, incomplete features, enhancements
@@ -22,11 +25,12 @@ Parallel framework analysis actors that coordinate to avoid duplicate work and e
 - Unique analysis file preventing conflicts with parallel actors
 
 ## Success Criteria
-- Context artifact guidance applied to prioritize and focus analysis
+- ANALYSES folder created if it didn't exist
 - Selected scope thoroughly analyzed without duplicating existing work
-- Implementation samples provided for each suggestion in scope aligned with context constraints
+- Implementation samples provided for each suggestion based on actual codebase structure
 - Unique file created with no naming conflicts
 - Coverage gaps filled efficiently through parallel coordination
+- Analysis based on actual code in CODEBASE directory
 
 ## MVP Focus - Explicitly Excluded
 This protocol focuses on current framework analysis and deliberately excludes:
@@ -55,7 +59,8 @@ This protocol focuses on current framework analysis and deliberately excludes:
 - **Date**: {DATE}
 - **Actor ID**: {ACTOR_ID}
 - **Selected Scope**: {SCOPE_AREA}
-- **Context Artifact Applied**: {CONTEXT_ARTIFACT_FILE}
+- **Workspace Directory**: {WORKSPACE_DIRECTORY}
+- **Codebase Analyzed**: {CODEBASE_DIRECTORY}
 - **Existing Analyses Reviewed**: {EXISTING_ANALYSIS_COUNT}
 - **Coverage Gap Identified**: {COVERAGE_GAP_DESCRIPTION}
 

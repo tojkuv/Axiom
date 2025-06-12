@@ -1,6 +1,6 @@
 # CODEBASE-STABILIZER-PROTOCOL
 
-Integrate parallel worker results into stable, application-ready codebase.
+Gradually integrate parallel worker results into provisioner baseline codebase with conflict resolution across multiple sessions, ensuring legacy implementations are replaced with modern solutions.
 
 ## Activation
 ```
@@ -8,11 +8,14 @@ Integrate parallel worker results into stable, application-ready codebase.
 ```
 
 ## Process
-1. **Assess** - Analyze codebase type and integration conflicts
-2. **Stabilize** - Fix compilation errors and structural issues
-3. **Integrate** - Resolve cross-worker conflicts and unify implementations
-4. **Optimize** - Apply performance improvements and type-specific enhancements
-5. **Validate** - Verify build, tests, and application readiness
+1. **Review** - Check ARTIFACTS directory for previous stabilizer sessions to determine continuation points
+2. **Baseline** - Establish provisioner codebase as integration baseline
+3. **Analyze** - Review all worker artifacts and codebases to identify integration scope
+4. **Plan** - Determine current session integration targets based on dependencies and conflicts
+5. **Integrate** - Gradually merge worker changes into baseline codebase, replacing any remaining legacy implementations
+6. **Resolve** - Address integration conflicts and API mismatches as they arise, prioritizing modern solutions over legacy preservation
+7. **Test** - Validate integration with comprehensive test execution
+8. **Document** - Generate session artifact in ARTIFACTS directory for next session
 
 ## Priority Levels
 - **Critical** - Compilation fixes, integration conflicts, API conflicts
@@ -20,15 +23,23 @@ Integrate parallel worker results into stable, application-ready codebase.
 - **Medium** - Code health, performance optimization, documentation
 
 ## Outputs
-- Unified codebase with zero integration conflicts
+- Progressively integrated codebase built from provisioner baseline
+- Worker implementations merged with conflict resolution
+- Session artifact in ARTIFACTS directory: `ARTIFACTS/STABILIZER-SESSION-{TIMESTAMP}.md`
+- Final unified codebase with zero integration conflicts (when complete)
 - Stable API contracts across components
 - Performance-validated implementation
 - Application-ready deliverable
 
 ## Success Criteria
-- All parallel work integrates successfully
-- Codebase builds and tests pass
+- Provisioner baseline codebase established as integration foundation
+- All worker artifacts and implementation decisions reviewed
+- Worker changes gradually integrated with conflict resolution
+- Cross-session continuity maintained through session artifacts
+- Final codebase builds successfully with zero compilation errors
+- All tests pass including worker-specific and integration tests
 - Performance meets baseline requirements
+- All workers' functionality validated in integrated codebase
 
 ## MVP Focus - Explicitly Excluded
 This protocol focuses on current state integration and deliberately excludes:
@@ -47,53 +58,60 @@ This protocol focuses on current state integration and deliberately excludes:
 - Rollback procedure preservation
 - Multi-version API support
 
-## Session Template
+## Legacy Implementation Policy
+**REQUIREMENT**: Legacy implementations must be replaced, not preserved. This protocol mandates:
+- Prioritize modern worker implementations over any legacy baseline code
+- Replace outdated patterns discovered during integration with modern equivalents
+- Remove deprecated code and obsolete implementations during conflict resolution
+- Choose optimal current solutions when resolving conflicts between legacy and modern approaches
+- Ensure final integrated codebase contains no legacy implementations
+- Document all legacy replacements and modernization decisions in session artifacts
 
-# STABILIZER-SESSION
+## Session Artifact Template
 
-*Codebase Stabilization Report*
+*Generated in ARTIFACTS/STABILIZER-SESSION-{TIMESTAMP}.md (revise existing if multiple sessions)*
 
-## Summary
+# STABILIZER-SESSION-{SESSION_NUMBER}-{TIMESTAMP}
+
+*Progressive Integration Report*
+
+## Meta-Data
 - **Date**: {DATE}
-- **Workspace**: {WORKSPACE}
-- **Codebase Type**: {CODEBASE_TYPE}
-- **Workers Integrated**: {WORKER_COUNT}
+- **Session**: {SESSION_NUMBER}
+- **Baseline**: {PROVISIONER_CODEBASE_PATH}
+- **Workers**: {TOTAL_WORKER_COUNT}
+- **Previous Sessions**: {PREVIOUS_SESSION_COUNT}
 
-## Integration Analysis
-### Conflicts Identified
-{CONFLICTS}
+## Previous Session Review
+- **Completed**: {INTEGRATED_WORKERS_LIST}
+- **Pending**: {PENDING_WORKERS_LIST}
+- **Current Scope**: {CURRENT_SESSION_TARGETS}
 
-### Dependencies Mapped
-{DEPENDENCIES}
+## Current Session Work
+### Workers Integrated
+- {WORKER_1}: {CHANGES_APPLIED_1} - {CONFLICTS_RESOLVED_1}
+- {WORKER_2}: {CHANGES_APPLIED_2} - {CONFLICTS_RESOLVED_2}
 
-### API Surface Issues
-{API_ISSUES}
-
-## Stabilization Work
-### Critical Issues Fixed
-{CRITICAL_FIXES}
-
-### Pattern Unification
-{PATTERN_WORK}
-
-### Performance Optimization
-{PERFORMANCE_WORK}
+### Conflicts Resolved
+- {CONFLICT_1}: {RESOLUTION_STRATEGY_1}
+- {CONFLICT_2}: {RESOLUTION_STRATEGY_2}
 
 ## Quality Validation
-### Build Status
-- Compilation: {COMPILATION}
-- Test suite: {TESTS}
-- Performance: {PERFORMANCE}
+- **Build**: {COMPILATION_STATUS} ({BUILD_ERROR_COUNT} errors)
+- **Tests**: {PASSING_TEST_COUNT}/{TOTAL_TEST_COUNT} passing
+- **Coverage**: {TEST_COVERAGE_PERCENTAGE}%
+- **API Consistency**: {API_CONSISTENCY_STATUS}
 
-### Integration Status
-- Cross-worker compatibility: {COMPATIBILITY}
-- API consistency: {API_CONSISTENCY}
-- Code quality: {QUALITY_SCORE}
+## Completion Status
+- **Integrated**: {FULLY_INTEGRATED_COUNT}/{TOTAL_WORKER_COUNT} workers
+- **Criteria**: 
+  - [ ] All workers integrated
+  - [ ] Conflicts resolved
+  - [ ] Build passes
+  - [ ] Tests pass
+  - [ ] Performance validated
 
-## Application Readiness
-- Purpose fulfillment: {PURPOSE_STATUS}
-- Deployment readiness: {DEPLOYMENT}
-- Documentation: {DOCS_STATUS}
-
-## Next Steps
-{NEXT_STEPS}
+## Next Session
+- **Priority**: {NEXT_SESSION_PRIORITY}
+- **Strategy**: {INTEGRATION_STRATEGY_NEXT_SESSION}
+- **Estimated Sessions Remaining**: {ESTIMATED_SESSIONS_REMAINING}
