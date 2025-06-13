@@ -130,7 +130,7 @@ public actor MLCapabilityResource: CapabilityResource {
 }
 
 /// ML/AI capability implementation
-public actor MLCapability: ExtendedCapability {
+public actor MLCapability: DomainCapability {
     private var _configuration: MLCapabilityConfiguration
     private var _resources: MLCapabilityResource
     private var _environment: CapabilityEnvironment

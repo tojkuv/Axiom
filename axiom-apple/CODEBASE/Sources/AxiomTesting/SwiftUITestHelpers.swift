@@ -11,11 +11,12 @@ public struct SwiftUITestHelpers {
     // MARK: - Test Host Creation
     
     /// Create a test host for a SwiftUI view
+    @MainActor
     public static func createTestHost<V: View>(
         for view: V,
         frame: CGSize = CGSize(width: 320, height: 568)
-    ) async throws -> ViewTestHost<V> {
-        return await ViewTestHost(view: view, frame: frame)
+    ) throws -> ViewTestHost<V> {
+        ViewTestHost(view: view, frame: frame)
     }
     
     // MARK: - Context Binding Testing
@@ -25,7 +26,7 @@ public struct SwiftUITestHelpers {
         in testHost: ViewTestHost<V>,
         contextType: C.Type,
         matches expectedContext: C,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws where C: AnyObject {
         // This would need view introspection to verify context binding
@@ -38,7 +39,7 @@ public struct SwiftUITestHelpers {
         in testHost: ViewTestHost<V>,
         type: C.Type,
         isAvailable: Bool,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         // This would need environment introspection
@@ -50,7 +51,7 @@ public struct SwiftUITestHelpers {
         in testHost: ViewTestHost<V>,
         scope: EnvironmentScope,
         expectedContexts: [Any.Type],
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         // Environment isolation verification
@@ -60,16 +61,15 @@ public struct SwiftUITestHelpers {
     // MARK: - Presentation Testing
     
     /// Bind presentation to context for testing
+    @MainActor
     public static func bindPresentationToContext<P: BindablePresentation, C: Context & PresentationBindable>(
         presentation: P,
         context: C
-    ) async throws {
+    ) throws {
         // Use the PresentationContextBindingManager
-        await MainActor.run {
-            let success = PresentationContextBindingManager.shared.bind(context, to: presentation)
-            if !success {
-                print("Warning: Failed to bind presentation to context")
-            }
+        let success = PresentationContextBindingManager.shared.bind(context, to: presentation)
+        if !success {
+            print("Warning: Failed to bind presentation to context")
         }
     }
     
@@ -86,7 +86,7 @@ public struct SwiftUITestHelpers {
         condition: (P) -> Bool,
         description: String,
         timeout: Duration = .seconds(1),
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         let deadline = ContinuousClock.now + timeout
@@ -111,64 +111,51 @@ public struct SwiftUITestHelpers {
     // MARK: - View Interaction Testing
     
     /// Simulate button tap
+    @MainActor
     public static func simulateTap<V: View>(
         in testHost: ViewTestHost<V>,
         on target: ViewTarget,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
-    ) async throws {
+    ) throws {
         // This would need UI interaction simulation
-        await MainActor.run {
-            testHost.recordInteraction(.tap(target))
-        }
-        
-        // Allow interaction to process
-        try await Task.sleep(for: .milliseconds(50))
+        testHost.recordInteraction(.tap(target))
     }
     
     /// Simulate text input
+    @MainActor
     public static func simulateTextInput<V: View>(
         in testHost: ViewTestHost<V>,
         in target: ViewTarget,
         text: String,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
-    ) async throws {
-        await MainActor.run {
-            testHost.recordInteraction(.textInput(target, text))
-        }
-        
-        try await Task.sleep(for: .milliseconds(50))
+    ) throws {
+        testHost.recordInteraction(.textInput(target, text))
     }
     
     /// Simulate swipe gesture
+    @MainActor
     public static func simulateSwipe<V: View>(
         in testHost: ViewTestHost<V>,
         direction: SwipeDirection,
         on target: ViewTarget,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
-    ) async throws {
-        await MainActor.run {
-            testHost.recordInteraction(.swipe(target, direction))
-        }
-        
-        try await Task.sleep(for: .milliseconds(100))
+    ) throws {
+        testHost.recordInteraction(.swipe(target, direction))
     }
     
     /// Simulate long press gesture
+    @MainActor
     public static func simulateLongPress<V: View>(
         in testHost: ViewTestHost<V>,
         on target: ViewTarget,
         duration: Duration = .seconds(1),
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
-    ) async throws {
-        await MainActor.run {
-            testHost.recordInteraction(.longPress(target, duration))
-        }
-        
-        try await Task.sleep(for: duration + .milliseconds(50))
+    ) throws {
+        testHost.recordInteraction(.longPress(target, duration))
     }
     
     // MARK: - View State Testing
@@ -176,10 +163,10 @@ public struct SwiftUITestHelpers {
     /// Assert view state condition
     public static func assertViewState<V: View>(
         in testHost: ViewTestHost<V>,
-        condition: (ViewTestHost<V>) -> Bool,
+        condition: @escaping @Sendable (ViewTestHost<V>) -> Bool,
         description: String,
         timeout: Duration = .seconds(1),
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         let deadline = ContinuousClock.now + timeout
@@ -199,7 +186,7 @@ public struct SwiftUITestHelpers {
         in context: C,
         wasTriggered action: Any,
         timeout: Duration = .seconds(1),
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         // This would need action tracking in context
@@ -210,10 +197,10 @@ public struct SwiftUITestHelpers {
     /// Assert context state condition
     public static func assertContextState<C: Context>(
         in context: C,
-        condition: (C) -> Bool,
+        condition: @escaping @Sendable (C) -> Bool,
         description: String,
         timeout: Duration = .seconds(1),
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         let deadline = ContinuousClock.now + timeout
@@ -231,24 +218,23 @@ public struct SwiftUITestHelpers {
     // MARK: - Gesture Testing
     
     /// Assert gesture was triggered
+    @MainActor
     public static func assertGestureTriggered<V: View>(
         in testHost: ViewTestHost<V>,
         gestureType: GestureType,
         onView viewType: Any.Type,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
-    ) async throws {
-        await MainActor.run {
-            let gestureTriggered = testHost.wasGestureTriggered(gestureType, on: viewType)
-            XCTAssertTrue(gestureTriggered, "Gesture \(gestureType) not triggered", file: file, line: line)
-        }
+    ) throws {
+        let gestureTriggered = testHost.wasGestureTriggered(gestureType, on: viewType)
+        XCTAssertTrue(gestureTriggered, "Gesture \(gestureType) not triggered", file: file, line: line)
     }
     
     /// Assert context menu appeared
     public static func assertContextMenuAppeared<V: View>(
         in testHost: ViewTestHost<V>,
         withOptions expectedOptions: [String],
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         await MainActor.run {
@@ -263,34 +249,31 @@ public struct SwiftUITestHelpers {
     // MARK: - Animation Testing
     
     /// Assert animation occurred
+    @MainActor
     public static func assertAnimation<V: View>(
         in testHost: ViewTestHost<V>,
         type: AnimationType,
         onView target: ViewTarget,
         duration: Duration,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
-    ) async throws {
-        // Wait for animation to complete
-        try await Task.sleep(for: duration + .milliseconds(50))
-        
-        await MainActor.run {
-            let animationOccurred = testHost.wasAnimationTriggered(type, on: target)
-            XCTAssertTrue(animationOccurred, "Animation \(type) not triggered", file: file, line: line)
-        }
+    ) throws {
+        let animationOccurred = testHost.wasAnimationTriggered(type, on: target)
+        XCTAssertTrue(animationOccurred, "Animation \(type) not triggered", file: file, line: line)
     }
     
     // MARK: - Performance Testing
     
     /// Benchmark view performance
+    @MainActor
     public static func benchmarkView<V: View>(
         _ view: V,
-        operation: () async throws -> Void
+        operation: @escaping @Sendable () async throws -> Void
     ) async throws -> ViewBenchmark {
         let startTime = ContinuousClock.now
         let startMemory = getCurrentMemoryUsage()
         
-        _ = try await createTestHost(for: view)
+        _ = try createTestHost(for: view)
         
         try await operation()
         
@@ -308,6 +291,7 @@ public struct SwiftUITestHelpers {
     // MARK: - Accessibility Testing
     
     /// Assert accessibility properties
+    @MainActor
     public static func assertAccessibility<V: View>(
         in testHost: ViewTestHost<V>,
         element: ViewTarget,
@@ -315,29 +299,27 @@ public struct SwiftUITestHelpers {
         hasHint: String? = nil,
         hasActions: [AccessibilityAction]? = nil,
         hasTraits: [AccessibilityTrait]? = nil,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
-        await MainActor.run {
-            if let expectedLabel = hasLabel {
-                let actualLabel = testHost.getAccessibilityLabel(for: element)
-                XCTAssertEqual(actualLabel, expectedLabel, "Accessibility label mismatch", file: file, line: line)
-            }
-            
-            if let expectedHint = hasHint {
-                let actualHint = testHost.getAccessibilityHint(for: element)
-                XCTAssertEqual(actualHint, expectedHint, "Accessibility hint mismatch", file: file, line: line)
-            }
-            
-            if let expectedActions = hasActions {
-                let actualActions = testHost.getAccessibilityActions(for: element)
-                XCTAssertEqual(actualActions, expectedActions, "Accessibility actions mismatch", file: file, line: line)
-            }
-            
-            if let expectedTraits = hasTraits {
-                let actualTraits = testHost.getAccessibilityTraits(for: element)
-                XCTAssertEqual(actualTraits, expectedTraits, "Accessibility traits mismatch", file: file, line: line)
-            }
+        if let expectedLabel = hasLabel {
+            let actualLabel = testHost.getAccessibilityLabel(for: element)
+            XCTAssertEqual(actualLabel, expectedLabel, "Accessibility label mismatch", file: file, line: line)
+        }
+        
+        if let expectedHint = hasHint {
+            let actualHint = testHost.getAccessibilityHint(for: element)
+            XCTAssertEqual(actualHint, expectedHint, "Accessibility hint mismatch", file: file, line: line)
+        }
+        
+        if let expectedActions = hasActions {
+            let actualActions = testHost.getAccessibilityActions(for: element)
+            XCTAssertEqual(actualActions, expectedActions, "Accessibility actions mismatch", file: file, line: line)
+        }
+        
+        if let expectedTraits = hasTraits {
+            let actualTraits = testHost.getAccessibilityTraits(for: element)
+            XCTAssertEqual(actualTraits, expectedTraits, "Accessibility traits mismatch", file: file, line: line)
         }
     }
     
@@ -345,7 +327,7 @@ public struct SwiftUITestHelpers {
     public static func assertVoiceOverNavigation<V: View>(
         in testHost: ViewTestHost<V>,
         sequence: [String],
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         await MainActor.run {
@@ -358,7 +340,7 @@ public struct SwiftUITestHelpers {
     public static func assertDynamicTypeSupport<V: View>(
         in testHost: ViewTestHost<V>,
         contentSizeCategory: ContentSizeCategory,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         await MainActor.run {
@@ -515,7 +497,7 @@ public class PresentationStateTracker<P: ObservableObject> {
     
     public func assertStateSequence(
         _ expectedSequence: [(P) -> Bool],
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         // Verify state sequence matches expected
@@ -528,19 +510,18 @@ public class PresentationStateTracker<P: ObservableObject> {
         )
     }
     
+    @MainActor
     public func assertCurrentState(
-        condition: (P) -> Bool,
-        file: StaticString = #file,
+        condition: @escaping @Sendable (P) -> Bool,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
-        await MainActor.run {
-            XCTAssertTrue(
-                condition(presentation),
-                "Current state condition failed",
-                file: file,
-                line: line
-            )
-        }
+        XCTAssertTrue(
+            condition(presentation),
+            "Current state condition failed",
+            file: file,
+            line: line
+        )
     }
     
     deinit {

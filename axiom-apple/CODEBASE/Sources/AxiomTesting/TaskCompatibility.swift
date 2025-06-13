@@ -12,7 +12,7 @@ extension Task where Success == Never, Failure == Never {
 }
 
 // MVP: TestDuration type for compatibility
-public struct TestDuration {
+public struct TestDuration: Sendable {
     let nanoseconds: UInt64
     
     public static func milliseconds(_ value: Int) -> TestDuration {

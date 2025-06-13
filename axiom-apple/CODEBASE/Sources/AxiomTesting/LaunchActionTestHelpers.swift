@@ -29,7 +29,7 @@ public struct LaunchActionTestHelpers {
         expected: ActionType,
         in storage: LaunchActionStorage<ActionType>,
         timeout: Duration = .seconds(1),
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async {
         let deadline = ContinuousClock.now + timeout
@@ -65,7 +65,7 @@ public struct LaunchActionTestHelpers {
     @MainActor
     public static func assertNoActiveAction<ActionType>(
         in storage: LaunchActionStorage<ActionType>,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) {
         XCTAssertNil(

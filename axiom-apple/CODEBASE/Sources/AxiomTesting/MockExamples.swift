@@ -31,11 +31,11 @@ public class MockTestService: TestService {
     }
     
     public func reset() {
-        Task.detached {
-            await self.performActionMock.reset()
-            await self.getCountMock.reset()
-            await self.updateStateMock.reset()
-            await self.isActiveMock.reset()
+        Task.detached { @Sendable [performActionMock, getCountMock, updateStateMock, isActiveMock] in
+            await performActionMock.reset()
+            await getCountMock.reset()
+            await updateStateMock.reset()
+            await isActiveMock.reset()
         }
     }
 }
@@ -150,7 +150,7 @@ public protocol TestDataSource {
     func deleteData(id: String) async throws -> Bool
 }
 
-public struct TestData: Equatable {
+public struct TestData: Equatable, Sendable {
     public let id: String
     public let value: String
     public let timestamp: Date
@@ -183,10 +183,10 @@ public class MockTestDataSource: TestDataSource {
     }
     
     public func reset() {
-        Task.detached {
-            await self.fetchDataMock.reset()
-            await self.saveDataMock.reset()
-            await self.deleteDataMock.reset()
+        Task.detached { @Sendable [fetchDataMock, saveDataMock, deleteDataMock] in
+            await fetchDataMock.reset()
+            await saveDataMock.reset()
+            await deleteDataMock.reset()
         }
     }
 }

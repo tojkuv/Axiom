@@ -16,7 +16,7 @@ public struct NavigationTestHelpers {
         hasPath expectedPath: String,
         hasParameters expectedParams: [String: String] = [:],
         description: String,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) throws {
         XCTAssertEqual(
@@ -54,7 +54,7 @@ public struct NavigationTestHelpers {
         _ route: R,
         fails: Bool,
         expectedError: NavigationTestError? = nil,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         // Route validation would be implemented based on route requirements
@@ -73,7 +73,7 @@ public struct NavigationTestHelpers {
         sequence: [NavigationAction],
         expectedStack: [Route],
         timeout: TestDuration = .seconds(5),
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         // Execute navigation sequence
@@ -112,7 +112,7 @@ public struct NavigationTestHelpers {
         handler: H,
         expectedRoute: R? = nil,
         expectedFailure: DeepLinkTestError? = nil,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws -> R? where R: Equatable {
         do {
@@ -133,7 +133,7 @@ public struct NavigationTestHelpers {
             
             return route as? R
         } catch {
-            if let expectedFailure = expectedFailure {
+            if expectedFailure != nil {
                 // Verify error type matches expected
                 XCTAssertTrue(true, "Deep link error verification placeholder", file: file, line: line)
             } else {
@@ -149,7 +149,7 @@ public struct NavigationTestHelpers {
         handler: H,
         navigator: N,
         expectedStack: [Route],
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         // Handle deep link
@@ -171,7 +171,7 @@ public struct NavigationTestHelpers {
         route: Route,
         navigationGuard: G,
         expectedReason: NavigationBlockReason,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         // Check guard
@@ -191,7 +191,7 @@ public struct NavigationTestHelpers {
         route: Route,
         navigationGuard: G,
         setupCondition: () async throws -> Void,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         // Setup condition
@@ -216,9 +216,9 @@ public struct NavigationTestHelpers {
         context: C,
         action: Any,
         expectedRoute: Route,
-        expectedContextState: (C) -> Bool,
+        expectedContextState: @escaping @Sendable (C) -> Bool,
         timeout: TestDuration = .seconds(1),
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         // Process context action
@@ -248,9 +248,9 @@ public struct NavigationTestHelpers {
     public static func assertContextSynchronization<N: NavigationService, C: Context>(
         navigator: N,
         context: C,
-        expectedState: (C) -> Bool,
+        expectedState: @escaping @Sendable (C) -> Bool,
         timeout: TestDuration = .seconds(1),
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         let deadline = ContinuousClock.now + Swift.Duration.seconds(timeout.nanoseconds / 1_000_000_000)
@@ -300,7 +300,7 @@ public struct NavigationTestHelpers {
         navigator: N,
         route: Route,
         expectedError: NavigationTestError,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         await navigator.navigate(to: route)
@@ -316,10 +316,10 @@ public struct NavigationTestHelpers {
         stackDepth: Int? = nil,
         hasError: Bool = false,
         expectedError: NavigationTestError? = nil,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
-        if let expectedDepth = stackDepth {
+        if stackDepth != nil {
             // Would need stack depth access
             XCTAssertTrue(true, "Stack depth verification placeholder", file: file, line: line)
         }
@@ -376,7 +376,7 @@ public class NavigationTracker<N: NavigationService> {
     
     public func assertNavigationSequence(
         _ expectedEvents: [NavigationEvent],
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         // Verify recorded events match expected
@@ -391,7 +391,7 @@ public class NavigationTracker<N: NavigationService> {
     
     public func assertCurrentRoute(
         _ expectedRoute: Route,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         // Would need current route access
@@ -400,7 +400,7 @@ public class NavigationTracker<N: NavigationService> {
     
     public func assertStackDepth(
         _ expectedDepth: Int,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         // Would need stack depth access

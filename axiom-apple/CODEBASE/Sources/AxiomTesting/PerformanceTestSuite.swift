@@ -157,9 +157,9 @@ public class BenchmarkContext {
     }
     
     /// Measure concurrent operations
-    public func measureConcurrent<T>(
+    public func measureConcurrent<T: Sendable>(
         tasks taskCount: Int,
-        operation: @escaping (Int) async throws -> T
+        operation: @escaping @Sendable (Int) async throws -> T
     ) async throws {
         let startTime = ContinuousClock.now
         

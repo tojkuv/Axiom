@@ -28,6 +28,18 @@ actor TestDurationsCollector {
     }
 }
 
+actor SamplesCollector {
+    var samples: [MemorySnapshot] = []
+    
+    func addSample(_ sample: MemorySnapshot) {
+        samples.append(sample)
+    }
+    
+    func getSamples() -> [MemorySnapshot] {
+        samples
+    }
+}
+
 // MARK: - Performance Testing Framework
 
 /// Comprehensive performance and memory testing utilities for Axiom
@@ -38,9 +50,9 @@ public struct PerformanceTestHelpers {
     
     /// Assert no memory leaks occur during operation
     public static func assertNoMemoryLeaks<T>(
-        operation: @escaping () async throws -> T,
+        operation: @escaping @Sendable () async throws -> T,
         timeout: Duration = .seconds(5),
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws -> T {
         weak var weakReference: AnyObject?
@@ -82,10 +94,10 @@ public struct PerformanceTestHelpers {
     
     /// Track memory usage during operation
     public static func trackMemoryUsage<T>(
-        during operation: () async throws -> T,
+        during operation: @escaping @Sendable () async throws -> T,
         samplingInterval: Duration = .milliseconds(100)
     ) async throws -> (result: T, memoryProfile: MemoryProfile) {
-        var samples: [MemorySnapshot] = []
+        let samplesCollector = SamplesCollector()
         let startTime = ContinuousClock.now
         
         // Start memory monitoring
@@ -95,7 +107,7 @@ public struct PerformanceTestHelpers {
                     timestamp: ContinuousClock.now,
                     usage: getCurrentMemoryUsage()
                 )
-                samples.append(snapshot)
+                await samplesCollector.addSample(snapshot)
                 
                 try? await Task.sleep(for: samplingInterval)
             }
@@ -108,6 +120,7 @@ public struct PerformanceTestHelpers {
         monitoringTask.cancel()
         
         let endTime = ContinuousClock.now
+        let samples = await samplesCollector.getSamples()
         let profile = MemoryProfile(
             duration: endTime - startTime,
             samples: samples,
@@ -121,10 +134,10 @@ public struct PerformanceTestHelpers {
     
     /// Assert memory usage stays within bounds
     public static func assertMemoryBounds<T>(
-        during operation: () async throws -> T,
+        during operation: @escaping @Sendable () async throws -> T,
         maxGrowth: Int = 10 * 1024 * 1024, // 10MB default
         maxPeak: Int = 100 * 1024 * 1024,  // 100MB default
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws -> T {
         let startMemory = getCurrentMemoryUsage()
@@ -198,7 +211,7 @@ public struct PerformanceTestHelpers {
         maxDuration: Duration = .seconds(1),
         maxMemoryGrowth: Int = 1024 * 1024, // 1MB
         iterations: Int = 5,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         let benchmark = try await Self.benchmark(operation, iterations: iterations)
@@ -226,14 +239,14 @@ public struct PerformanceTestHelpers {
     public static func loadTest(
         concurrency: Int = 10,
         duration: Duration = .seconds(10),
-        operation: @escaping () async throws -> Void
+        operation: @escaping @Sendable () async throws -> Void
     ) async throws -> LoadTestResults {
         let startTime = ContinuousClock.now
         let endTime = startTime + duration
         
         let resultsCollector = LoadTestResultsCollector()
         
-        try await withThrowingTaskGroup(of: Void.self) { group in
+        await withTaskGroup(of: Void.self) { group in
             // Start concurrent workers
             for workerId in 0..<concurrency {
                 group.addTask {
@@ -287,8 +300,8 @@ public struct PerformanceTestHelpers {
         duration: Duration = .seconds(10),
         minThroughput: Int = 100, // operations per second
         maxErrorRate: Double = 0.01, // 1%
-        operation: @escaping () async throws -> Void,
-        file: StaticString = #file,
+        operation: @escaping @Sendable () async throws -> Void,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws {
         let results = try await loadTest(
@@ -325,7 +338,7 @@ public struct PerformanceTestHelpers {
         maxConcurrency: Int = 100,
         stepSize: Int = 10,
         stepDuration: Duration = .seconds(5),
-        operation: @escaping () async throws -> Void
+        operation: @escaping @Sendable () async throws -> Void
     ) async throws -> StressTestResults {
         var stepResults: [StressTestStep] = []
         
@@ -375,7 +388,7 @@ public struct PerformanceTestHelpers {
         
         let durationsCollector = TestDurationsCollector()
         
-        try await withThrowingTaskGroup(of: Void.self) { group in
+        await withTaskGroup(of: Void.self) { group in
             for _ in 0..<concurrentClients {
                 group.addTask {
                     for _ in 0..<(actionCount / concurrentClients) {
@@ -439,7 +452,7 @@ public struct PerformanceTestHelpers {
 // MARK: - Supporting Types
 
 /// Memory snapshot at a point in time
-public struct MemorySnapshot {
+public struct MemorySnapshot: Sendable {
     public let timestamp: ContinuousClock.Instant
     public let usage: Int
 }
@@ -492,7 +505,7 @@ public struct PerformanceBenchmark<T> {
 }
 
 /// Load test result for a single worker
-public struct LoadTestResult {
+public struct LoadTestResult: Sendable {
     public let workerId: Int
     public let operationCount: Int
     public let errorCount: Int
@@ -506,7 +519,7 @@ public struct LoadTestResult {
 }
 
 /// Combined load test results
-public struct LoadTestResults {
+public struct LoadTestResults: Sendable {
     public let concurrency: Int
     public let requestedDuration: Duration
     public let actualDuration: Duration
@@ -606,7 +619,7 @@ public extension XCTestCase {
     func measureDetailedPerformance<T>(
         _ operation: () async throws -> T,
         iterations: Int = 10,
-        file: StaticString = #file,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws -> T {
         let benchmark = try await PerformanceTestHelpers.benchmark(operation, iterations: iterations)
@@ -624,8 +637,8 @@ public extension XCTestCase {
     
     /// Measure memory usage with detailed tracking
     func measureMemoryUsage<T>(
-        _ operation: () async throws -> T,
-        file: StaticString = #file,
+        _ operation: @escaping @Sendable () async throws -> T,
+        file: StaticString = #filePath,
         line: UInt = #line
     ) async throws -> T {
         let (result, profile) = try await PerformanceTestHelpers.trackMemoryUsage(during: operation)

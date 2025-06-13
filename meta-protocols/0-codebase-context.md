@@ -32,3 +32,16 @@ These compoents should not exists as concrete implementations in the framework c
 - Contexts
 - Clients
 - Orchestrator
+
+## codebase conformances
+- ensure we always use modern swift syntax, swift 6.2 or latest
+
+## protocol-specific considerations
+
+### stabilization analysis
+
+### exploration analysis
+- implement alart kit as a domain capability
+
+### meta-analysis
+- macro system expansions are not violations of the architectural foundation . we ecourage the expansion of the macro system

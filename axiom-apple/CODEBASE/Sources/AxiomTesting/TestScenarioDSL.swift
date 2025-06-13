@@ -13,7 +13,7 @@ import Foundation
 ///     Then { $0.state.isUpdated }
 /// }.run()
 /// ```
-public struct TestScenario {
+public struct TestScenario: Sendable {
     let components: [TestComponent]
     
     public init(@TestScenarioBuilder _ builder: () -> [TestComponent]) {
@@ -61,11 +61,11 @@ public struct TestScenario {
 
 // MARK: - Test Components
 
-public enum TestComponent {
-    case given(() async throws -> Any)
-    case when((Any) async throws -> Void)
-    case then((Any) async throws -> Void)
-    case thenEventually((Any) async throws -> Bool, timeout: Duration)
+public enum TestComponent: @unchecked Sendable {
+    case given(@Sendable () async throws -> Any)
+    case when(@Sendable (Any) async throws -> Void)
+    case then(@Sendable (Any) async throws -> Void)
+    case thenEventually(@Sendable (Any) async throws -> Bool, timeout: Duration)
 }
 
 // MARK: - Result Builder
@@ -79,13 +79,13 @@ public struct TestScenarioBuilder {
 
 // MARK: - DSL Functions
 
-public func Given<T>(_ setup: @escaping () async throws -> T) -> TestComponent {
+public func Given<T>(_ setup: @escaping @Sendable () async throws -> T) -> TestComponent {
     .given {
         try await setup()
     }
 }
 
-public func When<T>(_ action: @escaping (T) async throws -> Void) -> TestComponent {
+public func When<T>(_ action: @escaping @Sendable (T) async throws -> Void) -> TestComponent {
     .when { context in
         guard let typedContext = context as? T else {
             throw TestScenarioError.invalidContextType(
@@ -97,7 +97,7 @@ public func When<T>(_ action: @escaping (T) async throws -> Void) -> TestCompone
     }
 }
 
-public func Then<T>(_ assertion: @escaping (T) async throws -> Void) -> TestComponent {
+public func Then<T>(_ assertion: @escaping @Sendable (T) async throws -> Void) -> TestComponent {
     .then { context in
         guard let typedContext = context as? T else {
             throw TestScenarioError.invalidContextType(
@@ -111,7 +111,7 @@ public func Then<T>(_ assertion: @escaping (T) async throws -> Void) -> TestComp
 
 public func ThenEventually<T>(
     timeout: Duration = .seconds(5),
-    _ condition: @escaping (T) async throws -> Bool
+    _ condition: @escaping @Sendable (T) async throws -> Bool
 ) -> TestComponent {
     .thenEventually({ context in
         guard let typedContext = context as? T else {
@@ -185,7 +185,7 @@ public extension TestScenario {
     static func parallel(_ scenarios: TestScenario...) async throws {
         try await withThrowingTaskGroup(of: Void.self) { group in
             for scenario in scenarios {
-                group.addTask {
+                group.addTask { [scenario] in
                     try await scenario.run()
                 }
             }
@@ -201,7 +201,7 @@ public extension TestScenario {
     }
     
     /// Create a test scenario with shared context
-    static func withSharedContext<T>(
+    static func withSharedContext<T: Sendable>(
         _ context: T,
         @TestScenarioBuilder builder: () -> [TestComponent]
     ) -> TestScenario {
@@ -215,8 +215,8 @@ public extension TestScenario {
 
 /// Enhanced Then function that integrates with TestAssertions protocol
 public func ThenAssert<T>(
-    _ assertion: @escaping (T) async throws -> Void
-) -> TestComponent where T: TestAssertions {
+    _ assertion: @escaping @Sendable (T) async throws -> Void
+) -> TestComponent where T: TestAssertions & Sendable {
     .then { context in
         guard let typedContext = context as? T else {
             throw TestScenarioError.invalidContextType(

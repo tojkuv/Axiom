@@ -101,6 +101,25 @@ public struct CapabilityEnvironment: Codable, Sendable, Hashable {
         self.deviceClass = deviceClass
         self.osVersion = osVersion
     }
+    
+    // Predefined environment configurations
+    public static let testing = CapabilityEnvironment(isDebug: true)
+    public static let development = CapabilityEnvironment(isDebug: true)
+    public static let staging = CapabilityEnvironment(isDebug: false)
+    public static let production = CapabilityEnvironment(isDebug: false)
+    public static let preview = CapabilityEnvironment(isDebug: true)
+    
+    // Computed property for backwards compatibility with enum-like usage
+    public var rawValue: String {
+        switch self {
+        case Self.testing: return "testing"
+        case Self.development: return "development"
+        case Self.staging: return "staging"
+        case Self.production: return "production"
+        case Self.preview: return "preview"
+        default: return "custom"
+        }
+    }
 }
 
 /// Device classification for capability optimization

@@ -15,7 +15,7 @@ extension PresentationContextBindingManager {
 
 // MARK: - Mock Types for Testing
 
-public struct MockPresentation: BindablePresentation {
+public struct MockPresentation: BindablePresentation, Sendable {
     public let id: String
     public private(set) var isAppeared = false
     public private(set) var isDisappeared = false
@@ -36,8 +36,9 @@ public struct MockPresentation: BindablePresentation {
     }
     
     public func simulateDeallocation() {
+        let context = self
         Task { @MainActor in
-            PresentationContextBindingManager.shared.unbind(self)
+            PresentationContextBindingManager.shared.unbind(context)
         }
     }
 }
