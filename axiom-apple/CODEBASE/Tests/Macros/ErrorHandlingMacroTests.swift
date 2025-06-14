@@ -2,6 +2,7 @@ import XCTest
 import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
 @testable import Axiom
+@testable import AxiomMacros
 
 /// Tests for error handling macros (REQUIREMENTS-W-06-005)
 final class ErrorHandlingMacroTests: XCTestCase {

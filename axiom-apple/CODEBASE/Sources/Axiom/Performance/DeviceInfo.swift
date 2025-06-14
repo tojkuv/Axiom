@@ -83,6 +83,8 @@ public actor DeviceInfoMonitor {
         return "Apple Watch"
         #elseif os(tvOS)
         return "Apple TV"
+        #elseif os(visionOS)
+        return "Apple Vision Pro"
         #else
         return "Unknown Platform"
         #endif
@@ -196,6 +198,21 @@ public actor DeviceInfoMonitor {
             supportsWidgets: false,
             maxConcurrentOperations: ProcessInfo.processInfo.activeProcessorCount
         )
+        #elseif os(visionOS)
+        return PlatformCapabilities(
+            supportsBackgroundProcessing: true,
+            supportsMultiWindow: true,
+            supportsExternalDisplay: false,
+            supportsCamera: false, // No traditional camera
+            supportsLocation: false, // Limited location services
+            supportsPushNotifications: true,
+            supportsAppExtensions: true,
+            supportsWidgets: false, // No widget support
+            maxConcurrentOperations: ProcessInfo.processInfo.activeProcessorCount,
+            supportsSpatialComputing: true, // visionOS-specific
+            supportsHandTracking: true,     // visionOS-specific  
+            supportsEyeTracking: true       // visionOS-specific
+        )
         #else
         return PlatformCapabilities(
             supportsBackgroundProcessing: false,
@@ -218,6 +235,9 @@ public actor DeviceInfoMonitor {
         #elseif os(macOS)
         // Mac systems vary widely, use conservative estimate
         return 2.8
+        #elseif os(visionOS)
+        // Apple Vision Pro uses M2 chip
+        return 3.2 // M2 chip runs at ~3.2GHz
         #else
         return 1.0 // Conservative fallback
         #endif
@@ -237,6 +257,11 @@ public struct PlatformCapabilities: Sendable {
     public let supportsWidgets: Bool
     public let maxConcurrentOperations: Int
     
+    // visionOS-specific capabilities
+    public let supportsSpatialComputing: Bool
+    public let supportsHandTracking: Bool
+    public let supportsEyeTracking: Bool
+    
     public init(
         supportsBackgroundProcessing: Bool,
         supportsMultiWindow: Bool,
@@ -246,7 +271,10 @@ public struct PlatformCapabilities: Sendable {
         supportsPushNotifications: Bool,
         supportsAppExtensions: Bool,
         supportsWidgets: Bool,
-        maxConcurrentOperations: Int
+        maxConcurrentOperations: Int,
+        supportsSpatialComputing: Bool = false,
+        supportsHandTracking: Bool = false,
+        supportsEyeTracking: Bool = false
     ) {
         self.supportsBackgroundProcessing = supportsBackgroundProcessing
         self.supportsMultiWindow = supportsMultiWindow
@@ -257,6 +285,9 @@ public struct PlatformCapabilities: Sendable {
         self.supportsAppExtensions = supportsAppExtensions
         self.supportsWidgets = supportsWidgets
         self.maxConcurrentOperations = maxConcurrentOperations
+        self.supportsSpatialComputing = supportsSpatialComputing
+        self.supportsHandTracking = supportsHandTracking
+        self.supportsEyeTracking = supportsEyeTracking
     }
 }
 

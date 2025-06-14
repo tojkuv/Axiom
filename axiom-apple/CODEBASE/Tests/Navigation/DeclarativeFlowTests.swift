@@ -1,4 +1,5 @@
 import XCTest
+import SwiftUI
 @testable import Axiom
 
 final class DeclarativeFlowTests: XCTestCase {

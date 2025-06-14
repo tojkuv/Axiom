@@ -75,6 +75,7 @@ let package = Package(
             dependencies: [
                 "Axiom", 
                 "AxiomTesting",
+                "AxiomMacros",
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax")
             ],
             path: "Tests",

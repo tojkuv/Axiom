@@ -7,7 +7,7 @@ final class APINamingConsistencyTests: XCTestCase {
     func testProtocolFileNamingConsistency() throws {
         // File ClientProtocol.swift should define Client protocol
         // This test will fail until we rename files
-        let expectedProtocolNames = [
+        let _ = [
             "Client",      // not ClientProtocol
             "Context",     // not ContextProtocol
             "Capability",  // not CapabilityProtocol
@@ -15,28 +15,29 @@ final class APINamingConsistencyTests: XCTestCase {
         ]
         
         // Verify protocol names don't have redundant suffixes
-        XCTAssertNotNil(Client.self)
-        XCTAssertNotNil(Context.self)
-        XCTAssertNotNil(Capability.self)
-        XCTAssertNotNil(Orchestrator.self)
+        XCTAssertNotNil((any Client).self)
+        XCTAssertNotNil((any Context).self)
+        XCTAssertNotNil((any Capability).self)
+        XCTAssertNotNil((any Orchestrator).self)
     }
     
     // Test lifecycle method naming consistency
     func testLifecycleMethodNaming() throws {
         // Context should have consistent lifecycle methods
-        let contextType = Context.self
+        let _ = (any Context).self
         
-        // These should use past tense for events
-        let selectors = [
-            #selector(Context.onAppear),     // Should be viewAppeared
-            #selector(Context.onDisappear)   // Should be viewDisappeared
-        ]
+        // These should use past tense for events - commented out as methods don't exist
+        // let selectors = [
+        //     #selector(Context.onAppear),     // Should be viewAppeared
+        //     #selector(Context.onDisappear)   // Should be viewDisappeared
+        // ]
         
         // Currently using "on" prefix - should be past tense
-        for selector in selectors {
-            XCTAssertTrue(contextType.instancesRespond(to: selector), 
-                         "Lifecycle method should exist")
-        }
+        // for selector in selectors {
+        //     XCTAssertTrue(contextType.instancesRespond(to: selector), 
+        //                  "Lifecycle method should exist")
+        // }
+        XCTFail("Lifecycle methods use inconsistent naming patterns")
     }
     
     // Test boolean property naming
@@ -57,7 +58,7 @@ final class APINamingConsistencyTests: XCTestCase {
     func testNoVagueBasePrefix() throws {
         // These classes should have more descriptive names
         XCTAssertNotNil(ObservableContext.self)  // Should be ObservableContext or similar
-        XCTAssertNotNil(BaseClient.self)   // Should be ObservableClient or similar
+        // XCTAssertNotNil(BaseClient.self)   // Should be ObservableClient or similar - BaseClient doesn't exist
         
         // Document that these need renaming
         XCTAssertTrue(true, "Base prefix usage documented")
@@ -75,7 +76,7 @@ final class APINamingConsistencyTests: XCTestCase {
     // Test consistent use of Manager vs Service
     func testConsistentManagerServiceNaming() throws {
         // Should use either Manager or Service, not both
-        XCTAssertNotNil(NavigationService.self)
+        // XCTAssertNotNil(NavigationService.self) // NavigationService doesn't exist
         
         // ClientManager and ContextManager should be consistent
         // Either all Manager or all Service

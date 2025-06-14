@@ -43,27 +43,38 @@ class ErrorHandlingMacrosTests: XCTestCase {
         case .success:
             XCTFail("Expected failure when exceeding max retries")
         case .failure(let error):
-            XCTAssertTrue(error is AxiomError)
+            XCTAssertTrue(type(of: error) == AxiomError.self)
             XCTAssertEqual(mockClient.attemptCount, 3)
         }
     }
     
     func testErrorHandlingBackoffStrategies() async throws {
-        // Test different backoff strategies
-        var attempts: [TimeInterval] = []
+        // Track attempt timestamps using an actor for thread safety
+        actor AttemptTracker {
+            private var attempts: [TimeInterval] = []
+            
+            func addAttempt(_ time: TimeInterval) {
+                attempts.append(time)
+            }
+            
+            func getAttempts() -> [TimeInterval] {
+                return attempts
+            }
+        }
         
-        // Mock the backoff timing measurement
+        let tracker = AttemptTracker()
         let startTime = Date()
         
-        let result = await withErrorHandling(
+        let _ = await withErrorHandling(
             retry: 3,
             backoff: .exponential(initial: 0.1, multiplier: 2.0)
         ) {
-            attempts.append(Date().timeIntervalSince(startTime))
+            await tracker.addAttempt(Date().timeIntervalSince(startTime))
             throw AxiomError.clientError(.timeout(duration: 1.0))
         }
         
         // Verify exponential backoff pattern
+        let attempts = await tracker.getAttempts()
         XCTAssertEqual(attempts.count, 3)
         // First attempt should be immediate, subsequent attempts should have increasing delays
     }
@@ -201,7 +212,7 @@ class ErrorHandlingMacrosTests: XCTestCase {
             XCTAssertEqual(user.id, "123")
         case .failure(let error):
             // Verify error went through unified system
-            XCTAssertTrue(error is AxiomError)
+            XCTAssertTrue(type(of: error) == AxiomError.self)
         }
     }
     
@@ -256,7 +267,7 @@ class ErrorHandlingMacrosTests: XCTestCase {
 
 // MARK: - Mock Types for Testing
 
-private class MockNetworkClient {
+private class MockNetworkClient: @unchecked Sendable {
     var attemptCount = 0
     var failureCount = 0
     
@@ -275,7 +286,7 @@ private class MockViewModelWithBoundary {
     var lastError: AxiomError?
     var errorBoundaryTriggered = false
     var errorLogged = false
-    var recoveryStrategy: RecoveryStrategy = .log
+    var recoveryStrategy: MacroTestRecoveryStrategy = .log
     
     func performFailingOperation() async {
         // Simulate error boundary macro behavior
@@ -386,11 +397,11 @@ private class MockServiceWithChainedContext {
 }
 
 private class MockAPIClientWithMacros {
-    func fetchUserWithRetry(_ id: String) async -> Result<User, AxiomError> {
+    func fetchUserWithRetry(_ id: String) async -> Result<MacroTestUser, AxiomError> {
         // Simulate macro-generated code integration
         return await withErrorHandling(retry: 3) {
             if id == "123" {
-                return User(id: id, name: "Test User")
+                return MacroTestUser(id: id, name: "Test User")
             } else {
                 throw AxiomError.validationError(.invalidInput("id", "user not found"))
             }
@@ -398,7 +409,7 @@ private class MockAPIClientWithMacros {
     }
 }
 
-private struct User {
+private struct MacroTestUser {
     let id: String
     let name: String
 }
@@ -412,7 +423,7 @@ public enum BackoffStrategy {
     case exponential(initial: TimeInterval = 1.0, multiplier: Double = 2.0, maxDelay: TimeInterval = 60.0)
 }
 
-public enum RecoveryStrategy {
+public enum MacroTestRecoveryStrategy {
     case ignore
     case log
     case alert
@@ -422,11 +433,11 @@ public enum RecoveryStrategy {
 // MARK: - Mock Macro Functions (Simulating macro behavior)
 
 /// Simulates @ErrorHandling macro behavior for testing
-private func withErrorHandling<T>(
+private func withErrorHandling<T: Sendable>(
     retry: Int = 0,
     backoff: BackoffStrategy = .exponential(),
     timeout: TimeInterval? = nil,
-    operation: () async throws -> T
+    operation: @Sendable () async throws -> T
 ) async -> Result<T, AxiomError> {
     var lastError: AxiomError?
     let maxAttempts = max(1, retry)
@@ -459,7 +470,7 @@ private func withErrorHandling<T>(
 }
 
 /// Simulates timeout functionality
-private func withTimeout<T>(_ timeout: TimeInterval, operation: () async throws -> T) async throws -> T {
+private func withTimeout<T: Sendable>(_ timeout: TimeInterval, operation: () async throws -> T) async throws -> T {
     try await withThrowingTaskGroup(of: T.self) { group in
         group.addTask {
             try await operation()

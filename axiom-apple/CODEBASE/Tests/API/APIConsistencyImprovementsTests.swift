@@ -1,14 +1,15 @@
 import XCTest
 @testable import Axiom
+@testable import AxiomTesting
 
 /// Tests for REQUIREMENTS-003: API Consistency Improvements
 /// RED Phase: Testing unified API patterns before implementation
 final class APIConsistencyImprovementsTests: XCTestCase {
     
-    var navigationService: NavigationService!
+    var navigationService: ModularNavigationService!
     
     override func setUp() async throws {
-        navigationService = await NavigationService()
+        navigationService = await ModularNavigationService()
     }
     
     override func tearDown() async throws {
@@ -25,14 +26,14 @@ final class APIConsistencyImprovementsTests: XCTestCase {
         XCTExpectFailure("NavigationResult and unified API don't exist yet - this is RED phase")
         
         // All navigation methods should return NavigationResult, not different types
-        let homeRoute = StandardRoute.home
+        let _ = StandardRoute.home
         
         // These methods don't exist yet - will cause compilation failure
         // let navigateResult = await navigationService.navigate(to: homeRoute, options: .default)
         // XCTAssertTrue(navigateResult.isSuccess, "Navigation should succeed")
         
         // Current API returns Result<Void, AxiomError>, not NavigationResult
-        let currentResult = await navigationService.navigate(to: homeRoute)
+        let currentResult = await navigationService.navigate(to: "/home")
         switch currentResult {
         case .success:
             XCTFail("Expected this to be NavigationResult.success, but got Result.success")
@@ -69,9 +70,10 @@ final class APIConsistencyImprovementsTests: XCTestCase {
         await capability.deactivate() // Should be deactivate()
         
         // Test Context current API (inconsistent)
-        let context = await TestContextForAPI()
-        await context.viewAppeared() // Should be activate()
-        await context.viewDisappeared() // Should be deactivate()
+        let _ = await TestContextForAPI()
+        // These methods don't exist - commented out to prevent compilation error
+        // await context.viewAppeared() // Should be activate()
+        // await context.viewDisappeared() // Should be deactivate()
         
         XCTFail("Framework components use inconsistent lifecycle methods - need Lifecycle protocol")
     }
@@ -96,10 +98,10 @@ final class APIConsistencyImprovementsTests: XCTestCase {
         
         XCTExpectFailure("API uses inconsistent verbs - this is RED phase")
         
-        // Current NavigationService uses handleDeepLink(), not process()
-        // This demonstrates the inconsistency
-        let url = URL(string: "axiom://test")!
-        let result = await navigationService.handleDeepLink(url) // Should be process()
+        // Demonstration of API inconsistency - would need handleDeepLink method
+        // This demonstrates the inconsistency that should be fixed
+        // let url = URL(string: "axiom://test")!
+        // let result = await navigationService.handleDeepLink(url) // Should be process()
         
         // Different method name shows inconsistency
         XCTFail("NavigationService uses 'handle' instead of consistent 'process' verb")
@@ -114,7 +116,7 @@ final class APIConsistencyImprovementsTests: XCTestCase {
         XCTExpectFailure("Error handling patterns are inconsistent - this is RED phase")
         
         // Current API returns Result<Void, AxiomError>, but should return NavigationResult
-        let result = await navigationService.navigate(to: StandardRoute.home)
+        let result = await navigationService.navigate(to: "/home")
         
         switch result {
         case .success:
@@ -129,15 +131,19 @@ final class APIConsistencyImprovementsTests: XCTestCase {
 
 /// Mock capability for testing lifecycle consistency
 private actor TestCapabilityForAPI: Capability {
-    var isAvailable: Bool = false
+    private var _isAvailable: Bool = false
+    
+    var isAvailable: Bool {
+        get async { _isAvailable }
+    }
     
     // Current API (inconsistent)
     func activate() async throws {
-        isAvailable = true
+        _isAvailable = true
     }
     
     func deactivate() async {
-        isAvailable = false
+        _isAvailable = false
     }
 }
 
@@ -145,11 +151,11 @@ private actor TestCapabilityForAPI: Capability {
 @MainActor
 private class TestContextForAPI: ObservableContext {
     // Current API (inconsistent)
-    override func viewAppeared() async {
+    override func appeared() async {
         // Default implementation
     }
     
-    override func viewDisappeared() async {
+    override func disappeared() async {
         // Default implementation
     }
 }

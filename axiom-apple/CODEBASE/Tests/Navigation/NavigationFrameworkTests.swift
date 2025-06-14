@@ -583,7 +583,7 @@ enum TestRoute: Equatable, Route {
 
 enum NavigationAction {
     case navigate(to: TestRoute)
-    case navigateBack()
+    case navigateBack
 }
 
 enum NavigationTestError: Error, Equatable {

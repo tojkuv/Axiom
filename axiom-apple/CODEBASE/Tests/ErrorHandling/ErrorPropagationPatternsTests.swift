@@ -167,7 +167,7 @@ class ErrorPropagationPatternsTests: XCTestCase {
     // MARK: - Integration Pattern Tests
     
     func testDataServiceErrorPropagation() async throws {
-        let dataService = MockDataService()
+        let dataService = MockDataServicePatterns()
         
         let result = await dataService.fetchUserData(id: "invalid-user")
         
@@ -176,7 +176,7 @@ class ErrorPropagationPatternsTests: XCTestCase {
             XCTFail("Expected failure for invalid user")
         case .failure(let error):
             // Should be properly mapped AxiomError
-            XCTAssertTrue(error is AxiomError)
+            XCTAssertNotNil(error, "Error should be properly returned")
             
             // Test that we got a context error (which is how networkError is mapped for now)
             if case .contextError(let contextError) = error {
@@ -257,12 +257,12 @@ private class MockErrorRecoverable: ErrorRecoverable {
     
     func attemptRecovery(from error: AxiomError, using option: String) async -> Result<Void, AxiomError> {
         // Mock successful recovery
-        await Task.sleep(nanoseconds: 1_000_000) // 1ms
+        try? await Task.sleep(nanoseconds: 1_000_000) // 1ms
         return .success(())
     }
 }
 
-private actor MockDataService {
+private actor MockDataServicePatterns {
     func fetchUserData(id: String) async -> Result<User, AxiomError> {
         // Simulate network call that fails
         if id == "invalid-user" {
@@ -284,17 +284,10 @@ private class MockUserViewModel: ObservableObject {
     @Published var error: AxiomError?
     @Published var showError = false
     
-    private let dataService = MockDataService()
+    private let dataService = MockDataServicePatterns()
     
     func loadUser() async {
         let result = await dataService.fetchUserData(id: "invalid-user")
-            .recover { error in
-                // Attempt recovery based on error type
-                if case .contextError = error {
-                    return .success(User(id: "placeholder", name: "Placeholder User"))
-                }
-                return .failure(error)
-            }
         
         await MainActor.run {
             switch result {

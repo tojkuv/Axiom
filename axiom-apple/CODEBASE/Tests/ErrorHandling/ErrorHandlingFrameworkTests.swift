@@ -473,8 +473,8 @@ struct CustomTestError: Error, Equatable {
 }
 
 // Error Recovery Strategies
-enum RecoveryStrategy: Equatable {
-    case log()
+enum FrameworkTestRecoveryStrategy: Equatable {
+    case log
     case retry(maxAttempts: Int = 1)
     case fail
     case ignore
@@ -493,10 +493,10 @@ class TestErrorHandler: ErrorHandler {
     private(set) var errorSource: String?
     private(set) var errorSources: [String] = []
     private(set) var captureTaskId: UInt8?
-    private(set) var lastRecoveryAction: RecoveryStrategy?
+    private(set) var lastRecoveryAction: FrameworkTestRecoveryStrategy?
     
     var shouldPropagateToParent: Bool = false
-    private var recoveryStrategies: [String: (Error) -> RecoveryStrategy] = [:]
+    private var recoveryStrategies: [String: (Error) -> FrameworkTestRecoveryStrategy] = [:]
     
     func processError(_ error: Error, from source: String) {
         captureError(error, from: source)
@@ -515,7 +515,7 @@ class TestErrorHandler: ErrorHandler {
         lastRecoveryAction = strategy?(error) ?? .log()
     }
     
-    func setRecoveryStrategy<E: Error>(for errorType: E.Type, strategy: @escaping (Error) -> RecoveryStrategy) {
+    func setRecoveryStrategy<E: Error>(for errorType: E.Type, strategy: @escaping (Error) -> FrameworkTestRecoveryStrategy) {
         recoveryStrategies[String(describing: errorType)] = strategy
     }
     
@@ -573,7 +573,7 @@ actor ErrorTestClient: Client {
 }
 
 // Test State for Error Client
-struct ErrorTestState: State, Sendable {
+struct ErrorTestState: Axiom.State, Sendable {
     let lastError: Error?
     let errorCount: Int
     
@@ -685,7 +685,7 @@ extension TestHelpers {
         /// Assert that error recovery strategy is applied correctly
         static func assertRecoveryStrategy(
             handler: TestErrorHandler,
-            expectedStrategy: RecoveryStrategy,
+            expectedStrategy: FrameworkTestRecoveryStrategy,
             file: StaticString = #file,
             line: UInt = #line
         ) {

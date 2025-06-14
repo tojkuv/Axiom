@@ -13,7 +13,7 @@ final class EnhancedContextMacroTests: XCTestCase {
                 await client.process(.loadTasks)
             }
             
-            func addTask(_ task: Task) async {
+            func addTask(_ task: MockTask) async {
                 await client.process(.addTask(task))
             }
         }
@@ -37,7 +37,7 @@ final class EnhancedContextMacroTests: XCTestCase {
     
     // Test 2: Verify automatic client observation setup
     func testAutomaticClientObservation() async throws {
-        @Context(client: TaskClient.self, observes: [\TaskState.tasks, \TaskState.isLoading])
+        @Context(client: TaskClient.self, observes: [\EnhancedMacroTaskState.tasks, \EnhancedMacroTaskState.isLoading])
         struct ObservingContext {
             // No manual observation setup needed
         }
@@ -50,7 +50,7 @@ final class EnhancedContextMacroTests: XCTestCase {
         
         // Update client state
         await client.updateState { state in
-            state.tasks = [Task(title: "Test Task")]
+            state.tasks = [MockTask(title: "Test Task")]
             state.isLoading = false
         }
         
@@ -101,7 +101,7 @@ final class EnhancedContextMacroTests: XCTestCase {
         }
         
         // Trigger state change
-        await client.updateState { $0.tasks.append(Task(title: "New")) }
+        await client.updateState { $0.tasks.append(MockTask(title: "New")) }
         try await Task.sleep(for: .milliseconds(50))
         
         XCTAssertGreaterThan(updateCount, 0)
@@ -118,7 +118,7 @@ final class EnhancedContextMacroTests: XCTestCase {
                 await client.process(.loadTasks)
             }
             
-            func addTask(_ task: Task) async {
+            func addTask(_ task: MockTask) async {
                 await client.process(.addTask(task))
             }
         }
@@ -135,18 +135,18 @@ final class EnhancedContextMacroTests: XCTestCase {
 }
 
 // Mock implementations for testing
-struct Task {
+struct MockTask {
     let title: String
 }
 
 enum TaskAction {
     case loadTasks
-    case addTask(Task)
+    case addTask(MockTask)
     case failingAction
 }
 
-struct TaskState {
-    var tasks: [Task] = []
+struct EnhancedMacroTaskState {
+    var tasks: [MockTask] = []
     var isLoading = false
     var error: Error?
 }
@@ -154,13 +154,13 @@ struct TaskState {
 struct TaskError: Error {}
 
 actor MockTaskClient: Client {
-    typealias StateType = TaskState
+    typealias StateType = EnhancedMacroTaskState
     typealias ActionType = TaskAction
     
-    private var state = TaskState()
-    private var continuation: AsyncStream<TaskState>.Continuation?
+    private var state = EnhancedMacroTaskState()
+    private var continuation: AsyncStream<EnhancedMacroTaskState>.Continuation?
     
-    var stateStream: AsyncStream<TaskState> {
+    var stateStream: AsyncStream<EnhancedMacroTaskState> {
         AsyncStream { continuation in
             self.continuation = continuation
             continuation.yield(state)
@@ -186,7 +186,7 @@ actor MockTaskClient: Client {
         }
     }
     
-    func updateState(_ block: (inout TaskState) -> Void) async {
+    func updateState(_ block: (inout EnhancedMacroTaskState) -> Void) async {
         block(&state)
         continuation?.yield(state)
     }

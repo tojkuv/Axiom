@@ -3,8 +3,17 @@ import SwiftSyntaxMacrosTestSupport
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import Axiom
+@testable import AxiomMacros
 
 final class MacroTests: XCTestCase {
+    
+    let testMacros: [String: Macro.Type] = [
+        "Context": ContextMacro.self,
+        "Presentation": PresentationMacro.self,
+        "NavigationOrchestrator": NavigationOrchestratorMacro.self,
+        "AutoMockable": AutoMockableMacro.self,
+        "Capability": CapabilityMacro.self,
+    ]
     
     // MARK: - Context Macro Tests
     

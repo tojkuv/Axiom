@@ -335,7 +335,7 @@ final class ConcurrencySafetyTests: XCTestCase {
     
     func testReentrancyDetectionAndDenial() async {
         // Test that reentrancy is properly detected and can be denied
-        let guard = ReentrancyGuard()
+        let reentrancyGuard = ReentrancyGuard()
         let operation = OperationIdentifier(name: "test-operation")
         
         var firstCallCompleted = false
@@ -343,7 +343,7 @@ final class ConcurrencySafetyTests: XCTestCase {
         
         // Start first operation
         let firstTask = Task {
-            try await guard.executeWithGuard(
+            try await reentrancyGuard.executeWithGuard(
                 policy: .deny,
                 operation: operation
             ) {
@@ -357,7 +357,7 @@ final class ConcurrencySafetyTests: XCTestCase {
         let secondTask = Task {
             try await Task.sleep(nanoseconds: 50_000_000) // 50ms delay
             secondCallStarted = true
-            try await guard.executeWithGuard(
+            try await reentrancyGuard.executeWithGuard(
                 policy: .deny,
                 operation: operation
             ) {
@@ -383,19 +383,19 @@ final class ConcurrencySafetyTests: XCTestCase {
     
     func testReentrancyAllowancePolicy() async {
         // Test that allow policy permits reentrancy
-        let guard = ReentrancyGuard()
+        let reentrancyGuard = ReentrancyGuard()
         let operation = OperationIdentifier(name: "allow-test")
         
         var executionCount = 0
         
-        try await guard.executeWithGuard(
+        try await reentrancyGuard.executeWithGuard(
             policy: .allow,
             operation: operation
         ) {
             executionCount += 1
             
             // Recursive call (reentrancy)
-            try await guard.executeWithGuard(
+            try await reentrancyGuard.executeWithGuard(
                 policy: .allow,
                 operation: operation
             ) {

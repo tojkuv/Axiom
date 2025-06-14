@@ -874,22 +874,10 @@ protocol StorageAdapter {
 }
 
 // Capability Error Types
-enum CapabilityError: Error {
-    case initializationFailed(reason: String)
-    case notAvailable
-    case operationFailed(String)
-}
 
 // CapabilityState is imported from the Axiom module
 
-// Capability Protocol
-protocol Capability: AnyObject {
-    var isAvailable: Bool { get async }
-    var currentState: CapabilityState { get async }
-    
-    func activate() async throws
-    func deactivate() async
-}
+// Using Capability protocol from Axiom framework
 
 // Persistence Capability Protocol
 protocol PersistenceCapability: Capability {

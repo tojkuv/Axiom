@@ -209,7 +209,7 @@ final class ContextFrameworkTests: XCTestCase {
     
     func testContextClientObservation() async throws {
         try await testEnvironment.runTest { env in
-            let client = MockContextClient()
+            let client = FrameworkMockContextClient()
             let context = try await env.createContext(
                 ClientObservingTestContext.self,
                 id: "client-observer"
@@ -272,7 +272,7 @@ final class ContextFrameworkTests: XCTestCase {
     
     func testContextWeakReferenceManagement() async throws {
         try await testEnvironment.runTest { env in
-            var client: MockContextClient? = MockContextClient()
+            var client: FrameworkMockContextClient? = FrameworkMockContextClient()
             weak var weakClient = client
             
             let context = try await env.createContext(
@@ -527,11 +527,11 @@ class PerformanceTestContext: Context, ObservableObject {
 
 @MainActor
 class ClientObservingTestContext: ObservableContext {
-    private let client: MockContextClient
+    private let client: FrameworkMockContextClient
     @Published private(set) var observedStates: [ContextClientState] = []
     private var observationTask: Task<Void, Never>?
     
-    init(client: MockContextClient) {
+    init(client: FrameworkMockContextClient) {
         self.client = client
         super.init()
     }
@@ -573,13 +573,13 @@ class MemoryStabilityTestContext: ObservableContext {
 
 @MainActor
 class WeakReferenceTestContext: ObservableContext {
-    private weak var client: MockContextClient?
+    private weak var client: FrameworkMockContextClient?
     
     var hasAttachedClient: Bool {
         client != nil
     }
     
-    func attachClient(_ client: MockContextClient) {
+    func attachClient(_ client: FrameworkMockContextClient) {
         self.client = client
     }
 }
@@ -645,7 +645,7 @@ enum ContextErrorAction {
     case throwError
 }
 
-actor MockContextClient: Client {
+actor FrameworkFrameworkMockContextClient: Client {
     typealias StateType = ContextClientState
     typealias ActionType = ContextClientAction
     

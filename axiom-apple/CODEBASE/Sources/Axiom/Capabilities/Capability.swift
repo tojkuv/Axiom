@@ -36,10 +36,22 @@ public enum CapabilityState: Equatable, Sendable {
     case unknown
 }
 
+/// Capability status for internal state management
+public enum CapabilityStatus: Equatable, Sendable {
+    /// The capability is idle and not currently active
+    case idle
+    /// The capability is ready for use
+    case ready
+    /// The capability is currently active/running
+    case active
+    /// The capability has failed or encountered an error
+    case failed
+}
+
 // MARK: - Capability Type
 
 /// Represents different types of capabilities supported by the framework
-public enum CapabilityType: String, CaseIterable, Sendable {
+public enum CapabilityType: Sendable {
     case network
     case persistence
     case hardware
@@ -48,6 +60,27 @@ public enum CapabilityType: String, CaseIterable, Sendable {
     case payment
     case ml
     case service
+    case navigation
+    case custom(String)
+    
+    public var rawValue: String {
+        switch self {
+        case .network: return "network"
+        case .persistence: return "persistence"
+        case .hardware: return "hardware"
+        case .media: return "media"
+        case .analytics: return "analytics"
+        case .payment: return "payment"
+        case .ml: return "ml"
+        case .service: return "service"
+        case .navigation: return "navigation"
+        case .custom(let value): return value
+        }
+    }
+    
+    public static var allCases: [CapabilityType] {
+        return [.network, .persistence, .hardware, .media, .analytics, .payment, .ml, .service, .navigation]
+    }
 }
 
 // MARK: - Capability Errors

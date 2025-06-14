@@ -177,18 +177,6 @@ final class DeclarativeNavigationTests: XCTestCase {
     }
     
     // MARK: - Helper Types
-    
-    /// Mock route definitions
-    extension Route {
-        static let home = Route(identifier: "home")
-        static func detail(id: String) -> Route {
-            Route(identifier: "detail-\(id)")
-        }
-        static let settings = Route(identifier: "settings")
-        static func custom(path: String) -> Route {
-            Route(identifier: "custom-\(path)")
-        }
-    }
 }
 
 // MARK: - Test Helper Extensions
@@ -201,5 +189,15 @@ extension Route {
             type: identifier == "settings" ? .modal : .navigation,
             mode: identifier == "settings" ? .modal : .navigation
         )
+    }
+    
+    /// Mock route definitions
+    static let home = Route(identifier: "home")
+    static func detail(id: String) -> Route {
+        Route(identifier: "detail-\(id)")
+    }
+    static let settings = Route(identifier: "settings")
+    static func custom(path: String) -> Route {
+        Route(identifier: "custom-\(path)")
     }
 }

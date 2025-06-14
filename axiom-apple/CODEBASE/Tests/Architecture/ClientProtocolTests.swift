@@ -3,6 +3,24 @@ import XCTest
 
 final class ClientProtocolTests: XCTestCase {
     
+    // MARK: - Basic Conformance Tests
+    
+    func testBasicClientConformance() async throws {
+        // Basic test to verify client protocol conformance
+        let client = MockClient()
+        
+        // Test initial state
+        let initialState = await client.state
+        XCTAssertEqual(initialState.counter, 0)
+        XCTAssertEqual(initialState.name, "")
+        XCTAssertFalse(initialState.isEnabled)
+        
+        // Test action processing
+        try await client.process(.increment)
+        let updatedState = await client.state
+        XCTAssertEqual(updatedState.counter, 1)
+    }
+    
     // MARK: - State Streaming Tests
     
     func testClientStateStreamDelivery() async throws {

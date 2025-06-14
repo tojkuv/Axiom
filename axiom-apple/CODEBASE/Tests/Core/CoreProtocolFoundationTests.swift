@@ -65,7 +65,7 @@ final class CoreProtocolFoundationTests: XCTestCase {
     
     func testObservableClientThreadSafety() async throws {
         // Test thread-safe state mutations
-        let client = ObservableClient<TestState, TestAction>(initialState: TestState(value: 0))
+        let client = ObservableClient<TestState, CoreTestAction>(initialState: TestState(value: 0))
         
         // Concurrent state updates
         await withTaskGroup(of: Void.self) { group in
@@ -85,7 +85,7 @@ final class CoreProtocolFoundationTests: XCTestCase {
     
     func testContextProtocolConformance() async throws {
         // Test that Context protocol has required members
-        let context = CoreTestableContext()
+        let context = await CoreTestableContext()
         
         // Test MainActor binding
         XCTAssertTrue(Thread.isMainThread, "Context operations must run on MainActor")
@@ -103,25 +103,29 @@ final class CoreProtocolFoundationTests: XCTestCase {
     
     func testContextLifecycleIdempotency() async throws {
         // Test that activate/deactivate are idempotent
-        let context = ObservableContext()
+        let context = await ObservableContext()
         
         // Multiple activations should be safe
         try await context.activate()
         try await context.activate()
         try await context.activate()
         
-        XCTAssertTrue(await context.isActive, "Context should be active")
+        await MainActor.run {
+            XCTAssertTrue(context.isActive, "Context should be active")
+        }
         
         // Multiple deactivations should be safe
         await context.deactivate()
         await context.deactivate()
         
-        XCTAssertFalse(await context.isActive, "Context should be inactive")
+        await MainActor.run {
+            XCTAssertFalse(context.isActive, "Context should be inactive")
+        }
     }
     
     func testContextMemoryStability() async throws {
         // Requirement: Memory usage must remain stable after processing actions
-        let context = ObservableContext()
+        let context = await ObservableContext()
         
         let baselineMemory = await context.measureMemoryUsage()
         
@@ -130,7 +134,7 @@ final class CoreProtocolFoundationTests: XCTestCase {
             await context.processActions([i, "test", Double(i)])
         }
         
-        let afterMemory = await context.measureMemoryUsage()
+        _ = await context.measureMemoryUsage()
         let isStable = await context.isMemoryStable(baseline: baselineMemory, tolerance: 0.1)
         
         XCTAssertTrue(isStable, "Memory should remain stable (within 10% tolerance)")
@@ -138,13 +142,17 @@ final class CoreProtocolFoundationTests: XCTestCase {
     
     func testContextParentChildRelationships() async throws {
         // Test parent-child context relationships
-        let parent = ObservableContext()
-        let child = ObservableContext()
+        let parent = await ObservableContext()
+        let child = await ObservableContext()
         
         await parent.addChild(child)
         
-        XCTAssertEqual(await parent.activeChildren.count, 1, "Parent should have one child")
-        XCTAssertNotNil(await child.parentContext, "Child should have parent reference")
+        await MainActor.run {
+            XCTAssertEqual(parent.activeChildren.count, 1, "Parent should have one child")
+        }
+        await MainActor.run {
+            XCTAssertNotNil(child.parentContext, "Child should have parent reference")
+        }
         
         // Test action propagation
         var receivedAction: String?
@@ -157,13 +165,15 @@ final class CoreProtocolFoundationTests: XCTestCase {
             }
         }
         
-        let testParent = TestParent()
-        testParent.actionHandler = { action in
-            receivedAction = action as? String
-            expectation.fulfill()
+        let testParent = await TestParent()
+        await MainActor.run {
+            testParent.actionHandler = { action in
+                receivedAction = action as? String
+                expectation.fulfill()
+            }
         }
         
-        let testChild = ObservableContext()
+        let testChild = await ObservableContext()
         await testParent.addChild(testChild)
         await testChild.sendToParent("TestAction")
         
@@ -195,7 +205,8 @@ final class CoreProtocolFoundationTests: XCTestCase {
         let elapsed = ContinuousClock.now - start
         
         XCTAssertLessThan(elapsed, .milliseconds(10), "State transition must complete within 10ms")
-        XCTAssertTrue(await capability.isAvailable, "Capability should be available after transition")
+        let isAvailable = await capability.isAvailable
+        XCTAssertTrue(isAvailable, "Capability should be available after transition")
     }
     
     func testCapabilityStateStream() async throws {
@@ -251,7 +262,7 @@ final class CoreProtocolFoundationTests: XCTestCase {
     
     func testLifecycleProtocolAdoption() async throws {
         // Test that all core components adopt Lifecycle protocol
-        let context: any Lifecycle = ObservableContext()
+        let context: any Lifecycle = await ObservableContext()
         let capability: any Lifecycle = StandardCapability()
         
         // Test activation
@@ -268,7 +279,7 @@ final class CoreProtocolFoundationTests: XCTestCase {
     func testClientContextCapabilityIntegration() async throws {
         // Test that Client, Context, and Capability work together
         let client = TestableClient()
-        let context = ClientObservingContext(client: client)
+        let context = await ClientObservingContext<TestableClient>(client: client)
         let capability = TestableCapability()
         
         // Activate components
@@ -280,16 +291,28 @@ final class CoreProtocolFoundationTests: XCTestCase {
         
         // Verify context receives update
         var contextUpdated = false
+        @MainActor 
         class TestObservingContext: ClientObservingContext<TestableClient> {
             var updateHandler: (() -> Void)?
+            
+            override init(client: TestableClient) {
+                super.init(client: client)
+            }
+            
+            required init() {
+                fatalError("TestObservingContext must be initialized with a client")
+            }
+            
             override func handleStateUpdate(_ state: TestState) async {
                 updateHandler?()
             }
         }
         
-        let testContext = TestObservingContext(client: client)
-        testContext.updateHandler = {
-            contextUpdated = true
+        let testContext = await TestObservingContext(client: client)
+        await MainActor.run {
+            testContext.updateHandler = {
+                contextUpdated = true
+            }
         }
         
         try await testContext.activate()
@@ -299,7 +322,8 @@ final class CoreProtocolFoundationTests: XCTestCase {
         try await Task.sleep(for: .milliseconds(10))
         
         XCTAssertTrue(contextUpdated, "Context should receive client state updates")
-        XCTAssertTrue(await capability.isAvailable, "Capability should remain available")
+        let isCapabilityAvailable = await capability.isAvailable
+        XCTAssertTrue(isCapabilityAvailable, "Capability should remain available")
         
         // Cleanup
         await testContext.deactivate()
@@ -387,7 +411,7 @@ actor TestableCapability: Capability {
     private var available = false
     
     var isAvailable: Bool {
-        available
+        get async { available }
     }
     
     func activate() async throws {

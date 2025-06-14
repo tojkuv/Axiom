@@ -3,6 +3,20 @@ import XCTest
 
 final class NavigationServiceTests: XCTestCase {
     
+    // MARK: - Basic Navigation Tests
+    
+    func testBasicNavigation() async throws {
+        // Basic test to verify navigation functionality
+        let navigation = await createValidNavigationOrchestrator()
+        
+        // Test that navigation service exists and is functional
+        XCTAssertNotNil(navigation, "Navigation service should be created")
+        
+        // Test basic orchestrator conformance
+        let conformsToOrchestrator = navigation is (any Orchestrator)
+        XCTAssertTrue(conformsToOrchestrator, "Navigation service should conform to Orchestrator")
+    }
+    
     // MARK: - RED: Navigation Service Component Type Tests
     
     func testNavigationAsStandaloneComponentTypeFails() async throws {

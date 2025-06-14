@@ -222,17 +222,17 @@ class MockRecoverableService {
 }
 
 class MockDataService {
-    func fetchUserData(id: String) async -> Result<User, AxiomError> {
+    func fetchUserData(id: String) async -> Result<PropagationTestUser, AxiomError> {
         // Simulate network call
         if id == "invalid" {
             return .failure(.validationError(.invalidInput("userId", "Invalid format")))
         }
         
-        return .success(User(id: id, name: "Test User"))
+        return .success(PropagationTestUser(id: id, name: "Test User"))
     }
 }
 
-struct User {
+struct PropagationTestUser {
     let id: String
     let name: String
 }

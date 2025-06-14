@@ -25,7 +25,8 @@ final class DeadCodeEliminationTests: XCTestCase {
         
         let network = TestNetworkCapability()
         try await network.activate()
-        XCTAssertEqual(network.status, .ready)
+        let isAvailable = await network.isAvailable
+        XCTAssertTrue(isAvailable)
         XCTAssertNotNil(network)
         
         // PersistenceCapability should still work  
@@ -38,7 +39,8 @@ final class DeadCodeEliminationTests: XCTestCase {
         
         let persistence = TestPersistenceCapability()
         try await persistence.activate()
-        XCTAssertEqual(persistence.status, .ready)
+        let isPersistenceAvailable = await persistence.isAvailable
+        XCTAssertTrue(isPersistenceAvailable)
     }
     
     /// Verify ExtendedCapability protocol still functions for remaining capabilities
@@ -49,13 +51,50 @@ final class DeadCodeEliminationTests: XCTestCase {
             let type: CapabilityType = .custom("test")
             var status: CapabilityStatus = .idle
             var dependencies: [any Capability] = []
+            var state: CapabilityState = .unavailable
+            
+            var isAvailable: Bool {
+                get async { status == .ready }
+            }
+            
+            var stateStream: AsyncStream<CapabilityState> {
+                get async {
+                    AsyncStream { continuation in
+                        continuation.yield(state)
+                        continuation.finish()
+                    }
+                }
+            }
+            
+            var activationTimeout: Duration {
+                get async { .seconds(30) }
+            }
             
             func activate() async throws {
                 status = .ready
+                state = .available
+            }
+            
+            func deactivate() async {
+                status = .idle
+                state = .unavailable
+            }
+            
+            func isSupported() async -> Bool {
+                return true
+            }
+            
+            func requestPermission() async throws {
+                // No permission needed for test
+            }
+            
+            func setActivationTimeout(_ timeout: Duration) async {
+                // Configuration stored elsewhere
             }
             
             func cleanup() async throws {
                 status = .idle
+                state = .unavailable
             }
             
             func validate() async throws -> Bool {
@@ -67,13 +106,15 @@ final class DeadCodeEliminationTests: XCTestCase {
         
         // Verify lifecycle works
         try await capability.activate()
-        XCTAssertEqual(capability.status, .ready)
+        let statusAfterActivate = await capability.status
+        XCTAssertEqual(statusAfterActivate, .ready)
         
         let isValid = try await capability.validate()
         XCTAssertTrue(isValid)
         
         try await capability.cleanup()
-        XCTAssertEqual(capability.status, .idle)
+        let statusAfterCleanup = await capability.status
+        XCTAssertEqual(statusAfterCleanup, .idle)
     }
     
     /// Test that no references to dead capabilities exist in production code
@@ -101,7 +142,11 @@ final class DeadCodeEliminationTests: XCTestCase {
         // Test that capability dependencies and composition work
         @Capability(.network)
         actor CompositeCapability {
-            @CapabilityDependency var storageAdapter: StorageAdapter
+            private let storageAdapter: StorageAdapter
+            
+            init(storageAdapter: StorageAdapter) {
+                self.storageAdapter = storageAdapter
+            }
             
             func performCompositeOperation() async throws {
                 // Use both network (self) and storage dependency
@@ -110,12 +155,14 @@ final class DeadCodeEliminationTests: XCTestCase {
             }
         }
         
-        let composite = CompositeCapability()
+        let storageAdapter = FileStorageAdapter(directory: FileManager.default.temporaryDirectory)
+        let composite = CompositeCapability(storageAdapter: storageAdapter)
         try await composite.activate()
-        XCTAssertEqual(composite.status, .ready)
+        let compositeState = await composite.state
+        XCTAssertEqual(compositeState, .available)
         
-        // Verify dependency injection still works
-        XCTAssertNotNil(composite.storageAdapter)
+        // Verify dependency injection works through performCompositeOperation
+        try await composite.performCompositeOperation()
     }
     
     /// Test framework builds and all tests pass without dead code
@@ -149,14 +196,20 @@ final class DeadCodeEliminationTests: XCTestCase {
     // MARK: - Test Backup File Removal Safety
     
     /// Test that navigation functionality works without backup files
+    @MainActor 
     func testNavigationFunctionalityWithoutBackups() async throws {
         // Test core navigation service functionality
-        let navigationService = DefaultNavigationService()
+        let navigationService = ModularNavigationService()
         XCTAssertNotNil(navigationService, "Navigation service should initialize without backup files")
         
         // Test that navigation service has required methods
-        XCTAssertTrue(navigationService.responds(to: #selector(DefaultNavigationService.navigate(to:))), 
-                     "Navigation service should have navigate method")
+        let result = await navigationService.navigate(to: "/test")
+        switch result {
+        case .success:
+            XCTAssertTrue(true, "Navigation service should have navigate method")
+        case .failure:
+            XCTFail("Navigation service should succeed for test navigation")
+        }
     }
     
     /// Test that error handling works without backup dependencies
@@ -166,9 +219,9 @@ final class DeadCodeEliminationTests: XCTestCase {
         XCTAssertNotNil(error, "Error system should work without dead code")
         
         // Test error propagation patterns
-        let result: Result<String, AxiomError> = .failure(error)
+        let result: Result<String, any Error> = .failure(error)
         let transformed = result.mapToAxiomError { _ in
-            AxiomError.validationError(.invalidInput("test"))
+            AxiomError.validationError(.invalidInput("test", "test reason"))
         }
         
         XCTAssertNotNil(transformed, "Error propagation should work without backup files")
@@ -247,8 +300,8 @@ final class DeadCodeEliminationTests: XCTestCase {
     /// Test that essential framework features remain functional
     func testEssentialFunctionalityPreservation() async throws {
         // Test that core protocols exist
-        XCTAssertNotNil(ClientProtocol.self, "ClientProtocol should remain")
-        XCTAssertNotNil(ContextProtocol.self, "ContextProtocol should remain")
+        XCTAssertNotNil((any Client<any State, any Sendable>).self, "Client protocol should remain")
+        XCTAssertNotNil((any Context).self, "Context protocol should remain")
         
         // Test that error types exist
         XCTAssertNotNil(AxiomError.self, "AxiomError should remain")

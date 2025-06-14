@@ -4,6 +4,22 @@ import SwiftUI
 
 final class ContextProtocolTests: XCTestCase {
     
+    // MARK: - Basic Conformance Tests
+    
+    func testBasicContextConformance() async throws {
+        // Basic test to verify context protocol conformance
+        let context = await ProtocolTestContext()
+        
+        // Test lifecycle
+        await context.onAppear()
+        let isActive = await context.isActive
+        XCTAssertTrue(isActive, "Context should be active after onAppear")
+        
+        await context.onDisappear()
+        let isInactive = await context.isActive
+        XCTAssertFalse(isInactive, "Context should be inactive after onDisappear")
+    }
+    
     // MARK: - Lifecycle Tests
     
     func testContextLifecycleMethods() async throws {
@@ -70,7 +86,7 @@ final class ContextProtocolTests: XCTestCase {
     func testContextClientObservation() async throws {
         // Test that context can observe client state changes
         let client = MockContextClient()
-        let context = await ClientObservingContext(client: client)
+        let context = await TestClientObservingContext(client: client)
         
         await context.onAppear()
         
@@ -243,7 +259,7 @@ class ObservableProtocolTestContext: Context {
 
 // Context that observes a client
 @MainActor
-class ClientObservingContext: Context {
+class TestClientObservingContext: Context {
     private let client: MockContextClient
     private(set) var observedStates: [ContextClientState] = []
     private var observationTask: Task<Void, Never>?

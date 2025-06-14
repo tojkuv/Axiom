@@ -1,23 +1,23 @@
 import XCTest
 @testable import Axiom
 
+// MARK: - Test Types
+
+struct OptimizedTestState: State, Equatable {
+    var id = UUID().uuidString
+    var numbers: [Int] = []
+    var strings: [String] = []
+    var nested: NestedState = NestedState()
+    var metadata: [String: Any] = [:]
+    
+    struct NestedState: Equatable {
+        var value: Int = 0
+        var items: [String] = []
+    }
+}
+
 /// Tests for REQUIREMENTS-W-01-004: State Optimization Strategies
 final class StateOptimizationEnhancedTests: XCTestCase {
-    
-    // MARK: - Test Types
-    
-    struct OptimizedTestState: State, Equatable {
-        var id = UUID().uuidString
-        var numbers: [Int] = []
-        var strings: [String] = []
-        var nested: NestedState = NestedState()
-        var metadata: [String: Any] = [:]
-        
-        struct NestedState: Equatable {
-            var value: Int = 0
-            var items: [String] = []
-        }
-    }
     
     // MARK: - RED Phase Tests for COW Optimization
     

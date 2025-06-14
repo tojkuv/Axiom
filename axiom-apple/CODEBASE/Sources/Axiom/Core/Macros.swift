@@ -147,3 +147,83 @@ public macro ErrorContext(
     module: "AxiomMacros",
     type: "ErrorContextMacro"
 )
+
+// MARK: - Core Developer Experience Macros
+
+/// Macro that generates complete Client protocol conformance with state management
+///
+/// Usage:
+/// ```swift
+/// @Client(state: TodoState.self)
+/// public actor TodoClient {
+///     // All Client implementation generated automatically
+/// }
+/// ```
+///
+/// This macro generates:
+/// - Client protocol conformance
+/// - State storage and management
+/// - stateStream property with AsyncStream
+/// - process(_:) method for action handling
+/// - State lifecycle hooks (stateWillUpdate/stateDidUpdate)
+/// - Complete ObservableClient inheritance
+/// - Performance monitoring and validation
+@attached(peer, names: arbitrary)
+public macro Client<S: State>(
+    state: S.Type,
+    action: Any.Type = Any.self,
+    initialState: S? = nil,
+    performanceBudget: Double? = nil
+) = #externalMacro(module: "AxiomMacros", type: "ClientMacro")
+
+/// Macro that generates State protocol conformance with validation and optimizations
+///
+/// Usage:
+/// ```swift
+/// @State
+/// struct TodoState {
+///     let items: [TodoItem]
+///     let filter: Filter
+/// }
+/// ```
+///
+/// This macro generates:
+/// - State protocol conformance (Equatable, Hashable, Sendable)
+/// - Validation methods for immutability
+/// - Optimized equality and hashing implementations
+/// - State transition methods with validation
+/// - Memory-efficient state storage
+@attached(extension, conformances: State)
+public macro State(
+    validation: Bool = true,
+    optimizeEquality: Bool = true,
+    customHashable: Bool = false,
+    memoryOptimized: Bool = true
+) = #externalMacro(module: "AxiomMacros", type: "StateMacro")
+
+/// Macro that generates Action protocol conformance with execution pipeline and validation
+///
+/// Usage:
+/// ```swift
+/// @Action
+/// enum TodoAction {
+///     case addItem(String)
+///     case toggleItem(UUID)
+///     case deleteItem(UUID)
+/// }
+/// ```
+///
+/// This macro generates:
+/// - Sendable conformance for thread safety
+/// - Execution pipeline with pre/post processing
+/// - Action validation and sanitization
+/// - Performance tracking for action execution
+/// - Automatic error handling integration
+@attached(extension, conformances: Sendable)
+public macro Action(
+    validation: Bool = true,
+    performance: Bool = true,
+    retry: Bool = false,
+    timeout: Double? = nil,
+    priority: String = "medium"
+) = #externalMacro(module: "AxiomMacros", type: "ActionMacro")
