@@ -1,9 +1,7 @@
 import Foundation
 import SwiftUI
 
-#if canImport(XCTest)
-import XCTest
-#endif
+// XCTest import removed to prevent linking issues in production apps
 
 // MARK: - Deep Linking Framework (W-04-004)
 
@@ -740,9 +738,7 @@ public class DeepLinkTester {
     /// Test valid deep link
     public func test(_ urlString: String, validation: @escaping (any TypeSafeRoute) -> Void) async {
         guard let url = URL(string: urlString) else {
-            #if canImport(XCTest)
-            XCTFail("Invalid URL: \(urlString)")
-            #endif
+            assertionFailure("Invalid URL: \(urlString)")
             return
         }
         
@@ -750,18 +746,14 @@ public class DeepLinkTester {
         if case .resolved(let route) = result {
             validation(route)
         } else {
-            #if canImport(XCTest)
-            XCTFail("Expected resolved route for \(urlString), got \(result)")
-            #endif
+            assertionFailure("Expected resolved route for \(urlString), got \(result)")
         }
     }
     
     /// Test invalid deep link
     public func testInvalid(_ urlString: String, validation: @escaping (DeepLinkError) -> Void) async {
         guard let url = URL(string: urlString) else {
-            #if canImport(XCTest)
-            XCTFail("Invalid URL: \(urlString)")
-            #endif
+            assertionFailure("Invalid URL: \(urlString)")
             return
         }
         
@@ -769,9 +761,7 @@ public class DeepLinkTester {
         if case .invalid = result {
             validation(.routeNotFound)
         } else {
-            #if canImport(XCTest)
-            XCTFail("Expected invalid result for \(urlString), got \(result)")
-            #endif
+            assertionFailure("Expected invalid result for \(urlString), got \(result)")
         }
     }
 }

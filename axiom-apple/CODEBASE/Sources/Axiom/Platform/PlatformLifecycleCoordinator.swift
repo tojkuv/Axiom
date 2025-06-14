@@ -148,9 +148,10 @@ public actor PlatformLifecycleCoordinator {
         
         #if canImport(UIKit) && !os(watchOS)
         if backgroundTaskID != .invalid {
+            let taskID = backgroundTaskID
+            backgroundTaskID = .invalid
             await MainActor.run {
-                UIApplication.shared.endBackgroundTask(backgroundTaskID)
-                backgroundTaskID = .invalid
+                UIApplication.shared.endBackgroundTask(taskID)
             }
         }
         #endif
@@ -200,9 +201,10 @@ public actor PlatformLifecycleCoordinator {
         
         #if canImport(UIKit) && !os(watchOS)
         if backgroundTaskID != .invalid {
+            let taskID = backgroundTaskID
+            backgroundTaskID = .invalid
             await MainActor.run {
-                UIApplication.shared.endBackgroundTask(backgroundTaskID)
-                backgroundTaskID = .invalid
+                UIApplication.shared.endBackgroundTask(taskID)
             }
         }
         #endif
@@ -258,7 +260,7 @@ public protocol StateStorageProtocol: Actor {
     func refreshIfNeeded() async
 }
 
-extension Axiom.StateStorage: StateStorageProtocol {
+extension StateStorage: StateStorageProtocol {
     public var identifier: String {
         "\(S.self)_\(ObjectIdentifier(self).hashValue)"
     }

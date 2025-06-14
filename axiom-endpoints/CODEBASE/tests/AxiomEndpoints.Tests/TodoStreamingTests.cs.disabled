@@ -1,0 +1,232 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+using FluentAssertions;
+using TodoApi.Endpoints;
+using TodoApi.Models;
+
+#pragma warning disable CA1707 // Identifiers should not contain underscores - test method naming convention
+
+namespace AxiomEndpoints.Tests;
+
+public class TodoStreamingTests
+{
+    [Fact]
+    public async Task StreamTodos_Should_SendSnapshotThenUpdates()
+    {
+        // Arrange
+        var repository = new TestTodoRepository();
+        var endpoint = new StreamTodos(repository);
+        var request = new StreamTodosRequest();
+        var context = new TestContext();
+
+        // Pre-populate repository
+        var existingTodos = new List<Todo>
+        {
+            new(Guid.NewGuid(), "Todo 1", false, DateTime.UtcNow),
+            new(Guid.NewGuid(), "Todo 2", true, DateTime.UtcNow)
+        };
+
+        foreach (var todo in existingTodos)
+        {
+            await repository.AddAsync(todo);
+        }
+
+        // Act
+        var events = await endpoint
+            .StreamAsync(request, context)
+            .Take(3) // 1 snapshot + 2 updates
+            .ToListAsync();
+
+        // Trigger some changes
+        var newTodo = new Todo(Guid.NewGuid(), "New Todo", false, DateTime.UtcNow);
+        await repository.AddAsync(newTodo);
+
+        // Assert
+        events.Should().HaveCount(3);
+        events[0].Type.Should().Be(EventType.Snapshot);
+        events[0].Todos.Should().HaveCount(2);
+        events[1].Type.Should().Be(EventType.Updated);
+        events[2].Type.Should().Be(EventType.Updated);
+    }
+
+    [Fact]
+    public async Task ImportTodos_Should_ImportValidTodos()
+    {
+        // Arrange
+        var repository = new TestTodoRepository();
+        var endpoint = new ImportTodos(repository);
+        var context = new TestContext();
+
+        var todos = new[]
+        {
+            new Todo(Guid.NewGuid(), "Valid 1", false, DateTime.UtcNow),
+            new Todo(Guid.NewGuid(), "Valid 2", true, DateTime.UtcNow)
+        };
+
+        // Act
+        var result = await endpoint.HandleAsync(todos.ToAsyncEnumerable(), context);
+
+        // Assert
+        result.Should().BeSuccess();
+        result.Value.ImportedCount.Should().Be(2);
+        result.Value.FailedCount.Should().Be(0);
+        result.Value.Errors.Should().BeEmpty();
+
+        var allTodos = await repository.GetAllAsync();
+        allTodos.Should().HaveCount(2);
+    }
+
+    [Fact]
+    public async Task ImportTodos_Should_HandleInvalidTodos()
+    {
+        // Arrange
+        var repository = new TestTodoRepository();
+        var endpoint = new ImportTodos(repository);
+        var context = new TestContext();
+
+        var todos = new[]
+        {
+            new Todo(Guid.NewGuid(), "Valid", false, DateTime.UtcNow),
+            new Todo(Guid.Empty, "Invalid ID", false, DateTime.UtcNow), // Invalid
+            new Todo(Guid.NewGuid(), "", false, DateTime.UtcNow), // Invalid title
+            new Todo(Guid.NewGuid(), "Valid 2", true, DateTime.UtcNow)
+        };
+
+        // Act
+        var result = await endpoint.HandleAsync(todos.ToAsyncEnumerable(), context);
+
+        // Assert
+        result.Should().BeSuccess();
+        result.Value.ImportedCount.Should().Be(2);
+        result.Value.FailedCount.Should().Be(2);
+        result.Value.Errors.Should().HaveCount(2);
+    }
+
+    [Fact]
+    public async Task CollaborativeTodos_Should_ProcessCommands()
+    {
+        // Arrange
+        var repository = new TestTodoRepository();
+        var hub = new TestCollaborationHub();
+        var endpoint = new CollaborativeTodos(repository, hub);
+        var context = new TestContext();
+
+        var commands = new[]
+        {
+            new TodoCommand { Type = CommandType.Create, Todo = new Todo(Guid.Empty, "New Todo", false, DateTime.UtcNow) },
+            new TodoCommand { Type = CommandType.Update, Todo = new Todo(Guid.NewGuid(), "Updated Todo", true, DateTime.UtcNow) }
+        };
+
+        // Act
+        var updates = await endpoint
+            .StreamAsync(commands.ToAsyncEnumerable(), context)
+            .Take(2)
+            .ToListAsync();
+
+        // Assert
+        updates.Should().HaveCount(2);
+        hub.BroadcastedUpdates.Should().HaveCount(2);
+    }
+
+    [Fact]
+    public async Task ExportTodos_Should_GenerateCsvStream()
+    {
+        // Arrange
+        var repository = new TestTodoRepository();
+        var endpoint = new ExportTodos(repository);
+        var request = new ExportRequest { Format = "csv" };
+        var context = new TestContext();
+
+        // Pre-populate repository
+        await repository.AddAsync(new Todo(Guid.NewGuid(), "Test Todo", false, DateTime.UtcNow));
+
+        // Act
+        var chunks = await endpoint
+            .StreamAsync(request, context)
+            .Take(10) // Limit chunks
+            .ToListAsync();
+
+        // Assert
+        chunks.Should().NotBeEmpty();
+        chunks[0].ContentType.Should().Be("text/csv");
+        
+        // Reconstruct the full content
+        var fullContent = string.Join("", chunks.Select(c => System.Text.Encoding.UTF8.GetString(c.Data.ToArray())));
+        fullContent.Should().Contain("Id,Title,IsComplete,CreatedAt");
+        fullContent.Should().Contain("Test Todo");
+    }
+}
+
+// Test implementations
+[SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is used in tests")]
+internal sealed class TestTodoRepository : ITodoRepository
+{
+    private readonly List<Todo> _todos = new();
+    private readonly List<Todo> _changes = new();
+
+    public Task<List<Todo>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(_todos.ToList());
+    }
+
+    public Task<Todo?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(_todos.FirstOrDefault(t => t.Id == id));
+    }
+
+    public Task AddAsync(Todo todo, CancellationToken cancellationToken = default)
+    {
+        _todos.Add(todo);
+        _changes.Add(todo);
+        return Task.CompletedTask;
+    }
+
+    public Task<bool> UpdateAsync(Todo todo, CancellationToken cancellationToken = default)
+    {
+        var index = _todos.FindIndex(t => t.Id == todo.Id);
+        if (index >= 0)
+        {
+            _todos[index] = todo;
+            _changes.Add(todo);
+            return Task.FromResult(true);
+        }
+        return Task.FromResult(false);
+    }
+
+    public Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var index = _todos.FindIndex(t => t.Id == id);
+        if (index >= 0)
+        {
+            _todos.RemoveAt(index);
+            return Task.FromResult(true);
+        }
+        return Task.FromResult(false);
+    }
+
+    public async IAsyncEnumerable<Todo> GetChangesAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        foreach (var change in _changes)
+        {
+            yield return change;
+            await Task.Delay(10, cancellationToken); // Small delay
+        }
+    }
+}
+
+[SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is used in tests")]
+internal sealed class TestCollaborationHub : ICollaborationHub
+{
+    public List<TodoUpdate> BroadcastedUpdates { get; } = new();
+
+    public IAsyncEnumerable<TodoUpdate> JoinSession(Guid sessionId, string userId)
+    {
+        return BroadcastedUpdates.ToAsyncEnumerable();
+    }
+
+    public Task BroadcastUpdate(Guid sessionId, TodoUpdate update)
+    {
+        BroadcastedUpdates.Add(update);
+        return Task.CompletedTask;
+    }
+}

@@ -254,6 +254,11 @@ public actor UserErrorMessageService {
             return getInfrastructureErrorMessage(infraError)
         case .networkError(let networkError):
             return getNetworkErrorMessage(networkError)
+        case .unknownError:
+            return BaseErrorMessage(
+                title: localizationProvider.string(for: "error.generic.title"),
+                description: localizationProvider.string(for: "error.generic.description")
+            )
         }
     }
     
@@ -388,6 +393,16 @@ public actor UserErrorMessageService {
             return BaseErrorMessage(
                 title: "Service Unavailable",
                 description: "The service is starting up. Please wait a moment and try again."
+            )
+        case .atomicActionSequenceFailed(let processed, let total, _):
+            return BaseErrorMessage(
+                title: "Action Sequence Failed",
+                description: "Failed to complete action sequence (\(processed)/\(total) actions completed). Previous state has been restored."
+            )
+        case .maxRetriesExceeded(let attempts, _):
+            return BaseErrorMessage(
+                title: "Maximum Retries Exceeded",
+                description: "Operation failed after \(attempts) attempts. Please try again later."
             )
         }
     }

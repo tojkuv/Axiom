@@ -9,6 +9,9 @@ public protocol PersistenceCapability: Capability {
     /// Load state from persistent storage
     func load<T: Codable>(_ type: T.Type, for key: String) async throws -> T?
     
+    /// Load raw data from persistent storage
+    func load(key: String) async throws -> Data?
+    
     /// Delete state from persistent storage
     func delete(key: String) async throws
     
@@ -66,6 +69,11 @@ public actor MockPersistenceCapability: PersistenceCapability {
         loadCount += 1
         guard let data = storage[key] else { return nil }
         return try JSONDecoder().decode(type, from: data)
+    }
+    
+    public func load(key: String) async throws -> Data? {
+        loadCount += 1
+        return storage[key]
     }
     
     public func delete(key: String) async throws {
@@ -253,6 +261,30 @@ public actor CoreDataPersistenceCapability: PersistenceCapability {
                     
                     let value = try JSONDecoder().decode(type, from: data)
                     continuation.resume(returning: value)
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+    
+    public func load(key: String) async throws -> Data? {
+        return try await withCheckedThrowingContinuation { continuation in
+            coreDataStack.viewContext.perform {
+                do {
+                    let request: NSFetchRequest<NSManagedObject> = NSFetchRequest(entityName: "StoredValue")
+                    request.predicate = NSPredicate(format: "key == %@", key)
+                    request.fetchLimit = 1
+                    
+                    let results = try self.coreDataStack.viewContext.fetch(request)
+                    
+                    guard let object = results.first,
+                          let data = object.value(forKey: "data") as? Data else {
+                        continuation.resume(returning: nil)
+                        return
+                    }
+                    
+                    continuation.resume(returning: data)
                 } catch {
                     continuation.resume(throwing: error)
                 }

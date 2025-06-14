@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsAspireService>true</IsAspireService>
+    <UserSecretsId>aspire-notificationservice</UserSecretsId>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsNotAsErrors />
+    <EnableNETAnalyzers>false</EnableNETAnalyzers>
+    <NoWarn>CA1062,CA2007,CA1308</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.StackExchange.Redis" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\AxiomEndpoints.Core\AxiomEndpoints.Core.csproj" />
+    <ProjectReference Include="..\..\..\src\AxiomEndpoints.AspNetCore\AxiomEndpoints.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\..\src\AxiomEndpoints.Aspire\AxiomEndpoints.Aspire.csproj" />
+  </ItemGroup>
+
+</Project>

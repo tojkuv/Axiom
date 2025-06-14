@@ -169,7 +169,7 @@ struct TodoTask: Equatable, Hashable {
     let title: String
 }
 
-struct TestState: State, Equatable {
+struct TestState: AxiomState, Equatable {
     let value: Int
 }
 
@@ -230,9 +230,18 @@ actor TaskClient: Client {
             continuation.yield(currentState)
         }
     }
+    
+    func getCurrentState() async -> TaskState {
+        return currentState
+    }
+    
+    func rollbackToState(_ state: TaskState) async {
+        currentState = state
+        continuation.yield(currentState)
+    }
 }
 
-struct TaskState: State {
+struct TaskState: AxiomState {
     var tasks: [TodoTask]
 }
 

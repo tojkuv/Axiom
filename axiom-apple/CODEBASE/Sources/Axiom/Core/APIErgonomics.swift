@@ -47,7 +47,7 @@ public final class ContextBuilder<C: ObservableContext> {
 }
 
 /// Client builder for ergonomic client creation
-public final class ClientBuilder<State: Axiom.State & Equatable, Action: Sendable> {
+public final class ClientBuilder<State: Axiom.AxiomState & Equatable, Action: Sendable> {
     private let initialState: State
     private var performanceMonitor: (any ClientPerformanceMonitor)?
     private var actionProcessor: (@Sendable (Action) async throws -> State)?
@@ -57,7 +57,7 @@ public final class ClientBuilder<State: Axiom.State & Equatable, Action: Sendabl
     }
     
     /// Create a new client builder
-    public static func create<S: Axiom.State & Equatable, A>(initialState: S) -> ClientBuilder<S, A> {
+    public static func create<S: Axiom.AxiomState & Equatable, A>(initialState: S) -> ClientBuilder<S, A> {
         return ClientBuilder<S, A>(initialState: initialState)
     }
     
@@ -168,7 +168,7 @@ public final class ErrorBuilder {
 // MARK: - Ergonomic Client Implementation
 
 /// Ergonomic client implementation with reduced boilerplate
-public actor ErgonomicClient<S: Axiom.State & Equatable, A: Sendable>: Client {
+public actor ErgonomicClient<S: Axiom.AxiomState & Equatable, A: Sendable>: Client {
     public typealias StateType = S
     public typealias ActionType = A
     
@@ -224,6 +224,22 @@ public actor ErgonomicClient<S: Axiom.State & Equatable, A: Sendable>: Client {
         }
         
         await stateDidUpdate(from: oldState, to: newState)
+    }
+    
+    public func getCurrentState() async -> S {
+        return state
+    }
+    
+    public func rollbackToState(_ previousState: S) async {
+        let oldState = state
+        await stateWillUpdate(from: oldState, to: previousState)
+        state = previousState
+        
+        for (_, continuation) in streamContinuations {
+            continuation.yield(previousState)
+        }
+        
+        await stateDidUpdate(from: oldState, to: previousState)
     }
 }
 
@@ -356,7 +372,7 @@ public extension Context {
 
 public extension Client {
     /// Convenience method to create a client
-    static func create<S: Axiom.State & Equatable, A>(
+    static func create<S: Axiom.AxiomState & Equatable, A>(
         initialState: S,
         processor: @escaping @Sendable (A) async throws -> S
     ) -> ErgonomicClient<S, A> {

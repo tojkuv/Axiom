@@ -95,7 +95,7 @@ public enum AsyncTestError: Error, LocalizedError {
 // MARK: - Mock Client
 
 /// Mock client for testing async behaviors
-public actor MockClient<S: State, A>: Client {
+public actor MockClient<S: AxiomState, A>: Client {
     public typealias StateType = S
     public typealias ActionType = A
     
@@ -115,6 +115,15 @@ public actor MockClient<S: State, A>: Client {
     
     public func process(_ action: A) async throws {
         // Override in tests to define behavior
+    }
+    
+    public func getCurrentState() async -> S {
+        return currentState
+    }
+    
+    public func rollbackToState(_ state: S) async {
+        currentState = state
+        continuation.yield(state)
     }
     
     public func setState(_ state: S) {
@@ -407,7 +416,7 @@ public class ThrottledOperation<T: Sendable> {
 // MARK: - Convenience Assertions
 
 /// Assert async state values are equal
-public func XCTAssertStateEqual<S: State & Equatable>(
+public func XCTAssertStateEqual<S: AxiomState & Equatable>(
     _ expression1: @autoclosure () async throws -> S,
     _ expression2: @autoclosure () async throws -> S,
     file: StaticString = #filePath,

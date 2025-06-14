@@ -203,7 +203,7 @@ public actor AdaptivePerformanceOptimizer {
     // MARK: - Private Implementation
     
     private func profileDevice() async -> DeviceProfile {
-        let deviceInfo = DeviceInfoMonitor.current
+        let deviceInfo = await MainActor.run { DeviceInfoMonitor.current }
         let processInfo = ProcessInfo.processInfo
         
         return DeviceProfile(
@@ -783,7 +783,7 @@ public actor SLAManager {
         
         do {
             // Get current device profile to determine performance class
-            let deviceInfo = DeviceInfoMonitor.current
+            let deviceInfo = await MainActor.run { DeviceInfoMonitor.current }
             let deviceProfile = DeviceProfile(
                 deviceModel: await deviceInfo.model,
                 processorSpeed: await deviceInfo.processorSpeed,
@@ -824,7 +824,7 @@ public actor SLAManager {
     
     /// Validate SLA achievability against current device capabilities
     private func validateSLAAchievability(_ sla: PerformanceSLA) async {
-        let deviceInfo = DeviceInfoMonitor.current
+        let deviceInfo = await MainActor.run { DeviceInfoMonitor.current }
         let memoryPressure = await deviceInfo.currentMemoryPressure
         let thermalState = await deviceInfo.thermalState
         let isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled

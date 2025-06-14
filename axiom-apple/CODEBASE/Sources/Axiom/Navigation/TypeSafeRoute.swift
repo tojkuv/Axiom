@@ -10,7 +10,7 @@ public protocol Routable {
 }
 
 /// Generic route type alias for compatibility
-public typealias Route = StandardRoute
+public typealias Route = any TypeSafeRoute
 
 /// Standard route enumeration for basic navigation
 public enum StandardRoute: Routable {

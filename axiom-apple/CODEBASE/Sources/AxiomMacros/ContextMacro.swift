@@ -236,7 +236,8 @@ public struct ContextMacro: MemberMacro {
             private func startObservation() {
                 observationTask = Task { [weak self] in
                     guard let self = self else { return }
-                    for await state in await self.client.stateStream {
+                    let stream = await self.client.stateStream
+                    for await state in stream {
                         await self.handleStateUpdate(state)
                     }
                 }
@@ -252,19 +253,10 @@ public struct ContextMacro: MemberMacro {
             """
             
             @MainActor
-            private func handleStateUpdate(_ state: Any) async {
+            public func handleStateUpdate(_ state: Any) async {
                 // Update @Published properties from client state
-                \(raw: parameters.observedKeyPaths.map { keyPath in
-                    let propertyName = keyPath.split(separator: ".").last ?? Substring(keyPath)
-                    return """
-                if let value = (state as? AnyObject)?.value(forKeyPath: "\(keyPath)") {
-                    self.\(propertyName) = value
-                }
-                """
-                }.joined(separator: "\n        "))
-                
-                // Trigger SwiftUI update
-                objectWillChange.send()
+                // Subclasses should override this method to update their specific properties
+                // Default implementation does nothing
             }
             """
         ]

@@ -3,11 +3,11 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-/// StateMacro generates State protocol conformance with validation and optimizations
+/// StateMacro generates Axiom State protocol conformance with validation and optimizations
 ///
 /// Usage:
 /// ```swift
-/// @State
+/// @AxiomState
 /// struct TodoState {
 ///     let items: [TodoItem]
 ///     let filter: Filter
@@ -15,7 +15,7 @@ import SwiftSyntaxMacros
 /// ```
 ///
 /// This macro generates:
-/// - State protocol conformance (Equatable, Hashable, Sendable)
+/// - Axiom AxiomState protocol conformance (Equatable, Hashable, Sendable)
 /// - Validation methods for immutability
 /// - Optimized equality and hashing implementations
 /// - State transition methods with validation
@@ -132,7 +132,7 @@ public struct StateMacro: ExtensionMacro {
         
         return try ExtensionDeclSyntax(
             """
-            extension \(raw: typeName): State {
+            extension \(raw: typeName): AxiomState {
                 \(raw: conformanceCode)
             }
             """
@@ -187,7 +187,7 @@ public struct StateMacro: ExtensionMacro {
     ) -> String {
         var code = """
         
-        // MARK: - Generated State Protocol Conformance
+        // MARK: - Generated AxiomState Protocol Conformance
         
         /// Generated Equatable implementation
         """
@@ -404,11 +404,11 @@ enum StateMacroError: Error, CustomStringConvertible {
     var description: String {
         switch self {
         case .mustBeAppliedToStruct:
-            return "@State can only be applied to struct declarations"
+            return "@AxiomState can only be applied to struct declarations"
         case .invalidParameters:
-            return "@State has invalid parameters"
+            return "@AxiomState has invalid parameters"
         case .missingRequiredProperties:
-            return "@State requires at least one stored property"
+            return "@AxiomState requires at least one stored property"
         }
     }
 }

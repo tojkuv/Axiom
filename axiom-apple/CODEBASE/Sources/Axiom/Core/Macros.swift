@@ -166,21 +166,22 @@ public macro ErrorContext(
 /// - stateStream property with AsyncStream
 /// - process(_:) method for action handling
 /// - State lifecycle hooks (stateWillUpdate/stateDidUpdate)
-/// - Complete ObservableClient inheritance
+/// - Atomic action processing capabilities
 /// - Performance monitoring and validation
-@attached(peer, names: arbitrary)
-public macro Client<S: State>(
+@attached(member, names: named(_internalState), named(_stateObservers), named(state), named(stateStream), named(getCurrentState), named(rollbackToState), named(_updateState))
+@attached(extension, conformances: Client)
+public macro Client<S: AxiomState>(
     state: S.Type,
     action: Any.Type = Any.self,
     initialState: S? = nil,
     performanceBudget: Double? = nil
 ) = #externalMacro(module: "AxiomMacros", type: "ClientMacro")
 
-/// Macro that generates State protocol conformance with validation and optimizations
+/// Macro that generates Axiom State protocol conformance with validation and optimizations
 ///
 /// Usage:
 /// ```swift
-/// @State
+/// @AxiomState
 /// struct TodoState {
 ///     let items: [TodoItem]
 ///     let filter: Filter
@@ -188,13 +189,13 @@ public macro Client<S: State>(
 /// ```
 ///
 /// This macro generates:
-/// - State protocol conformance (Equatable, Hashable, Sendable)
+/// - Axiom State protocol conformance (Equatable, Hashable, Sendable)
 /// - Validation methods for immutability
 /// - Optimized equality and hashing implementations
 /// - State transition methods with validation
 /// - Memory-efficient state storage
-@attached(extension, conformances: State)
-public macro State(
+@attached(extension, conformances: AxiomState)
+public macro AxiomState(
     validation: Bool = true,
     optimizeEquality: Bool = true,
     customHashable: Bool = false,
@@ -215,11 +216,11 @@ public macro State(
 ///
 /// This macro generates:
 /// - Sendable conformance for thread safety
-/// - Execution pipeline with pre/post processing
-/// - Action validation and sanitization
+/// - Action identification and description
+/// - Action validation capabilities
 /// - Performance tracking for action execution
-/// - Automatic error handling integration
-@attached(extension, conformances: Sendable)
+/// - Save triggering logic
+@attached(extension, conformances: Sendable, names: named(actionId), named(description), named(triggersSave), named(validate), named(validateParameters), named(isValid), named(trackExecution))
 public macro Action(
     validation: Bool = true,
     performance: Bool = true,

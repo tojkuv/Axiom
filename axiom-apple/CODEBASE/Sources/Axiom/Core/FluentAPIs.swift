@@ -59,7 +59,7 @@ public struct ContextConfiguration<C: ObservableContext> {
 }
 
 /// Fluent client configuration with method chaining
-public struct ClientConfiguration<State: Axiom.State & Equatable, Action: Sendable>: Sendable {
+public struct ClientConfiguration<State: Axiom.AxiomState & Equatable, Action: Sendable>: Sendable {
     private let client: ErgonomicClient<State, Action>
     private var validators: [@Sendable (Action) -> Result<Void, AxiomError>] = []
     private var interceptors: [@Sendable (Action) async -> Action] = []
@@ -313,7 +313,7 @@ public struct CommonChains {
     }
     
     /// Client with validation and persistence
-    public static func validatedClient<State: Axiom.State & Equatable, Action>(
+    public static func validatedClient<State: Axiom.AxiomState & Equatable, Action>(
         initialState: State,
         processor: @escaping @Sendable (Action) async throws -> State,
         validator: @escaping @Sendable (Action) -> Result<Void, AxiomError>,

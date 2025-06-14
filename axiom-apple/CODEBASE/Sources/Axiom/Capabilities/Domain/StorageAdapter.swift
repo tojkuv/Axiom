@@ -246,6 +246,10 @@ public actor AdapterBasedPersistence: PersistenceCapability {
         return try decoder.decode(type, from: data)
     }
     
+    public func load(key: String) async throws -> Data? {
+        return try await adapter.read(key: key)
+    }
+    
     public func delete(key: String) async throws {
         try await adapter.delete(key: key)
     }

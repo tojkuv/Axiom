@@ -105,7 +105,7 @@ public extension Client {
 
 public extension ErgonomicClient {
     /// Quick client creation with basic validation
-    static func validated<StateType: Axiom.State & Equatable, ActionType>(
+    static func validated<StateType: Axiom.AxiomState & Equatable, ActionType>(
         initialState: StateType,
         processor: @escaping @Sendable (ActionType) async throws -> StateType,
         validator: @escaping @Sendable (ActionType) -> Bool
@@ -119,7 +119,7 @@ public extension ErgonomicClient {
     }
     
     /// Client with automatic state persistence
-    static func persistent<StateType: Axiom.State & Equatable & Codable, ActionType>(
+    static func persistent<StateType: Axiom.AxiomState & Equatable & Codable, ActionType>(
         initialState: StateType,
         processor: @escaping @Sendable (ActionType) async throws -> StateType,
         storageKey: String
@@ -319,7 +319,7 @@ public extension View {
 
 public extension ErgonomicClient {
     /// Create mock client for testing
-    static func mock<StateType: Axiom.State & Equatable & Sendable, ActionType: Sendable>(
+    static func mock<StateType: Axiom.AxiomState & Equatable & Sendable, ActionType: Sendable>(
         initialState: StateType,
         responses: [ActionType: StateType] = [:]
     ) -> ErgonomicClient<StateType, ActionType> {

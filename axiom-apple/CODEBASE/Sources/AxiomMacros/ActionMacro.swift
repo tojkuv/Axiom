@@ -194,19 +194,20 @@ public struct ActionMacro: ExtensionMacro {
             return "\\(type(of: self)).\\(String(describing: self))"
         }
         
-        /// Action priority for execution scheduling
-        public var priority: ActionPriority {
-            return .\(parameters.priority)
+        /// Action description for logging
+        public var description: String {
+            return String(describing: self)
         }
         
-        /// Action metadata for analytics and debugging
-        public var metadata: ActionMetadata {
-            return ActionMetadata(
-                id: actionId,
-                priority: priority,
-                timestamp: Date(),
-                source: "\(typeName)"
-            )
+        /// Indicates if this action should trigger an automatic save
+        public var triggersSave: Bool {
+            // Actions that modify data should trigger saves
+            let description = String(describing: self)
+            return description.contains("add") || 
+                   description.contains("update") || 
+                   description.contains("delete") || 
+                   description.contains("toggle") ||
+                   description.contains("bulk")
         }
         """
         
@@ -216,30 +217,9 @@ public struct ActionMacro: ExtensionMacro {
             // MARK: - Action Validation
             
             /// Validates the action before execution
-            public func validate() -> ActionValidationResult {
-                var issues: [String] = []
-                
-                // Perform action-specific validation
-                let customValidation = performCustomValidation()
-                if !customValidation.isValid {
-                    issues.append(contentsOf: customValidation.issues)
-                }
-                
-                // Validate action parameters
-                if !validateParameters() {
-                    issues.append("Invalid action parameters")
-                }
-                
-                return ActionValidationResult(
-                    isValid: issues.isEmpty,
-                    issues: issues,
-                    action: self
-                )
-            }
-            
-            /// Custom validation logic - override in extensions
-            private func performCustomValidation() -> ActionValidationResult {
-                return ActionValidationResult(isValid: true, issues: [], action: self)
+            public func validate() -> Bool {
+                // Default implementation - actions are valid by default
+                return validateParameters()
             }
             
             /// Validates action parameters
@@ -260,154 +240,14 @@ public struct ActionMacro: ExtensionMacro {
     ) -> String {
         var code = """
         
-        // MARK: - Generated Execution Pipeline
+        // MARK: - Generated Execution Support
         
-        /// Execute action with full pipeline support
-        public func execute<StateType: State>(
-            on client: any Client<StateType, Self>,
-            with context: ActionExecutionContext = ActionExecutionContext()
-        ) async throws -> ActionExecutionResult {
-            let startTime = CFAbsoluteTimeGetCurrent()
-            var executionContext = context
-            executionContext.actionId = actionId
-            executionContext.startTime = startTime
-            
-            // Pre-execution phase
-            try await preExecution(context: &executionContext)
-            
-            // Validation phase
+        /// Simple validation check
+        public func isValid() -> Bool {
             \(parameters.enableValidation ? """
-            let validationResult = validate()
-            guard validationResult.isValid else {
-                throw ActionExecutionError.validationFailed(validationResult.issues)
-            }
-            """ : "")
-            
-            // Execution phase with optional retry
-            let result: ActionExecutionResult
-            \(parameters.enableRetry ? """
-            result = try await executeWithRetry(on: client, context: executionContext)
+            return validate()
             """ : """
-            result = try await performExecution(on: client, context: executionContext)
-            """)
-            
-            // Post-execution phase
-            await postExecution(result: result, context: executionContext)
-            
-            // Performance tracking
-            \(parameters.trackPerformance ? """
-            let duration = CFAbsoluteTimeGetCurrent() - startTime
-            await trackPerformance(duration: duration, result: result)
-            """ : "")
-            
-            return result
-        }
-        
-        /// Pre-execution hook
-        private func preExecution(context: inout ActionExecutionContext) async throws {
-            context.phase = .preExecution
-            
-            // Timeout setup
-            \(parameters.timeout != nil ? """
-            context.timeout = \(parameters.timeout!)
-            """ : "")
-            
-            // Custom pre-execution logic
-            await customPreExecution(context: &context)
-        }
-        
-        /// Post-execution hook
-        private func postExecution(result: ActionExecutionResult, context: ActionExecutionContext) async {
-            // Custom post-execution logic
-            await customPostExecution(result: result, context: context)
-        }
-        
-        /// Custom pre-execution hook - override in extensions
-        func customPreExecution(context: inout ActionExecutionContext) async {
-            // Override in extension
-        }
-        
-        /// Custom post-execution hook - override in extensions
-        func customPostExecution(result: ActionExecutionResult, context: ActionExecutionContext) async {
-            // Override in extension
-        }
-        """
-        
-        if parameters.enableRetry {
-            code += """
-            
-            // MARK: - Retry Logic
-            
-            /// Execute action with retry support
-            private func executeWithRetry<StateType: State>(
-                on client: any Client<StateType, Self>,
-                context: ActionExecutionContext
-            ) async throws -> ActionExecutionResult {
-                let maxRetries = 3
-                var lastError: Error?
-                
-                for attempt in 0..<maxRetries {
-                    do {
-                        return try await performExecution(on: client, context: context)
-                    } catch {
-                        lastError = error
-                        
-                        // Don't retry on validation errors
-                        if error is ActionExecutionError {
-                            throw error
-                        }
-                        
-                        // Wait before retry with exponential backoff
-                        if attempt < maxRetries - 1 {
-                            let delay = pow(2.0, Double(attempt)) * 0.1 // 100ms, 200ms, 400ms
-                            try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-                        }
-                    }
-                }
-                
-                throw lastError ?? ActionExecutionError.maxRetriesExceeded
-            }
-            """
-        }
-        
-        code += """
-        
-        /// Core execution logic
-        private func performExecution<StateType: State>(
-            on client: any Client<StateType, Self>,
-            context: ActionExecutionContext
-        ) async throws -> ActionExecutionResult {
-            \(parameters.timeout != nil ? """
-            // Execute with timeout
-            return try await withThrowingTaskGroup(of: ActionExecutionResult.self) { group in
-                group.addTask {
-                    try await client.process(self)
-                    return ActionExecutionResult(
-                        success: true,
-                        action: self,
-                        duration: CFAbsoluteTimeGetCurrent() - context.startTime,
-                        context: context
-                    )
-                }
-                
-                group.addTask {
-                    try await Task.sleep(nanoseconds: UInt64(\(parameters.timeout!) * 1_000_000_000))
-                    throw ActionExecutionError.timeout
-                }
-                
-                let result = try await group.next()!
-                group.cancelAll()
-                return result
-            }
-            """ : """
-            // Execute without timeout
-            try await client.process(self)
-            return ActionExecutionResult(
-                success: true,
-                action: self,
-                duration: CFAbsoluteTimeGetCurrent() - context.startTime,
-                context: context
-            )
+            return true
             """)
         }
         """
@@ -417,17 +257,11 @@ public struct ActionMacro: ExtensionMacro {
             
             // MARK: - Performance Tracking
             
-            /// Track action execution performance
-            private func trackPerformance(duration: Double, result: ActionExecutionResult) async {
-                let metrics = ActionPerformanceMetrics(
-                    actionId: actionId,
-                    duration: duration,
-                    success: result.success,
-                    timestamp: Date()
-                )
-                
-                // Send to performance monitoring system
-                await ActionPerformanceTracker.shared.record(metrics)
+            /// Track action execution for debugging
+            public func trackExecution(_ duration: TimeInterval) {
+                #if DEBUG
+                print("Action \\(actionId) executed in \\(String(format: "%.2f", duration * 1000))ms")
+                #endif
             }
             """
         }
@@ -436,115 +270,7 @@ public struct ActionMacro: ExtensionMacro {
     }
 }
 
-// MARK: - Supporting Types
-
-/// Action priority levels
-public enum ActionPriority: String, CaseIterable {
-    case low, medium, high, critical
-}
-
-/// Action metadata for tracking
-public struct ActionMetadata {
-    public let id: String
-    public let priority: ActionPriority
-    public let timestamp: Date
-    public let source: String
-    
-    public init(id: String, priority: ActionPriority, timestamp: Date, source: String) {
-        self.id = id
-        self.priority = priority
-        self.timestamp = timestamp
-        self.source = source
-    }
-}
-
-/// Action validation result
-public struct ActionValidationResult {
-    public let isValid: Bool
-    public let issues: [String]
-    public let action: Any
-    
-    public init(isValid: Bool, issues: [String], action: Any) {
-        self.isValid = isValid
-        self.issues = issues
-        self.action = action
-    }
-}
-
-/// Action execution context
-public struct ActionExecutionContext {
-    public var actionId: String = ""
-    public var startTime: CFAbsoluteTime = 0
-    public var timeout: Double?
-    public var phase: ExecutionPhase = .created
-    public var metadata: [String: Any] = [:]
-    
-    public enum ExecutionPhase {
-        case created, preExecution, executing, postExecution, completed
-    }
-    
-    public init() {}
-}
-
-/// Action execution result
-public struct ActionExecutionResult {
-    public let success: Bool
-    public let action: Any
-    public let duration: Double
-    public let context: ActionExecutionContext
-    public let error: Error?
-    
-    public init(success: Bool, action: Any, duration: Double, context: ActionExecutionContext, error: Error? = nil) {
-        self.success = success
-        self.action = action
-        self.duration = duration
-        self.context = context
-        self.error = error
-    }
-}
-
-/// Action execution errors
-public enum ActionExecutionError: Error {
-    case validationFailed([String])
-    case timeout
-    case maxRetriesExceeded
-    case executionFailed(Error)
-}
-
-/// Performance metrics for actions
-public struct ActionPerformanceMetrics {
-    public let actionId: String
-    public let duration: Double
-    public let success: Bool
-    public let timestamp: Date
-    
-    public init(actionId: String, duration: Double, success: Bool, timestamp: Date) {
-        self.actionId = actionId
-        self.duration = duration
-        self.success = success
-        self.timestamp = timestamp
-    }
-}
-
-/// Performance tracker singleton
-public actor ActionPerformanceTracker {
-    public static let shared = ActionPerformanceTracker()
-    
-    private var metrics: [ActionPerformanceMetrics] = []
-    
-    public func record(_ metric: ActionPerformanceMetrics) {
-        metrics.append(metric)
-        
-        // Keep only recent metrics (last 1000)
-        if metrics.count > 1000 {
-            metrics = Array(metrics.suffix(1000))
-        }
-    }
-    
-    public func getMetrics(for actionId: String) -> [ActionPerformanceMetrics] {
-        return metrics.filter { $0.actionId == actionId }
-    }
-}
+// These supporting types are now handled by the framework
 
 // MARK: - Error Types
 

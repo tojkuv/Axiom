@@ -1,0 +1,4 @@
+is_global = true
+
+# Global analyzer settings for all projects
+dotnet_diagnostic.CA1515.severity = suggestion

@@ -394,7 +394,7 @@ public actor Telemetry {
     // MARK: - Private Methods
     
     private func enrichTelemetryEvent(_ event: TelemetryEvent) async throws -> TelemetryData {
-        let deviceMonitor = DeviceInfoMonitor.current
+        let deviceMonitor = await MainActor.run { DeviceInfoMonitor.current }
         
         let deviceContext = DeviceContext(
             platform: await detectPlatform(),

@@ -198,7 +198,7 @@ public struct CircularBuffer<Element> {
 // MARK: - State Diffing
 
 /// Protocol for states that support diffing
-public protocol DiffableState: State {
+public protocol DiffableState: AxiomState {
     func diff(from previous: Self) -> StateChanges
 }
 

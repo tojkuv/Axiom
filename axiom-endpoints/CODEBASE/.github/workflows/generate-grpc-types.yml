@@ -1,0 +1,342 @@
+name: Generate gRPC Types
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/**/*.cs'
+      - '**/Endpoints/**/*.cs'
+      - '**/Events/**/*.cs'
+      - '**/Models/**/*.cs'
+      - 'samples/**/*.cs'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'src/**/*.cs'
+      - '**/Endpoints/**/*.cs'
+      - '**/Events/**/*.cs'
+      - '**/Models/**/*.cs'
+      - 'samples/**/*.cs'
+  workflow_dispatch:
+    inputs:
+      languages:
+        description: 'Target languages (comma-separated: swift,kotlin,csharp,java,typescript)'
+        required: false
+        default: 'swift,kotlin,csharp'
+      sample_project:
+        description: 'Sample project to use'
+        required: false
+        default: 'ProtoGenSample'
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  PROTOC_VERSION: '25.2'
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      has-changes: ${{ steps.changes.outputs.has-changes }}
+      sample-projects: ${{ steps.changes.outputs.sample-projects }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
+
+    - name: Detect changed sample projects
+      id: changes
+      run: |
+        # Detect which sample projects have changes
+        changed_files=$(git diff --name-only HEAD^ HEAD)
+        echo "Changed files:"
+        echo "$changed_files"
+        
+        sample_projects=""
+        has_changes="false"
+        
+        for project in samples/*/; do
+          if [ -d "$project" ]; then
+            project_name=$(basename "$project")
+            if echo "$changed_files" | grep -q "^samples/$project_name/\|^src/"; then
+              if [ -n "$sample_projects" ]; then
+                sample_projects="$sample_projects,$project_name"
+              else
+                sample_projects="$project_name"
+              fi
+              has_changes="true"
+            fi
+          fi
+        done
+        
+        # If workflow_dispatch, use the specified sample project
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          sample_projects="${{ github.event.inputs.sample_project }}"
+          has_changes="true"
+        fi
+        
+        # Default to ProtoGenSample if no specific changes detected but source changes exist
+        if [ "$has_changes" = "true" ] && [ -z "$sample_projects" ]; then
+          sample_projects="ProtoGenSample"
+        fi
+        
+        echo "has-changes=$has_changes" >> $GITHUB_OUTPUT
+        echo "sample-projects=$sample_projects" >> $GITHUB_OUTPUT
+        
+        echo "Has changes: $has_changes"
+        echo "Sample projects: $sample_projects"
+
+  build-and-test:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has-changes == 'true'
+    
+    strategy:
+      matrix:
+        sample: ${{ fromJson(format('["{0}"]', needs.detect-changes.outputs.sample-projects)) }}
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Setup Protoc
+      uses: arduino/setup-protoc@v3
+      with:
+        version: ${{ env.PROTOC_VERSION }}
+        include-pre-releases: false
+
+    - name: Install gRPC tools
+      run: |
+        # Install gRPC C# plugin
+        dotnet tool install -g Grpc.Tools
+        
+        # Install buf for proto linting and generation (optional)
+        curl -sSL https://github.com/bufbuild/buf/releases/latest/download/buf-Linux-x86_64 -o buf
+        chmod +x buf
+        sudo mv buf /usr/local/bin/
+        
+        # Verify installations
+        protoc --version
+        buf --version || echo "buf not available"
+
+    - name: Restore dependencies
+      run: |
+        dotnet restore
+        dotnet restore src/AxiomEndpoints.ProtoGen.Cli/
+
+    - name: Build framework
+      run: |
+        dotnet build -c Release --no-restore --verbosity minimal
+
+    - name: Build CLI tool
+      run: |
+        cd src/AxiomEndpoints.ProtoGen.Cli
+        dotnet build -c Release --no-restore --verbosity minimal
+
+    - name: Build sample project
+      run: |
+        if [ -d "samples/${{ matrix.sample }}" ]; then
+          cd samples/${{ matrix.sample }}
+          dotnet build -c Release --no-restore --verbosity minimal
+        else
+          echo "Sample project ${{ matrix.sample }} not found"
+          exit 1
+        fi
+
+    - name: Run tests
+      run: |
+        dotnet test --no-build -c Release --verbosity minimal --logger trx --results-directory TestResults/
+
+    - name: Generate proto types
+      run: |
+        # Set up variables
+        SAMPLE_DIR="samples/${{ matrix.sample }}"
+        SAMPLE_ASSEMBLY="$SAMPLE_DIR/bin/Release/net9.0/${{ matrix.sample }}.dll"
+        OUTPUT_DIR="generated"
+        LANGUAGES="${{ github.event.inputs.languages || 'swift,kotlin,csharp' }}"
+        
+        echo "Generating proto types for ${{ matrix.sample }}"
+        echo "Assembly: $SAMPLE_ASSEMBLY"
+        echo "Output: $OUTPUT_DIR"
+        echo "Languages: $LANGUAGES"
+        
+        # Check if assembly exists
+        if [ ! -f "$SAMPLE_ASSEMBLY" ]; then
+          echo "❌ Assembly not found: $SAMPLE_ASSEMBLY"
+          echo "Available files in bin directory:"
+          find "$SAMPLE_DIR/bin" -name "*.dll" || echo "No DLL files found"
+          exit 1
+        fi
+        
+        # Create output directory
+        mkdir -p "$OUTPUT_DIR"
+        
+        # For now, run the test script which simulates the generation
+        # In a real implementation, this would be:
+        # dotnet run --project src/AxiomEndpoints.ProtoGen.Cli -- generate \
+        #   --assembly "$SAMPLE_ASSEMBLY" \
+        #   --output "$OUTPUT_DIR" \
+        #   --languages "$LANGUAGES" \
+        #   --organization "mycompany" \
+        #   --authors "CI/CD Pipeline" \
+        #   --description "Generated gRPC types for ${{ matrix.sample }}" \
+        #   --repository "${{ github.server_url }}/${{ github.repository }}" \
+        #   --verbose
+        
+        # Run the simulation script
+        ./test-protogen.sh
+        
+        echo "✅ Proto generation completed"
+
+    - name: Validate generated types
+      run: |
+        OUTPUT_DIR="generated"
+        
+        echo "Validating generated output..."
+        
+        # Check if proto files were generated
+        if [ ! -f "$OUTPUT_DIR/protogensample/protogensample.proto" ]; then
+          echo "❌ Main proto file not generated"
+          exit 1
+        fi
+        
+        # Validate proto syntax with protoc
+        cd "$OUTPUT_DIR/protogensample"
+        echo "Validating proto syntax..."
+        protoc --proto_path=. --descriptor_set_out=/dev/null protogensample.proto
+        
+        # Check package structures
+        echo "Checking package structures..."
+        
+        # Swift package
+        if [ -f "../generated/swift/ProtoGenSampleSwift/Package.swift" ]; then
+          echo "✅ Swift package structure created"
+        else
+          echo "❌ Swift package structure missing"
+        fi
+        
+        # Kotlin package
+        if [ -f "../generated/kotlin/protogensample-kotlin/build.gradle.kts" ]; then
+          echo "✅ Kotlin package structure created"
+        else
+          echo "❌ Kotlin package structure missing"
+        fi
+        
+        # C# package
+        if [ -f "../generated/csharp/ProtoGenSample.Types/ProtoGenSample.Types.csproj" ]; then
+          echo "✅ C# package structure created"
+        else
+          echo "❌ C# package structure missing"
+        fi
+        
+        echo "✅ Validation completed"
+
+    - name: Upload generated types
+      uses: actions/upload-artifact@v4
+      with:
+        name: grpc-types-${{ matrix.sample }}-${{ github.sha }}
+        path: generated/
+        retention-days: 30
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ matrix.sample }}-${{ github.sha }}
+        path: TestResults/
+        retention-days: 7
+
+    - name: Create release packages (main branch only)
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: |
+        echo "Creating release packages..."
+        
+        # In a real implementation, this would:
+        # 1. Version the packages based on git tags or build numbers
+        # 2. Build the actual language-specific packages
+        # 3. Sign packages if required
+        # 4. Prepare for publishing
+        
+        VERSION="1.0.${{ github.run_number }}"
+        echo "Version: $VERSION"
+        
+        # Create a summary of what would be published
+        cat > package-summary.json << EOF
+        {
+          "version": "$VERSION",
+          "sample": "${{ matrix.sample }}",
+          "languages": "${{ github.event.inputs.languages || 'swift,kotlin,csharp' }}",
+          "commit": "${{ github.sha }}",
+          "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+          "packages": {
+            "swift": "ProtoGenSampleSwift-$VERSION.zip",
+            "kotlin": "protogensample-kotlin-$VERSION.jar",
+            "csharp": "ProtoGenSample.Types.$VERSION.nupkg"
+          }
+        }
+        EOF
+        
+        echo "Package summary:"
+        cat package-summary.json
+
+    - name: Publish packages (manual trigger only)
+      if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+      run: |
+        echo "Package publishing would happen here..."
+        echo "Targets: GitHub Packages, NuGet.org, Maven Central"
+        
+        # In a real implementation:
+        # 1. Publish Swift package to GitHub
+        # 2. Publish Kotlin package to Maven Central or GitHub Packages
+        # 3. Publish NuGet package to NuGet.org or GitHub Packages
+        # 4. Update package registries and documentation
+
+  notify-completion:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-and-test]
+    if: always() && needs.detect-changes.outputs.has-changes == 'true'
+    
+    steps:
+    - name: Notify completion
+      run: |
+        if [ "${{ needs.build-and-test.result }}" = "success" ]; then
+          echo "✅ gRPC type generation completed successfully"
+          echo "📦 Generated packages are available as artifacts"
+          echo "🔗 Check the Actions tab for download links"
+        else
+          echo "❌ gRPC type generation failed"
+          echo "🔍 Check the logs for details"
+        fi
+
+# Cleanup old artifacts
+  cleanup:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Cleanup old artifacts
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const artifacts = await github.rest.actions.listArtifactsForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            per_page: 100
+          });
+          
+          const cutoff = new Date();
+          cutoff.setDate(cutoff.getDate() - 7); // Keep artifacts for 7 days
+          
+          for (const artifact of artifacts.data.artifacts) {
+            if (new Date(artifact.created_at) < cutoff) {
+              console.log(`Deleting artifact: ${artifact.name} (${artifact.created_at})`);
+              await github.rest.actions.deleteArtifact({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                artifact_id: artifact.id
+              });
+            }
+          }

@@ -4,7 +4,7 @@ import ObjectiveC
 // MARK: - Unified Error Types
 
 /// Unified error hierarchy for the Axiom framework
-public enum AxiomError: Error, Codable, Equatable {
+public enum AxiomError: Error, Codable, Equatable, Hashable {
     case contextError(AxiomContextError)
     case clientError(AxiomClientError)
     case navigationError(AxiomNavigationError)
@@ -15,6 +15,7 @@ public enum AxiomError: Error, Codable, Equatable {
     case deviceError(DeviceError)
     case infrastructureError(InfrastructureError)
     case networkError(NetworkError)
+    case unknownError
     
     /// Human-readable error description
     public var localizedDescription: String {
@@ -39,6 +40,8 @@ public enum AxiomError: Error, Codable, Equatable {
             return "Infrastructure Error: \(error.localizedDescription)"
         case .networkError(let error):
             return "Network Error: \(error.localizedDescription)"
+        case .unknownError:
+            return "Unknown error occurred"
         }
     }
     
@@ -65,14 +68,33 @@ public enum AxiomError: Error, Codable, Equatable {
             return .retry(attempts: 2)
         case .networkError(let error):
             return error.recoveryStrategy
+        case .unknownError:
+            return .propagate
         }
+    }
+}
+
+// MARK: - Supporting Types
+
+/// Codable wrapper for any error (for error aggregation)
+public struct AnyCodableError: Error, Codable, Equatable, Hashable {
+    public let description: String
+    public let type: String
+    
+    public init<E: Error>(_ error: E) {
+        self.description = String(describing: error)
+        self.type = String(describing: Swift.type(of: error))
+    }
+    
+    public var localizedDescription: String {
+        return description
     }
 }
 
 // MARK: - Specific Error Types
 
 /// Context-related errors
-public enum AxiomContextError: Error, Codable, Equatable {
+public enum AxiomContextError: Error, Codable, Equatable, Hashable {
     case lifecycleError(String)
     case initializationFailed(String)
     case childContextError(String)
@@ -90,11 +112,13 @@ public enum AxiomContextError: Error, Codable, Equatable {
 }
 
 /// Client-related errors
-public enum AxiomClientError: Error, Codable, Equatable {
+public enum AxiomClientError: Error, Codable, Equatable, Hashable {
     case invalidAction(String)
     case stateUpdateFailed(String)
     case timeout(duration: TimeInterval)
     case notInitialized
+    case atomicActionSequenceFailed(processed: Int, total: Int, underlyingError: AnyCodableError)
+    case maxRetriesExceeded(attempts: Int, underlyingError: AnyCodableError)
     
     public var localizedDescription: String {
         switch self {
@@ -106,6 +130,10 @@ public enum AxiomClientError: Error, Codable, Equatable {
             return "Operation timed out after \(duration)s"
         case .notInitialized:
             return "Client not initialized"
+        case .atomicActionSequenceFailed(let processed, let total, let underlyingError):
+            return "Atomic action sequence failed after \(processed)/\(total) actions: \(underlyingError.localizedDescription)"
+        case .maxRetriesExceeded(let attempts, let underlyingError):
+            return "Max retries exceeded after \(attempts) attempts: \(underlyingError.localizedDescription)"
         }
     }
     
@@ -113,6 +141,10 @@ public enum AxiomClientError: Error, Codable, Equatable {
         switch self {
         case .timeout:
             return .retry(attempts: 2)
+        case .atomicActionSequenceFailed:
+            return .propagate
+        case .maxRetriesExceeded:
+            return .propagate
         default:
             return .propagate
         }
@@ -120,7 +152,7 @@ public enum AxiomClientError: Error, Codable, Equatable {
 }
 
 /// Navigation-related errors
-public enum AxiomNavigationError: Error, Codable, Equatable {
+public enum AxiomNavigationError: Error, Codable, Equatable, Hashable {
     // Route errors
     case invalidRoute(String)
     case routeNotFound(String)
@@ -222,7 +254,7 @@ public enum AxiomNavigationError: Error, Codable, Equatable {
 }
 
 /// Persistence-related errors
-public enum PersistenceError: Error, Codable, Equatable {
+public enum PersistenceError: Error, Codable, Equatable, Hashable {
     case saveFailed(String)
     case loadFailed(String)
     case deleteFailed(String)
@@ -243,7 +275,7 @@ public enum PersistenceError: Error, Codable, Equatable {
 }
 
 /// Validation-related errors
-public enum AxiomValidationError: Error, Codable, Equatable {
+public enum AxiomValidationError: Error, Codable, Equatable, Hashable {
     case invalidInput(String, String) // field, reason
     case missingRequired(String)
     case formatError(String, String) // field, expected format
@@ -270,7 +302,7 @@ public enum AxiomValidationError: Error, Codable, Equatable {
 }
 
 /// Actor-related errors for enhanced isolation patterns
-public enum ActorError: Error, Codable, Equatable {
+public enum ActorError: Error, Codable, Equatable, Hashable {
     case invariantViolation(String)
     case actorNotFound(ActorIdentifier)
     case reentrancyDenied(OperationIdentifier)
@@ -297,7 +329,7 @@ public enum ActorError: Error, Codable, Equatable {
 }
 
 /// Capability-related errors
-public enum CapabilityError: Error, Codable, Equatable {
+public enum CapabilityError: Error, Codable, Equatable, Hashable {
     case initializationFailed(String)
     case resourceAllocationFailed(String)
     case resourceUnavailable(String)
@@ -327,7 +359,7 @@ public enum CapabilityError: Error, Codable, Equatable {
 }
 
 /// Device-related errors
-public enum DeviceError: Error, Codable, Equatable {
+public enum DeviceError: Error, Codable, Equatable, Hashable {
     case platformDetectionFailed
     case memoryInfoUnavailable
     case thermalStateUnavailable
@@ -354,7 +386,7 @@ public enum DeviceError: Error, Codable, Equatable {
 }
 
 /// Infrastructure-related errors
-public enum InfrastructureError: Error, Codable, Equatable {
+public enum InfrastructureError: Error, Codable, Equatable, Hashable {
     case systemResourceUnavailable(String)
     case configurationMissing(String)
     case dependencyNotFound(String)
@@ -384,7 +416,7 @@ public enum InfrastructureError: Error, Codable, Equatable {
 }
 
 /// Network-related errors
-public enum NetworkError: Error, Codable, Equatable {
+public enum NetworkError: Error, Codable, Equatable, Hashable {
     case invalidURL(String)
     case sessionNotAvailable
     case requestFailed(String)

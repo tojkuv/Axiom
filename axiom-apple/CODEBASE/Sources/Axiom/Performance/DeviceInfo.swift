@@ -3,7 +3,7 @@ import Darwin.Mach
 
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, tvOS 17.0, *)
 public actor DeviceInfoMonitor {
-    public static let current = DeviceInfoMonitor()
+    @MainActor public static let current = DeviceInfoMonitor()
     
     public var model: String {
         deviceModel
@@ -38,7 +38,7 @@ public actor DeviceInfoMonitor {
     private let totalSystemMemory: Int64
     private let capabilities: PlatformCapabilities
     
-    private init() {
+    @MainActor private init() {
         // Initialize device model
         self.deviceModel = Self.detectDeviceModel()
         
@@ -149,7 +149,7 @@ public actor DeviceInfoMonitor {
         return 0.0
     }
     
-    private static func detectPlatformCapabilities() -> PlatformCapabilities {
+    @MainActor private static func detectPlatformCapabilities() -> PlatformCapabilities {
         #if os(iOS)
         return PlatformCapabilities(
             supportsBackgroundProcessing: true,

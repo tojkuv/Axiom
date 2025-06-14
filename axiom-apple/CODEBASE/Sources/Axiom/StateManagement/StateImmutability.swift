@@ -573,6 +573,34 @@ public struct CompactStateStorage<State: ImmutableState> {
     }
 }
 
+// MARK: - State Validation Results
+
+/// Result of state validation
+public struct StateValidationResult {
+    public let isValid: Bool
+    public let issues: [String]
+    
+    public init(isValid: Bool, issues: [String]) {
+        self.isValid = isValid
+        self.issues = issues
+    }
+}
+
+/// Result of state transition validation
+public struct StateTransitionResult {
+    public let isValid: Bool
+    public let reason: String
+    public let oldState: Any
+    public let newState: Any
+    
+    public init(isValid: Bool, reason: String, oldState: Any, newState: Any) {
+        self.isValid = isValid
+        self.reason = reason
+        self.oldState = oldState
+        self.newState = newState
+    }
+}
+
 // MARK: - Immutable State Macros (Future)
 
 // Note: When Swift macros are more mature, we can add:

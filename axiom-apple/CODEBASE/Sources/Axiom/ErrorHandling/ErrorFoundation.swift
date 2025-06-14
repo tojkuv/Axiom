@@ -43,6 +43,8 @@ public enum ErrorCategory: String, CaseIterable, Sendable {
                 return .system
             case .networkError:
                 return .network
+            case .unknownError:
+                return .unknown
             }
         case let nsError as NSError:
             if nsError.domain == NSURLErrorDomain {

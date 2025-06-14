@@ -7,7 +7,7 @@
 import Foundation
 
 
-public actor StateStorage<S: State & Codable> {
+public actor StateStorage<S: AxiomState & Codable> {
     private let state: S
     private let memoryLimit: Int
     private var partitionCache: [String: (data: Any, lastAccessed: CFAbsoluteTime)] = [:]
@@ -27,15 +27,18 @@ public actor StateStorage<S: State & Codable> {
     
     private func setupMemoryPressureMonitoring() async {
         #if canImport(UIKit) && !os(watchOS)
-        await MainActor.run {
-            self.memoryPressureObserver = NotificationCenter.default.addObserver(
-                forName: UIApplication.didReceiveMemoryWarningNotification,
-                object: nil,
-                queue: .main
-            ) { [weak self] _ in
-                Task {
-                    await self?.handleMemoryPressure()
-                }
+        // Get the notification name from MainActor context, then assign to actor property
+        let notificationName = await MainActor.run {
+            UIApplication.didReceiveMemoryWarningNotification
+        }
+        
+        self.memoryPressureObserver = NotificationCenter.default.addObserver(
+            forName: notificationName,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task {
+                await self?.handleMemoryPressure()
             }
         }
         #elseif canImport(AppKit)

@@ -48,7 +48,7 @@ public actor StatePropagationEngine {
     }
     
     /// Create optimized stream with performance guarantees
-    public func createStream<S: State>(
+    public func createStream<S: AxiomState>(
         for clientType: any Client.Type,
         initialState: S,
         priority: PropagationPriority = .normal
@@ -65,7 +65,7 @@ public actor StatePropagationEngine {
     }
     
     /// Multi-cast optimization for shared states
-    public func createMulticastStream<S: State>(
+    public func createMulticastStream<S: AxiomState>(
         source: AsyncStream<S>,
         subscribers: Int
     ) -> MulticastStateStream<S> {
@@ -91,7 +91,7 @@ public actor StatePropagationEngine {
 public struct AnyStateStream: Sendable {
     private let _optimize: @Sendable () async -> Void
     
-    public init<S: State>(_ stream: GuaranteedStateStream<S>) {
+    public init<S: AxiomState>(_ stream: GuaranteedStateStream<S>) {
         self._optimize = {
             await stream.optimize()
         }
@@ -103,7 +103,7 @@ public struct AnyStateStream: Sendable {
 }
 
 /// Guaranteed performance state stream
-public class GuaranteedStateStream<S: State>: @unchecked Sendable {
+public class GuaranteedStateStream<S: AxiomState>: @unchecked Sendable {
     public let id = UUID()
     private let engine: StatePropagationEngine
     private let priority: PropagationPriority
@@ -152,7 +152,7 @@ public class GuaranteedStateStream<S: State>: @unchecked Sendable {
 }
 
 /// Multi-cast state stream optimization
-public struct MulticastStateStream<S: State> {
+public struct MulticastStateStream<S: AxiomState> {
     private let broadcaster: StateBroadcaster<S>
     
     public init(
@@ -174,7 +174,7 @@ public struct MulticastStateStream<S: State> {
 }
 
 /// State broadcaster for multi-cast optimization
-internal actor StateBroadcaster<S: State> {
+internal actor StateBroadcaster<S: AxiomState> {
     private let source: AsyncStream<S>
     private let capacity: Int
     private let optimizer: PropagationOptimizer
@@ -237,7 +237,7 @@ internal actor StateBroadcaster<S: State> {
 // MARK: - Observer Lifecycle Management (REQUIREMENTS-W-01-005)
 
 /// Observer registry with lifecycle management
-public actor ObserverRegistry<S: State> {
+public actor ObserverRegistry<S: AxiomState> {
     private var observers: [ObserverEntry<S>] = []
     private let maxObservers: Int
     private let cleanupInterval: TimeInterval = 60.0
@@ -357,7 +357,7 @@ public actor ObserverRegistry<S: State> {
 }
 
 /// Observer wrapper
-public struct Observer<S: State>: @unchecked Sendable {
+public struct Observer<S: AxiomState>: @unchecked Sendable {
     let priority: ObserverPriority
     let handler: @Sendable (S) async -> Void
     
@@ -385,7 +385,7 @@ public class ObservationToken: @unchecked Sendable {
 // MARK: - Selective State Propagation (REQUIREMENTS-W-01-005)
 
 /// Selective propagation with predicates
-public struct SelectiveStateStream<S: State>: @unchecked Sendable {
+public struct SelectiveStateStream<S: AxiomState>: @unchecked Sendable {
     private let source: AsyncStream<S>
     private let predicates: [StatePredicate<S>]
     
@@ -465,7 +465,7 @@ public struct SelectiveStateStream<S: State>: @unchecked Sendable {
 }
 
 /// State predicate for filtering
-public struct StatePredicate<S: State>: @unchecked Sendable {
+public struct StatePredicate<S: AxiomState>: @unchecked Sendable {
     private let predicate: (S) -> Bool
     
     public init(_ predicate: @escaping (S) -> Bool) {

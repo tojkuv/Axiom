@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>13</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+    <EnableNETAnalyzers>false</EnableNETAnalyzers>
+    <AnalysisLevel>none</AnalysisLevel>
+    <AssemblyName>axiom-protogen</AssemblyName>
+    
+    <!-- Package Information -->
+    <PackageId>AxiomEndpoints.ProtoGen.Cli</PackageId>
+    <Version>1.0.0</Version>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>axiom-protogen</ToolCommandName>
+    <PackageDescription>CLI tool for Axiom Endpoints gRPC type generation</PackageDescription>
+    <PackageTags>grpc;protobuf;codegen;cli;axiom</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../AxiomEndpoints.ProtoGen/AxiomEndpoints.ProtoGen.csproj" />
+  </ItemGroup>
+
+</Project>

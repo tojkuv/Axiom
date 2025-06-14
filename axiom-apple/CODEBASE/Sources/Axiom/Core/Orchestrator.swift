@@ -20,7 +20,7 @@ public protocol Orchestrator: Actor {
     ) async -> P.ContextType
     
     /// Navigate to a route
-    func navigate(to route: StandardRoute) async
+    func navigate(to route: any TypeSafeRoute) async
 }
 
 // MARK: - Extended Orchestrator Protocol
@@ -62,13 +62,13 @@ public actor StandardOrchestrator: ExtendedOrchestrator {
     private var capabilities: [String: any Capability] = [:]
     
     /// Current navigation route
-    public private(set) var currentRoute: StandardRoute?
+    public private(set) var currentRoute: (any TypeSafeRoute)?
     
     /// Navigation history
-    public private(set) var navigationHistory: [StandardRoute] = []
+    public private(set) var navigationHistory: [any TypeSafeRoute] = []
     
     /// Route handlers
-    private var routeHandlers: [StandardRoute: (StandardRoute) async -> any Context] = [:]
+    private var routeHandlers: [AnyHashable: (any TypeSafeRoute) async -> any Context] = [:]
     
     public init() {}
     
@@ -125,23 +125,28 @@ public actor StandardOrchestrator: ExtendedOrchestrator {
     }
     
     /// Navigate to route
-    public func navigate(to route: StandardRoute) async {
+    public func navigate(to route: any TypeSafeRoute) async {
         currentRoute = route
         navigationHistory.append(route)
         
         // Execute route handler if registered
-        if let handler = routeHandlers[route] {
+        if let handler = routeHandlers[AnyHashable(route)] {
             let context = await handler(route)
-            contexts[route.identifier] = context
+            contexts[route.routeIdentifier] = context
         }
     }
     
     /// Register route handler
-    public func registerRoute(
-        _ route: StandardRoute,
-        handler: @escaping (StandardRoute) async -> any Context
+    public func registerRoute<R: TypeSafeRoute>(
+        _ route: R,
+        handler: @escaping (R) async -> any Context
     ) async {
-        routeHandlers[route] = handler
+        routeHandlers[AnyHashable(route)] = { anyRoute in
+            if let typedRoute = anyRoute as? R {
+                return await handler(typedRoute)
+            }
+            fatalError("Route type mismatch")
+        }
     }
     
     /// Activate all contexts
@@ -186,7 +191,7 @@ public final class OrchestratorContextBuilder<T: Context>: @unchecked Sendable {
     private var errorHandlers: [(any Error) async -> Void] = []
     private var lifecycleHooks: [(hook: LifecycleHook, action: (T) async -> Void)] = []
     
-    init(orchestrator: any ExtendedOrchestrator, contextType: T.Type) {
+    public init(orchestrator: any ExtendedOrchestrator, contextType: T.Type) {
         self.orchestrator = orchestrator
         self.contextType = contextType
     }
@@ -270,15 +275,15 @@ public enum LifecycleHook {
 /// Dedicated navigation management
 public actor NavigationManager {
     /// Current route stack
-    private var routeStack: [StandardRoute] = []
+    private var routeStack: [any TypeSafeRoute] = []
     
     /// Navigation handlers
-    private var handlers: [StandardRoute: () async -> Void] = [:]
+    private var handlers: [AnyHashable: () async -> Void] = [:]
     
     /// Push a route
-    public func push(_ route: StandardRoute) async {
+    public func push(_ route: any TypeSafeRoute) async {
         routeStack.append(route)
-        if let handler = handlers[route] {
+        if let handler = handlers[AnyHashable(route)] {
             await handler()
         }
     }
@@ -296,12 +301,12 @@ public actor NavigationManager {
     }
     
     /// Register navigation handler
-    public func registerHandler(for route: StandardRoute, handler: @escaping () async -> Void) {
-        handlers[route] = handler
+    public func registerHandler(for route: any TypeSafeRoute, handler: @escaping () async -> Void) {
+        handlers[AnyHashable(route)] = handler
     }
     
     /// Current route
-    public var currentRoute: StandardRoute? {
+    public var currentRoute: (any TypeSafeRoute)? {
         routeStack.last
     }
     

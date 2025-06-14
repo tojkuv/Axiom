@@ -586,7 +586,7 @@ public enum DefaultRecoveryOption: String, RecoveryOption {
 
 /// Accessibility helpers for error recovery
 public struct ErrorRecoveryAccessibility {
-    public static func announceError(_ error: AxiomError) {
+    @MainActor public static func announceError(_ error: AxiomError) {
         let announcement = "Error occurred: \(error.userFriendlyTitle). \(error.userFriendlyDescription)"
         
         #if os(iOS)
@@ -594,7 +594,7 @@ public struct ErrorRecoveryAccessibility {
         #endif
     }
     
-    public static func announceRecovery(success: Bool, option: String) {
+    @MainActor public static func announceRecovery(success: Bool, option: String) {
         let announcement = success 
             ? "Recovery successful using \(option)"
             : "Recovery failed using \(option)"

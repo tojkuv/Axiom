@@ -1,0 +1,23 @@
+<Project>
+  <PropertyGroup>
+    <!-- Override parent settings -->
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <WarningsNotAsErrors />
+    <NoWarn />
+    <PublishAot>false</PublishAot>
+    <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
+    <IsTrimmable>false</IsTrimmable>
+  </PropertyGroup>
+
+  <!-- Remove all global usings -->
+  <ItemGroup>
+    <Using Remove="System.Runtime.CompilerServices" />
+    <Using Remove="System.Collections.Frozen" />
+    <Using Remove="System.Threading.Channels" />
+  </ItemGroup>
+</Project>

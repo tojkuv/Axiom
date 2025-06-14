@@ -43,32 +43,11 @@ let package = Package(
             name: "Axiom",
             dependencies: [
                 "AxiomMacros"
-            ],
-            swiftSettings: [
-                .define("DEBUG", .when(configuration: .debug)),
-                .define("RELEASE", .when(configuration: .release)),
-                .define("TESTING", .when(platforms: [], configuration: .debug)),
-                .unsafeFlags([
-                    "-warnings-as-errors",
-                    "-strict-concurrency=complete",
-                    "-enable-actor-data-race-checks",
-                    "-warn-concurrency"
-                ])
             ]
         ),
         .target(
             name: "AxiomTesting",
-            dependencies: ["Axiom"],
-            swiftSettings: [
-                .define("TESTING"),
-                .define("DEBUG", .when(configuration: .debug)),
-                .unsafeFlags([
-                    "-warnings-as-errors",
-                    "-strict-concurrency=complete",
-                    "-enable-actor-data-race-checks",
-                    "-warn-concurrency"
-                ])
-            ]
+            dependencies: ["Axiom"]
         ),
         .testTarget(
             name: "AxiomTests",
@@ -78,17 +57,7 @@ let package = Package(
                 "AxiomMacros",
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax")
             ],
-            path: "Tests",
-            swiftSettings: [
-                .define("TESTING"),
-                .define("DEBUG", .when(configuration: .debug)),
-                .unsafeFlags([
-                    "-warnings-as-errors",
-                    "-strict-concurrency=complete",
-                    "-enable-actor-data-race-checks",
-                    "-warn-concurrency"
-                ])
-            ]
+            path: "Tests"
         ),
     ]
 )

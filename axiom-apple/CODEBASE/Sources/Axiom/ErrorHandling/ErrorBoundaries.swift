@@ -71,6 +71,8 @@ public actor DefaultUserInteractionService: ProductionUserInteractionService {
             return .halt
         case .networkError:
             return .retry
+        case .unknownError:
+            return .halt
         }
     }
     

@@ -3,7 +3,7 @@ import Foundation
 // MARK: - Mutation Debugging and Profiling (REQUIREMENTS-W-01-003)
 
 /// Mutation debugger for tracing state changes
-public struct MutationDebugger<S: State> {
+public struct MutationDebugger<S: AxiomState> {
     public static func trace<T>(
         _ mutation: (inout S) throws -> T,
         on state: S,
@@ -79,7 +79,7 @@ public struct MutationDebugger<S: State> {
 }
 
 /// Mutation profiler for performance analysis
-public actor MutationProfiler<S: State> {
+public actor MutationProfiler<S: AxiomState> {
     private var profiles: [MutationProfile] = []
     
     public func profile<T>(
@@ -105,7 +105,7 @@ public actor MutationProfiler<S: State> {
 }
 
 /// Undo/Redo manager for state history
-public actor UndoManager<S: State> {
+public actor UndoManager<S: AxiomState> {
     private var history: [StateSnapshot<S>] = []
     private var currentIndex: Int = -1
     private let maxHistory: Int
@@ -165,7 +165,7 @@ public struct Mutable<Value> {
 }
 
 /// Batch mutation coordinator for optimized bulk operations
-public actor BatchMutationCoordinator<S: State> {
+public actor BatchMutationCoordinator<S: AxiomState> {
     private var pendingMutations: [(inout S) throws -> Void] = []
     private var coalescingTask: Task<Void, Never>?
     private let coalescingWindow: TimeInterval
@@ -243,7 +243,7 @@ public actor BatchMutationCoordinator<S: State> {
 // MARK: - Supporting Types for Enhanced Features
 
 /// Snapshot of state at a point in time
-public struct StateSnapshot<S: State> {
+public struct StateSnapshot<S: AxiomState> {
     public let state: S
     public let timestamp: Date
     

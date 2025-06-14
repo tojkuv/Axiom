@@ -16,7 +16,7 @@ import Foundation
 /// 
 /// ## Example
 /// ```swift
-/// struct TodoState: State {
+/// struct TodoState: AxiomState {
 ///     let items: [TodoItem]
 ///     let filter: Filter
 ///     
@@ -25,8 +25,8 @@ import Foundation
 ///     }
 /// }
 /// ```
-public protocol State: Equatable, Hashable, Sendable {
-    // Marker protocol for state types
+public protocol AxiomState: Equatable, Hashable, Sendable {
+    // Marker protocol for Axiom state types
 }
 
 // MARK: - Ownership Management
@@ -63,7 +63,7 @@ public final class StateOwnershipValidator {
     ///   - state: The state instance to assign
     ///   - client: The client that will own the state
     /// - Returns: true if ownership was successfully assigned, false if it violated constraints
-    public func assignOwnership<S: State, C>(of state: S, to client: C) -> Bool {
+    public func assignOwnership<S: AxiomState, C>(of state: S, to client: C) -> Bool {
         guard let clientId = extractClientId(from: client) else {
             diagnostics.recordError(.invalidClientType(String(describing: type(of: client))))
             return false
@@ -208,9 +208,9 @@ public struct OwnershipDiagnostics {
 
 /// Protocol for states that support partitioning into sub-states
 /// for managing large domains
-public protocol PartitionableState: State {
+public protocol PartitionableState: AxiomState {
     associatedtype PartitionKey: Hashable
-    associatedtype SubState: State
+    associatedtype SubState: AxiomState
     
     /// Returns the partition key for a given sub-state path
     func partitionKey(for keyPath: KeyPath<Self, SubState>) -> PartitionKey
@@ -225,7 +225,7 @@ public protocol PartitionableState: State {
 // MARK: - Compile-time State Ownership (REQUIREMENTS-W-01-002)
 
 /// Compile-time ownership wrapper that ensures type-safe state ownership
-public struct StateOwnership<S: State, Owner: Client> {
+public struct StateOwnership<S: AxiomState, Owner: Client> {
     public let state: S
     public let owner: Owner
     public var isValid: Bool { true }
@@ -238,7 +238,7 @@ public struct StateOwnership<S: State, Owner: Client> {
 
 /// Property wrapper that enforces state ownership at compile-time
 @propertyWrapper
-public struct Owned<S: State> {
+public struct Owned<S: AxiomState> {
     public let wrappedValue: S
     
     public init(_ initialState: S) {
@@ -251,7 +251,7 @@ public struct Owned<S: State> {
 }
 
 /// Enhanced state lifecycle management with resource coordination and performance tracking
-public actor StateLifecycleManager<S: State> {
+public actor StateLifecycleManager<S: AxiomState> {
     public enum LifecyclePhase: Sendable {
         case created
         case activating
@@ -397,7 +397,7 @@ public actor StateLifecycleManager<S: State> {
 
 /// Protocol for observing state lifecycle events
 public protocol StateLifecycleObserver: AnyObject, Sendable {
-    func lifecycleDidChange(_ phase: StateLifecycleManager<some State>.LifecyclePhase) async
+    func lifecycleDidChange(_ phase: StateLifecycleManager<some AxiomState>.LifecyclePhase) async
 }
 
 /// Weak reference wrapper for state lifecycle observers to prevent retain cycles
@@ -410,18 +410,18 @@ private struct WeakObserver {
 }
 
 /// Protocol for hierarchical state management
-public protocol HierarchicalState: State {
-    associatedtype ChildStates: Collection where ChildStates.Element: State
+public protocol HierarchicalState: AxiomState {
+    associatedtype ChildStates: Collection where ChildStates.Element: AxiomState
     
     var children: ChildStates { get }
     
-    func child<T: State>(ofType: T.Type, id: String) -> T?
-    func addChild<T: State>(_ child: T) -> Self
-    func removeChild<T: State>(ofType: T.Type, id: String) -> Self
+    func child<T: AxiomState>(ofType: T.Type, id: String) -> T?
+    func addChild<T: AxiomState>(_ child: T) -> Self
+    func removeChild<T: AxiomState>(ofType: T.Type, id: String) -> Self
 }
 
 /// Protocol for transferable state ownership
-public protocol TransferableState: State {
+public protocol TransferableState: AxiomState {
     func prepareForTransfer() async -> TransferToken<Self>
 }
 
@@ -448,7 +448,7 @@ public struct TransferToken<S: TransferableState> {
 }
 
 /// Advanced memory-efficient state storage with intelligent partitioning and LRU eviction
-public actor PartitionedStateStorage<S: State> {
+public actor PartitionedStateStorage<S: AxiomState> {
     private let state: S
     private let memoryLimit: Int
     private var partitionCache: [String: (data: Any, lastAccessed: CFAbsoluteTime)] = [:]
@@ -599,7 +599,7 @@ public struct MemoryStats {
 /// Property wrapper that would enforce state ownership at compile-time
 /// (Legacy compatibility - use Owned instead)
 @propertyWrapper
-public struct OwnedState<S: State> {
+public struct OwnedState<S: AxiomState> {
     private let state: S
     
     public var wrappedValue: S {
@@ -618,7 +618,7 @@ struct TestClient {
     let id: String
 }
 
-struct TestState: State {
+struct TestState: AxiomState {
     let value: String
     
     func withValue(_ newValue: String) -> TestState {

@@ -82,7 +82,7 @@ extension Client {
 // MARK: - Transaction Support (REQUIREMENTS-W-01-003)
 
 /// Transaction for atomic multi-step mutations
-public struct Transaction<S: State> {
+public struct Transaction<S: AxiomState> {
     private var pendingOperations: [AnyOperation] = []
     private let initialState: S
     

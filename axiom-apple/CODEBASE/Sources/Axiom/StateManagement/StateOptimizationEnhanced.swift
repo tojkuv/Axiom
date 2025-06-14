@@ -166,7 +166,7 @@ enum BatchingDecision {
 }
 
 /// Adaptive batch coordinator for intelligent update batching
-public actor AdaptiveBatchCoordinator<S: State> {
+public actor AdaptiveBatchCoordinator<S: AxiomState> {
     private let predictor: UpdatePredictor
     private var priorityQueue: PriorityQueue<BatchedUpdate<S>>
     private var currentBatch: UpdateBatch<S>?
@@ -405,7 +405,7 @@ public enum CachePolicy {
 }
 
 /// Compressed state storage for memory efficiency
-public actor CompressedStateStorage<S: State & Codable> {
+public actor CompressedStateStorage<S: AxiomState & Codable> {
     private var compressed: Data?
     private var cache: S?
     private let compressionLevel: CompressionLevel
@@ -489,7 +489,7 @@ public actor CompressedStateStorage<S: State & Codable> {
 }
 
 /// Protocol for incremental state computation
-public protocol IncrementalState: State {
+public protocol IncrementalState: AxiomState {
     associatedtype Increment
     
     func apply(increment: Increment) -> Self

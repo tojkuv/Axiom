@@ -14,7 +14,7 @@ import Foundation
 /// - State updates must be delivered within 5ms
 public protocol Client<StateType, ActionType>: Actor {
     /// The type of state managed by this client
-    associatedtype StateType: State
+    associatedtype StateType: AxiomState
     
     /// The type of actions processed by this client
     associatedtype ActionType: Sendable
@@ -39,6 +39,12 @@ public protocol Client<StateType, ActionType>: Actor {
     ///   - old: The previous state before update
     ///   - new: The current state after update
     func stateDidUpdate(from old: StateType, to new: StateType) async
+    
+    /// Get current state for rollback purposes - must be implemented by conforming types
+    func getCurrentState() async -> StateType
+    
+    /// Restore state during rollback - must be implemented by conforming types
+    func rollbackToState(_ state: StateType) async
 }
 
 // MARK: - Client Extensions
@@ -65,6 +71,79 @@ extension Client {
         }
     }
     
+    /// Process multiple actions atomically with rollback on failure
+    public func processAtomically<S: Sequence>(_ actions: S) async throws where S.Element == ActionType {
+        let actionsArray = Array(actions)
+        guard !actionsArray.isEmpty else { return }
+        
+        // Store the initial state for rollback
+        let currentState = await getCurrentState()
+        var processedActions: [ActionType] = []
+        
+        do {
+            // Process all actions, tracking successful ones
+            for action in actionsArray {
+                try await process(action)
+                processedActions.append(action)
+            }
+        } catch {
+            // Rollback on failure by restoring the initial state
+            await rollbackToState(currentState)
+            throw AxiomError.clientError(.atomicActionSequenceFailed(
+                processed: processedActions.count,
+                total: actionsArray.count,
+                underlyingError: AnyCodableError(error)
+            ))
+        }
+    }
+    
+    /// Process actions with retry logic and exponential backoff
+    public func processWithRetry<S: Sequence>(
+        _ actions: S,
+        maxRetries: Int = 3,
+        baseDelay: Duration = .milliseconds(100)
+    ) async throws where S.Element == ActionType {
+        let actionsArray = Array(actions)
+        var lastError: Error?
+        
+        for attempt in 0...maxRetries {
+            do {
+                try await processAtomically(actionsArray)
+                return // Success
+            } catch {
+                lastError = error
+                
+                if attempt == maxRetries {
+                    break // No more retries
+                }
+                
+                // Exponential backoff
+                let delay = Duration.milliseconds(
+                    Int(Double(baseDelay.components.attoseconds) * pow(2.0, Double(attempt)))
+                )
+                try await Task.sleep(for: delay)
+            }
+        }
+        
+        throw AxiomError.clientError(.maxRetriesExceeded(
+            attempts: maxRetries + 1,
+            underlyingError: AnyCodableError(lastError ?? AxiomError.unknownError)
+        ))
+    }
+    
+    /// Process action batch with proper atomic handling
+    public func process(_ batch: ActionBatch<ActionType>) async throws {
+        if batch.isAtomicExecution {
+            try await processAtomically(batch.actions)
+        } else {
+            try await process(batch.actions)
+        }
+    }
+}
+
+// MARK: - Client Extensions
+
+extension Client {
     /// Process actions with timeout
     public func process(_ action: ActionType, timeout: Duration) async throws {
         try await withThrowingTaskGroup(of: Void.self) { group in
@@ -100,7 +179,7 @@ extension Client {
 /// - State management with automatic streaming
 /// - Thread-safe state mutations
 /// - Performance guarantees for state propagation
-public actor ObservableClient<S: State, A>: Client where S: Equatable {
+public actor ObservableClient<S: AxiomState, A>: Client where S: Equatable {
     public typealias StateType = S
     public typealias ActionType = A
     /// Current state of the client
@@ -167,6 +246,16 @@ public actor ObservableClient<S: State, A>: Client where S: Equatable {
     /// Override in subclasses to handle specific actions
     public func process(_ action: A) async throws {
         // Base implementation - subclasses should override
+    }
+    
+    /// Get current state for atomic action processing
+    public func getCurrentState() async -> S {
+        return state
+    }
+    
+    /// Restore state during rollback
+    public func rollbackToState(_ state: S) async {
+        updateState(state)
     }
 }
 
