@@ -1,11 +1,11 @@
 import SwiftUI
 
 @main
-struct HotReloadAppApp: App {
+struct HotReloadControllerApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .preferredColorScheme(.dark)
         }
+        .windowResizability(.contentSize)
     }
 }
