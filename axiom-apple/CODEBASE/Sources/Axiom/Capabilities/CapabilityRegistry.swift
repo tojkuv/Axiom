@@ -1,22 +1,22 @@
 import Foundation
 
 /// Central registry for managing all capabilities in the system
-public actor CapabilityRegistry {
-    public static let shared = CapabilityRegistry()
+public actor AxiomCapabilityRegistry {
+    public static let shared = AxiomCapabilityRegistry()
     
-    private var registrations: [String: CapabilityRegistration] = [:]
+    private var registrations: [String: AxiomCapabilityRegistration] = [:]
     private var categories: [String: Set<String>] = [:]
     private let registrationLock = AsyncSemaphore(value: 1)
     
     private init() {}
     
     /// Register a capability with the registry
-    public func register<C: Capability>(
+    public func register<C: AxiomCapability>(
         _ capability: C,
-        requirements: Set<CapabilityDiscoveryService.Requirement> = [],
+        requirements: Set<AxiomCapabilityDiscoveryService.Requirement> = [],
         category: String? = nil,
         validator: @escaping @Sendable () async -> Bool = { true },
-        metadata: CapabilityMetadata? = nil
+        metadata: AxiomCapabilityMetadata? = nil
     ) async throws {
         await registrationLock.wait()
         defer { Task { await registrationLock.signal() } }
@@ -24,15 +24,15 @@ public actor CapabilityRegistry {
         let identifier = String(describing: type(of: capability))
         
         // Create default metadata if none provided
-        let capabilityMetadata = metadata ?? CapabilityMetadata(
+        let capabilityMetadata = metadata ?? AxiomCapabilityMetadata(
             name: identifier,
-            description: "Capability: \(identifier)",
+            description: "AxiomCapability: \(identifier)",
             version: "1.0.0",
             category: category
         )
         
         // Create registration
-        let registration = CapabilityRegistration(
+        let registration = AxiomCapabilityRegistration(
             identifier: identifier,
             capability: capability,
             requirements: requirements,
@@ -52,7 +52,7 @@ public actor CapabilityRegistry {
         }
         
         // Register with discovery service
-        await CapabilityDiscoveryService.shared.register(
+        await AxiomCapabilityDiscoveryService.shared.register(
             capability: capability,
             identifier: identifier,
             requirements: requirements,
@@ -61,18 +61,18 @@ public actor CapabilityRegistry {
         )
         
         // Notify discovery service
-        let discoveryRegistration = CapabilityDiscoveryService.CapabilityRegistration(
+        let discoveryRegistration = AxiomCapabilityDiscoveryService.AxiomCapabilityRegistration(
             identifier: registration.identifier,
             capability: registration.capability,
             requirements: [],
             validator: { true },
             metadata: registration.metadata
         )
-        await CapabilityDiscoveryService.shared.capabilityRegistered(discoveryRegistration)
+        await AxiomCapabilityDiscoveryService.shared.capabilityRegistered(discoveryRegistration)
     }
     
     /// Get capabilities in a specific category
-    public func capabilities(in category: String) -> [any Capability] {
+    public func capabilities(in category: String) -> [any AxiomCapability] {
         guard let identifiers = categories[category] else { return [] }
         
         return identifiers.compactMap { identifier in
@@ -81,11 +81,11 @@ public actor CapabilityRegistry {
     }
     
     /// Get all registered capabilities
-    public func allCapabilities() async -> [CapabilityInfo] {
-        var results: [CapabilityInfo] = []
+    public func allCapabilities() async -> [AxiomCapabilityInfo] {
+        var results: [AxiomCapabilityInfo] = []
         for registration in registrations.values {
-            let isAvailable = await CapabilityDiscoveryService.shared.hasCapability(registration.identifier)
-            results.append(CapabilityInfo(
+            let isAvailable = await AxiomCapabilityDiscoveryService.shared.hasAxiomCapability(registration.identifier)
+            results.append(AxiomCapabilityInfo(
                 identifier: registration.identifier,
                 name: registration.metadata.name ?? "Unknown",
                 description: registration.metadata.description,
@@ -102,7 +102,7 @@ public actor CapabilityRegistry {
     }
     
     /// Get capability by identifier
-    public func capability(withId identifier: String) -> (any Capability)? {
+    public func capability(withId identifier: String) -> (any AxiomCapability)? {
         return registrations[identifier]?.capability
     }
     
@@ -129,21 +129,21 @@ public actor CapabilityRegistry {
         }
         
         // Notify discovery service
-        await CapabilityDiscoveryService.shared.capabilityBecameUnavailable(identifier)
+        await AxiomCapabilityDiscoveryService.shared.capabilityBecameUnavailable(identifier)
     }
     
     /// Get registration details for a capability
-    public func registration(for identifier: String) -> CapabilityRegistration? {
+    public func registration(for identifier: String) -> AxiomCapabilityRegistration? {
         return registrations[identifier]
     }
     
     /// Get capabilities by metadata criteria
-    public func capabilities(matching criteria: CapabilitySearchCriteria) async -> [CapabilityInfo] {
-        var results: [CapabilityInfo] = []
+    public func capabilities(matching criteria: AxiomCapabilitySearchCriteria) async -> [AxiomCapabilityInfo] {
+        var results: [AxiomCapabilityInfo] = []
         for registration in registrations.values {
             if await criteria.matches(registration) {
-                let isAvailable = await CapabilityDiscoveryService.shared.hasCapability(registration.identifier)
-                results.append(CapabilityInfo(
+                let isAvailable = await AxiomCapabilityDiscoveryService.shared.hasAxiomCapability(registration.identifier)
+                results.append(AxiomCapabilityInfo(
                     identifier: registration.identifier,
                     name: registration.metadata.name ?? "Unknown",
                     description: registration.metadata.description,
@@ -156,9 +156,9 @@ public actor CapabilityRegistry {
     }
     
     /// Activate a capability by identifier
-    public func activateCapability(_ identifier: String) async throws {
+    public func activateAxiomCapability(_ identifier: String) async throws {
         guard let registration = registrations[identifier] else {
-            throw AxiomError.capabilityError(.notAvailable("Capability not found: \(identifier)"))
+            throw AxiomError.capabilityError(.notAvailable("AxiomCapability not found: \(identifier)"))
         }
         
         // Try to activate the capability
@@ -182,21 +182,21 @@ public actor CapabilityRegistry {
     }
 }
 
-// MARK: - Capability Registration
+// MARK: - AxiomCapability Registration
 
-public struct CapabilityRegistration: @unchecked Sendable {
+public struct AxiomCapabilityRegistration: @unchecked Sendable {
     public let identifier: String
-    public let capability: any Capability
-    public let requirements: Set<CapabilityDiscoveryService.Requirement>
+    public let capability: any AxiomCapability
+    public let requirements: Set<AxiomCapabilityDiscoveryService.Requirement>
     public let validator: @Sendable () async -> Bool
-    public let metadata: CapabilityMetadata
+    public let metadata: AxiomCapabilityMetadata
     
     public init(
         identifier: String,
-        capability: any Capability,
-        requirements: Set<CapabilityDiscoveryService.Requirement>,
+        capability: any AxiomCapability,
+        requirements: Set<AxiomCapabilityDiscoveryService.Requirement>,
         validator: @escaping @Sendable () async -> Bool,
-        metadata: CapabilityMetadata
+        metadata: AxiomCapabilityMetadata
     ) {
         self.identifier = identifier
         self.capability = capability
@@ -206,9 +206,9 @@ public struct CapabilityRegistration: @unchecked Sendable {
     }
 }
 
-// MARK: - Capability Info
+// MARK: - AxiomCapability Info
 
-public struct CapabilityInfo: Sendable {
+public struct AxiomCapabilityInfo: Sendable {
     public let identifier: String
     public let name: String
     public let description: String
@@ -232,7 +232,7 @@ public struct CapabilityInfo: Sendable {
 
 // MARK: - Search Criteria
 
-public struct CapabilitySearchCriteria: Sendable {
+public struct AxiomCapabilitySearchCriteria: Sendable {
     public let namePattern: String?
     public let category: String?
     public let requiredTags: Set<String>
@@ -256,7 +256,7 @@ public struct CapabilitySearchCriteria: Sendable {
         self.onlyAvailable = onlyAvailable
     }
     
-    public func matches(_ registration: CapabilityRegistration) async -> Bool {
+    public func matches(_ registration: AxiomCapabilityRegistration) async -> Bool {
         // Check category
         if let requiredCategory = category,
            registration.metadata.category != requiredCategory {
@@ -278,7 +278,7 @@ public struct CapabilitySearchCriteria: Sendable {
         
         // Check availability if required
         if onlyAvailable {
-            let isAvailable = await CapabilityDiscoveryService.shared.hasCapability(registration.identifier)
+            let isAvailable = await AxiomCapabilityDiscoveryService.shared.hasAxiomCapability(registration.identifier)
             if !isAvailable {
                 return false
             }
@@ -320,23 +320,23 @@ public actor AsyncSemaphore {
     }
 }
 
-// MARK: - Capability Bootstrap
+// MARK: - AxiomCapability Bootstrap
 
 /// Bootstrap helper for automatic capability registration
-public struct CapabilityBootstrap {
+public struct AxiomCapabilityBootstrap {
     
     /// Register all built-in system capabilities
     public static func registerSystemCapabilities() async throws {
-        _ = CapabilityRegistry.shared
+        _ = AxiomCapabilityRegistry.shared
         
         // Network capability - simplified for now
         /*
-        let networkCapability = NetworkCapability()
+        let networkAxiomCapability = NetworkAxiomCapability()
         try await registry.register(
-            networkCapability,
+            networkAxiomCapability,
             category: "System",
-            validator: { await networkCapability.isAvailable },
-            metadata: CapabilityMetadata(
+            validator: { await networkAxiomCapability.isAvailable },
+            metadata: AxiomCapabilityMetadata(
                 name: "Network",
                 description: "Network connectivity capability",
                 version: "1.0.0",
@@ -347,25 +347,25 @@ public struct CapabilityBootstrap {
     }
     
     /// Register capability using type-based discovery
-    public static func register<T: Capability>(_ type: T.Type) async throws {
-        let capability = try await createCapability(of: type)
-        try await CapabilityRegistry.shared.register(capability)
+    public static func register<T: AxiomCapability>(_ type: T.Type) async throws {
+        let capability = try await createAxiomCapability(of: type)
+        try await AxiomCapabilityRegistry.shared.register(capability)
     }
     
     /// Create capability instance based on type
-    private static func createCapability<T: Capability>(of type: T.Type) async throws -> T {
+    private static func createAxiomCapability<T: AxiomCapability>(of type: T.Type) async throws -> T {
         // Throw error instead of crashing
-        throw AxiomError.capabilityError(.initializationFailed("Capability auto-creation not implemented for type: \(type)"))
+        throw AxiomError.capabilityError(.initializationFailed("AxiomCapability auto-creation not implemented for type: \(type)"))
     }
 }
 
-// MARK: - Registrable Capability Protocol
+// MARK: - Registrable AxiomCapability Protocol
 
 /// Protocol for capabilities that can self-register
-public protocol RegistrableCapability: Capability {
+public protocol RegistrableAxiomCapability: AxiomCapability {
     static var defaultCategory: String? { get }
-    static var defaultRequirements: Set<CapabilityDiscoveryService.Requirement> { get }
-    static var metadata: CapabilityMetadata { get }
+    static var defaultRequirements: Set<AxiomCapabilityDiscoveryService.Requirement> { get }
+    static var metadata: AxiomCapabilityMetadata { get }
     
     /// Register this capability type with the registry
     static func register() async throws
@@ -373,15 +373,15 @@ public protocol RegistrableCapability: Capability {
 
 // MARK: - Default Implementations
 
-extension RegistrableCapability {
+extension RegistrableAxiomCapability {
     public static var defaultCategory: String? { nil }
-    public static var defaultRequirements: Set<CapabilityDiscoveryService.Requirement> { [] }
+    public static var defaultRequirements: Set<AxiomCapabilityDiscoveryService.Requirement> { [] }
     
     public static func register() async throws {
         // This would create an instance and register it
         // Implementation would depend on capability-specific initialization
         let instance = try await createInstance()
-        try await CapabilityRegistry.shared.register(
+        try await AxiomCapabilityRegistry.shared.register(
             instance,
             requirements: defaultRequirements,
             category: defaultCategory,

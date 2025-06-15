@@ -4,7 +4,7 @@ import Network
 // MARK: - Network Capability Configuration
 
 /// Network capability configuration
-public struct NetworkCapabilityConfiguration: CapabilityConfiguration, Codable {
+public struct NetworkCapabilityConfiguration: AxiomCapabilityConfiguration, Codable {
     public let timeout: TimeInterval
     public let maxConcurrentConnections: Int
     public let connectionTimeout: TimeInterval
@@ -84,7 +84,7 @@ public struct NetworkCapabilityConfiguration: CapabilityConfiguration, Codable {
         )
     }
     
-    public func adjusted(for environment: CapabilityEnvironment) -> NetworkCapabilityConfiguration {
+    public func adjusted(for environment: AxiomCapabilityEnvironment) -> NetworkCapabilityConfiguration {
         var adjustedTimeout = timeout
         var adjustedLogging = enableLogging
         var adjustedCellular = allowsCellularAccess
@@ -187,7 +187,7 @@ public struct NetworkExecutionResult: Sendable {
 // MARK: - Network Capability Resource
 
 /// Network resource management
-public actor NetworkCapabilityResource: CapabilityResource {
+public actor NetworkCapabilityResource: AxiomCapabilityResource {
     private var activeConnections: Set<UUID> = []
     private let maxConnections: Int
     private var _isAvailable: Bool = true
@@ -230,7 +230,7 @@ public actor NetworkCapabilityResource: CapabilityResource {
     
     public func allocate() async throws {
         guard await isAvailable() else {
-            throw CapabilityError.resourceAllocationFailed("Connection limit reached or resource unavailable")
+            throw AxiomCapabilityError.resourceAllocationFailed("Connection limit reached or resource unavailable")
         }
         
         let connectionId = UUID()
@@ -255,7 +255,7 @@ public actor NetworkCapabilityResource: CapabilityResource {
     
     // MARK: - Session Management
     
-    private nonisolated func configureSession() -> URLSessionConfiguration {
+    private func configureSession() -> URLSessionConfiguration {
         let sessionConfig = URLSessionConfiguration.default
         sessionConfig.timeoutIntervalForRequest = configuration.timeout
         sessionConfig.timeoutIntervalForResource = configuration.connectionTimeout
@@ -377,11 +377,11 @@ public actor NetworkCapability: DomainCapability {
     
     private var _configuration: NetworkCapabilityConfiguration
     private var _resources: NetworkCapabilityResource
-    private var _environment: CapabilityEnvironment
-    private var _state: CapabilityState = .unknown
+    private var _environment: AxiomCapabilityEnvironment
+    private var _state: AxiomCapabilityState = .unknown
     private var _activationTimeout: Duration = .milliseconds(10)
     private var networkMonitor: NetworkMonitor
-    private var stateStreamContinuation: AsyncStream<CapabilityState>.Continuation?
+    private var stateStreamContinuation: AsyncStream<AxiomCapabilityState>.Continuation?
     
     public nonisolated var id: String { "network-capability" }
     
@@ -389,11 +389,11 @@ public actor NetworkCapability: DomainCapability {
         get async { _state == .available }
     }
     
-    public var state: CapabilityState {
+    public var state: AxiomCapabilityState {
         get async { _state }
     }
     
-    public var stateStream: AsyncStream<CapabilityState> {
+    public var stateStream: AsyncStream<AxiomCapabilityState> {
         AsyncStream { [weak self] continuation in
             Task { [weak self] in
                 await self?.setStreamContinuation(continuation)
@@ -416,13 +416,13 @@ public actor NetworkCapability: DomainCapability {
         get async { _resources }
     }
     
-    public var environment: CapabilityEnvironment {
+    public var environment: AxiomCapabilityEnvironment {
         get async { _environment }
     }
     
     public init(
         configuration: NetworkCapabilityConfiguration = NetworkCapabilityConfiguration(),
-        environment: CapabilityEnvironment = CapabilityEnvironment()
+        environment: AxiomCapabilityEnvironment = AxiomCapabilityEnvironment()
     ) {
         self._configuration = configuration.adjusted(for: environment)
         self._resources = NetworkCapabilityResource(configuration: self._configuration)
@@ -430,7 +430,7 @@ public actor NetworkCapability: DomainCapability {
         self.networkMonitor = NetworkMonitor()
     }
     
-    private func setStreamContinuation(_ continuation: AsyncStream<CapabilityState>.Continuation) {
+    private func setStreamContinuation(_ continuation: AsyncStream<AxiomCapabilityState>.Continuation) {
         self.stateStreamContinuation = continuation
     }
     
@@ -438,14 +438,14 @@ public actor NetworkCapability: DomainCapability {
     
     public func updateConfiguration(_ configuration: NetworkCapabilityConfiguration) async throws {
         guard configuration.isValid else {
-            throw CapabilityError.initializationFailed("Invalid network configuration")
+            throw AxiomCapabilityError.initializationFailed("Invalid network configuration")
         }
         
         _configuration = configuration.adjusted(for: _environment)
         await _resources.updateConfiguration(_configuration)
     }
     
-    public func handleEnvironmentChange(_ environment: CapabilityEnvironment) async {
+    public func handleEnvironmentChange(_ environment: AxiomCapabilityEnvironment) async {
         _environment = environment
         let adjusted = _configuration.adjusted(for: environment)
         try? await updateConfiguration(adjusted)
@@ -469,17 +469,17 @@ public actor NetworkCapability: DomainCapability {
     
     public func activate() async throws {
         guard await _resources.isAvailable() else {
-            throw CapabilityError.initializationFailed("Network resources not available")
+            throw AxiomCapabilityError.initializationFailed("Network resources not available")
         }
         
         await networkMonitor.start()
         
         let networkStatus = await networkMonitor.status
         if !networkStatus.isConnected && !_configuration.allowsCellularAccess {
-            throw CapabilityError.notAvailable("Network not available and cellular access disabled")
+            throw AxiomCapabilityError.notAvailable("Network not available and cellular access disabled")
         }
         
-        await transitionTo(.available)
+        await transitionTo(AxiomCapabilityState.available)
         try await _resources.allocate()
         
         // Start monitoring network changes
@@ -492,7 +492,7 @@ public actor NetworkCapability: DomainCapability {
     }
     
     public func deactivate() async {
-        await transitionTo(.unavailable)
+        await transitionTo(AxiomCapabilityState.unavailable)
         await _resources.releaseAll()
         await networkMonitor.stop()
         stateStreamContinuation?.finish()
@@ -502,7 +502,7 @@ public actor NetworkCapability: DomainCapability {
         await deactivate()
     }
     
-    private func transitionTo(_ newState: CapabilityState) async {
+    private func transitionTo(_ newState: AxiomCapabilityState) async {
         guard _state != newState else { return }
         _state = newState
         stateStreamContinuation?.yield(newState)
@@ -513,10 +513,10 @@ public actor NetworkCapability: DomainCapability {
             do {
                 try await activate()
             } catch {
-                await transitionTo(.restricted)
+                await transitionTo(AxiomCapabilityState.restricted)
             }
-        } else if !status.isConnected && _state == .available {
-            await transitionTo(.unavailable)
+        } else if !status.isConnected && _state == AxiomCapabilityState.available {
+            await transitionTo(AxiomCapabilityState.unavailable)
         }
     }
     
@@ -525,8 +525,8 @@ public actor NetworkCapability: DomainCapability {
     /// Execute a URLRequest - the foundational network operation
     /// Applications build their own clients on top of this primitive
     public func execute(_ request: URLRequest, context: NetworkExecutionContext = NetworkExecutionContext()) async throws -> NetworkExecutionResult {
-        guard _state == .available else {
-            throw CapabilityError.notAvailable("Network capability not available")
+        guard _state == AxiomCapabilityState.available else {
+            throw AxiomCapabilityError.notAvailable("Network capability not available")
         }
         
         let session = await _resources.getSession()
@@ -562,7 +562,7 @@ public actor NetworkCapability: DomainCapability {
             if _configuration.enableLogging {
                 await logError(error, request: request, context: context)
             }
-            throw NetworkError.requestFailed(error.localizedDescription)
+            throw AxiomNetworkError.requestFailed(error.localizedDescription)
         }
     }
     
@@ -578,7 +578,7 @@ public actor NetworkCapability: DomainCapability {
     
     // MARK: - Private Helpers
     
-    private func mapURLError(_ error: URLError) -> NetworkError {
+    private func mapURLError(_ error: URLError) -> AxiomNetworkError {
         switch error.code {
         case .notConnectedToInternet:
             return .noInternetConnection

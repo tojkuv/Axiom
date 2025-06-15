@@ -4,7 +4,7 @@ import Foundation
 // MARK: - Contacts Configuration
 
 /// Configuration for Contacts capability
-public struct ContactsConfiguration: CapabilityConfiguration {
+public struct ContactsConfiguration: AxiomCapabilityConfiguration {
     public let keysToFetch: [CNKeyDescriptor]
     public let requestTimeout: TimeInterval
     public let enableAutomaticSyncing: Bool
@@ -46,7 +46,7 @@ public struct ContactsConfiguration: CapabilityConfiguration {
         )
     }
     
-    public func adjusted(for environment: CapabilityEnvironment) -> ContactsConfiguration {
+    public func adjusted(for environment: AxiomCapabilityEnvironment) -> ContactsConfiguration {
         var adjustedTimeout = requestTimeout
         var adjustedSyncing = enableAutomaticSyncing
         
@@ -335,7 +335,7 @@ public struct ContactData: Sendable, Codable {
 // MARK: - Contacts Resource
 
 /// Resource management for Contacts
-public actor ContactsResource: CapabilityResource {
+public actor ContactsResource: AxiomCapabilityResource {
     private var activeFetches: Set<UUID> = []
     private var _isAvailable: Bool = true
     private let configuration: ContactsConfiguration
@@ -378,7 +378,7 @@ public actor ContactsResource: CapabilityResource {
     
     public func addFetch(_ fetchId: UUID) async throws {
         guard await isAvailable() else {
-            throw CapabilityError.resourceAllocationFailed("Contacts resources not available")
+            throw AxiomCapabilityError.resourceAllocationFailed("Contacts resources not available")
         }
         activeFetches.insert(fetchId)
     }
@@ -401,12 +401,12 @@ public actor ContactsCapability: DomainCapability {
     
     private var _configuration: ContactsConfiguration
     private var _resources: ContactsResource
-    private var _environment: CapabilityEnvironment
-    private var _state: CapabilityState = .unknown
+    private var _environment: AxiomCapabilityEnvironment
+    private var _state: AxiomCapabilityState = .unknown
     private var _activationTimeout: Duration = .milliseconds(10)
     
     private var contactStore: CNContactStore?
-    private var stateStreamContinuation: AsyncStream<CapabilityState>.Continuation?
+    private var stateStreamContinuation: AsyncStream<AxiomCapabilityState>.Continuation?
     private var contactStreamContinuation: AsyncStream<ContactData>.Continuation?
     
     public nonisolated var id: String { "contacts-capability" }
@@ -415,11 +415,11 @@ public actor ContactsCapability: DomainCapability {
         get async { _state == .available }
     }
     
-    public var state: CapabilityState {
+    public var state: AxiomCapabilityState {
         get async { _state }
     }
     
-    public var stateStream: AsyncStream<CapabilityState> {
+    public var stateStream: AsyncStream<AxiomCapabilityState> {
         AsyncStream { [weak self] continuation in
             Task { [weak self] in
                 await self?.setStateStreamContinuation(continuation)
@@ -442,20 +442,20 @@ public actor ContactsCapability: DomainCapability {
         get async { _resources }
     }
     
-    public var environment: CapabilityEnvironment {
+    public var environment: AxiomCapabilityEnvironment {
         get async { _environment }
     }
     
     public init(
         configuration: ContactsConfiguration = ContactsConfiguration(),
-        environment: CapabilityEnvironment = CapabilityEnvironment()
+        environment: AxiomCapabilityEnvironment = AxiomCapabilityEnvironment()
     ) {
         self._configuration = configuration.adjusted(for: environment)
         self._resources = ContactsResource(configuration: self._configuration)
         self._environment = environment
     }
     
-    private func setStateStreamContinuation(_ continuation: AsyncStream<CapabilityState>.Continuation) {
+    private func setStateStreamContinuation(_ continuation: AsyncStream<AxiomCapabilityState>.Continuation) {
         self.stateStreamContinuation = continuation
     }
     
@@ -467,13 +467,13 @@ public actor ContactsCapability: DomainCapability {
     
     public func updateConfiguration(_ configuration: ContactsConfiguration) async throws {
         guard configuration.isValid else {
-            throw CapabilityError.initializationFailed("Invalid Contacts configuration")
+            throw AxiomCapabilityError.initializationFailed("Invalid Contacts configuration")
         }
         
         _configuration = configuration.adjusted(for: _environment)
     }
     
-    public func handleEnvironmentChange(_ environment: CapabilityEnvironment) async {
+    public func handleEnvironmentChange(_ environment: AxiomCapabilityEnvironment) async {
         _environment = environment
         let adjusted = _configuration.adjusted(for: environment)
         try? await updateConfiguration(adjusted)
@@ -487,7 +487,7 @@ public actor ContactsCapability: DomainCapability {
     
     public func requestPermission() async throws {
         guard let store = contactStore else {
-            throw CapabilityError.notAvailable("Contacts store not initialized")
+            throw AxiomCapabilityError.notAvailable("Contacts store not initialized")
         }
         
         let status = CNContactStore.authorizationStatus(for: .contacts)
@@ -495,10 +495,10 @@ public actor ContactsCapability: DomainCapability {
         if status == .notDetermined {
             let granted = try await store.requestAccess(for: .contacts)
             if !granted {
-                throw CapabilityError.permissionRequired("Contacts access denied")
+                throw AxiomCapabilityError.permissionRequired("Contacts access denied")
             }
         } else if status != .authorized {
-            throw CapabilityError.permissionRequired("Contacts access not authorized")
+            throw AxiomCapabilityError.permissionRequired("Contacts access not authorized")
         }
     }
     
@@ -510,7 +510,7 @@ public actor ContactsCapability: DomainCapability {
     
     public func activate() async throws {
         guard await _resources.isAvailable() else {
-            throw CapabilityError.initializationFailed("Contacts resources not available")
+            throw AxiomCapabilityError.initializationFailed("Contacts resources not available")
         }
         
         contactStore = CNContactStore()
@@ -529,7 +529,7 @@ public actor ContactsCapability: DomainCapability {
         contactStreamContinuation?.finish()
     }
     
-    private func transitionTo(_ newState: CapabilityState) async {
+    private func transitionTo(_ newState: AxiomCapabilityState) async {
         guard _state != newState else { return }
         _state = newState
         stateStreamContinuation?.yield(newState)
@@ -540,11 +540,11 @@ public actor ContactsCapability: DomainCapability {
     /// Fetch all contacts
     public func getAllContacts() async throws -> [ContactData] {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("Contacts capability not available")
+            throw AxiomCapabilityError.notAvailable("Contacts capability not available")
         }
         
         guard let store = contactStore else {
-            throw CapabilityError.notAvailable("Contacts store not initialized")
+            throw AxiomCapabilityError.notAvailable("Contacts store not initialized")
         }
         
         let fetchId = UUID()
@@ -572,11 +572,11 @@ public actor ContactsCapability: DomainCapability {
     /// Fetch contacts matching predicate
     public func getContacts(matching predicate: NSPredicate) async throws -> [ContactData] {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("Contacts capability not available")
+            throw AxiomCapabilityError.notAvailable("Contacts capability not available")
         }
         
         guard let store = contactStore else {
-            throw CapabilityError.notAvailable("Contacts store not initialized")
+            throw AxiomCapabilityError.notAvailable("Contacts store not initialized")
         }
         
         let fetchId = UUID()
@@ -617,11 +617,11 @@ public actor ContactsCapability: DomainCapability {
     /// Get contact by identifier
     public func getContact(withIdentifier identifier: String) async throws -> ContactData? {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("Contacts capability not available")
+            throw AxiomCapabilityError.notAvailable("Contacts capability not available")
         }
         
         guard let store = contactStore else {
-            throw CapabilityError.notAvailable("Contacts store not initialized")
+            throw AxiomCapabilityError.notAvailable("Contacts store not initialized")
         }
         
         let fetchId = UUID()
@@ -653,11 +653,11 @@ public actor ContactsCapability: DomainCapability {
         jobTitle: String = ""
     ) async throws -> ContactData {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("Contacts capability not available")
+            throw AxiomCapabilityError.notAvailable("Contacts capability not available")
         }
         
         guard let store = contactStore else {
-            throw CapabilityError.notAvailable("Contacts store not initialized")
+            throw AxiomCapabilityError.notAvailable("Contacts store not initialized")
         }
         
         let contact = CNMutableContact()
@@ -704,11 +704,11 @@ public actor ContactsCapability: DomainCapability {
         jobTitle: String? = nil
     ) async throws -> ContactData {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("Contacts capability not available")
+            throw AxiomCapabilityError.notAvailable("Contacts capability not available")
         }
         
         guard let store = contactStore else {
-            throw CapabilityError.notAvailable("Contacts store not initialized")
+            throw AxiomCapabilityError.notAvailable("Contacts store not initialized")
         }
         
         // Fetch the existing contact
@@ -755,11 +755,11 @@ public actor ContactsCapability: DomainCapability {
     /// Delete contact
     public func deleteContact(withIdentifier identifier: String) async throws {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("Contacts capability not available")
+            throw AxiomCapabilityError.notAvailable("Contacts capability not available")
         }
         
         guard let store = contactStore else {
-            throw CapabilityError.notAvailable("Contacts store not initialized")
+            throw AxiomCapabilityError.notAvailable("Contacts store not initialized")
         }
         
         // Fetch the contact to delete
@@ -783,7 +783,7 @@ public actor ContactsCapability: DomainCapability {
     /// Get contact groups
     public func getContactGroups() async throws -> [CNGroup] {
         guard let store = contactStore else {
-            throw CapabilityError.notAvailable("Contacts store not initialized")
+            throw AxiomCapabilityError.notAvailable("Contacts store not initialized")
         }
         
         return try store.groups(matching: nil)
@@ -801,11 +801,11 @@ public actor ContactsCapability: DomainCapability {
     /// Get contact image data
     public func getContactImage(withIdentifier identifier: String) async throws -> Data? {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("Contacts capability not available")
+            throw AxiomCapabilityError.notAvailable("Contacts capability not available")
         }
         
         guard let store = contactStore else {
-            throw CapabilityError.notAvailable("Contacts store not initialized")
+            throw AxiomCapabilityError.notAvailable("Contacts store not initialized")
         }
         
         let contact = try store.unifiedContact(
@@ -819,24 +819,24 @@ public actor ContactsCapability: DomainCapability {
 
 // MARK: - Registration Extension
 
-extension CapabilityRegistry {
+extension AxiomCapabilityRegistry {
     /// Register Contacts capability
     public func registerContacts() async throws {
         let capability = ContactsCapability()
         try await register(
             capability,
             requirements: [
-                CapabilityDiscoveryService.Requirement(
+                AxiomCapabilityDiscoveryService.Requirement(
                     type: .systemFeature("Contacts"),
                     isMandatory: true
                 ),
-                CapabilityDiscoveryService.Requirement(
+                AxiomCapabilityDiscoveryService.Requirement(
                     type: .permission("NSContactsUsageDescription"),
                     isMandatory: true
                 )
             ],
             category: "contacts",
-            metadata: CapabilityMetadata(
+            metadata: AxiomCapabilityMetadata(
                 name: "Contacts",
                 description: "Device contacts access and management capability",
                 version: "1.0.0",

@@ -22,7 +22,7 @@ public struct SwiftUITestHelpers {
     // MARK: - Context Binding Testing
     
     /// Assert context is properly bound to view
-    public static func assertContextBinding<V: View, C: Context>(
+    public static func assertContextBinding<V: View, C: AxiomContext>(
         in testHost: ViewTestHost<V>,
         contextType: C.Type,
         matches expectedContext: C,
@@ -62,7 +62,7 @@ public struct SwiftUITestHelpers {
     
     /// Bind presentation to context for testing
     @MainActor
-    public static func bindPresentationToContext<P: BindablePresentation, C: Context & PresentationBindable>(
+    public static func bindPresentationToContext<P: BindablePresentation, C: AxiomContext & PresentationBindable>(
         presentation: P,
         context: C
     ) throws {
@@ -182,7 +182,7 @@ public struct SwiftUITestHelpers {
     }
     
     /// Assert context action was triggered
-    public static func assertContextAction<C: Context>(
+    public static func assertContextAction<C: AxiomContext>(
         in context: C,
         wasTriggered action: Any,
         timeout: Duration = .seconds(1),
@@ -195,7 +195,7 @@ public struct SwiftUITestHelpers {
     }
     
     /// Assert context state condition
-    public static func assertContextState<C: Context>(
+    public static func assertContextState<C: AxiomContext>(
         in context: C,
         condition: @escaping @Sendable (C) -> Bool,
         description: String,

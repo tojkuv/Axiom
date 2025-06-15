@@ -7,9 +7,9 @@ import Combine
 /// Type-erased capability dependency
 public struct AnyCapabilityDependency {
     public let id: String
-    public let state: CapabilityState
+    public let state: AxiomCapabilityState
     
-    public init(id: String, state: CapabilityState) {
+    public init(id: String, state: AxiomCapabilityState) {
         self.id = id
         self.state = state
     }
@@ -26,7 +26,7 @@ public protocol ComposableCapability: DomainCapability {
     func validateDependencies() async throws
     
     /// Handle dependency state changes
-    func handleDependencyChange(_ dependency: DependencyType, newState: CapabilityState) async
+    func handleDependencyChange(_ dependency: DependencyType, newState: AxiomCapabilityState) async
 }
 
 /// Capability dependency specification
@@ -87,7 +87,7 @@ public protocol CapabilityHierarchy {
     func removeChild(_ child: ChildCapability) async
     
     /// Propagate state changes to children
-    func propagateStateChange(_ state: CapabilityState) async
+    func propagateStateChange(_ state: AxiomCapabilityState) async
 }
 
 /// Hierarchical capability implementation
@@ -111,13 +111,13 @@ public actor HierarchicalCapability<Parent: DomainCapability, Child: DomainCapab
     public func addChild(_ child: Child) async throws {
         // Validate hierarchy rules
         guard _children.count < hierarchyRules.maxChildren else {
-            throw CapabilityError.initializationFailed("Maximum children exceeded")
+            throw AxiomCapabilityError.initializationFailed("Maximum children exceeded")
         }
         
         // Check for conflicts
         for existingChild in _children {
             if await areConflicting(child, existingChild) {
-                throw CapabilityError.initializationFailed("Conflicting capabilities")
+                throw AxiomCapabilityError.initializationFailed("Conflicting capabilities")
             }
         }
         
@@ -145,7 +145,7 @@ public actor HierarchicalCapability<Parent: DomainCapability, Child: DomainCapab
         }
     }
     
-    public func propagateStateChange(_ state: CapabilityState) async {
+    public func propagateStateChange(_ state: AxiomCapabilityState) async {
         for child in _children {
             switch state {
             case .available:
@@ -254,7 +254,7 @@ public actor CapabilityComposer {
     }
     
     /// Handle capability state change and propagate to dependents
-    public func handleStateChange(capabilityId: String, newState: CapabilityState) async {
+    public func handleStateChange(capabilityId: String, newState: AxiomCapabilityState) async {
         let dependents = await resolver.getDependents(of: capabilityId)
         
         for dependentId in dependents {
@@ -270,7 +270,7 @@ public actor CapabilityComposer {
     }
     
     /// Helper method to handle dependency changes with type erasure
-    private func notifyDependencyChange(capability: any ComposableCapability, dependency: AnyCapabilityDependency, newState: CapabilityState) async {
+    private func notifyDependencyChange(capability: any ComposableCapability, dependency: AnyCapabilityDependency, newState: AxiomCapabilityState) async {
         // This is a simplified approach - in a full implementation, you'd need more sophisticated type handling
         // For now, just log that a dependency changed
         print("Dependency \(dependency.id) changed state for capability, new state: \(newState)")

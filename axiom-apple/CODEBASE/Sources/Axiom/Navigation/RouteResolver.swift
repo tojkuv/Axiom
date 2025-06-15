@@ -8,12 +8,12 @@ import UIKit
 
 /// Protocol for resolving routes to their corresponding implementations
 public protocol RouteResolving: Actor {
-    func validate<R: TypeSafeRoute>(_ route: R) async throws
-    func register<R: TypeSafeRoute>(
+    func validate<R: AxiomTypeSafeRoute>(_ route: R) async throws
+    func register<R: AxiomTypeSafeRoute>(
         route: R.Type,
         factory: @escaping @Sendable (R) async throws -> Any
     ) async
-    func resolve<R: TypeSafeRoute>(route: R) async throws -> Any
+    func resolve<R: AxiomTypeSafeRoute>(route: R) async throws -> Any
 }
 
 // MARK: - Route Factory Types
@@ -25,7 +25,7 @@ private struct RouteFactory {
     let routeType: Any.Type
     let isSwiftUICompatible: Bool
     
-    init<R: TypeSafeRoute>(
+    init<R: AxiomTypeSafeRoute>(
         pattern: String,
         routeType: R.Type,
         isSwiftUICompatible: Bool = true,
@@ -46,7 +46,7 @@ private struct RouteFactory {
 // MARK: - Permission Protocols
 
 /// Protocol for routes that require permission checks
-public protocol PermissionProtectedRoute: TypeSafeRoute {
+public protocol PermissionProtectedRoute: AxiomTypeSafeRoute {
     var requiredPermissions: Set<String> { get }
 }
 
@@ -79,7 +79,7 @@ public actor RouteResolver: RouteResolving {
     
     // MARK: - RouteResolving Implementation
     
-    public func validate<R: TypeSafeRoute>(_ route: R) async throws {
+    public func validate<R: AxiomTypeSafeRoute>(_ route: R) async throws {
         // Check if route is registered
         let routePattern = String(describing: type(of: route))
         guard routeRegistry[routePattern] != nil else {
@@ -106,7 +106,7 @@ public actor RouteResolver: RouteResolving {
         }
     }
     
-    public func register<R: TypeSafeRoute>(
+    public func register<R: AxiomTypeSafeRoute>(
         route: R.Type,
         factory: @escaping @Sendable (R) async throws -> Any
     ) async {
@@ -120,7 +120,7 @@ public actor RouteResolver: RouteResolving {
         routeRegistry[pattern] = routeFactory
     }
     
-    public func resolve<R: TypeSafeRoute>(route: R) async throws -> Any {
+    public func resolve<R: AxiomTypeSafeRoute>(route: R) async throws -> Any {
         let pattern = String(describing: type(of: route))
         
         guard let factory = routeRegistry[pattern] else {
@@ -143,7 +143,7 @@ public actor RouteResolver: RouteResolving {
     
     // MARK: - Route Information
     
-    public func isSwiftUICompatible<R: TypeSafeRoute>(_ route: R) async -> Bool {
+    public func isSwiftUICompatible<R: AxiomTypeSafeRoute>(_ route: R) async -> Bool {
         let pattern = String(describing: type(of: route))
         return routeRegistry[pattern]?.isSwiftUICompatible ?? false
     }
@@ -156,12 +156,12 @@ public actor RouteResolver: RouteResolving {
     
     private func registerDefaultRoutes() async {
         // Register framework-provided routes
-        await register(route: StandardRoute.self) { route in
+        await register(route: AxiomStandardRoute.self) { route in
             return await self.resolveStandardRoute(route)
         }
     }
     
-    private func resolveStandardRoute(_ route: StandardRoute) async -> any Sendable {
+    private func resolveStandardRoute(_ route: AxiomStandardRoute) async -> any Sendable {
         switch route {
         case .home:
             return "HomeView" // Placeholder - would return actual view/controller
@@ -202,7 +202,7 @@ public struct RouteRegistration {
     }
     
     /// Register a SwiftUI view route
-    public func view<R: TypeSafeRoute, V: View & Sendable>(
+    public func view<R: AxiomTypeSafeRoute, V: View & Sendable>(
         _ routeType: R.Type,
         @ViewBuilder builder: @escaping @Sendable (R) -> V
     ) async {
@@ -213,7 +213,7 @@ public struct RouteRegistration {
     
     #if canImport(UIKit)
     /// Register a UIKit view controller route
-    public func viewController<R: TypeSafeRoute, VC: UIViewController>(
+    public func viewController<R: AxiomTypeSafeRoute, VC: UIViewController>(
         _ routeType: R.Type,
         factory: @escaping @Sendable (R) async throws -> VC
     ) async {
@@ -222,7 +222,7 @@ public struct RouteRegistration {
     #endif
     
     /// Register a data route (for non-UI navigation)
-    public func data<R: TypeSafeRoute, T>(
+    public func data<R: AxiomTypeSafeRoute, T>(
         _ routeType: R.Type,
         factory: @escaping @Sendable (R) async throws -> T
     ) async {
@@ -244,14 +244,14 @@ public extension RouteResolver {
 
 extension RouteResolver {
     /// Validate multiple routes in batch
-    public func validateBatch<S: Sequence>(_ routes: S) async throws where S.Element: TypeSafeRoute {
+    public func validateBatch<S: Sequence>(_ routes: S) async throws where S.Element: AxiomTypeSafeRoute {
         for route in routes {
             try await validate(route)
         }
     }
     
     /// Check if a route pattern is registered
-    public func isRegistered<R: TypeSafeRoute>(_ routeType: R.Type) async -> Bool {
+    public func isRegistered<R: AxiomTypeSafeRoute>(_ routeType: R.Type) async -> Bool {
         let pattern = String(describing: routeType)
         return routeRegistry[pattern] != nil
     }
@@ -260,7 +260,7 @@ extension RouteResolver {
 // MARK: - Example Route Definitions
 
 /// Example of a permission-protected route
-public struct ProfileRoute: TypeSafeRoute, PermissionProtectedRoute {
+public struct ProfileRoute: AxiomTypeSafeRoute, PermissionProtectedRoute {
     public let userId: String
     
     public var pathComponents: String {
@@ -289,7 +289,7 @@ public struct ProfileRoute: TypeSafeRoute, PermissionProtectedRoute {
 }
 
 /// Example of a simple route
-public struct HomeRoute: TypeSafeRoute {
+public struct HomeRoute: AxiomTypeSafeRoute {
     public var pathComponents: String {
         return "/"
     }
@@ -312,7 +312,7 @@ public struct HomeRoute: TypeSafeRoute {
 }
 
 /// Example of a parameterized route
-public struct DetailRoute: TypeSafeRoute {
+public struct DetailRoute: AxiomTypeSafeRoute {
     public let itemId: String
     public let section: String?
     
@@ -343,7 +343,7 @@ public struct DetailRoute: TypeSafeRoute {
 }
 
 /// Example of a settings route
-public struct SettingsRoute: TypeSafeRoute {
+public struct SettingsRoute: AxiomTypeSafeRoute {
     public let section: String?
     
     public var pathComponents: String {

@@ -4,13 +4,13 @@ import SwiftUI
 // MARK: - Implicit Action Subscription
 
 /// Extension to Context protocol for implicit parent-child action subscription
-extension Context {
+extension AxiomContext {
     /// Emit an action to parent context
     /// The framework automatically delivers this to the parent's handleChildAction
     @MainActor
     public func emit<Action>(_ action: Action) {
         // Get parent context reference from ObservableContext
-        if let observableContext = self as? ObservableContext,
+        if let observableContext = self as? AxiomObservableContext,
            let parent = observableContext.parentContext {
             parent.handleChildAction(action, from: self)
         }
@@ -22,10 +22,10 @@ extension Context {
 
 /// Internal wrapper for weak context references
 public struct WeakContextWrapper: Hashable {
-    weak var context: (any Context)?
+    weak var context: (any AxiomContext)?
     private let id: ObjectIdentifier
     
-    init(_ context: any Context) {
+    init(_ context: any AxiomContext) {
         self.context = context
         self.id = ObjectIdentifier(context)
     }
@@ -43,16 +43,16 @@ public struct WeakContextWrapper: Hashable {
 
 /// Internal wrapper for weak parent reference
 private class WeakParentWrapper {
-    weak var parent: (any Context)?
+    weak var parent: (any AxiomContext)?
     
-    init(_ parent: any Context) {
+    init(_ parent: any AxiomContext) {
         self.parent = parent
     }
 }
 
 // MARK: - Parent-Child Relationship Extensions
 
-extension ObservableContext {
+extension AxiomObservableContext {
     // Associated object keys for storing parent/child relationships
     private static var parentContextKey: UInt8 = 0
     private static var childrenKey: UInt8 = 1
@@ -84,6 +84,6 @@ public protocol ContextAction {
 /// Marker protocol for views that require contexts
 /// Only Presentation views participate in the isomorphic DAG constraint
 public protocol PresentationView: View {
-    associatedtype ContextType: Context
+    associatedtype ContextType: AxiomContext
     var context: ContextType { get }
 }

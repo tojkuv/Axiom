@@ -12,9 +12,9 @@ import SwiftUI
 
 /// Deep link resolution result
 public enum DeepLinkResolution: Equatable {
-    case resolved(any TypeSafeRoute)
+    case resolved(any AxiomTypeSafeRoute)
     case redirect(URL)
-    case fallback(any TypeSafeRoute)
+    case fallback(any AxiomTypeSafeRoute)
     case invalid(reason: String)
     
     public static func == (lhs: DeepLinkResolution, rhs: DeepLinkResolution) -> Bool {
@@ -373,9 +373,9 @@ public struct DeepLinkReport {
 /// Registered pattern with handler
 private struct RegisteredPattern {
     let pattern: CompiledPattern
-    let handler: ([String: String]) -> (any TypeSafeRoute)?
+    let handler: ([String: String]) -> (any AxiomTypeSafeRoute)?
     
-    init(pattern: CompiledPattern, handler: @escaping ([String: String]) -> (any TypeSafeRoute)?) {
+    init(pattern: CompiledPattern, handler: @escaping ([String: String]) -> (any AxiomTypeSafeRoute)?) {
         self.pattern = pattern
         self.handler = handler
     }
@@ -395,7 +395,7 @@ public class DeepLinkPatternHandler {
     public init() {}
     
     /// Register URL pattern with handler (REFACTOR: with caching optimization)
-    public func register(pattern: String, handler: @escaping ([String: String]) -> (any TypeSafeRoute)?) {
+    public func register(pattern: String, handler: @escaping ([String: String]) -> (any AxiomTypeSafeRoute)?) {
         // Check cache first for performance
         let compiled: CompiledPattern
         if let cached = patternCache[pattern] {
@@ -432,7 +432,7 @@ public class DeepLinkPatternHandler {
             }
         }
         
-        register(pattern: pattern) { _ in nil as (any TypeSafeRoute)? }
+        register(pattern: pattern) { _ in nil as (any AxiomTypeSafeRoute)? }
     }
     
     /// Check if patterns conflict
@@ -706,7 +706,7 @@ public class DeferredDeepLinkHandler {
     }
     
     /// Process pending links
-    public func processPendingLinks() async -> [any TypeSafeRoute] {
+    public func processPendingLinks() async -> [any AxiomTypeSafeRoute] {
         _ = pendingLinks
         pendingLinks.removeAll()
         
@@ -736,7 +736,7 @@ public class DeepLinkTester {
     }
     
     /// Test valid deep link
-    public func test(_ urlString: String, validation: @escaping (any TypeSafeRoute) -> Void) async {
+    public func test(_ urlString: String, validation: @escaping (any AxiomTypeSafeRoute) -> Void) async {
         guard let url = URL(string: urlString) else {
             assertionFailure("Invalid URL: \(urlString)")
             return

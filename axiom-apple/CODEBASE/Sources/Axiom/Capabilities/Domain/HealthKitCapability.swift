@@ -4,7 +4,7 @@ import Foundation
 // MARK: - HealthKit Configuration
 
 /// Configuration for HealthKit capability
-public struct HealthKitConfiguration: CapabilityConfiguration {
+public struct HealthKitConfiguration: AxiomCapabilityConfiguration {
     public let readTypes: Set<HKObjectType>
     public let writeTypes: Set<HKSampleType>
     public let requestTimeout: TimeInterval
@@ -39,7 +39,7 @@ public struct HealthKitConfiguration: CapabilityConfiguration {
         )
     }
     
-    public func adjusted(for environment: CapabilityEnvironment) -> HealthKitConfiguration {
+    public func adjusted(for environment: AxiomCapabilityEnvironment) -> HealthKitConfiguration {
         var adjustedTimeout = requestTimeout
         var adjustedBackgroundDelivery = enableBackgroundDelivery
         
@@ -209,7 +209,7 @@ public struct HealthDataQueryResult: Sendable {
 // MARK: - HealthKit Resource
 
 /// Resource management for HealthKit
-public actor HealthKitResource: CapabilityResource {
+public actor HealthKitResource: AxiomCapabilityResource {
     private var activeQueries: Set<UUID> = []
     private var observerQueries: Set<UUID> = []
     private var _isAvailable: Bool = true
@@ -254,7 +254,7 @@ public actor HealthKitResource: CapabilityResource {
     
     public func addQuery(_ queryId: UUID, isObserver: Bool = false) async throws {
         guard await isAvailable() else {
-            throw CapabilityError.resourceAllocationFailed("HealthKit resources not available")
+            throw AxiomCapabilityError.resourceAllocationFailed("HealthKit resources not available")
         }
         
         if isObserver {
@@ -283,12 +283,12 @@ public actor HealthKitCapability: DomainCapability {
     
     private var _configuration: HealthKitConfiguration
     private var _resources: HealthKitResource
-    private var _environment: CapabilityEnvironment
-    private var _state: CapabilityState = .unknown
+    private var _environment: AxiomCapabilityEnvironment
+    private var _state: AxiomCapabilityState = .unknown
     private var _activationTimeout: Duration = .milliseconds(10)
     
     private var healthStore: HKHealthStore?
-    private var stateStreamContinuation: AsyncStream<CapabilityState>.Continuation?
+    private var stateStreamContinuation: AsyncStream<AxiomCapabilityState>.Continuation?
     private var dataStreamContinuation: AsyncStream<HealthDataSample>.Continuation?
     private var activeObserverQueries: [HKObserverQuery] = []
     
@@ -298,11 +298,11 @@ public actor HealthKitCapability: DomainCapability {
         get async { _state == .available }
     }
     
-    public var state: CapabilityState {
+    public var state: AxiomCapabilityState {
         get async { _state }
     }
     
-    public var stateStream: AsyncStream<CapabilityState> {
+    public var stateStream: AsyncStream<AxiomCapabilityState> {
         AsyncStream { [weak self] continuation in
             Task { [weak self] in
                 await self?.setStateStreamContinuation(continuation)
@@ -325,20 +325,20 @@ public actor HealthKitCapability: DomainCapability {
         get async { _resources }
     }
     
-    public var environment: CapabilityEnvironment {
+    public var environment: AxiomCapabilityEnvironment {
         get async { _environment }
     }
     
     public init(
         configuration: HealthKitConfiguration = HealthKitConfiguration(),
-        environment: CapabilityEnvironment = CapabilityEnvironment()
+        environment: AxiomCapabilityEnvironment = AxiomCapabilityEnvironment()
     ) {
         self._configuration = configuration.adjusted(for: environment)
         self._resources = HealthKitResource(configuration: self._configuration)
         self._environment = environment
     }
     
-    private func setStateStreamContinuation(_ continuation: AsyncStream<CapabilityState>.Continuation) {
+    private func setStateStreamContinuation(_ continuation: AsyncStream<AxiomCapabilityState>.Continuation) {
         self.stateStreamContinuation = continuation
     }
     
@@ -350,14 +350,14 @@ public actor HealthKitCapability: DomainCapability {
     
     public func updateConfiguration(_ configuration: HealthKitConfiguration) async throws {
         guard configuration.isValid else {
-            throw CapabilityError.initializationFailed("Invalid HealthKit configuration")
+            throw AxiomCapabilityError.initializationFailed("Invalid HealthKit configuration")
         }
         
         _configuration = configuration.adjusted(for: _environment)
         await setupObserverQueries()
     }
     
-    public func handleEnvironmentChange(_ environment: CapabilityEnvironment) async {
+    public func handleEnvironmentChange(_ environment: AxiomCapabilityEnvironment) async {
         _environment = environment
         let adjusted = _configuration.adjusted(for: environment)
         try? await updateConfiguration(adjusted)
@@ -371,7 +371,7 @@ public actor HealthKitCapability: DomainCapability {
     
     public func requestPermission() async throws {
         guard let store = healthStore else {
-            throw CapabilityError.notAvailable("HealthKit store not initialized")
+            throw AxiomCapabilityError.notAvailable("HealthKit store not initialized")
         }
         
         let typesToRead = _configuration.readTypes
@@ -385,14 +385,14 @@ public actor HealthKitCapability: DomainCapability {
         for type in typesToRead {
             let status = store.authorizationStatus(for: type)
             if status == .sharingDenied {
-                throw CapabilityError.permissionRequired("HealthKit read access denied for \(type.identifier)")
+                throw AxiomCapabilityError.permissionRequired("HealthKit read access denied for \(type.identifier)")
             }
         }
         
         for type in typesToWrite {
             let status = store.authorizationStatus(for: type)
             if status == .sharingDenied {
-                throw CapabilityError.permissionRequired("HealthKit write access denied for \(type.identifier)")
+                throw AxiomCapabilityError.permissionRequired("HealthKit write access denied for \(type.identifier)")
             }
         }
     }
@@ -405,11 +405,11 @@ public actor HealthKitCapability: DomainCapability {
     
     public func activate() async throws {
         guard await _resources.isAvailable() else {
-            throw CapabilityError.initializationFailed("HealthKit not available")
+            throw AxiomCapabilityError.initializationFailed("HealthKit not available")
         }
         
         guard HKHealthStore.isHealthDataAvailable() else {
-            throw CapabilityError.notAvailable("HealthKit not available on this device")
+            throw AxiomCapabilityError.notAvailable("HealthKit not available on this device")
         }
         
         healthStore = HKHealthStore()
@@ -437,7 +437,7 @@ public actor HealthKitCapability: DomainCapability {
         dataStreamContinuation?.finish()
     }
     
-    private func transitionTo(_ newState: CapabilityState) async {
+    private func transitionTo(_ newState: AxiomCapabilityState) async {
         guard _state != newState else { return }
         _state = newState
         stateStreamContinuation?.yield(newState)
@@ -485,11 +485,11 @@ public actor HealthKitCapability: DomainCapability {
         limit: Int = HKObjectQueryNoLimit
     ) async throws -> HealthDataQueryResult {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("HealthKit capability not available")
+            throw AxiomCapabilityError.notAvailable("HealthKit capability not available")
         }
         
         guard let store = healthStore else {
-            throw CapabilityError.notAvailable("HealthKit store not initialized")
+            throw AxiomCapabilityError.notAvailable("HealthKit store not initialized")
         }
         
         let queryId = UUID()
@@ -558,11 +558,11 @@ public actor HealthKitCapability: DomainCapability {
     /// Save health data sample
     public func saveSample(_ sample: HKObject) async throws {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("HealthKit capability not available")
+            throw AxiomCapabilityError.notAvailable("HealthKit capability not available")
         }
         
         guard let store = healthStore else {
-            throw CapabilityError.notAvailable("HealthKit store not initialized")
+            throw AxiomCapabilityError.notAvailable("HealthKit store not initialized")
         }
         
         try await store.save(sample)
@@ -571,11 +571,11 @@ public actor HealthKitCapability: DomainCapability {
     /// Delete health data samples
     public func deleteSamples(_ samples: [HKObject]) async throws {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("HealthKit capability not available")
+            throw AxiomCapabilityError.notAvailable("HealthKit capability not available")
         }
         
         guard let store = healthStore else {
-            throw CapabilityError.notAvailable("HealthKit store not initialized")
+            throw AxiomCapabilityError.notAvailable("HealthKit store not initialized")
         }
         
         try await store.delete(samples)
@@ -608,7 +608,7 @@ public actor HealthKitCapability: DomainCapability {
     /// Get preferred units for quantity types
     public func getPreferredUnits(for quantityTypes: Set<HKQuantityType>) async throws -> [HKQuantityType: HKUnit] {
         guard let store = healthStore else {
-            throw CapabilityError.notAvailable("HealthKit store not initialized")
+            throw AxiomCapabilityError.notAvailable("HealthKit store not initialized")
         }
         
         return try await store.preferredUnits(for: quantityTypes)
@@ -617,28 +617,28 @@ public actor HealthKitCapability: DomainCapability {
 
 // MARK: - Registration Extension
 
-extension CapabilityRegistry {
+extension AxiomCapabilityRegistry {
     /// Register HealthKit capability
     public func registerHealthKit() async throws {
         let capability = HealthKitCapability()
         try await register(
             capability,
             requirements: [
-                CapabilityDiscoveryService.Requirement(
+                AxiomCapabilityDiscoveryService.Requirement(
                     type: .systemFeature("HealthKit"),
                     isMandatory: true
                 ),
-                CapabilityDiscoveryService.Requirement(
+                AxiomCapabilityDiscoveryService.Requirement(
                     type: .permission("NSHealthShareUsageDescription"),
                     isMandatory: false
                 ),
-                CapabilityDiscoveryService.Requirement(
+                AxiomCapabilityDiscoveryService.Requirement(
                     type: .permission("NSHealthUpdateUsageDescription"),
                     isMandatory: false
                 )
             ],
             category: "health",
-            metadata: CapabilityMetadata(
+            metadata: AxiomCapabilityMetadata(
                 name: "HealthKit",
                 description: "Health and fitness data access capability",
                 version: "1.0.0",

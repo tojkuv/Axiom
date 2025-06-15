@@ -16,7 +16,7 @@ import Axiom
 
 /// Context for the task list view on iOS
 @MainActor
-public final class TaskListContext: ClientObservingContext<TaskClient> {
+public final class TaskListContext: AxiomClientObservingContext<TaskClient> {
     
     // MARK: - Published Properties
     @Published public private(set) var tasks: [Task] = []

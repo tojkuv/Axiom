@@ -575,7 +575,7 @@ public enum EnhancedRecoveryStrategy: @unchecked Sendable {
 /// Recovery strategy selector for automatic strategy selection
 public struct RecoveryStrategySelector {
     public static func defaultStrategy(for error: any Error) -> EnhancedRecoveryStrategy {
-        let category = ErrorCategory.categorize(error)
+        let category = AxiomErrorCategory.categorize(error)
         
         switch category {
         case .network:

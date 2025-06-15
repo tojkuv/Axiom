@@ -20,7 +20,7 @@ import Foundation
 /// }
 /// ```
 @MainActor
-open class AutoObservingContext<C: Client>: ObservableContext {
+open class AutoObservingContext<C: AxiomClient>: AxiomObservableContext {
     /// The client being observed
     public let client: C
     
@@ -78,7 +78,7 @@ open class AutoObservingContext<C: Client>: ObservableContext {
 ///     .withPerformanceMonitoring()
 ///     .build()
 /// ```
-public struct AutoContextBuilder<C: Client> {
+public struct AutoContextBuilder<C: AxiomClient> {
     private var client: C?
     private var errorHandler: ((any Error) async -> Void)?
     private var performanceMonitoring: Bool = false
@@ -139,4 +139,4 @@ public struct AutoContextBuilder<C: Client> {
 
 /// Macro declaration for the @Context attribute
 @attached(member, names: named(updateTrigger), named(isActive), named(appearanceCount), named(observationTask), named(performAppearance), named(performDisappearance), named(startObservation), named(stopObservation), named(triggerUpdate))
-public macro Context(observing clientType: any Client.Type) = #externalMacro(module: "AxiomMacros", type: "ContextMacro")
+public macro Context(observing clientType: any AxiomClient.Type) = #externalMacro(module: "AxiomMacros", type: "ContextMacro")

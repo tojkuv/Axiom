@@ -15,7 +15,7 @@ import Axiom
 
 /// Context for creating new tasks on iOS
 @MainActor
-public final class CreateTaskContext: ClientObservingContext<TaskClient> {
+public final class CreateTaskContext: AxiomClientObservingContext<TaskClient> {
     
     // MARK: - Published Properties
     @Published public var title: String = ""

@@ -5,29 +5,29 @@ import SwiftUI
 
 /// Context builder for ergonomic context creation
 @MainActor
-public final class ContextBuilder<C: ObservableContext> {
+public final class ContextBuilder<C: AxiomObservableContext> {
     private var context: C
-    private var children: [any Context] = []
-    private var memoryOptions: ContextMemoryOptions?
+    private var children: [any AxiomContext] = []
+    private var memoryOptions: AxiomContextMemoryOptions?
     
     private init(context: C) {
         self.context = context
     }
     
     /// Create a new context builder
-    public static func create<T: ObservableContext>(_ contextType: T.Type) -> ContextBuilder<T> {
+    public static func create<T: AxiomObservableContext>(_ contextType: T.Type) -> ContextBuilder<T> {
         let context = T()
         return ContextBuilder<T>(context: context)
     }
     
     /// Add child contexts
-    public func children(_ children: any Context...) -> Self {
+    public func children(_ children: any AxiomContext...) -> Self {
         self.children.append(contentsOf: children)
         return self
     }
     
     /// Configure memory options
-    public func memory(_ options: ContextMemoryOptions) -> Self {
+    public func memory(_ options: AxiomContextMemoryOptions) -> Self {
         self.memoryOptions = options
         return self
     }
@@ -49,7 +49,7 @@ public final class ContextBuilder<C: ObservableContext> {
 /// Client builder for ergonomic client creation
 public final class ClientBuilder<State: Axiom.AxiomState & Equatable, Action: Sendable> {
     private let initialState: State
-    private var performanceMonitor: (any ClientPerformanceMonitor)?
+    private var performanceMonitor: (any AxiomClientPerformanceMonitor)?
     private var actionProcessor: (@Sendable (Action) async throws -> State)?
     
     private init(initialState: State) {
@@ -62,7 +62,7 @@ public final class ClientBuilder<State: Axiom.AxiomState & Equatable, Action: Se
     }
     
     /// Add performance monitoring
-    public func monitor(_ monitor: any ClientPerformanceMonitor) -> Self {
+    public func monitor(_ monitor: any AxiomClientPerformanceMonitor) -> Self {
         self.performanceMonitor = monitor
         return self
     }
@@ -108,19 +108,19 @@ public final class NavigationBuilder {
 
 /// Error builder for ergonomic error handling
 public final class ErrorBuilder {
-    private var category: ErrorCategory = .unknown
-    private var severity: ErrorSeverity = .error
+    private var category: AxiomErrorCategory = .unknown
+    private var severity: AxiomErrorSeverity = .error
     private var context: [String: String] = [:]
-    private var recoveryStrategy: PropagationRecoveryStrategy = .fail
+    private var recoveryStrategy: AxiomPropagationRecoveryStrategy = .fail
     
     /// Set error category
-    public func category(_ category: ErrorCategory) -> Self {
+    public func category(_ category: AxiomErrorCategory) -> Self {
         self.category = category
         return self
     }
     
     /// Set error severity
-    public func severity(_ severity: ErrorSeverity) -> Self {
+    public func severity(_ severity: AxiomErrorSeverity) -> Self {
         self.severity = severity
         return self
     }
@@ -132,7 +132,7 @@ public final class ErrorBuilder {
     }
     
     /// Set recovery strategy
-    public func recovery(_ strategy: PropagationRecoveryStrategy) -> Self {
+    public func recovery(_ strategy: AxiomPropagationRecoveryStrategy) -> Self {
         self.recoveryStrategy = strategy
         return self
     }
@@ -168,7 +168,7 @@ public final class ErrorBuilder {
 // MARK: - Ergonomic Client Implementation
 
 /// Ergonomic client implementation with reduced boilerplate
-public actor ErgonomicClient<S: Axiom.AxiomState & Equatable, A: Sendable>: Client {
+public actor ErgonomicClient<S: Axiom.AxiomState & Equatable, A: Sendable>: AxiomClient {
     public typealias StateType = S
     public typealias ActionType = A
     
@@ -311,7 +311,7 @@ extension ContextBuilder {
     }
     
     @discardableResult
-    public func observing<ClientType: Client>(_ client: ClientType) -> Self where ClientType.StateType: Equatable {
+    public func observing<ClientType: AxiomClient>(_ client: ClientType) -> Self where ClientType.StateType: Equatable {
         // Add client observation
         return self
     }
@@ -354,14 +354,14 @@ extension NavigationBuilder {
 
 // MARK: - Convenience Extensions
 
-public extension Context {
+public extension AxiomContext {
     /// Convenience method to create and activate a context
-    static func create<T: ObservableContext>() async throws -> T where T: ObservableContext {
+    static func create<T: AxiomObservableContext>() async throws -> T where T: AxiomObservableContext {
         return try await ContextBuilder.create(T.self).build()
     }
     
     /// Convenience method with children
-    static func create<T: ObservableContext>(with children: [any Context]) async throws -> T where T: ObservableContext {
+    static func create<T: AxiomObservableContext>(with children: [any AxiomContext]) async throws -> T where T: AxiomObservableContext {
         var builder = ContextBuilder.create(T.self)
         for child in children {
             builder = builder.children(child)
@@ -370,7 +370,7 @@ public extension Context {
     }
 }
 
-public extension Client {
+public extension AxiomClient {
     /// Convenience method to create a client
     static func create<S: Axiom.AxiomState & Equatable, A>(
         initialState: S,

@@ -10,7 +10,7 @@ import TaskManager_Shared
 
 /// Context for creating new tasks on macOS with enhanced form capabilities
 @MainActor
-public final class CreateTaskContext: ClientObservingContext<TaskClient> {
+public final class CreateTaskContext: AxiomClientObservingContext<TaskClient> {
     
     // MARK: - Published Properties
     @Published public var title: String = ""
@@ -359,6 +359,15 @@ public final class CreateTaskContext: ClientObservingContext<TaskClient> {
                 isTitleValid && !isCreating
             }
             .assign(to: &$canCreateTask)
+    }
+    
+    private func loadDefaultSettings() {
+        // Load default task creation settings from user preferences
+        // Initialize with sensible defaults for now
+        priority = .medium
+        category = .personal
+        hasDueDate = false
+        hasReminder = false
     }
     
     private func updateValidation() {

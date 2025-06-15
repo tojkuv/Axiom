@@ -10,9 +10,9 @@ import UserNotifications
 // MARK: - Domain Capability Foundation
 
 /// Base protocol for domain-specific capabilities with enhanced functionality
-public protocol DomainCapability: ExtendedCapability {
-    associatedtype ConfigurationType: CapabilityConfiguration
-    associatedtype ResourceType: CapabilityResource
+public protocol DomainCapability: AxiomExtendedCapability {
+    associatedtype ConfigurationType: AxiomCapabilityConfiguration
+    associatedtype ResourceType: AxiomCapabilityResource
     
     /// Configuration for this capability
     var configuration: ConfigurationType { get async }
@@ -21,17 +21,17 @@ public protocol DomainCapability: ExtendedCapability {
     var resources: ResourceType { get async }
     
     /// Environment this capability is running in
-    var environment: CapabilityEnvironment { get async }
+    var environment: AxiomCapabilityEnvironment { get async }
     
     /// Update configuration at runtime
     func updateConfiguration(_ configuration: ConfigurationType) async throws
     
     /// Handle environment changes
-    func handleEnvironmentChange(_ environment: CapabilityEnvironment) async
+    func handleEnvironmentChange(_ environment: AxiomCapabilityEnvironment) async
 }
 
 /// Configuration protocol for capabilities
-public protocol CapabilityConfiguration: Codable, Sendable {
+public protocol AxiomCapabilityConfiguration: Codable, Sendable {
     /// Whether this configuration is valid
     var isValid: Bool { get }
     
@@ -39,11 +39,11 @@ public protocol CapabilityConfiguration: Codable, Sendable {
     func merged(with other: Self) -> Self
     
     /// Environment-specific adjustments
-    func adjusted(for environment: CapabilityEnvironment) -> Self
+    func adjusted(for environment: AxiomCapabilityEnvironment) -> Self
 }
 
 /// Resource protocol for capability resource management
-public protocol CapabilityResource: Sendable {
+public protocol AxiomCapabilityResource: Sendable {
     /// Current resource usage
     var currentUsage: ResourceUsage { get async }
     
@@ -81,7 +81,7 @@ public struct ResourceUsage: Codable, Sendable {
 }
 
 /// Environment information for capabilities
-public struct CapabilityEnvironment: Codable, Sendable, Hashable {
+public struct AxiomCapabilityEnvironment: Codable, Sendable, Hashable {
     public let isDebug: Bool
     public let isLowPowerMode: Bool
     public let hasNetworkConnection: Bool
@@ -103,11 +103,11 @@ public struct CapabilityEnvironment: Codable, Sendable, Hashable {
     }
     
     // Predefined environment configurations
-    public static let testing = CapabilityEnvironment(isDebug: true)
-    public static let development = CapabilityEnvironment(isDebug: true)
-    public static let staging = CapabilityEnvironment(isDebug: false)
-    public static let production = CapabilityEnvironment(isDebug: false)
-    public static let preview = CapabilityEnvironment(isDebug: true)
+    public static let testing = AxiomCapabilityEnvironment(isDebug: true)
+    public static let development = AxiomCapabilityEnvironment(isDebug: true)
+    public static let staging = AxiomCapabilityEnvironment(isDebug: false)
+    public static let production = AxiomCapabilityEnvironment(isDebug: false)
+    public static let preview = AxiomCapabilityEnvironment(isDebug: true)
     
     // Computed property for backwards compatibility with enum-like usage
     public var rawValue: String {
@@ -144,7 +144,7 @@ public enum DeviceClass: String, Codable, CaseIterable, Sendable {
 // MARK: - Core Data Capability Registration
 
 /// Extension for registering Core Data persistence capability
-extension CapabilityRegistry {
+extension AxiomCapabilityRegistry {
     
     /// Register Core Data persistence capability
     public func registerCoreDataPersistence() async throws {
@@ -153,7 +153,7 @@ extension CapabilityRegistry {
             persistence,
             requirements: [],
             category: "persistence",
-            metadata: CapabilityMetadata(
+            metadata: AxiomCapabilityMetadata(
                 description: "Core Data persistence capability with CloudKit sync support",
                 version: "1.0.0",
                 documentation: "Provides Core Data-based persistence with CloudKit integration for data sync across devices",

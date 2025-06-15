@@ -241,7 +241,7 @@ enum TestAction {
 }
 
 // Mock client implementation
-actor MockClient: Client {
+actor MockClient: AxiomClient {
     typealias StateType = ClientTestState
     typealias ActionType = TestAction
     
@@ -322,7 +322,7 @@ enum ClientError: Error {
     case processingFailed
 }
 
-actor ErrorThrowingClient: Client {
+actor ErrorThrowingClient: AxiomClient {
     typealias StateType = ErrorState
     typealias ActionType = ErrorAction
     

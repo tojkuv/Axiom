@@ -21,7 +21,7 @@ public struct ContextTestHelpers {
     
     /// Assert context state equals expected value
     @MainActor
-    public static func assertStateEquals<C: Context, S: Equatable & Sendable>(
+    public static func assertStateEquals<C: AxiomContext, S: Equatable & Sendable>(
         in context: C,
         expected: S,
         keyPath: KeyPath<C, S>,
@@ -35,7 +35,7 @@ public struct ContextTestHelpers {
     
     /// Assert context state equals expected value (for Published properties)
     public static func assertStateEquals<S: Equatable>(
-        in context: any Context,
+        in context: any AxiomContext,
         expected: S,
         description: String,
         file: StaticString = #filePath,
@@ -49,7 +49,7 @@ public struct ContextTestHelpers {
     // MARK: - Action Testing
     
     /// Test a sequence of actions and expected state transitions
-    public static func assertActionSequence<C: Context>(
+    public static func assertActionSequence<C: AxiomContext>(
         in context: C,
         actions: [Any],
         expectedStates: [(C) -> Bool],
@@ -74,7 +74,7 @@ public struct ContextTestHelpers {
     }
     
     /// Assert that an action fails with expected error
-    public static func assertActionFails<C: Context, E: Error & Equatable>(
+    public static func assertActionFails<C: AxiomContext, E: Error & Equatable>(
         in context: C,
         action: Any,
         expectedError: E,
@@ -94,7 +94,7 @@ public struct ContextTestHelpers {
     
     /// Track context lifecycle events for testing
     @MainActor
-    public static func trackLifecycle<C: Context>(
+    public static func trackLifecycle<C: AxiomContext>(
         for context: C
     ) -> ContextLifecycleTracker<C> {
         return ContextLifecycleTracker(context: context)
@@ -103,7 +103,7 @@ public struct ContextTestHelpers {
     // MARK: - Dependency Testing
     
     /// Create context with mock dependencies for testing
-    public static func createContextWithDependencies<C: Context>(
+    public static func createContextWithDependencies<C: AxiomContext>(
         _ contextType: C.Type,
         dependencies: [TestDependency]
     ) async throws -> C {
@@ -113,7 +113,7 @@ public struct ContextTestHelpers {
     }
     
     /// Assert a dependency was injected correctly
-    public static func assertDependency<C: Context, D>(
+    public static func assertDependency<C: AxiomContext, D>(
         in context: C,
         type: D.Type,
         matches expected: D
@@ -136,7 +136,7 @@ public struct ContextTestHelpers {
     // MARK: - Parent-Child Testing
     
     /// Establish parent-child relationship for testing
-    public static func establishParentChild<P: Context, C: Context>(
+    public static func establishParentChild<P: AxiomContext, C: AxiomContext>(
         parent: P,
         child: C
     ) async throws {
@@ -146,10 +146,10 @@ public struct ContextTestHelpers {
     }
     
     /// Assert child action was received by parent
-    public static func assertChildActionReceived<P: Context, A>(
+    public static func assertChildActionReceived<P: AxiomContext, A>(
         by parent: P,
         action: A,
-        from child: any Context,
+        from child: any AxiomContext,
         timeout: Duration = .seconds(1),
         file: StaticString = #filePath,
         line: UInt = #line
@@ -163,7 +163,7 @@ public struct ContextTestHelpers {
     
     
     /// Benchmark context performance
-    public static func benchmarkContext<C: Context>(
+    public static func benchmarkContext<C: AxiomContext>(
         _ context: C,
         operation: () async throws -> Void
     ) async throws -> ContextBenchmark {
@@ -185,7 +185,7 @@ public struct ContextTestHelpers {
     // MARK: - Observation Testing
     
     /// Observe context changes for testing
-    public static func observeContext<C: Context>(
+    public static func observeContext<C: AxiomContext>(
         _ context: C
     ) async throws -> ContextObserver<C> where C: ObservableObject {
         return ContextObserver(context: context)
@@ -194,7 +194,7 @@ public struct ContextTestHelpers {
     // MARK: - Mock Creation
     
     /// Create a mock context for testing
-    public static func createMockContext<C: Context>(
+    public static func createMockContext<C: AxiomContext>(
         type: C.Type,
         initialState: Any? = nil
     ) async throws -> MockContext<C> {
@@ -202,7 +202,7 @@ public struct ContextTestHelpers {
     }
     
     /// Program mock context behavior
-    public static func programMockContext<C: Context>(
+    public static func programMockContext<C: AxiomContext>(
         _ mockContext: MockContext<C>,
         configuration: () -> Void
     ) async throws {
@@ -210,7 +210,7 @@ public struct ContextTestHelpers {
     }
     
     /// Assert mock was called with specific method
-    public static func assertMockWasCalled<C: Context>(
+    public static func assertMockWasCalled<C: AxiomContext>(
         _ mockContext: MockContext<C>,
         method: Any,
         file: StaticString = #filePath,
@@ -248,7 +248,7 @@ public struct ContextTestHelpers {
 
 /// Lifecycle tracker for contexts
 @MainActor
-public class ContextLifecycleTracker<C: Context> {
+public class ContextLifecycleTracker<C: AxiomContext> {
     private let context: C
     private(set) var appearCount = 0
     private(set) var disappearCount = 0
@@ -283,7 +283,7 @@ public class ContextLifecycleTracker<C: Context> {
 }
 
 /// Context observer for testing Published properties
-public class ContextObserver<C: Context>: ObservableObject where C: ObservableObject {
+public class ContextObserver<C: AxiomContext>: ObservableObject where C: ObservableObject {
     private let context: C
     private var changeCount = 0
     private var cancellable: AnyCancellable?
@@ -319,7 +319,7 @@ public class ContextObserver<C: Context>: ObservableObject where C: ObservableOb
 }
 
 /// Mock context for testing
-public class MockContext<C: Context> {
+public class MockContext<C: AxiomContext> {
     private let contextType: C.Type
     private var initialState: Any?
     private var calledMethods: [String] = []

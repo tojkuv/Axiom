@@ -49,7 +49,7 @@ public actor StatePropagationEngine {
     
     /// Create optimized stream with performance guarantees
     public func createStream<S: AxiomState>(
-        for clientType: any Client.Type,
+        for clientType: any AxiomClient.Type,
         initialState: S,
         priority: PropagationPriority = .normal
     ) -> GuaranteedStateStream<S> {

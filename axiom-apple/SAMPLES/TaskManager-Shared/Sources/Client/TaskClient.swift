@@ -4,7 +4,7 @@ import Axiom
 // MARK: - Task Client
 
 /// Actor-based client for managing task state and processing task actions
-public actor TaskClient: Client {
+public actor TaskClient: AxiomClient {
     public typealias StateType = TaskManagerState
     public typealias ActionType = TaskAction
     

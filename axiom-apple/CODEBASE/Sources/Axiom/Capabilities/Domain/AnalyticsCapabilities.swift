@@ -3,7 +3,7 @@ import Foundation
 // MARK: - Analytics and Tracking Capabilities
 
 /// Analytics configuration
-public struct AnalyticsCapabilityConfiguration: CapabilityConfiguration {
+public struct AnalyticsCapabilityConfiguration: AxiomCapabilityConfiguration {
     public let trackingId: String
     public let batchSize: Int
     public let flushInterval: TimeInterval
@@ -50,7 +50,7 @@ public struct AnalyticsCapabilityConfiguration: CapabilityConfiguration {
         )
     }
     
-    public func adjusted(for environment: CapabilityEnvironment) -> AnalyticsCapabilityConfiguration {
+    public func adjusted(for environment: AxiomCapabilityEnvironment) -> AnalyticsCapabilityConfiguration {
         AnalyticsCapabilityConfiguration(
             trackingId: trackingId,
             batchSize: environment.isDebug ? min(batchSize, 5) : batchSize,
@@ -67,7 +67,7 @@ public struct AnalyticsCapabilityConfiguration: CapabilityConfiguration {
 extension AnalyticsCapabilityConfiguration: Codable {}
 
 /// Analytics resource management
-public actor AnalyticsCapabilityResource: CapabilityResource {
+public actor AnalyticsCapabilityResource: AxiomCapabilityResource {
     private var eventQueue: [AnalyticsEvent] = []
     private var uploadTask: Task<Void, Never>?
     private let configuration: AnalyticsCapabilityConfiguration
@@ -138,14 +138,14 @@ public actor AnalyticsCapabilityResource: CapabilityResource {
 public actor AnalyticsCapability: DomainCapability {
     private var _configuration: AnalyticsCapabilityConfiguration
     private var _resources: AnalyticsCapabilityResource
-    private var _environment: CapabilityEnvironment
-    private var _state: CapabilityState = .unknown
+    private var _environment: AxiomCapabilityEnvironment
+    private var _state: AxiomCapabilityState = .unknown
     private var _activationTimeout: Duration = .seconds(5)
     private var flushTimer: Task<Void, Never>?
     
     public init(
         configuration: AnalyticsCapabilityConfiguration,
-        environment: CapabilityEnvironment = CapabilityEnvironment(isDebug: true)
+        environment: AxiomCapabilityEnvironment = AxiomCapabilityEnvironment(isDebug: true)
     ) {
         self._configuration = configuration
         self._resources = AnalyticsCapabilityResource(configuration: configuration)
@@ -162,7 +162,7 @@ public actor AnalyticsCapability: DomainCapability {
         get async { _resources }
     }
     
-    public var environment: CapabilityEnvironment {
+    public var environment: AxiomCapabilityEnvironment {
         get async { _environment }
     }
     
@@ -172,7 +172,7 @@ public actor AnalyticsCapability: DomainCapability {
         await startFlushTimer()
     }
     
-    public func handleEnvironmentChange(_ environment: CapabilityEnvironment) async {
+    public func handleEnvironmentChange(_ environment: AxiomCapabilityEnvironment) async {
         _environment = environment
         let adjustedConfig = _configuration.adjusted(for: environment)
         try? await updateConfiguration(adjustedConfig)
@@ -180,11 +180,11 @@ public actor AnalyticsCapability: DomainCapability {
     
     // MARK: - ExtendedCapability Protocol
     
-    public var state: CapabilityState {
+    public var state: AxiomCapabilityState {
         get async { _state }
     }
     
-    public var stateStream: AsyncStream<CapabilityState> {
+    public var stateStream: AsyncStream<AxiomCapabilityState> {
         get async {
             AsyncStream { continuation in
                 continuation.yield(_state)

@@ -112,13 +112,13 @@ public struct UserErrorMessage {
     public let title: String
     public let description: String
     public let suggestions: [ActionableSuggestion]
-    public let severity: ErrorSeverity
+    public let severity: AxiomErrorSeverity
     
     public init(
         title: String,
         description: String,
         suggestions: [ActionableSuggestion],
-        severity: ErrorSeverity
+        severity: AxiomErrorSeverity
     ) {
         self.title = title
         self.description = description
@@ -239,21 +239,21 @@ public actor UserErrorMessageService {
         case .validationError(let validationError):
             return getValidationErrorMessage(validationError)
         case .persistenceError(let persistenceError):
-            return getPersistenceErrorMessage(persistenceError)
+            return getAxiomPersistenceErrorMessage(persistenceError)
         case .capabilityError(let capabilityError):
-            return getCapabilityErrorMessage(capabilityError)
+            return getAxiomCapabilityErrorMessage(capabilityError)
         case .clientError(let clientError):
             return getClientErrorMessage(clientError)
         case .contextError(let contextError):
             return getContextErrorMessage(contextError)
         case .actorError(let actorError):
-            return getActorErrorMessage(actorError)
+            return getAxiomActorErrorMessage(actorError)
         case .deviceError(let deviceError):
-            return getDeviceErrorMessage(deviceError)
+            return getAxiomDeviceErrorMessage(deviceError)
         case .infrastructureError(let infraError):
-            return getInfrastructureErrorMessage(infraError)
+            return getAxiomInfrastructureErrorMessage(infraError)
         case .networkError(let networkError):
-            return getNetworkErrorMessage(networkError)
+            return getAxiomNetworkErrorMessage(networkError)
         case .unknownError:
             return BaseErrorMessage(
                 title: localizationProvider.string(for: "error.generic.title"),
@@ -322,7 +322,7 @@ public actor UserErrorMessageService {
         }
     }
     
-    private func getPersistenceErrorMessage(_ error: PersistenceError) -> BaseErrorMessage {
+    private func getAxiomPersistenceErrorMessage(_ error: AxiomPersistenceError) -> BaseErrorMessage {
         switch error {
         case .saveFailed:
             return BaseErrorMessage(
@@ -347,7 +347,7 @@ public actor UserErrorMessageService {
         }
     }
     
-    private func getCapabilityErrorMessage(_ error: CapabilityError) -> BaseErrorMessage {
+    private func getAxiomCapabilityErrorMessage(_ error: AxiomCapabilityError) -> BaseErrorMessage {
         switch error {
         case .notAvailable(let capability):
             return BaseErrorMessage(
@@ -427,14 +427,14 @@ public actor UserErrorMessageService {
         }
     }
     
-    private func getActorErrorMessage(_ error: ActorError) -> BaseErrorMessage {
+    private func getAxiomActorErrorMessage(_ error: AxiomActorError) -> BaseErrorMessage {
         return BaseErrorMessage(
             title: "System Error",
             description: "A system error occurred. Please try again or restart the app."
         )
     }
     
-    private func getDeviceErrorMessage(_ error: DeviceError) -> BaseErrorMessage {
+    private func getAxiomDeviceErrorMessage(_ error: AxiomDeviceError) -> BaseErrorMessage {
         switch error {
         case .performanceThrottled:
             return BaseErrorMessage(
@@ -454,7 +454,7 @@ public actor UserErrorMessageService {
         }
     }
     
-    private func getInfrastructureErrorMessage(_ error: InfrastructureError) -> BaseErrorMessage {
+    private func getAxiomInfrastructureErrorMessage(_ error: AxiomInfrastructureError) -> BaseErrorMessage {
         switch error {
         case .serviceUnavailable:
             return BaseErrorMessage(
@@ -474,7 +474,7 @@ public actor UserErrorMessageService {
         }
     }
     
-    private func getNetworkErrorMessage(_ error: NetworkError) -> BaseErrorMessage {
+    private func getAxiomNetworkErrorMessage(_ error: AxiomNetworkError) -> BaseErrorMessage {
         switch error {
         case .invalidURL(let url):
             return BaseErrorMessage(
@@ -669,7 +669,7 @@ public actor UserErrorMessageService {
         }
     }
     
-    private func determineSeverity(for error: AxiomError) -> ErrorSeverity {
+    private func determineSeverity(for error: AxiomError) -> AxiomErrorSeverity {
         switch error {
         case .validationError:
             return .warning

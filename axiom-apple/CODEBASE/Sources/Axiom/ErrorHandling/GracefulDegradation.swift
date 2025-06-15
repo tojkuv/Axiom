@@ -119,7 +119,7 @@ public actor DefaultUserNotificationService: UserNotificationService {
 }
 
 // MARK: - Capability Registry Integration
-// Note: Uses the real CapabilityRegistry from Capabilities module
+// Note: Uses the real AxiomCapabilityRegistry from Capabilities module
 
 // MARK: - Graceful Degradation Service
 
@@ -218,7 +218,7 @@ public actor GracefulDegradationService {
         }
     }
     
-    private func determineSeverity(for error: AxiomError) -> ErrorSeverity {
+    private func determineSeverity(for error: AxiomError) -> AxiomErrorSeverity {
         switch error {
         case .capabilityError(.notAvailable), .capabilityError(.restricted):
             return .critical
@@ -294,10 +294,10 @@ public actor GracefulDegradationService {
     }
     
     private func attemptRecovery(capability: String) async {
-        let capabilityManager = CapabilityRegistry.shared
+        let capabilityManager = AxiomCapabilityRegistry.shared
         
         do {
-            try await capabilityManager.activateCapability(capability)
+            try await capabilityManager.activateAxiomCapability(capability)
             
             // If successful, restore full functionality
             let previousLevel = degradationState[capability] ?? .full
@@ -441,7 +441,7 @@ public actor CapabilityStatusMonitor {
         guard !isMonitoring else { return }
         isMonitoring = true
         
-        let registry = CapabilityRegistry.shared
+        let registry = AxiomCapabilityRegistry.shared
         lastCapabilityStates = await registry.getAllCapabilities()
         
         monitoringTask = Task {
@@ -460,7 +460,7 @@ public actor CapabilityStatusMonitor {
     }
     
     private func checkCapabilityChanges() async {
-        let registry = CapabilityRegistry.shared
+        let registry = AxiomCapabilityRegistry.shared
         let currentStates = await registry.getAllCapabilities()
         
         for (capability, currentState) in currentStates {

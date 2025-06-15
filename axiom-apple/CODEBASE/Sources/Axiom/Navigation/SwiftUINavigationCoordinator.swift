@@ -16,14 +16,14 @@ public class SwiftUINavigationCoordinator: ObservableObject {
     
     // MARK: - Private State
     
-    private let navigationService: ModularNavigationService
+    private let navigationService: AxiomModularNavigationService
     private let routeResolver: RouteResolver
     private var navigationObserver: NavigationObserverImpl?
     
     // MARK: - Initialization
     
-    public init(navigationService: ModularNavigationService? = nil, routeResolver: RouteResolver? = nil) {
-        self.navigationService = navigationService ?? ModularNavigationService()
+    public init(navigationService: AxiomModularNavigationService? = nil, routeResolver: RouteResolver? = nil) {
+        self.navigationService = navigationService ?? AxiomModularNavigationService()
         self.routeResolver = routeResolver ?? RouteResolver()
         
         // Set up navigation observation
@@ -33,7 +33,7 @@ public class SwiftUINavigationCoordinator: ObservableObject {
     
     // MARK: - Navigation Methods
     
-    public func navigate<R: TypeSafeRoute>(to route: R) {
+    public func navigate<R: AxiomTypeSafeRoute>(to route: R) {
         Task {
             isNavigating = true
             navigationError = nil
@@ -65,9 +65,9 @@ public class SwiftUINavigationCoordinator: ObservableObject {
         }
     }
     
-    public func present<R: TypeSafeRoute>(_ route: R, style: PresentationStyle = .present(.sheet)) {
+    public func present<R: AxiomTypeSafeRoute>(_ route: R, style: PresentationStyle = .present(.sheet)) {
         Task {
-            // For now, just add to presented routes since ModularNavigationService doesn't have present
+            // For now, just add to presented routes since AxiomModularNavigationService doesn't have present
             await MainActor.run {
                 presentedRoutes.append(AnyTypeRoute(route))
             }
@@ -257,7 +257,7 @@ public struct AxiomNavigationStack<Content: View>: View {
     private let content: () -> Content
     
     public init(
-        navigationService: ModularNavigationService? = nil,
+        navigationService: AxiomModularNavigationService? = nil,
         routeResolver: RouteResolver? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) {
@@ -287,7 +287,7 @@ public struct AxiomNavigationStack<Content: View>: View {
 
 /// Protocol for providing navigation destinations
 public protocol NavigationDestinationProvider {
-    associatedtype Route: TypeSafeRoute
+    associatedtype Route: AxiomTypeSafeRoute
     associatedtype Destination: View
     
     @ViewBuilder
@@ -301,7 +301,7 @@ public struct DynamicNavigationStack<Content: View>: View {
     private var providers: [Any] = []
     
     public init(
-        navigationService: ModularNavigationService? = nil,
+        navigationService: AxiomModularNavigationService? = nil,
         routeResolver: RouteResolver? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) {
@@ -387,7 +387,7 @@ private struct SettingsViewPlaceholder: View {
 
 /// Declarative navigation modifiers
 extension View {
-    public func navigation<Route: TypeSafeRoute>(
+    public func navigation<Route: AxiomTypeSafeRoute>(
         to route: Route?,
         isActive: Binding<Bool>
     ) -> some View {
@@ -400,7 +400,7 @@ extension View {
         }
     }
     
-    public func navigationLink<Route: TypeSafeRoute>(
+    public func navigationLink<Route: AxiomTypeSafeRoute>(
         to route: Route
     ) -> some View {
         Button(action: {

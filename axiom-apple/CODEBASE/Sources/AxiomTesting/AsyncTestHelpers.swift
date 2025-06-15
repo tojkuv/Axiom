@@ -40,7 +40,7 @@ fileprivate actor CountTracker {
 public struct AsyncTestHelpers {
     
     /// Wait for state condition to be met
-    public static func waitForState<C: Client>(
+    public static func waitForState<C: AxiomClient>(
         from client: C,
         timeout: Duration = .seconds(1),
         until condition: @escaping (C.StateType) -> Bool
@@ -55,7 +55,7 @@ public struct AsyncTestHelpers {
     }
     
     /// Assert a sequence of state transitions
-    public static func assertStateSequence<C: Client>(
+    public static func assertStateSequence<C: AxiomClient>(
         from client: C,
         timeout: Duration = .seconds(1),
         sequence: [(C.StateType) -> Bool],
@@ -95,7 +95,7 @@ public enum AsyncTestError: Error, LocalizedError {
 // MARK: - Mock Client
 
 /// Mock client for testing async behaviors
-public actor MockClient<S: AxiomState, A>: Client {
+public actor MockClient<S: AxiomState, A>: AxiomClient {
     public typealias StateType = S
     public typealias ActionType = A
     

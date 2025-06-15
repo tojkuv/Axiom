@@ -102,7 +102,7 @@ final class DependencyRulesTests: XCTestCase {
     
     func testDependencyGraphIsAcyclic() {
         // Test that the default dependency rules form a DAG
-        let dependencies: [ComponentType: Set<ComponentType>] = [
+        let dependencies: [Axiom.ComponentType: Set<Axiom.ComponentType>] = [
             .capability: [.capability],
             .state: [],
             .client: [.capability],
@@ -116,7 +116,7 @@ final class DependencyRulesTests: XCTestCase {
     
     func testCyclicGraphDetection() {
         // Test that cycles are properly detected
-        let cyclicDependencies: [ComponentType: Set<ComponentType>] = [
+        let cyclicDependencies: [Axiom.ComponentType: Set<Axiom.ComponentType>] = [
             .client: [.context],
             .context: [.orchestrator],
             .orchestrator: [.client]  // Creates a cycle
@@ -127,7 +127,7 @@ final class DependencyRulesTests: XCTestCase {
     
     func testTopologicalSort() {
         // Test topological sorting of dependency graph
-        let dependencies: [ComponentType: Set<ComponentType>] = [
+        let dependencies: [Axiom.ComponentType: Set<Axiom.ComponentType>] = [
             .presentation: [.context],
             .context: [.client],
             .client: [.capability],

@@ -12,14 +12,14 @@ public actor DefaultAggregatedCapability: AggregatedCapability {
     public var capabilities: [String: any DomainCapability] = [:]
     private var _configuration: AggregatedConfiguration
     private var _resources: AggregatedResource
-    private var _environment: CapabilityEnvironment
-    private var _state: CapabilityState = .unknown
+    private var _environment: AxiomCapabilityEnvironment
+    private var _state: AxiomCapabilityState = .unknown
     private var orchestrationStrategy: OrchestrationStrategy
     private var _activationTimeout: Duration = .milliseconds(10)
     
     public init(
         configuration: AggregatedConfiguration,
-        environment: CapabilityEnvironment = CapabilityEnvironment(isDebug: true),
+        environment: AxiomCapabilityEnvironment = AxiomCapabilityEnvironment(isDebug: true),
         orchestrationStrategy: OrchestrationStrategy = .sequential
     ) {
         self._configuration = configuration
@@ -38,7 +38,7 @@ public actor DefaultAggregatedCapability: AggregatedCapability {
         get async { _resources }
     }
     
-    public var environment: CapabilityEnvironment {
+    public var environment: AxiomCapabilityEnvironment {
         get async { _environment }
     }
     
@@ -47,7 +47,7 @@ public actor DefaultAggregatedCapability: AggregatedCapability {
         _resources = AggregatedResource(configuration: _configuration)
     }
     
-    public func handleEnvironmentChange(_ environment: CapabilityEnvironment) async {
+    public func handleEnvironmentChange(_ environment: AxiomCapabilityEnvironment) async {
         _environment = environment
         let adjustedConfig = _configuration.adjusted(for: environment)
         try? await updateConfiguration(adjustedConfig)
@@ -60,11 +60,11 @@ public actor DefaultAggregatedCapability: AggregatedCapability {
     
     // MARK: - ExtendedCapability Protocol
     
-    public var state: CapabilityState {
+    public var state: AxiomCapabilityState {
         get async { _state }
     }
     
-    public var stateStream: AsyncStream<CapabilityState> {
+    public var stateStream: AsyncStream<AxiomCapabilityState> {
         get async {
             AsyncStream { continuation in
                 continuation.yield(_state)
@@ -105,7 +105,7 @@ public actor DefaultAggregatedCapability: AggregatedCapability {
     public func activate() async throws {
         guard await isSupported() else {
             _state = .unavailable
-            throw CapabilityError.notAvailable("One or more capabilities not supported")
+            throw AxiomCapabilityError.notAvailable("One or more capabilities not supported")
         }
         
         try await _resources.allocate()
@@ -137,7 +137,7 @@ public actor DefaultAggregatedCapability: AggregatedCapability {
     
     public func addCapability(_ capability: any DomainCapability, withId id: String) async throws {
         guard !capabilities.keys.contains(id) else {
-            throw CapabilityError.initializationFailed("Capability with id '\(id)' already exists")
+            throw AxiomCapabilityError.initializationFailed("Capability with id '\(id)' already exists")
         }
         
         capabilities[id] = capability
@@ -215,7 +215,7 @@ public actor DefaultAggregatedCapability: AggregatedCapability {
             
             // If no progress was made, we have circular dependencies
             if remaining.count == previousCount {
-                throw CapabilityError.initializationFailed("Circular dependencies detected")
+                throw AxiomCapabilityError.initializationFailed("Circular dependencies detected")
             }
         }
     }
@@ -229,7 +229,7 @@ public enum OrchestrationStrategy {
 }
 
 /// Configuration for aggregated capabilities
-public struct AggregatedConfiguration: CapabilityConfiguration {
+public struct AggregatedConfiguration: AxiomCapabilityConfiguration {
     // Note: For MVP, removing type-erased dictionary that can't be Codable
     // In production, would use concrete types or custom Codable implementation
     public let orchestrationTimeout: TimeInterval
@@ -254,7 +254,7 @@ public struct AggregatedConfiguration: CapabilityConfiguration {
         )
     }
     
-    public func adjusted(for environment: CapabilityEnvironment) -> AggregatedConfiguration {
+    public func adjusted(for environment: AxiomCapabilityEnvironment) -> AggregatedConfiguration {
         return AggregatedConfiguration(
             orchestrationTimeout: environment.isDebug ? min(orchestrationTimeout, 10) : orchestrationTimeout,
             failureStrategy: failureStrategy
@@ -270,9 +270,9 @@ public enum FailureStrategy: String, Codable, Sendable {
 }
 
 /// Resource management for aggregated capabilities
-public actor AggregatedResource: CapabilityResource {
+public actor AggregatedResource: AxiomCapabilityResource {
     private let configuration: AggregatedConfiguration
-    private var allocatedResources: [String: any CapabilityResource] = [:]
+    private var allocatedResources: [String: any AxiomCapabilityResource] = [:]
     
     public init(configuration: AggregatedConfiguration) {
         self.configuration = configuration
@@ -306,7 +306,7 @@ public actor AggregatedResource: CapabilityResource {
     
     public func allocate() async throws {
         guard await isAvailable() else {
-            throw CapabilityError.resourceAllocationFailed("Insufficient resources for aggregated capability")
+            throw AxiomCapabilityError.resourceAllocationFailed("Insufficient resources for aggregated capability")
         }
     }
     
@@ -317,7 +317,7 @@ public actor AggregatedResource: CapabilityResource {
         allocatedResources.removeAll()
     }
     
-    func addResource(_ resource: any CapabilityResource, withId id: String) async {
+    func addResource(_ resource: any AxiomCapabilityResource, withId id: String) async {
         allocatedResources[id] = resource
     }
     
@@ -337,14 +337,14 @@ public actor AdaptiveCapabilityActor<BaseCapability: DomainCapability>: DomainCa
     
     private var baseCapability: BaseCapability
     private var _configuration: AdaptiveConfiguration<BaseCapability.ConfigurationType>
-    private var _environment: CapabilityEnvironment
+    private var _environment: AxiomCapabilityEnvironment
     private var configurationUpdater: Task<Void, Never>?
     private var _activationTimeout: Duration = .milliseconds(10)
     
     public init(
         baseCapability: BaseCapability,
         configuration: AdaptiveConfiguration<BaseCapability.ConfigurationType>,
-        environment: CapabilityEnvironment = CapabilityEnvironment(isDebug: true)
+        environment: AxiomCapabilityEnvironment = AxiomCapabilityEnvironment(isDebug: true)
     ) {
         self.baseCapability = baseCapability
         self._configuration = configuration
@@ -361,7 +361,7 @@ public actor AdaptiveCapabilityActor<BaseCapability: DomainCapability>: DomainCa
         get async { await baseCapability.resources }
     }
     
-    public var environment: CapabilityEnvironment {
+    public var environment: AxiomCapabilityEnvironment {
         get async { _environment }
     }
     
@@ -374,7 +374,7 @@ public actor AdaptiveCapabilityActor<BaseCapability: DomainCapability>: DomainCa
         await startConfigurationUpdater()
     }
     
-    public func handleEnvironmentChange(_ environment: CapabilityEnvironment) async {
+    public func handleEnvironmentChange(_ environment: AxiomCapabilityEnvironment) async {
         _environment = environment
         
         let baseConfig = await resolveConfiguration(for: environment)
@@ -384,11 +384,11 @@ public actor AdaptiveCapabilityActor<BaseCapability: DomainCapability>: DomainCa
     
     // MARK: - ExtendedCapability Protocol
     
-    public var state: CapabilityState {
+    public var state: AxiomCapabilityState {
         get async { await baseCapability.state }
     }
     
-    public var stateStream: AsyncStream<CapabilityState> {
+    public var stateStream: AsyncStream<AxiomCapabilityState> {
         get async { await baseCapability.stateStream }
     }
     
@@ -430,7 +430,7 @@ public actor AdaptiveCapabilityActor<BaseCapability: DomainCapability>: DomainCa
     
     // MARK: - Adaptive Methods
     
-    private func resolveConfiguration(for environment: CapabilityEnvironment) async -> BaseCapability.ConfigurationType {
+    private func resolveConfiguration(for environment: AxiomCapabilityEnvironment) async -> BaseCapability.ConfigurationType {
         let configurations = _configuration.environmentConfigurations
         
         if let envConfig = configurations[environment] {
@@ -469,9 +469,9 @@ public actor AdaptiveCapabilityActor<BaseCapability: DomainCapability>: DomainCa
 }
 
 /// Adaptive configuration with environment-specific settings
-public struct AdaptiveConfiguration<BaseConfig: CapabilityConfiguration>: CapabilityConfiguration {
+public struct AdaptiveConfiguration<BaseConfig: AxiomCapabilityConfiguration>: AxiomCapabilityConfiguration {
     public let defaultConfiguration: BaseConfig
-    public let environmentConfigurations: [CapabilityEnvironment: BaseConfig]
+    public let environmentConfigurations: [AxiomCapabilityEnvironment: BaseConfig]
     public let enableRuntimeUpdates: Bool
     public let updateInterval: TimeInterval
     public let featureFlags: [String: Bool]
@@ -479,7 +479,7 @@ public struct AdaptiveConfiguration<BaseConfig: CapabilityConfiguration>: Capabi
     
     public init(
         defaultConfiguration: BaseConfig,
-        environmentConfigurations: [CapabilityEnvironment: BaseConfig] = [:],
+        environmentConfigurations: [AxiomCapabilityEnvironment: BaseConfig] = [:],
         enableRuntimeUpdates: Bool = false,
         updateInterval: TimeInterval = 60,
         featureFlags: [String: Bool] = [:],
@@ -518,7 +518,7 @@ public struct AdaptiveConfiguration<BaseConfig: CapabilityConfiguration>: Capabi
         )
     }
     
-    public func adjusted(for environment: CapabilityEnvironment) -> AdaptiveConfiguration<BaseConfig> {
+    public func adjusted(for environment: AxiomCapabilityEnvironment) -> AdaptiveConfiguration<BaseConfig> {
         let adjustedDefault = defaultConfiguration.adjusted(for: environment)
         let adjustedEnvironmentConfigs = environmentConfigurations.mapValues { config in
             config.adjusted(for: environment)

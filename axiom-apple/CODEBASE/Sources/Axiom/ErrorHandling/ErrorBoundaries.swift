@@ -645,7 +645,7 @@ open class ErrorBoundaryContext: ErrorBoundary, Hashable {
     /// - Parameter error: The error to evaluate
     /// - Returns: A suggested recovery strategy
     open func defaultRecoveryStrategy(for error: any Error) -> RecoveryStrategy {
-        let category = ErrorCategory.categorize(error)
+        let category = AxiomErrorCategory.categorize(error)
         
         switch category {
         case .network:

@@ -6,10 +6,10 @@ import UIKit
 
 // MARK: - Context Convenience Extensions
 
-public extension Context {
+public extension AxiomContext {
     /// Quick context creation with automatic lifecycle
     @MainActor
-    static func quick<T: ObservableContext>() async -> T {
+    static func quick<T: AxiomObservableContext>() async -> T {
         let context = T()
         try? await context.activate()
         return context
@@ -17,10 +17,10 @@ public extension Context {
     
     /// Context with error boundary
     @MainActor
-    static func withErrorBoundary<T: ObservableContext>(
+    static func withErrorBoundary<T: AxiomObservableContext>(
         _ contextType: T.Type,
         errorHandler: @escaping (any Error) -> Void = { _ in }
-    ) async -> T where T: ObservableContext {
+    ) async -> T where T: AxiomObservableContext {
         let context = T()
         // Error boundary setup would be implemented here
         try? await context.activate()
@@ -29,7 +29,7 @@ public extension Context {
     
     /// Context with automatic cleanup
     @MainActor
-    static func autoCleanup<T: ObservableContext>(_ contextType: T.Type) async -> T {
+    static func autoCleanup<T: AxiomObservableContext>(_ contextType: T.Type) async -> T {
         let context = T()
         
         // Set up automatic cleanup on app background/terminate
@@ -48,9 +48,9 @@ public extension Context {
     }
 }
 
-public extension ObservableContext {
+public extension AxiomObservableContext {
     /// Add multiple children at once
-    func withChildren(_ children: any Context...) -> Self {
+    func withChildren(_ children: any AxiomContext...) -> Self {
         for child in children {
             addChild(child)
         }
@@ -71,7 +71,7 @@ public extension ObservableContext {
 
 // MARK: - Client Convenience Extensions
 
-public extension Client {
+public extension AxiomClient {
     /// Process action with automatic error handling
     func safeProcess(_ action: ActionType) async -> Result<Void, AxiomError> {
         do {
@@ -288,7 +288,7 @@ public extension Result where Failure == AxiomError {
 public extension View {
     /// Bind context to view with automatic lifecycle
     @MainActor
-    func context<C: ObservableContext>(_ context: C) -> some View {
+    func context<C: AxiomObservableContext>(_ context: C) -> some View {
         self
             .environmentObject(context)
             .onAppear {
@@ -329,10 +329,10 @@ public extension ErgonomicClient {
     }
 }
 
-public extension ObservableContext {
+public extension AxiomObservableContext {
     /// Create test context
     @MainActor
-    static func test<T: ObservableContext>() -> T where T: ObservableContext {
+    static func test<T: AxiomObservableContext>() -> T where T: AxiomObservableContext {
         let context = T()
         // Skip activation for testing
         return context
@@ -349,7 +349,7 @@ public extension ErgonomicNavigationService {
 
 // MARK: - Performance Optimization Extensions
 
-public extension ObservableContext {
+public extension AxiomObservableContext {
     /// Debounced update notifications
     func debouncedUpdate(delay: TimeInterval = 0.1) {
         Task {
@@ -380,7 +380,7 @@ public extension ObservableContext {
 
 // MARK: - Memory Management Extensions
 
-public extension Context {
+public extension AxiomContext {
     /// Check memory usage
     func memoryFootprint() -> Int {
         return measureMemoryUsage()
@@ -389,7 +389,7 @@ public extension Context {
     /// Clean up resources
     @MainActor
     func cleanup() async {
-        if let observableContext = self as? ObservableContext {
+        if let observableContext = self as? AxiomObservableContext {
             await observableContext.deactivate()
         }
     }

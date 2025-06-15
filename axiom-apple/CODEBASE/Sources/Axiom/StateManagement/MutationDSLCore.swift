@@ -3,7 +3,7 @@ import Foundation
 // MARK: - Mutation DSL
 
 /// Enhanced protocol for types that support advanced mutation DSL (REQUIREMENTS-W-01-003)
-public protocol MutableClient: Client {
+public protocol MutableClient: AxiomClient {
     /// Perform a state mutation with automatic immutability preservation
     @MainActor
     @discardableResult
@@ -32,8 +32,8 @@ public protocol MutableClient: Client {
     func batchMutate(_ mutations: [(inout StateType) throws -> Void]) async throws
 }
 
-/// Extension to Client protocol providing mutation DSL for simplified state updates
-extension Client {
+/// Extension to AxiomClient protocol providing mutation DSL for simplified state updates
+extension AxiomClient {
     /// Perform a state mutation with automatic immutability preservation.
     /// 
     /// This method provides a mutable-style syntax while maintaining immutable semantics.

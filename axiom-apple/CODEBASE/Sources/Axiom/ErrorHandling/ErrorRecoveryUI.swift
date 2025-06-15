@@ -1,6 +1,6 @@
 import SwiftUI
 
-// Use ErrorSeverity from ErrorFoundation directly
+// Use AxiomErrorSeverity from ErrorFoundation directly
 
 // MARK: - Recovery Option Protocol
 
@@ -16,10 +16,10 @@ public protocol RecoveryOption: Hashable, CaseIterable, Sendable {
 
 /// Icon view for different error severities
 public struct ErrorIconView: View {
-    let severity: ErrorSeverity
+    let severity: AxiomErrorSeverity
     let size: CGFloat
     
-    public init(severity: ErrorSeverity, size: CGFloat = 48) {
+    public init(severity: AxiomErrorSeverity, size: CGFloat = 48) {
         self.severity = severity
         self.size = size
     }
@@ -246,7 +246,7 @@ public struct ErrorRecoveryView<Option: RecoveryOption>: View {
     
     // MARK: - Computed Properties
     
-    private var errorSeverity: ErrorSeverity {
+    private var errorSeverity: AxiomErrorSeverity {
         switch error {
         case .validationError:
             return .warning
@@ -345,7 +345,7 @@ public struct ErrorStateView<Option: RecoveryOption>: View {
         VStack(spacing: 32) {
             Spacer()
             
-            ErrorIconView(severity: ErrorSeverity.error, size: 80)
+            ErrorIconView(severity: AxiomErrorSeverity.error, size: 80)
             
             VStack(spacing: 16) {
                 Text(error.userFriendlyTitle)
@@ -411,7 +411,7 @@ public struct BannerErrorView<Option: RecoveryOption>: View {
         VStack(spacing: 0) {
             // Collapsed view
             HStack {
-                ErrorIconView(severity: ErrorSeverity.warning, size: 24)
+                ErrorIconView(severity: AxiomErrorSeverity.warning, size: 24)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(error.userFriendlyTitle)

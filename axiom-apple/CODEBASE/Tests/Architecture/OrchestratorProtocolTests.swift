@@ -14,7 +14,7 @@ final class OrchestratorProtocolTests: XCTestCase {
         let startTime = ContinuousClock.now
         
         // Create 50 contexts
-        var contexts: [any Context] = []
+        var contexts: [any AxiomContext] = []
         for i in 0..<50 {
             let context = await orchestrator.createContext(
                 type: TestOrchestratorContext.self,
@@ -217,19 +217,19 @@ final class OrchestratorProtocolTests: XCTestCase {
 // MARK: - Test Support Types
 
 // Test orchestrator implementation
-actor TestOrchestrator: ExtendedOrchestrator {
-    private var contexts: [String: any Context] = [:]
-    private var clients: [String: any Client] = [:]
-    private var capabilities: [String: any Capability] = [:]
+actor TestOrchestrator: AxiomExtendedOrchestrator {
+    private var contexts: [String: any AxiomContext] = [:]
+    private var clients: [String: any AxiomClient] = [:]
+    private var capabilities: [String: any AxiomCapability] = [:]
     public private(set) var currentRoute: Route?
     public private(set) var navigationHistory: [Route] = []
-    private var routeHandlers: [Route: (Route) async -> any Context] = [:]
+    private var routeHandlers: [Route: (Route) async -> any AxiomContext] = [:]
     
     func createContext<P: Presentation>(for presentation: P.Type) async -> P.ContextType {
         fatalError("Not implemented in test orchestrator")
     }
     
-    func createContext<T: Context>(
+    func createContext<T: AxiomContext>(
         type: T.Type,
         identifier: String? = nil,
         dependencies: [String] = []
@@ -237,7 +237,7 @@ actor TestOrchestrator: ExtendedOrchestrator {
         let id = identifier ?? UUID().uuidString
         
         if T.self == TestOrchestratorContext.self {
-            let depClients: [any Client] = []  // Simplified for testing
+            let depClients: [any AxiomClient] = []  // Simplified for testing
             let context = await TestOrchestratorContext(
                 identifier: id,
                 dependencies: depClients
@@ -268,11 +268,11 @@ actor TestOrchestrator: ExtendedOrchestrator {
         fatalError("Unknown context type")
     }
     
-    func client<C: Client>(for key: String, as type: C.Type) async -> C? {
+    func client<C: AxiomClient>(for key: String, as type: C.Type) async -> C? {
         return clients[key] as? C
     }
     
-    func registerClient<C: Client>(_ client: C, for key: String) async {
+    func registerClient<C: AxiomClient>(_ client: C, for key: String) async {
         clients[key] = client
     }
     
@@ -281,11 +281,11 @@ actor TestOrchestrator: ExtendedOrchestrator {
         currentRoute = route
     }
     
-    func registerRoute(_ route: Route, handler: @escaping (Route) async -> any Context) async {
+    func registerRoute(_ route: Route, handler: @escaping (Route) async -> any AxiomContext) async {
         routeHandlers[route] = handler
     }
     
-    func registerCapability<C: Capability>(_ capability: C, for key: String) async {
+    func registerCapability<C: AxiomCapability>(_ capability: C, for key: String) async {
         capabilities[key] = capability
     }
     
@@ -296,7 +296,7 @@ actor TestOrchestrator: ExtendedOrchestrator {
         return false
     }
     
-    func contextBuilder<T: Context>(for type: T.Type) async -> ContextBuilder<T> {
+    func contextBuilder<T: AxiomContext>(for type: T.Type) async -> ContextBuilder<T> {
         return ContextBuilder<T>(orchestrator: self, contextType: type)
     }
     
@@ -314,27 +314,27 @@ actor TestOrchestrator: ExtendedOrchestrator {
 }
 
 // Navigation orchestrator
-actor NavigationOrchestrator: ExtendedOrchestrator {
-    private var contexts: [String: any Context] = [:]
-    private var clients: [String: any Client] = [:]
-    private var capabilities: [String: any Capability] = [:]
+actor NavigationOrchestrator: AxiomExtendedOrchestrator {
+    private var contexts: [String: any AxiomContext] = [:]
+    private var clients: [String: any AxiomClient] = [:]
+    private var capabilities: [String: any AxiomCapability] = [:]
     public private(set) var currentRoute: Route?
     public private(set) var navigationHistory: [Route] = []
-    private var routeHandlers: [Route: (Route) async -> any Context] = [:]
+    private var routeHandlers: [Route: (Route) async -> any AxiomContext] = [:]
     
     func createContext<P: Presentation>(for presentation: P.Type) async -> P.ContextType {
         fatalError("Not implemented for navigation orchestrator")
     }
     
-    func createContext<T: Context>(type: T.Type, identifier: String?, dependencies: [String]) async -> T {
+    func createContext<T: AxiomContext>(type: T.Type, identifier: String?, dependencies: [String]) async -> T {
         fatalError("Not implemented for navigation orchestrator")
     }
     
-    func client<C: Client>(for key: String, as type: C.Type) async -> C? {
+    func client<C: AxiomClient>(for key: String, as type: C.Type) async -> C? {
         return clients[key] as? C
     }
     
-    func registerClient<C: Client>(_ client: C, for key: String) async {
+    func registerClient<C: AxiomClient>(_ client: C, for key: String) async {
         clients[key] = client
     }
     
@@ -348,11 +348,11 @@ actor NavigationOrchestrator: ExtendedOrchestrator {
         }
     }
     
-    func registerRoute(_ route: Route, handler: @escaping (Route) async -> any Context) async {
+    func registerRoute(_ route: Route, handler: @escaping (Route) async -> any AxiomContext) async {
         routeHandlers[route] = handler
     }
     
-    func registerCapability<C: Capability>(_ capability: C, for key: String) async {
+    func registerCapability<C: AxiomCapability>(_ capability: C, for key: String) async {
         capabilities[key] = capability
     }
     
@@ -363,7 +363,7 @@ actor NavigationOrchestrator: ExtendedOrchestrator {
         return false
     }
     
-    func contextBuilder<T: Context>(for type: T.Type) async -> ContextBuilder<T> {
+    func contextBuilder<T: AxiomContext>(for type: T.Type) async -> ContextBuilder<T> {
         return ContextBuilder<T>(orchestrator: self, contextType: type)
     }
     
@@ -382,13 +382,13 @@ actor NavigationOrchestrator: ExtendedOrchestrator {
 
 // Test context implementation
 @MainActor
-class TestOrchestratorContext: Context {
+class TestOrchestratorContext: AxiomContext {
     let identifier: String
     private(set) var isActive = false
     private(set) var dependencyCount: Int
     var configuration: [String: Any] = [:]
     
-    init(identifier: String, dependencies: [any Client] = []) {
+    init(identifier: String, dependencies: [any AxiomClient] = []) {
         self.identifier = identifier
         self.dependencyCount = dependencies.count
     }
@@ -408,7 +408,7 @@ class TestOrchestratorContext: Context {
 
 // Dependency injected context
 @MainActor
-class DependencyInjectedContext: Context {
+class DependencyInjectedContext: AxiomContext {
     let clients: [TestOrchestratorClient]
     
     init(clients: [TestOrchestratorClient]) {
@@ -420,7 +420,7 @@ class DependencyInjectedContext: Context {
 }
 
 // Test client
-actor TestOrchestratorClient: Client {
+actor TestOrchestratorClient: AxiomClient {
     typealias StateType = OrchestratorClientState
     typealias ActionType = OrchestratorClientAction
     
@@ -442,7 +442,7 @@ actor TestOrchestratorClient: Client {
 }
 
 // Monitored capability
-actor MonitoredCapability: Capability {
+actor MonitoredCapability: AxiomCapability {
     private var state: CapabilityState = .unavailable
     
     var isAvailable: Bool {

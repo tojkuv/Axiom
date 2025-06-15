@@ -1,18 +1,113 @@
 using System.Reflection;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
+using AxiomEndpoints.Aspire.PackageGeneration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AxiomEndpoints.Aspire;
 
 /// <summary>
 /// Aspire builder extensions for Axiom Endpoints
-/// NOTE: This is a foundational implementation that demonstrates the integration approach.
-/// Full implementation would require the complete Aspire workload to be installed.
 /// </summary>
 public static class AspireBuilderExtensions
 {
-    // TODO: Implement full Aspire builder extensions when Aspire workload is available
-    // The interfaces and structure are in place for future enhancement
+    /// <summary>
+    /// Add Axiom package generation support to the application
+    /// </summary>
+    public static IDistributedApplicationBuilder AddAxiomPackageGeneration(this IDistributedApplicationBuilder builder)
+    {
+        builder.Services.AddSingleton<IPackageGenerationService, PackageGenerationService>();
+        return builder;
+    }
+
+    /// <summary>
+    /// Add enhanced Axiom package generation with validation, hooks, and code quality improvements
+    /// </summary>
+    public static IDistributedApplicationBuilder AddEnhancedAxiomPackageGeneration(
+        this IDistributedApplicationBuilder builder,
+        Action<EnhancedPackageGenerationOptions>? configure = null)
+    {
+        var options = new EnhancedPackageGenerationOptions();
+        configure?.Invoke(options);
+
+        // Register enhanced services
+        builder.Services.AddEnhancedPackageGeneration();
+
+        // Configure validation pipeline if enabled
+        if (options.EnableValidation)
+        {
+            builder.Services.ConfigureValidationPipeline(pipeline =>
+                pipeline.AddAllValidators());
+        }
+
+        // Configure hook pipeline if enabled
+        if (options.EnableHooks)
+        {
+            builder.Services.ConfigureHookPipeline(hooks =>
+            {
+                if (options.EnableBuiltInHooks)
+                    hooks.AddBuiltInHooks();
+                else
+                    hooks.AddAllHooks();
+            });
+        }
+
+        return builder;
+    }
+    
+    /// <summary>
+    /// Add a project with Axiom package generation using simple API with smart conventions
+    /// </summary>
+    public static SimplePackageBuilder WithAxiomPackageGeneration<T>(
+        this IResourceBuilder<T> builder,
+        params PackageLanguage[] languages)
+        where T : IResource
+    {
+        var projectName = builder.Resource.Name?.Replace("-", "").Replace("_", "") ?? "Package";
+        return builder.WithPackageGeneration(projectName, languages);
+    }
+    
+    /// <summary>
+    /// Add a project with Axiom package generation using prefix and languages
+    /// </summary>
+    public static SimplePackageBuilder WithAxiomPackageGeneration<T>(
+        this IResourceBuilder<T> builder,
+        string prefix,
+        params PackageLanguage[] languages)
+        where T : IResource
+    {
+        return builder.WithPackageGeneration(prefix, languages);
+    }
+    
+    /// <summary>
+    /// Add a project with Axiom package generation using advanced fluent configuration
+    /// </summary>
+    public static IResourceBuilder<T> WithAxiomPackageGenerationAdvanced<T>(
+        this IResourceBuilder<T> builder,
+        Action<PackageGenerationOptionsBuilder> configure)
+        where T : IResource
+    {
+        // Add package generation resource
+        var packageGenName = $"{builder.Resource.Name}-packages";
+        builder.ApplicationBuilder.AddPackageGeneration(packageGenName, builder, configure);
+        
+        return builder;
+    }
+    
+    /// <summary>
+    /// Add a project with Axiom package generation using simple configuration callback
+    /// </summary>
+    public static IResourceBuilder<T> WithAxiomPackageGenerationAdvanced<T>(
+        this IResourceBuilder<T> builder,
+        Action<PackageGenerationOptions> configure)
+        where T : IResource
+    {
+        // Add package generation resource
+        var packageGenName = $"{builder.Resource.Name}-packages";
+        builder.ApplicationBuilder.AddPackageGeneration(packageGenName, builder, configure);
+        
+        return builder;
+    }
 }
 
 /// <summary>

@@ -65,7 +65,7 @@ public extension TestAssertions {
     /// Observe states from a client until a condition is met
     /// 
     /// This consolidates state observation patterns found in AsyncTestHelpers and ContextTestHelpers
-    func observeStates<C: Client>(
+    func observeStates<C: AxiomClient>(
         from client: C,
         timeout: Duration = .seconds(5),
         until condition: @escaping (C.StateType) -> Bool
@@ -125,7 +125,7 @@ public extension TestAssertions {
     /// Wait for multiple states from a client stream
     /// 
     /// Consolidates state collection patterns
-    func collectStates<C: Client>(
+    func collectStates<C: AxiomClient>(
         from client: C,
         count: Int,
         timeout: Duration = .seconds(5),
@@ -202,7 +202,7 @@ public func waitFor<T>(
 }
 
 /// Global convenience function for observeStates
-public func observeStates<C: Client>(
+public func observeStates<C: AxiomClient>(
     from client: C,
     timeout: Duration = .seconds(5),
     until condition: @escaping (C.StateType) -> Bool

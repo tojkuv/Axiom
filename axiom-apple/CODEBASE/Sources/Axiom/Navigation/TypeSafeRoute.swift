@@ -5,15 +5,15 @@ import Foundation
 // MARK: - Base Routing Protocols and Types
 
 /// Base protocol for all routable components
-public protocol Routable {
+public protocol AxiomRoutable {
     var presentation: PresentationStyle { get }
 }
 
 /// Generic route type alias for compatibility
-public typealias Route = any TypeSafeRoute
+public typealias AxiomRoute = any AxiomTypeSafeRoute
 
 /// Standard route enumeration for basic navigation
-public enum StandardRoute: Routable {
+public enum AxiomStandardRoute: AxiomRoutable {
     case home
     case detail(id: String)
     case settings
@@ -48,7 +48,7 @@ public enum StandardRoute: Routable {
 }
 
 /// Enhanced protocol for type-safe routing that supports any route structure
-public protocol TypeSafeRoute: Routable, Hashable, Sendable {
+public protocol AxiomTypeSafeRoute: AxiomRoutable, Hashable, Sendable {
     /// The path components of this route (e.g., "/profile/123")
     var pathComponents: String { get }
     
@@ -60,7 +60,7 @@ public protocol TypeSafeRoute: Routable, Hashable, Sendable {
 }
 
 /// Default implementation of Routable for TypeSafeRoute
-extension TypeSafeRoute {
+extension AxiomTypeSafeRoute {
     public var presentation: PresentationStyle {
         // Default presentation style - can be overridden
         return .push
@@ -68,7 +68,7 @@ extension TypeSafeRoute {
 }
 
 /// Route building utilities for type-safe routes
-public struct TypeSafeRouteBuilder {
+public struct AxiomTypeSafeRouteBuilder {
     
     /// Build a full URL string from path and query parameters
     public static func buildURL(path: String, queryParameters: [String: String] = [:]) -> String {
@@ -109,26 +109,26 @@ public struct TypeSafeRouteBuilder {
 }
 
 /// Enhanced route builder for declarative route construction with type safety
-public class EnhancedRouteBuilder<Route: TypeSafeRoute> {
+public class AxiomEnhancedRouteBuilder<Route: AxiomTypeSafeRoute> {
     private var baseRoute: Route?
     private var additionalQueryParameters: [String: String] = [:]
     
     public init() {}
     
     /// Start building with a base route
-    public func route(_ route: Route) -> EnhancedRouteBuilder<Route> {
+    public func route(_ route: Route) -> AxiomEnhancedRouteBuilder<Route> {
         self.baseRoute = route
         return self
     }
     
     /// Add a query parameter
-    public func withQueryParameter(_ key: String, value: String) -> EnhancedRouteBuilder<Route> {
+    public func withQueryParameter(_ key: String, value: String) -> AxiomEnhancedRouteBuilder<Route> {
         additionalQueryParameters[key] = value
         return self
     }
     
     /// Add multiple query parameters
-    public func withQueryParameters(_ parameters: [String: String]) -> EnhancedRouteBuilder<Route> {
+    public func withQueryParameters(_ parameters: [String: String]) -> AxiomEnhancedRouteBuilder<Route> {
         for (key, value) in parameters {
             additionalQueryParameters[key] = value
         }
@@ -142,7 +142,7 @@ public class EnhancedRouteBuilder<Route: TypeSafeRoute> {
         }
         
         let mergedParameters = route.queryParameters.merging(additionalQueryParameters) { _, new in new }
-        return TypeSafeRouteBuilder.buildURL(path: route.pathComponents, queryParameters: mergedParameters)
+        return AxiomTypeSafeRouteBuilder.buildURL(path: route.pathComponents, queryParameters: mergedParameters)
     }
     
     /// Get the base route (if available)
@@ -151,11 +151,11 @@ public class EnhancedRouteBuilder<Route: TypeSafeRoute> {
     }
 }
 
-/// Use EnhancedRouteBuilder as the main implementation
-// Note: TypeSafeRouteBuilder struct above provides static utility methods
+/// Use AxiomEnhancedRouteBuilder as the main implementation
+// Note: AxiomTypeSafeRouteBuilder struct above provides static utility methods
 
 /// Simple route matching for URL patterns
-public struct RoutePattern {
+public struct AxiomRoutePattern {
     public let pattern: String
     public let parameterNames: [String]
     
@@ -192,13 +192,13 @@ public struct RoutePattern {
     public func extractParameters(from path: String) -> [String: String]? {
         guard matches(path: path) else { return nil }
         
-        return TypeSafeRouteBuilder.extractParameters(from: path, pattern: pattern)
+        return AxiomTypeSafeRouteBuilder.extractParameters(from: path, pattern: pattern)
     }
 }
 
 /// Enhanced route matcher for matching URLs to routes with improved pattern support
-public class RouteMatcher<Route: TypeSafeRoute> {
-    private var patterns: [RoutePattern] = []
+public class AxiomRouteMatcher<Route: AxiomTypeSafeRoute> {
+    private var patterns: [AxiomRoutePattern] = []
     private var routeConstructors: [String: ([String: String]) -> Route?] = [:]
     private var priority: [String: Int] = [:]
     
@@ -210,7 +210,7 @@ public class RouteMatcher<Route: TypeSafeRoute> {
         priority: Int = 0,
         constructor: @escaping ([String: String]) -> Route?
     ) {
-        let routePattern = RoutePattern(pattern: pattern)
+        let routePattern = AxiomRoutePattern(pattern: pattern)
         patterns.append(routePattern)
         routeConstructors[pattern] = constructor
         self.priority[pattern] = priority
@@ -268,10 +268,10 @@ public class RouteMatcher<Route: TypeSafeRoute> {
     }
 }
 
-// MARK: - TypeSafeRoute Protocol Conformance for StandardRoute
+// MARK: - AxiomTypeSafeRoute Protocol Conformance for AxiomStandardRoute
 
-/// Extension to make the existing StandardRoute conform to TypeSafeRoute protocol
-extension StandardRoute: TypeSafeRoute {
+/// Extension to make the existing AxiomStandardRoute conform to AxiomTypeSafeRoute protocol
+extension AxiomStandardRoute: AxiomTypeSafeRoute {
     public var pathComponents: String {
         switch self {
         case .home:

@@ -4,12 +4,12 @@ import Foundation
 
 /// Macro for generating mock implementations of protocols
 @attached(peer, names: arbitrary)
-public macro AutoMockable() = #externalMacro(module: "AxiomMacros", type: "AutoMockableMacro")
+public macro AxiomAutoMockable() = #externalMacro(module: "AxiomMacros", type: "AutoMockableMacro")
 
 /// Enhanced macro for automatic context setup with client-based initialization
 @attached(member, names: named(client), named(observationTask), named(init), named(viewAppeared), named(viewDisappeared), named(handleStateUpdate))
 @attached(extension, conformances: ObservableObject)
-public macro Context<C: PresentationClient>(client: C.Type) = #externalMacro(module: "AxiomMacros", type: "ContextMacro")
+public macro AxiomContext<C: PresentationClient>(client: C.Type) = #externalMacro(module: "AxiomMacros", type: "ContextMacro")
 
 /// Macro that enforces single-context presentation architecture with compile-time safety
 ///
@@ -33,7 +33,7 @@ public macro Context<C: PresentationClient>(client: C.Type) = #externalMacro(mod
 @attached(member, names: named(context), named(init))
 @attached(extension, conformances: PresentationProtocol)
 @attached(peer, names: prefixed(_ValidatePresentation))
-public macro Presentation<C: ObservableObject>(context: C.Type) = #externalMacro(module: "AxiomMacros", type: "PresentationMacro")
+public macro AxiomPresentation<C: ObservableObject>(context: C.Type) = #externalMacro(module: "AxiomMacros", type: "PresentationMacro")
 
 // MARK: - Capability Pattern Macro
 
@@ -56,7 +56,7 @@ public macro Presentation<C: ObservableObject>(context: C.Type) = #externalMacro
 /// }
 /// ```
 @attached(member, names: arbitrary)
-public macro Capability(_ type: CapabilityType) = #externalMacro(module: "AxiomMacros", type: "CapabilityMacro")
+public macro AxiomCapability(_ type: AxiomCapabilityType) = #externalMacro(module: "AxiomMacros", type: "CapabilityMacro")
 
 // MARK: - Navigation Orchestrator Macro
 
@@ -72,8 +72,8 @@ public macro Capability(_ type: CapabilityType) = #externalMacro(module: "AxiomM
 /// }
 /// ```
 @attached(member, names: named(routes), named(navigate), named(canNavigate), named(currentRoute), named(navigationStack))
-// @attached(extension, conformances: ModularNavigationService) // Disabled - ModularNavigationService is now a class
-public macro NavigationOrchestrator() = #externalMacro(
+// @attached(extension, conformances: AxiomModularNavigationService) // Disabled - AxiomModularNavigationService is now a class
+public macro AxiomNavigationOrchestrator() = #externalMacro(
     module: "AxiomMacros",
     type: "NavigationOrchestratorMacro"
 )
@@ -92,7 +92,7 @@ public macro NavigationOrchestrator() = #externalMacro(
 /// }
 /// ```
 @attached(member, names: named(initializeErrorBoundary), named(performAppearance), arbitrary)
-public macro ErrorBoundary(
+public macro AxiomErrorBoundary(
     strategy: ErrorRecoveryStrategy = .propagate,
     customHandler: String? = nil
 ) = #externalMacro(
@@ -117,7 +117,7 @@ public macro ErrorBoundary(
 /// }
 /// ```
 @attached(member, names: named(executeWithRetry), named(calculateBackoffDelay))
-public macro ErrorHandling(
+public macro AxiomErrorHandling(
     retry: Int = 3,
     backoff: BackoffStrategy = .exponential()
 ) = #externalMacro(
@@ -141,7 +141,7 @@ public macro ErrorHandling(
 /// }
 /// ```
 @attached(member, names: named(executeWithContext))
-public macro ErrorContext(
+public macro AxiomErrorContext(
     operation: String? = nil
 ) = #externalMacro(
     module: "AxiomMacros",
@@ -169,8 +169,8 @@ public macro ErrorContext(
 /// - Atomic action processing capabilities
 /// - Performance monitoring and validation
 @attached(member, names: named(_internalState), named(_stateObservers), named(state), named(stateStream), named(getCurrentState), named(rollbackToState), named(_updateState))
-@attached(extension, conformances: Client)
-public macro Client<S: AxiomState>(
+@attached(extension, conformances: AxiomClient)
+public macro AxiomClient<S: AxiomState>(
     state: S.Type,
     action: Any.Type = Any.self,
     initialState: S? = nil,
@@ -221,7 +221,7 @@ public macro AxiomState(
 /// - Performance tracking for action execution
 /// - Save triggering logic
 @attached(extension, conformances: Sendable, names: named(actionId), named(description), named(triggersSave), named(validate), named(validateParameters), named(isValid), named(trackExecution))
-public macro Action(
+public macro AxiomAction(
     validation: Bool = true,
     performance: Bool = true,
     retry: Bool = false,

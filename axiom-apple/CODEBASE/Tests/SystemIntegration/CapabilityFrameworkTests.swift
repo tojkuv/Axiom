@@ -106,7 +106,7 @@ final class Worker05CapabilityFrameworkTests {
 // MARK: - Test Support Types
 
 /// Test capability for basic lifecycle testing
-actor TestCapability: Capability {
+actor TestCapability: AxiomCapability {
     private var _isAvailable: Bool = false
     
     var isAvailable: Bool {
@@ -123,7 +123,7 @@ actor TestCapability: Capability {
 }
 
 /// Test capability that demonstrates state observation
-actor ObservableTestCapability: ExtendedCapability {
+actor ObservableTestCapability: AxiomExtendedCapability {
     private var _state: CapabilityState = .unknown
     private var stateStreamContinuation: AsyncStream<CapabilityState>.Continuation?
     
@@ -175,7 +175,7 @@ actor ObservableTestCapability: ExtendedCapability {
 }
 
 /// Test capability that fails activation
-actor FailingTestCapability: Capability {
+actor FailingTestCapability: AxiomCapability {
     private var _isAvailable: Bool = false
     
     var isAvailable: Bool {

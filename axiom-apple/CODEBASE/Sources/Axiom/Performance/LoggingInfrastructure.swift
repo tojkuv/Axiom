@@ -718,7 +718,7 @@ private extension DateFormatter {
 
 // MARK: - Framework Integration Extensions
 
-public extension Context {
+public extension AxiomContext {
     var logger: CategoryLogger {
         .logger(for: .context)
     }
@@ -728,7 +728,7 @@ public extension Context {
     }
 }
 
-public extension Client {
+public extension AxiomClient {
     var logger: CategoryLogger {
         .logger(for: .client)
     }
@@ -738,7 +738,7 @@ public extension Client {
     }
 }
 
-public extension Capability {
+public extension AxiomCapability {
     var logger: CategoryLogger {
         .logger(for: .capability)
     }

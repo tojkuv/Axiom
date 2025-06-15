@@ -9,7 +9,7 @@ import TaskManager_Shared
 
 /// Context for the task list view on macOS with enhanced desktop features
 @MainActor
-public final class TaskListContext: ClientObservingContext<TaskClient> {
+public final class TaskListContext: AxiomClientObservingContext<TaskClient> {
     
     // MARK: - Published Properties
     @Published public private(set) var tasks: [Task] = []

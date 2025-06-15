@@ -5,7 +5,7 @@ import Darwin
 // MARK: - Lifecycle Protocol
 
 /// Universal lifecycle protocol for consistent activation/deactivation across all framework components
-public protocol Lifecycle {
+public protocol AxiomLifecycle {
     /// Activate the component and prepare it for use
     @MainActor func activate() async throws
     
@@ -26,15 +26,15 @@ public protocol Lifecycle {
 /// - Supports observation through ObservableObject
 /// - Memory usage must remain stable after processing actions
 @MainActor
-public protocol Context: ObservableObject, Lifecycle, Sendable {
+public protocol AxiomContext: ObservableObject, AxiomLifecycle, Sendable {
     /// Handle actions from child contexts
     /// Called automatically by the framework when children emit actions
-    func handleChildAction<T>(_ action: T, from child: any Context)
+    func handleChildAction<T>(_ action: T, from child: any AxiomContext)
 }
 
 // MARK: - Context Extensions
 
-extension Context {
+extension AxiomContext {
     /// Default implementation for contexts that don't need activation logic
     @MainActor public func activate() async throws {
         // Default no-op implementation
@@ -46,7 +46,7 @@ extension Context {
     }
     
     /// Default implementation for handling child actions
-    public func handleChildAction<T>(_ action: T, from child: any Context) {
+    public func handleChildAction<T>(_ action: T, from child: any AxiomContext) {
         // Default implementation does nothing
         // Override in contexts to handle specific actions
     }
@@ -64,7 +64,7 @@ extension Context {
 // MARK: - Memory Management
 
 /// Options for context memory management
-public struct ContextMemoryOptions {
+public struct AxiomContextMemoryOptions {
     /// Maximum number of retained states
     public let maxRetainedStates: Int
     
@@ -94,7 +94,7 @@ public struct ContextMemoryOptions {
 /// - Automatic observation support
 /// - Memory-efficient operation
 @MainActor
-open class ObservableContext: Context {
+open class AxiomObservableContext: AxiomContext {
     /// Published property to trigger SwiftUI updates
     @Published private var updateTrigger = UUID()
     
@@ -105,7 +105,7 @@ open class ObservableContext: Context {
     private var appearanceCount = 0
     
     /// Weak reference to parent context for child-to-parent communication
-    public weak var parentContext: (any Context)?
+    public weak var parentContext: (any AxiomContext)?
     
     /// Child contexts for parent-child relationships
     public private(set) var childContexts: [WeakContextWrapper] = []
@@ -143,17 +143,17 @@ open class ObservableContext: Context {
     }
     
     /// Override to handle actions from child contexts
-    open func handleChildAction<T>(_ action: T, from child: any Context) {
+    open func handleChildAction<T>(_ action: T, from child: any AxiomContext) {
         // Default implementation does nothing
         // Override in subclasses to handle specific actions
     }
     
     /// Add a child context
-    public func addChild(_ child: any Context) {
+    public func addChild(_ child: any AxiomContext) {
         let wrapper = WeakContextWrapper(child)
         childContexts.append(wrapper)
         
-        if let observableChild = child as? ObservableContext {
+        if let observableChild = child as? AxiomObservableContext {
             observableChild.parentContext = self
         }
         
@@ -161,12 +161,12 @@ open class ObservableContext: Context {
     }
     
     /// Remove a child context
-    public func removeChild(_ child: any Context) {
+    public func removeChild(_ child: any AxiomContext) {
         childContexts.removeAll { wrapper in
             wrapper.context === child
         }
         
-        if let observableChild = child as? ObservableContext {
+        if let observableChild = child as? AxiomObservableContext {
             observableChild.parentContext = nil
         }
     }
@@ -187,7 +187,7 @@ open class ObservableContext: Context {
     }
     
     /// Get active child contexts
-    public var activeChildren: [any Context] {
+    public var activeChildren: [any AxiomContext] {
         cleanupDeallocatedChildren()
         return childContexts.compactMap { $0.context }
     }
@@ -197,7 +197,7 @@ open class ObservableContext: Context {
 
 /// Observable context that observes a client's state stream
 @MainActor
-open class ClientObservingContext<C: Client>: ObservableContext {
+open class AxiomClientObservingContext<C: AxiomClient>: AxiomObservableContext {
     /// The client being observed
     public let client: C
     
@@ -210,9 +210,9 @@ open class ClientObservingContext<C: Client>: ObservableContext {
         super.init()
     }
     
-    /// Required initializer - not typically used for ClientObservingContext
+    /// Required initializer - not typically used for AxiomClientObservingContext
     public required init() {
-        fatalError("ClientObservingContext must be initialized with a client")
+        fatalError("AxiomClientObservingContext must be initialized with a client")
     }
     
     open override func appeared() async {
@@ -254,7 +254,7 @@ open class ClientObservingContext<C: Client>: ObservableContext {
 // WeakContextWrapper is defined in ImplicitActionSubscription.swift
 
 /// Wrapper for weak references to clients
-public struct WeakClient<C: Client> {
+public struct AxiomWeakClient<C: AxiomClient> {
     public weak var client: C?
     
     public init(_ client: C) {
@@ -264,29 +264,29 @@ public struct WeakClient<C: Client> {
 
 /// Context that manages weak references to prevent retain cycles
 @MainActor
-open class WeakReferenceContext<C: Client>: ObservableContext {
+open class AxiomWeakReferenceContext<C: AxiomClient>: AxiomObservableContext {
     /// Weakly held clients
-    private var weakClients: [WeakClient<C>] = []
+    private var weakClients: [AxiomWeakClient<C>] = []
     
     /// Memory management options
-    public let memoryOptions: ContextMemoryOptions
+    public let memoryOptions: AxiomContextMemoryOptions
     
     /// Initialize with memory options
-    public init(memoryOptions: ContextMemoryOptions = ContextMemoryOptions()) {
+    public init(memoryOptions: AxiomContextMemoryOptions = AxiomContextMemoryOptions()) {
         self.memoryOptions = memoryOptions
         super.init()
     }
     
     /// Required initializer
     public required init() {
-        self.memoryOptions = ContextMemoryOptions()
+        self.memoryOptions = AxiomContextMemoryOptions()
         super.init()
     }
     
     /// Add a client with weak reference
     public func addClient(_ client: C) {
         if memoryOptions.shouldUseWeakClientReferences {
-            weakClients.append(WeakClient(client))
+            weakClients.append(AxiomWeakClient(client))
             cleanupDeallocatedClients()
         }
     }
@@ -328,7 +328,7 @@ open class WeakReferenceContext<C: Client>: ObservableContext {
 
 /// Context that provides error handling capabilities
 @MainActor
-open class ErrorHandlingContext: ObservableContext {
+open class AxiomErrorHandlingContext: AxiomObservableContext {
     /// Errors encountered during operation
     @Published public private(set) var errors: [any Error] = []
     
@@ -358,17 +358,17 @@ open class ErrorHandlingContext: ObservableContext {
 // MARK: - Context Manager Protocol
 
 /// Protocol for managing multiple contexts
-public protocol ContextManager: Actor {
+public protocol AxiomContextManager: Actor {
     /// Create a context for a presentation
-    func createContext<P: Presentation>(
+    func createContext<P: AxiomPresentation>(
         for presentation: P.Type
     ) async -> P.ContextType
     
     /// Register a context
-    func register<C: Context>(_ context: C, for key: String) async
+    func register<C: AxiomContext>(_ context: C, for key: String) async
     
     /// Retrieve a registered context
-    func context<C: Context>(for key: String, as type: C.Type) async -> C?
+    func context<C: AxiomContext>(for key: String, as type: C.Type) async -> C?
     
     /// Deactivate all contexts
     func deactivateAll() async
@@ -377,7 +377,7 @@ public protocol ContextManager: Actor {
 // MARK: - Performance Monitoring
 
 /// Extension for monitoring context performance
-extension Context {
+extension AxiomContext {
     /// Measure memory usage for the context
     public func measureMemoryUsage() -> Int {
         var info = mach_task_basic_info()
@@ -407,7 +407,7 @@ extension Context {
 
 /// Optimized observation with batching support
 @MainActor
-public final class BatchingContext: ObservableContext {
+public final class AxiomBatchingContext: AxiomObservableContext {
     /// Batch size for updates
     public let batchSize: Int
     
@@ -464,8 +464,8 @@ public final class BatchingContext: ObservableContext {
 // MARK: - Presentation Protocol (Referenced)
 
 /// Protocol for presentations (will be defined separately)
-public protocol Presentation: View {
-    associatedtype ContextType: Context
+public protocol AxiomPresentation: View {
+    associatedtype ContextType: AxiomContext
     var context: ContextType { get }
 }
 
@@ -473,18 +473,18 @@ public protocol Presentation: View {
 
 /// Manager for context lifecycle coordination
 @MainActor
-public final class ContextLifecycleManager {
+public final class AxiomContextLifecycleManager {
     /// Active contexts
-    private var contexts: [ObjectIdentifier: any Context] = [:]
+    private var contexts: [ObjectIdentifier: any AxiomContext] = [:]
     
     /// Register a context
-    public func register<C: Context>(_ context: C) {
+    public func register<C: AxiomContext>(_ context: C) {
         let id = ObjectIdentifier(C.self)
         contexts[id] = context
     }
     
     /// Deregister a context
-    public func deregister<C: Context>(_ contextType: C.Type) {
+    public func deregister<C: AxiomContext>(_ contextType: C.Type) {
         let id = ObjectIdentifier(contextType)
         contexts.removeValue(forKey: id)
     }

@@ -7,7 +7,7 @@ public protocol QuickAction: Equatable, Sendable {
     var identifier: String { get }
     
     /// Convert to navigation route  
-    func toRoute() -> Route?
+    func toRoute() -> AxiomRoute?
 }
 
 // MARK: - Launch Action Property Wrapper
@@ -115,7 +115,7 @@ public enum CommonQuickAction: String, QuickAction, CaseIterable {
     
     public var identifier: String { rawValue }
     
-    public func toRoute() -> Route? {
+    public func toRoute() -> AxiomRoute? {
         // Override in app-specific extensions
         nil
     }
@@ -131,8 +131,8 @@ public struct URLLaunchAction: QuickAction {
         self.url = url
     }
     
-    public func toRoute() -> Route? {
-        // URL-to-route conversion deferred until URLToRouteParser is integrated
+    public func toRoute() -> AxiomRoute? {
+        // URL-to-route conversion deferred until URLToAxiomRouteParser is integrated
         // This will be implemented in navigation enhancement phase
         nil
     }

@@ -203,7 +203,7 @@ class TaskListContext: ObservableObject {
     }
 }
 
-actor TaskClient: Client {
+actor TaskClient: AxiomClient {
     typealias StateType = TaskState
     typealias ActionType = TaskAction
     

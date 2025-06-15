@@ -1,13 +1,13 @@
 import XCTest
 @testable import Axiom
 
-final class ComponentTypeTests: XCTestCase {
+final class AxiomComponentTypeTests: XCTestCase {
     
     // MARK: - Component Type Definition Tests
     
-    func testComponentTypeEnumerationHasExactlySixCases() {
-        // Red: Test that ComponentType enum has exactly 6 cases
-        let componentTypes: [ComponentType] = [
+    func testAxiomComponentTypeEnumerationHasExactlySixCases() {
+        // Red: Test that AxiomComponentType enum has exactly 6 cases
+        let componentTypes: [AxiomComponentType] = [
             .capability,
             .state,
             .client,
@@ -16,16 +16,16 @@ final class ComponentTypeTests: XCTestCase {
             .presentation
         ]
         
-        XCTAssertEqual(componentTypes.count, 6, "ComponentType must have exactly 6 cases")
+        XCTAssertEqual(componentTypes.count, 6, "AxiomComponentType must have exactly 6 cases")
     }
     
-    func testComponentTypeEnumIsFrozen() {
-        // Red: Test that ComponentType is marked as @frozen
+    func testAxiomComponentTypeEnumIsFrozen() {
+        // Red: Test that AxiomComponentType is marked as @frozen
         // This test will verify at compile time that no new cases can be added
         // The actual @frozen attribute will be verified by the compiler
         
         // Exhaustive switch without default case will fail to compile if enum is not frozen
-        let type: ComponentType = .capability
+        let type: AxiomComponentType = .capability
         
         switch type {
         case .capability:
@@ -44,14 +44,14 @@ final class ComponentTypeTests: XCTestCase {
         }
     }
     
-    func testComponentTypeHasStringDescription() {
+    func testAxiomComponentTypeHasStringDescription() {
         // Red: Test that each component type has a meaningful string description
-        XCTAssertEqual(ComponentType.capability.description, "Capability")
-        XCTAssertEqual(ComponentType.state.description, "State")
-        XCTAssertEqual(ComponentType.client.description, "Client")
-        XCTAssertEqual(ComponentType.orchestrator.description, "Orchestrator")
-        XCTAssertEqual(ComponentType.context.description, "Context")
-        XCTAssertEqual(ComponentType.presentation.description, "Presentation")
+        XCTAssertEqual(AxiomComponentType.capability.description, "Capability")
+        XCTAssertEqual(AxiomComponentType.state.description, "State")
+        XCTAssertEqual(AxiomComponentType.client.description, "Client")
+        XCTAssertEqual(AxiomComponentType.orchestrator.description, "Orchestrator")
+        XCTAssertEqual(AxiomComponentType.context.description, "Context")
+        XCTAssertEqual(AxiomComponentType.presentation.description, "Presentation")
     }
     
     // MARK: - Component Validation Protocol Tests
@@ -60,7 +60,7 @@ final class ComponentTypeTests: XCTestCase {
         // RED: Test that CapabilityValidatable protocol defines required lifecycle methods
         // This test will verify that capabilities can be validated properly
         
-        struct TestCapability: CapabilityValidatable {
+        struct TestCapability: AxiomCapabilityValidatable {
             func initialize() async throws {
                 // Test implementation
             }
@@ -81,7 +81,7 @@ final class ComponentTypeTests: XCTestCase {
     func testStateValidationProtocolRequirements() {
         // RED: Test that StateValidatable protocol ensures value type constraints
         
-        struct TestState: StateValidatable {
+        struct TestState: AxiomStateValidatable {
             let id: String = "test"
             let value: Int = 42
         }
@@ -94,7 +94,7 @@ final class ComponentTypeTests: XCTestCase {
     func testClientValidationProtocolRequirements() {
         // RED: Test that ClientValidatable protocol enforces actor isolation and associated types
         
-        actor TestClient: ClientValidatable {
+        actor TestClient: AxiomClientValidatable {
             typealias StateType = TestClientState
             typealias ActionType = TestClientAction
             
@@ -125,7 +125,7 @@ final class ComponentTypeTests: XCTestCase {
         let registry = ComponentRegistry()
         
         // Test valid capability registration
-        struct ValidCapability: CapabilityValidatable {
+        struct ValidCapability: AxiomCapabilityValidatable {
             func initialize() async throws { }
             func terminate() async { }
             var isAvailable: Bool { true }

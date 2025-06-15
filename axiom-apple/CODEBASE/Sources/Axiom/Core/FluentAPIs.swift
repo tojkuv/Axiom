@@ -5,9 +5,9 @@ import SwiftUI
 
 /// Fluent configuration for contexts with method chaining
 @MainActor
-public struct ContextConfiguration<C: ObservableContext> {
+public struct ContextConfiguration<C: AxiomObservableContext> {
     private let context: C
-    private var observers: [any Client] = []
+    private var observers: [any AxiomClient] = []
     private var errorHandlers: [(any Error) -> Void] = []
     private var lifecycleCallbacks: (onAppear: () async -> Void, onDisappear: () async -> Void) = ({}, {})
     
@@ -16,7 +16,7 @@ public struct ContextConfiguration<C: ObservableContext> {
     }
     
     /// Add client observation with automatic state updates
-    public func observe<ObserverClient: Axiom.Client>(_ client: ObserverClient) -> ContextConfiguration<C> where ObserverClient.StateType: Equatable {
+    public func observe<ObserverClient: AxiomClient>(_ client: ObserverClient) -> ContextConfiguration<C> where ObserverClient.StateType: Equatable {
         var config = self
         config.observers.append(client)
         return config
@@ -47,7 +47,7 @@ public struct ContextConfiguration<C: ObservableContext> {
         }
         
         // Set up error handlers
-        if context is ErrorHandlingContext {
+        if context is AxiomErrorHandlingContext {
             // Configure error handling
         }
         
@@ -142,21 +142,21 @@ public struct NavigationConfiguration {
 
 /// Fluent error configuration
 public struct ErrorConfiguration {
-    private var category: ErrorCategory = .unknown
-    private var severity: ErrorSeverity = .error
+    private var category: AxiomErrorCategory = .unknown
+    private var severity: AxiomErrorSeverity = .error
     private var context: [String: String] = [:]
     private var handlers: [(AxiomError) -> Void] = []
-    private var recovery: PropagationRecoveryStrategy = .fail
+    private var recovery: AxiomPropagationRecoveryStrategy = .fail
     
     /// Set error category
-    public func category(_ category: ErrorCategory) -> ErrorConfiguration {
+    public func category(_ category: AxiomErrorCategory) -> ErrorConfiguration {
         var config = self
         config.category = category
         return config
     }
     
     /// Set error severity
-    public func severity(_ severity: ErrorSeverity) -> ErrorConfiguration {
+    public func severity(_ severity: AxiomErrorSeverity) -> ErrorConfiguration {
         var config = self
         config.severity = severity
         return config
@@ -177,7 +177,7 @@ public struct ErrorConfiguration {
     }
     
     /// Set recovery strategy
-    public func recover(_ strategy: PropagationRecoveryStrategy) -> ErrorConfiguration {
+    public func recover(_ strategy: AxiomPropagationRecoveryStrategy) -> ErrorConfiguration {
         var config = self
         config.recovery = strategy
         return config
@@ -201,7 +201,7 @@ public struct ErrorConfiguration {
 
 // MARK: - Fluent API Entry Points
 
-// Note: ObservableContext fluent configuration removed due to covariant Self limitations
+// Note: AxiomObservableContext fluent configuration removed due to covariant Self limitations
 // Use ContextBuilder.create() directly instead
 
 public extension ErgonomicClient {
@@ -301,12 +301,12 @@ extension ClientConfiguration: AsyncChainable {
 public struct CommonChains {
     /// Context with client observation and error handling
     @MainActor
-    public static func observingContext<C: ObservableContext, ObserverClient: Axiom.Client>(
+    public static func observingContext<C: AxiomObservableContext, ObserverClient: AxiomClient>(
         _ contextType: C.Type,
         observing client: ObserverClient,
         errorHandler: @escaping (any Error) -> Void = { _ in }
-    ) async throws -> C where ObserverClient.StateType: Equatable, C: ObservableContext {
-        // Direct context creation since fluent configuration was removed for ObservableContext
+    ) async throws -> C where ObserverClient.StateType: Equatable, C: AxiomObservableContext {
+        // Direct context creation since fluent configuration was removed for AxiomObservableContext
         let context = try await ContextBuilder.create(C.self).build()
         try await context.activate()
         return context

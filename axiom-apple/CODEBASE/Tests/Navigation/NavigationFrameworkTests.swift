@@ -31,14 +31,14 @@ final class NavigationFrameworkTests: XCTestCase {
             
             // Verify orchestrator conformance
             XCTAssertTrue(
-                validNavigationService is (any Orchestrator),
-                "Navigation service must conform to Orchestrator protocol"
+                validNavigationService is (any AxiomOrchestrator),
+                "Navigation service must conform to AxiomOrchestrator protocol"
             )
             
             // Verify navigation service conformance
             XCTAssertTrue(
-                validNavigationService is (any NavigationService),
-                "Must also conform to NavigationService protocol"
+                validNavigationService is (any AxiomNavigationService),
+                "Must also conform to AxiomNavigationService protocol"
             )
         }
     }
@@ -46,7 +46,7 @@ final class NavigationFrameworkTests: XCTestCase {
     func testNavigationAsStandaloneComponentTypeFails() async throws {
         try await testEnvironment.runTest { env in
             // Test architectural constraint: Navigation is not a separate component type
-            let componentTypes = ComponentType.allCases
+            let componentTypes = AxiomComponentType.allCases
             let hasNavigationType = componentTypes.contains { type in
                 "\(type)".lowercased().contains("navigation")
             }
@@ -56,13 +56,13 @@ final class NavigationFrameworkTests: XCTestCase {
                 "Navigation should not be a separate component type - it must be an Orchestrator service"
             )
             
-            // Test that standalone navigation service doesn't conform to Orchestrator
+            // Test that standalone navigation service doesn't conform to AxiomOrchestrator
             let standaloneNavigation = StandaloneNavigationService()
-            let isValidNavigationService = standaloneNavigation is (any Orchestrator)
+            let isValidNavigationService = standaloneNavigation is (any AxiomOrchestrator)
             
             XCTAssertFalse(
                 isValidNavigationService,
-                "Navigation service must be implemented as Orchestrator service, not standalone component"
+                "Navigation service must be implemented as AxiomOrchestrator service, not standalone component"
             )
         }
     }
@@ -316,8 +316,8 @@ final class NavigationFrameworkTests: XCTestCase {
         assertFrameworkCompliance(orchestrator)
         
         // Navigation-specific compliance checks
-        XCTAssertTrue(orchestrator is NavigationService, "Must implement NavigationService")
-        XCTAssertTrue(orchestrator is Orchestrator, "Must implement Orchestrator")
+        XCTAssertTrue(orchestrator is AxiomNavigationService, "Must implement AxiomNavigationService")
+        XCTAssertTrue(orchestrator is AxiomOrchestrator, "Must implement AxiomOrchestrator")
     }
 }
 
@@ -494,7 +494,7 @@ class DeepLinkNavigationContext: ObservableContext {
 
 // MARK: - Test Support Types
 
-actor TestNavigationOrchestrator: NavigationService, Orchestrator {
+actor TestNavigationOrchestrator: AxiomNavigationService, AxiomOrchestrator {
     private(set) var currentRoute: TestRoute?
     private(set) var navigationHistory: [TestRoute] = []
     
@@ -518,13 +518,13 @@ actor TestNavigationOrchestrator: NavigationService, Orchestrator {
         currentRoute = nil
     }
     
-    // Orchestrator conformance
+    // AxiomOrchestrator conformance
     func createContext<P: Presentation>(for presentation: P.Type) async -> P.ContextType {
         fatalError("Not implemented for testing")
     }
 }
 
-actor FailingNavigationOrchestrator: NavigationService, Orchestrator {
+actor FailingNavigationOrchestrator: AxiomNavigationService, AxiomOrchestrator {
     private(set) var currentRoute: TestRoute?
     
     func navigate(to route: TestRoute) async throws {
@@ -539,7 +539,7 @@ actor FailingNavigationOrchestrator: NavigationService, Orchestrator {
     func canNavigate(to route: TestRoute) async -> Bool { return false }
     func clearHistory() async {}
     
-    // Orchestrator conformance
+    // AxiomOrchestrator conformance
     func createContext<P: Presentation>(for presentation: P.Type) async -> P.ContextType {
         fatalError("Not implemented for testing")
     }
@@ -547,7 +547,7 @@ actor FailingNavigationOrchestrator: NavigationService, Orchestrator {
 
 class StandaloneNavigationService {
     func navigate(to route: TestRoute) async throws {
-        throw NavigationTestError.invalidImplementation("Navigation must be Orchestrator service")
+        throw NavigationTestError.invalidImplementation("Navigation must be AxiomOrchestrator service")
     }
 }
 

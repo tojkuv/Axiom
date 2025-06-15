@@ -226,7 +226,7 @@ public struct PerformanceTestGenerator {
     public init() {}
     
     /// Generate performance tests for a client type
-    public func generatePerformanceTests<C: Client>(
+    public func generatePerformanceTests<C: AxiomClient>(
         for clientType: C.Type,
         scenarios: [PerformanceScenario]
     ) -> String {
@@ -249,7 +249,7 @@ public struct PerformanceTestGenerator {
         return code
     }
     
-    private func generateScenarioTest<C: Client>(
+    private func generateScenarioTest<C: AxiomClient>(
         _ scenario: PerformanceScenario,
         for clientType: C.Type
     ) -> String {

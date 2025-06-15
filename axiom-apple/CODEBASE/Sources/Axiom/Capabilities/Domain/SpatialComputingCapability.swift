@@ -11,7 +11,7 @@ import SwiftUI
 // MARK: - Spatial Computing Configuration
 
 /// Configuration for spatial computing capability
-public struct SpatialComputingConfiguration: CapabilityConfiguration {
+public struct SpatialComputingConfiguration: AxiomCapabilityConfiguration {
     public let enableRealityKit: Bool
     public let enableHandTracking: Bool
     public let enableEyeTracking: Bool
@@ -69,7 +69,7 @@ public struct SpatialComputingConfiguration: CapabilityConfiguration {
         )
     }
     
-    public func adjusted(for environment: CapabilityEnvironment) -> SpatialComputingConfiguration {
+    public func adjusted(for environment: AxiomCapabilityEnvironment) -> SpatialComputingConfiguration {
         var adjustedMaxEntities = maxEntities
         var adjustedTimeout = requestTimeout
         var adjustedAccuracy = handTrackingAccuracy
@@ -292,7 +292,7 @@ public enum ImmersiveSpaceState: String, Codable, CaseIterable, Sendable {
 // MARK: - Spatial Computing Resource
 
 /// Resource management for spatial computing
-public actor SpatialComputingResource: CapabilityResource {
+public actor SpatialComputingResource: AxiomCapabilityResource {
     private var isRealityKitActive: Bool = false
     private var isHandTrackingActive: Bool = false
     private var isSpatialAudioActive: Bool = false
@@ -366,21 +366,21 @@ public actor SpatialComputingResource: CapabilityResource {
     
     public func activateRealityKit() async throws {
         guard await isAvailable() else {
-            throw CapabilityError.resourceAllocationFailed("Spatial computing not available")
+            throw AxiomCapabilityError.resourceAllocationFailed("Spatial computing not available")
         }
         isRealityKitActive = true
     }
     
     public func activateHandTracking() async throws {
         guard await isAvailable() else {
-            throw CapabilityError.resourceAllocationFailed("Hand tracking not available")
+            throw AxiomCapabilityError.resourceAllocationFailed("Hand tracking not available")
         }
         isHandTrackingActive = true
     }
     
     public func activateSpatialAudio() async throws {
         guard await isAvailable() else {
-            throw CapabilityError.resourceAllocationFailed("Spatial audio not available")
+            throw AxiomCapabilityError.resourceAllocationFailed("Spatial audio not available")
         }
         isSpatialAudioActive = true
     }
@@ -399,7 +399,7 @@ public actor SpatialComputingResource: CapabilityResource {
     
     public func addEntity() async throws {
         guard entityCount < configuration.maxEntities else {
-            throw CapabilityError.resourceAllocationFailed("Maximum entity count reached")
+            throw AxiomCapabilityError.resourceAllocationFailed("Maximum entity count reached")
         }
         entityCount += 1
     }
@@ -428,8 +428,8 @@ public actor SpatialComputingCapability: DomainCapability {
     
     private var _configuration: SpatialComputingConfiguration
     private var _resources: SpatialComputingResource
-    private var _environment: CapabilityEnvironment
-    private var _state: CapabilityState = .unknown
+    private var _environment: AxiomCapabilityEnvironment
+    private var _state: AxiomCapabilityState = .unknown
     private var _activationTimeout: Duration = .milliseconds(10)
     
     #if os(visionOS)
@@ -440,7 +440,7 @@ public actor SpatialComputingCapability: DomainCapability {
     private var entities: [String: Entity] = [:]
     #endif
     
-    private var stateStreamContinuation: AsyncStream<CapabilityState>.Continuation?
+    private var stateStreamContinuation: AsyncStream<AxiomCapabilityState>.Continuation?
     private var handTrackingStreamContinuation: AsyncStream<HandTrackingData>.Continuation?
     private var spatialInteractionStreamContinuation: AsyncStream<SpatialInteraction>.Continuation?
     private var immersiveSpaceState: ImmersiveSpaceState = .inactive
@@ -451,11 +451,11 @@ public actor SpatialComputingCapability: DomainCapability {
         get async { _state == .available }
     }
     
-    public var state: CapabilityState {
+    public var state: AxiomCapabilityState {
         get async { _state }
     }
     
-    public var stateStream: AsyncStream<CapabilityState> {
+    public var stateStream: AsyncStream<AxiomCapabilityState> {
         AsyncStream { [weak self] continuation in
             Task { [weak self] in
                 await self?.setStateStreamContinuation(continuation)
@@ -478,20 +478,20 @@ public actor SpatialComputingCapability: DomainCapability {
         get async { _resources }
     }
     
-    public var environment: CapabilityEnvironment {
+    public var environment: AxiomCapabilityEnvironment {
         get async { _environment }
     }
     
     public init(
         configuration: SpatialComputingConfiguration = SpatialComputingConfiguration(),
-        environment: CapabilityEnvironment = CapabilityEnvironment()
+        environment: AxiomCapabilityEnvironment = AxiomCapabilityEnvironment()
     ) {
         self._configuration = configuration.adjusted(for: environment)
         self._resources = SpatialComputingResource(configuration: self._configuration)
         self._environment = environment
     }
     
-    private func setStateStreamContinuation(_ continuation: AsyncStream<CapabilityState>.Continuation) {
+    private func setStateStreamContinuation(_ continuation: AsyncStream<AxiomCapabilityState>.Continuation) {
         self.stateStreamContinuation = continuation
     }
     
@@ -507,14 +507,14 @@ public actor SpatialComputingCapability: DomainCapability {
     
     public func updateConfiguration(_ configuration: SpatialComputingConfiguration) async throws {
         guard configuration.isValid else {
-            throw CapabilityError.initializationFailed("Invalid spatial computing configuration")
+            throw AxiomCapabilityError.initializationFailed("Invalid spatial computing configuration")
         }
         
         _configuration = configuration.adjusted(for: _environment)
         try await updateSpatialSystems()
     }
     
-    public func handleEnvironmentChange(_ environment: CapabilityEnvironment) async {
+    public func handleEnvironmentChange(_ environment: AxiomCapabilityEnvironment) async {
         _environment = environment
         let adjusted = _configuration.adjusted(for: environment)
         try? await updateConfiguration(adjusted)
@@ -536,11 +536,11 @@ public actor SpatialComputingCapability: DomainCapability {
         if _configuration.enableHandTracking {
             let status = await ARKitSession.queryAuthorization(for: [.handTracking])
             if status[.handTracking] != .allowed {
-                throw CapabilityError.permissionRequired("Hand tracking permission required")
+                throw AxiomCapabilityError.permissionRequired("Hand tracking permission required")
             }
         }
         #else
-        throw CapabilityError.notAvailable("Spatial computing only available on visionOS")
+        throw AxiomCapabilityError.notAvailable("Spatial computing only available on visionOS")
         #endif
     }
     
@@ -552,11 +552,11 @@ public actor SpatialComputingCapability: DomainCapability {
     
     public func activate() async throws {
         guard await _resources.isAvailable() else {
-            throw CapabilityError.initializationFailed("Spatial computing resources not available")
+            throw AxiomCapabilityError.initializationFailed("Spatial computing resources not available")
         }
         
         guard await isSupported() else {
-            throw CapabilityError.notAvailable("Spatial computing not supported on this platform")
+            throw AxiomCapabilityError.notAvailable("Spatial computing not supported on this platform")
         }
         
         try await requestPermission()
@@ -575,7 +575,7 @@ public actor SpatialComputingCapability: DomainCapability {
         spatialInteractionStreamContinuation?.finish()
     }
     
-    private func transitionTo(_ newState: CapabilityState) async {
+    private func transitionTo(_ newState: AxiomCapabilityState) async {
         guard _state != newState else { return }
         _state = newState
         stateStreamContinuation?.yield(newState)
@@ -752,7 +752,7 @@ public actor SpatialComputingCapability: DomainCapability {
     /// Create and place a 3D entity in the scene
     public func createEntity(at position: SIMD3<Float>, name: String? = nil) async throws -> String {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("Spatial computing not available")
+            throw AxiomCapabilityError.notAvailable("Spatial computing not available")
         }
         
         #if os(visionOS)
@@ -766,32 +766,32 @@ public actor SpatialComputingCapability: DomainCapability {
         
         return entityId
         #else
-        throw CapabilityError.notAvailable("Entity creation only available on visionOS")
+        throw AxiomCapabilityError.notAvailable("Entity creation only available on visionOS")
         #endif
     }
     
     /// Remove an entity from the scene
     public func removeEntity(_ entityId: String) async throws {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("Spatial computing not available")
+            throw AxiomCapabilityError.notAvailable("Spatial computing not available")
         }
         
         #if os(visionOS)
         guard entities[entityId] != nil else {
-            throw CapabilityError.notAvailable("Entity not found: \(entityId)")
+            throw AxiomCapabilityError.notAvailable("Entity not found: \(entityId)")
         }
         
         entities.removeValue(forKey: entityId)
         await _resources.removeEntity()
         #else
-        throw CapabilityError.notAvailable("Entity removal only available on visionOS")
+        throw AxiomCapabilityError.notAvailable("Entity removal only available on visionOS")
         #endif
     }
     
     /// Create a spatial anchor at the specified position
     public func createSpatialAnchor(at position: SIMD3<Float>, orientation: simd_quatf = simd_quatf(ix: 0, iy: 0, iz: 0, r: 1)) async throws -> SpatialAnchor {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("Spatial computing not available")
+            throw AxiomCapabilityError.notAvailable("Spatial computing not available")
         }
         
         #if os(visionOS)
@@ -809,41 +809,41 @@ public actor SpatialComputingCapability: DomainCapability {
             isTracked: true
         )
         #else
-        throw CapabilityError.notAvailable("Spatial anchors only available on visionOS")
+        throw AxiomCapabilityError.notAvailable("Spatial anchors only available on visionOS")
         #endif
     }
     
     /// Remove a spatial anchor
     public func removeSpatialAnchor(_ anchorId: String) async throws {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("Spatial computing not available")
+            throw AxiomCapabilityError.notAvailable("Spatial computing not available")
         }
         
         #if os(visionOS)
         guard spatialAnchors[anchorId] != nil else {
-            throw CapabilityError.notAvailable("Spatial anchor not found: \(anchorId)")
+            throw AxiomCapabilityError.notAvailable("Spatial anchor not found: \(anchorId)")
         }
         
         spatialAnchors.removeValue(forKey: anchorId)
         #else
-        throw CapabilityError.notAvailable("Spatial anchor removal only available on visionOS")
+        throw AxiomCapabilityError.notAvailable("Spatial anchor removal only available on visionOS")
         #endif
     }
     
     /// Start hand tracking updates
     public func startHandTracking() async throws {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("Spatial computing not available")
+            throw AxiomCapabilityError.notAvailable("Spatial computing not available")
         }
         
         guard _configuration.enableHandTracking else {
-            throw CapabilityError.notAvailable("Hand tracking not enabled in configuration")
+            throw AxiomCapabilityError.notAvailable("Hand tracking not enabled in configuration")
         }
         
         #if os(visionOS)
         // Hand tracking is automatically started when the provider is created
         #else
-        throw CapabilityError.notAvailable("Hand tracking only available on visionOS")
+        throw AxiomCapabilityError.notAvailable("Hand tracking only available on visionOS")
         #endif
     }
     
@@ -857,16 +857,16 @@ public actor SpatialComputingCapability: DomainCapability {
     /// Place spatial audio at the specified position
     public func playSpatialAudio(data: Data, at position: SIMD3<Float>, volume: Float = 1.0) async throws {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("Spatial computing not available")
+            throw AxiomCapabilityError.notAvailable("Spatial computing not available")
         }
         
         guard _configuration.enableSpatialAudio else {
-            throw CapabilityError.notAvailable("Spatial audio not enabled in configuration")
+            throw AxiomCapabilityError.notAvailable("Spatial audio not enabled in configuration")
         }
         
         #if os(visionOS)
         guard let engine = spatialAudioEngine else {
-            throw CapabilityError.notAvailable("Spatial audio engine not available")
+            throw AxiomCapabilityError.notAvailable("Spatial audio engine not available")
         }
         
         // Create audio player node
@@ -892,14 +892,14 @@ public actor SpatialComputingCapability: DomainCapability {
         playerNode.volume = volume
         playerNode.play()
         #else
-        throw CapabilityError.notAvailable("Spatial audio only available on visionOS")
+        throw AxiomCapabilityError.notAvailable("Spatial audio only available on visionOS")
         #endif
     }
     
     /// Perform raycast from the specified position and direction
     public func performRaycast(from origin: SIMD3<Float>, direction: SIMD3<Float>) async throws -> [SpatialInteraction] {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("Spatial computing not available")
+            throw AxiomCapabilityError.notAvailable("Spatial computing not available")
         }
         
         #if os(visionOS)
@@ -930,7 +930,7 @@ public actor SpatialComputingCapability: DomainCapability {
         
         return interactions.sorted { $0.confidence > $1.confidence }
         #else
-        throw CapabilityError.notAvailable("Raycast only available on visionOS")
+        throw AxiomCapabilityError.notAvailable("Raycast only available on visionOS")
         #endif
     }
     
@@ -942,7 +942,7 @@ public actor SpatialComputingCapability: DomainCapability {
     /// Open immersive space
     public func openImmersiveSpace() async throws {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("Spatial computing not available")
+            throw AxiomCapabilityError.notAvailable("Spatial computing not available")
         }
         
         #if os(visionOS)
@@ -950,14 +950,14 @@ public actor SpatialComputingCapability: DomainCapability {
         // In a real implementation, this would trigger SwiftUI immersive space opening
         immersiveSpaceState = .open
         #else
-        throw CapabilityError.notAvailable("Immersive spaces only available on visionOS")
+        throw AxiomCapabilityError.notAvailable("Immersive spaces only available on visionOS")
         #endif
     }
     
     /// Close immersive space
     public func closeImmersiveSpace() async throws {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("Spatial computing not available")
+            throw AxiomCapabilityError.notAvailable("Spatial computing not available")
         }
         
         #if os(visionOS)
@@ -965,7 +965,7 @@ public actor SpatialComputingCapability: DomainCapability {
         // In a real implementation, this would trigger SwiftUI immersive space closing
         immersiveSpaceState = .inactive
         #else
-        throw CapabilityError.notAvailable("Immersive spaces only available on visionOS")
+        throw AxiomCapabilityError.notAvailable("Immersive spaces only available on visionOS")
         #endif
     }
     
@@ -1049,28 +1049,28 @@ extension simd_quatf: Codable {
 
 // MARK: - Registration Extension
 
-extension CapabilityRegistry {
+extension AxiomCapabilityRegistry {
     /// Register spatial computing capability
     public func registerSpatialComputing() async throws {
         let capability = SpatialComputingCapability()
         try await register(
             capability,
             requirements: [
-                CapabilityDiscoveryService.Requirement(
+                AxiomCapabilityDiscoveryService.Requirement(
                     type: .systemFeature("visionOS"),
                     isMandatory: true
                 ),
-                CapabilityDiscoveryService.Requirement(
+                AxiomCapabilityDiscoveryService.Requirement(
                     type: .systemFeature("RealityKit"),
                     isMandatory: false
                 ),
-                CapabilityDiscoveryService.Requirement(
+                AxiomCapabilityDiscoveryService.Requirement(
                     type: .systemFeature("ARKit"),
                     isMandatory: false
                 )
             ],
             category: "spatial",
-            metadata: CapabilityMetadata(
+            metadata: AxiomCapabilityMetadata(
                 name: "Spatial Computing",
                 description: "Comprehensive spatial computing capability for visionOS",
                 version: "1.0.0",

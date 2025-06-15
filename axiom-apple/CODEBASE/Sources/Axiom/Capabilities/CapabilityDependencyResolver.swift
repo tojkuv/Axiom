@@ -11,7 +11,7 @@ public actor CapabilityDependencyResolver {
     public init() {}
     
     /// Register a capability with dependencies
-    public func registerCapability(_ capability: any Capability, withId id: String, dependencies: [String]) async {
+    public func registerCapability(_ capability: any AxiomCapability, withId id: String, dependencies: [String]) async {
         dependencyGraph[id] = Set(dependencies)
     }
     
@@ -90,9 +90,9 @@ public actor CapabilityDependencyResolver {
         var unavailableDependencies: [String] = []
         
         for dependency in dependencies {
-            if !(await CapabilityDiscoveryService.shared.hasCapability(dependency)) {
+            if !(await AxiomCapabilityDiscoveryService.shared.hasAxiomCapability(dependency)) {
                 // Check if the dependency is registered but not available
-                if await CapabilityRegistry.shared.isRegistered(identifier: dependency) {
+                if await AxiomCapabilityRegistry.shared.isRegistered(identifier: dependency) {
                     unavailableDependencies.append(dependency)
                 } else {
                     missingDependencies.append(dependency)
@@ -208,7 +208,7 @@ public actor CapabilityDependencyResolver {
         
         for (_, dependencies) in dependencyGraph {
             for dependency in dependencies {
-                if !(await CapabilityRegistry.shared.isRegistered(identifier: dependency)) {
+                if !(await AxiomCapabilityRegistry.shared.isRegistered(identifier: dependency)) {
                     missingCapabilities.insert(dependency)
                 }
             }
@@ -236,7 +236,7 @@ public actor CapabilityDependencyResolver {
             }
             
             // Get capability and initialize it
-            if let capability = await CapabilityRegistry.shared.capability(withId: capabilityId) {
+            if let capability = await AxiomCapabilityRegistry.shared.capability(withId: capabilityId) {
                 try await capability.activate()
             }
         }
@@ -453,7 +453,7 @@ public enum DependencyComplexity: String, CaseIterable, Sendable {
 // MARK: - Dependent Capability Protocol
 
 /// Protocol for capabilities with explicit dependencies
-public protocol DependentCapability: Capability {
+public protocol DependentCapability: AxiomCapability {
     /// Set of capability identifiers this capability depends on
     var dependencies: Set<String> { get async }
     
@@ -461,7 +461,7 @@ public protocol DependentCapability: Capability {
     func validateDependencies() async throws
     
     /// Handle dependency state change
-    func handleDependencyChange(_ dependencyId: String, newState: CapabilityState) async
+    func handleDependencyChange(_ dependencyId: String, newState: AxiomCapabilityState) async
 }
 
 // MARK: - Default Implementation
@@ -482,7 +482,7 @@ extension DependentCapability {
         }
     }
     
-    public func handleDependencyChange(_ dependencyId: String, newState: CapabilityState) async {
+    public func handleDependencyChange(_ dependencyId: String, newState: AxiomCapabilityState) async {
         // Default implementation - can be overridden by specific capabilities
         if newState != .available {
             // If a required dependency becomes unavailable, deactivate this capability
@@ -494,13 +494,13 @@ extension DependentCapability {
 // MARK: - Auto-Registration with Dependencies
 
 /// Extension to support automatic dependency registration
-extension CapabilityRegistry {
+extension AxiomCapabilityRegistry {
     
     /// Register a dependent capability and its dependencies
     public func registerWithDependencies<C: DependentCapability>(
         _ capability: C,
         category: String? = nil,
-        metadata: CapabilityMetadata? = nil
+        metadata: AxiomCapabilityMetadata? = nil
     ) async throws {
         let capabilityId = String(describing: type(of: capability))
         let dependencies = await capability.dependencies
@@ -515,14 +515,14 @@ extension CapabilityRegistry {
         
         // Convert dependencies to requirements
         let requirements = Set(dependencies.map { dependencyId in
-            CapabilityDiscoveryService.Requirement(
+            AxiomCapabilityDiscoveryService.Requirement(
                 type: .dependency(dependencyId),
                 isMandatory: true
             )
         })
         
         // Register the capability  
-        try await CapabilityRegistry.shared.register(
+        try await AxiomCapabilityRegistry.shared.register(
             capability,
             requirements: requirements,
             category: category,
@@ -539,7 +539,7 @@ public struct DependencyVisualizer {
     /// Generate DOT format for dependency graph visualization
     public static func generateDOTGraph() async -> String {
         let resolver = CapabilityDependencyResolver.shared
-        let capabilities = await CapabilityRegistry.shared.allCapabilities()
+        let capabilities = await AxiomCapabilityRegistry.shared.allCapabilities()
         
         var dot = "digraph CapabilityDependencies {\n"
         dot += "  rankdir=LR;\n"

@@ -15,18 +15,18 @@ import Axiom
 // MARK: - Task Manager Orchestrator (iOS)
 
 /// Main orchestrator for the iOS Task Manager application
-public actor TaskManagerOrchestrator: ExtendedOrchestrator {
+public actor TaskManagerOrchestrator: AxiomExtendedOrchestrator {
     
     // MARK: - Properties
     private let taskClient: TaskClient
     private let storageCapability: any TaskStorageCapability
-    private var contexts: [String: any Context] = [:]
+    private var contexts: [String: any AxiomContext] = [:]
     private var currentRoute: TaskManagerRoute?
     private var navigationHistory: [TaskManagerRoute] = []
     
     // Dependency injection
-    private var clients: [String: any Client] = [:]
-    private var capabilities: [String: any Capability] = [:]
+    private var clients: [String: any AxiomClient] = [:]
+    private var capabilities: [String: any AxiomCapability] = [:]
     
     // MARK: - Initialization
     
@@ -295,7 +295,7 @@ public enum TaskManagerRoute: TypeSafeRoute {
 
 // These would be implemented in separate files
 @MainActor
-public class TaskListContext: ClientObservingContext<TaskClient> {
+public class TaskListContext: AxiomClientObservingContext<TaskClient> {
     public required init() {
         fatalError("Use init(client:) instead")
     }
@@ -306,7 +306,7 @@ public class TaskListContext: ClientObservingContext<TaskClient> {
 }
 
 @MainActor
-public class TaskDetailContext: ClientObservingContext<TaskClient> {
+public class TaskDetailContext: AxiomClientObservingContext<TaskClient> {
     private var taskId: UUID?
     
     public required init() {
@@ -328,7 +328,7 @@ public class TaskDetailContext: ClientObservingContext<TaskClient> {
 }
 
 @MainActor
-public class CreateTaskContext: ClientObservingContext<TaskClient> {
+public class CreateTaskContext: AxiomClientObservingContext<TaskClient> {
     public required init() {
         fatalError("Use init(client:) instead")
     }

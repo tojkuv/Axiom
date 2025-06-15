@@ -12,7 +12,7 @@ import Foundation
 /// - Provides async stream of state updates
 /// - Processes actions to produce new state
 /// - State updates must be delivered within 5ms
-public protocol Client<StateType, ActionType>: Actor {
+public protocol AxiomClient<StateType, ActionType>: Actor {
     /// The type of state managed by this client
     associatedtype StateType: AxiomState
     
@@ -49,7 +49,7 @@ public protocol Client<StateType, ActionType>: Actor {
 
 // MARK: - Client Extensions
 
-extension Client {
+extension AxiomClient {
     /// Default implementation of stateWillUpdate - does nothing
     public func stateWillUpdate(from old: StateType, to new: StateType) async {
         // Default implementation - no action required
@@ -132,7 +132,7 @@ extension Client {
     }
     
     /// Process action batch with proper atomic handling
-    public func process(_ batch: ActionBatch<ActionType>) async throws {
+    public func process(_ batch: AxiomActionBatch<ActionType>) async throws {
         if batch.isAtomicExecution {
             try await processAtomically(batch.actions)
         } else {
@@ -143,7 +143,7 @@ extension Client {
 
 // MARK: - Client Extensions
 
-extension Client {
+extension AxiomClient {
     /// Process actions with timeout
     public func process(_ action: ActionType, timeout: Duration) async throws {
         try await withThrowingTaskGroup(of: Void.self) { group in
@@ -179,7 +179,7 @@ extension Client {
 /// - State management with automatic streaming
 /// - Thread-safe state mutations
 /// - Performance guarantees for state propagation
-public actor ObservableClient<S: AxiomState, A>: Client where S: Equatable {
+public actor AxiomObservableClient<S: AxiomState, A>: AxiomClient where S: Equatable {
     public typealias StateType = S
     public typealias ActionType = A
     /// Current state of the client
@@ -262,15 +262,15 @@ public actor ObservableClient<S: AxiomState, A>: Client where S: Equatable {
 // MARK: - Client Manager Protocol
 
 /// Protocol for managing multiple clients
-public protocol ClientManager: Actor {
+public protocol AxiomClientManager: Actor {
     /// Register a client with the manager
-    func register<C: Client>(_ client: C, for key: String) async
+    func register<C: AxiomClient>(_ client: C, for key: String) async
     
     /// Retrieve a registered client
-    func client<C: Client>(for key: String, as type: C.Type) async -> C?
+    func client<C: AxiomClient>(for key: String, as type: C.Type) async -> C?
     
     /// Process an action on a specific client
-    func processAction<C: Client>(
+    func processAction<C: AxiomClient>(
         for key: String,
         clientType: C.Type,
         action: C.ActionType
@@ -280,7 +280,7 @@ public protocol ClientManager: Actor {
 // MARK: - Client Helpers
 
 /// Helper to create type-safe client identifiers
-public struct ClientIdentifier<C: Client>: Hashable, Sendable {
+public struct AxiomClientIdentifier<C: AxiomClient>: Hashable, Sendable {
     public let key: String
     
     public init(_ key: String) {
@@ -289,7 +289,7 @@ public struct ClientIdentifier<C: Client>: Hashable, Sendable {
 }
 
 /// Helper to batch multiple actions for atomic processing
-public struct ActionBatch<Action> {
+public struct AxiomActionBatch<Action> {
     public let actions: [Action]
     public let isAtomicExecution: Bool
     
@@ -302,7 +302,7 @@ public struct ActionBatch<Action> {
 // MARK: - Performance Monitoring
 
 /// Protocol for monitoring client performance
-public protocol ClientPerformanceMonitor: Actor {
+public protocol AxiomClientPerformanceMonitor: Actor {
     /// Record state update timing
     func recordStateUpdate(clientId: String, duration: Duration) async
     
@@ -310,7 +310,7 @@ public protocol ClientPerformanceMonitor: Actor {
     func recordActionProcessing(clientId: String, duration: Duration) async
     
     /// Get performance metrics for a client
-    func metrics(for clientId: String) async -> ClientPerformanceMetrics?
+    func metrics(for clientId: String) async -> AxiomClientPerformanceMetrics?
 }
 
 /// Performance metrics for a client
@@ -323,7 +323,7 @@ extension Duration {
     }
 }
 
-public struct ClientPerformanceMetrics: Sendable {
+public struct AxiomClientPerformanceMetrics: Sendable {
     public let averageStateUpdateTime: Duration
     public let averageActionProcessingTime: Duration
     public let totalStateUpdates: Int
@@ -354,16 +354,16 @@ extension AsyncStream where Element: Sendable {
     /// Create a multicast async stream that properly handles multiple observers
     public static func multicast(
         bufferingPolicy: Continuation.BufferingPolicy = .unbounded,
-        _ build: @escaping (MulticastContinuation<Element>) -> Void
+        _ build: @escaping (AxiomMulticastContinuation<Element>) -> Void
     ) -> AsyncStream<Element> {
-        let multicast = MulticastContinuation<Element>()
+        let multicast = AxiomMulticastContinuation<Element>()
         build(multicast)
         return multicast.stream
     }
 }
 
 /// A continuation that supports multiple observers
-public final class MulticastContinuation<Element: Sendable>: @unchecked Sendable {
+public final class AxiomMulticastContinuation<Element: Sendable>: @unchecked Sendable {
     private var continuations: [UUID: AsyncStream<Element>.Continuation] = [:]
     private let lock = NSLock()
     

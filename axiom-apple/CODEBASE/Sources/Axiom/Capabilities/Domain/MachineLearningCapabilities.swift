@@ -4,7 +4,7 @@ import CoreML
 // MARK: - Machine Learning / AI Capabilities
 
 /// Configuration for ML capabilities
-public struct MLCapabilityConfiguration: CapabilityConfiguration, Codable {
+public struct MLCapabilityConfiguration: AxiomCapabilityConfiguration, Codable {
     public let modelName: String
     public let batchSize: Int
     // MVP: Removing non-Codable types
@@ -40,7 +40,7 @@ public struct MLCapabilityConfiguration: CapabilityConfiguration, Codable {
         )
     }
     
-    public func adjusted(for environment: CapabilityEnvironment) -> MLCapabilityConfiguration {
+    public func adjusted(for environment: AxiomCapabilityEnvironment) -> MLCapabilityConfiguration {
         if environment.isDebug {
             // Debug/development configuration
             return MLCapabilityConfiguration(
@@ -73,7 +73,7 @@ public enum MLModelCachePolicy: String, Codable {
 }
 
 /// Resource management for ML capabilities
-public actor MLCapabilityResource: CapabilityResource {
+public actor MLCapabilityResource: AxiomCapabilityResource {
     private var model: MLModel?
     private var isModelLoaded = false
     private let configuration: MLCapabilityConfiguration
@@ -133,15 +133,15 @@ public actor MLCapabilityResource: CapabilityResource {
 public actor MLCapability: DomainCapability {
     private var _configuration: MLCapabilityConfiguration
     private var _resources: MLCapabilityResource
-    private var _environment: CapabilityEnvironment
-    private var _state: CapabilityState = .unknown
+    private var _environment: AxiomCapabilityEnvironment
+    private var _state: AxiomCapabilityState = .unknown
     private var predictionQueue: [any MLFeatureProvider] = []
     private var isProcessing = false
     private var _activationTimeout: Duration = .seconds(30)
     
     public init(
         configuration: MLCapabilityConfiguration,
-        environment: CapabilityEnvironment = CapabilityEnvironment(isDebug: true)
+        environment: AxiomCapabilityEnvironment = AxiomCapabilityEnvironment(isDebug: true)
     ) {
         self._configuration = configuration
         self._resources = MLCapabilityResource(configuration: configuration)
@@ -158,13 +158,13 @@ public actor MLCapability: DomainCapability {
         get async { _resources }
     }
     
-    public var environment: CapabilityEnvironment {
+    public var environment: AxiomCapabilityEnvironment {
         get async { _environment }
     }
     
     public func updateConfiguration(_ configuration: MLCapabilityConfiguration) async throws {
         guard configuration.isValid else {
-            throw CapabilityError.initializationFailed("Invalid ML configuration")
+            throw AxiomCapabilityError.initializationFailed("Invalid ML configuration")
         }
         
         _configuration = configuration.adjusted(for: _environment)
@@ -175,7 +175,7 @@ public actor MLCapability: DomainCapability {
         }
     }
     
-    public func handleEnvironmentChange(_ environment: CapabilityEnvironment) async {
+    public func handleEnvironmentChange(_ environment: AxiomCapabilityEnvironment) async {
         _environment = environment
         let adjustedConfig = _configuration.adjusted(for: environment)
         try? await updateConfiguration(adjustedConfig)
@@ -183,11 +183,11 @@ public actor MLCapability: DomainCapability {
     
     // MARK: - ExtendedCapability Protocol
     
-    public var state: CapabilityState {
+    public var state: AxiomCapabilityState {
         get async { _state }
     }
     
-    public var stateStream: AsyncStream<CapabilityState> {
+    public var stateStream: AsyncStream<AxiomCapabilityState> {
         get async {
             AsyncStream { continuation in
                 continuation.yield(_state)
@@ -224,7 +224,7 @@ public actor MLCapability: DomainCapability {
         
         guard await isSupported() else {
             _state = .unavailable
-            throw CapabilityError.notAvailable("Core ML not supported")
+            throw AxiomCapabilityError.notAvailable("Core ML not supported")
         }
         
         try await _resources.allocate()
@@ -244,7 +244,7 @@ public actor MLCapability: DomainCapability {
         outputType: Output.Type
     ) async throws -> Output where Input: MLFeatureProvider, Output: MLFeatureProvider {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("ML capability not available")
+            throw AxiomCapabilityError.notAvailable("ML capability not available")
         }
         
         let request = MLPredictionRequest(input: input, priority: .userInitiated)
@@ -256,7 +256,7 @@ public actor MLCapability: DomainCapability {
         outputType: Output.Type
     ) async throws -> [Output] where Input: MLFeatureProvider, Output: MLFeatureProvider {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("ML capability not available")
+            throw AxiomCapabilityError.notAvailable("ML capability not available")
         }
         
         var results: [Output] = []
@@ -275,7 +275,7 @@ public actor MLCapability: DomainCapability {
         try await Task.sleep(for: .milliseconds(50)) // Simulate prediction time
         
         // Return mock result (in real implementation, use model.prediction)
-        throw CapabilityError.initializationFailed("Mock implementation")
+        throw AxiomCapabilityError.initializationFailed("Mock implementation")
     }
 }
 

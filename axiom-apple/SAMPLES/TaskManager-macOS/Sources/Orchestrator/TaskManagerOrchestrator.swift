@@ -54,27 +54,27 @@ public actor TaskManagerOrchestrator: ExtendedOrchestrator {
         
         switch typeName {
         case "TaskListView":
-            let context = TaskListContext(client: taskClient)
+            let context = await MainActor.run { TaskListContext(client: taskClient) }
             await storeContext(context, for: "TaskListContext")
             return context as! P.ContextType
             
         case "TaskDetailView":
-            let context = TaskDetailContext(client: taskClient)
+            let context = await MainActor.run { TaskDetailContext(client: taskClient) }
             await storeContext(context, for: "TaskDetailContext")
             return context as! P.ContextType
             
         case "CreateTaskView":
-            let context = CreateTaskContext(client: taskClient)
+            let context = await MainActor.run { CreateTaskContext(client: taskClient) }
             await storeContext(context, for: "CreateTaskContext")
             return context as! P.ContextType
             
         case "TaskSettingsView":
-            let context = TaskSettingsContext(client: taskClient, storage: storageCapability)
+            let context = await MainActor.run { TaskSettingsContext(client: taskClient, storage: storageCapability) }
             await storeContext(context, for: "TaskSettingsContext")
             return context as! P.ContextType
             
         case "TaskStatisticsView":
-            let context = TaskStatisticsContext(client: taskClient)
+            let context = await MainActor.run { TaskStatisticsContext(client: taskClient) }
             await storeContext(context, for: "TaskStatisticsContext")
             return context as! P.ContextType
             

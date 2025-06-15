@@ -4,7 +4,7 @@ import Foundation
 // MARK: - EventKit Configuration
 
 /// Configuration for EventKit capability
-public struct EventKitConfiguration: CapabilityConfiguration {
+public struct EventKitConfiguration: AxiomCapabilityConfiguration {
     public let entityTypes: Set<EKEntityType>
     public let requestTimeout: TimeInterval
     public let enableAutomaticSyncing: Bool
@@ -39,7 +39,7 @@ public struct EventKitConfiguration: CapabilityConfiguration {
         )
     }
     
-    public func adjusted(for environment: CapabilityEnvironment) -> EventKitConfiguration {
+    public func adjusted(for environment: AxiomCapabilityEnvironment) -> EventKitConfiguration {
         var adjustedTimeout = requestTimeout
         var adjustedSyncing = enableAutomaticSyncing
         
@@ -270,7 +270,7 @@ public struct CalendarInfo: Sendable, Codable {
 // MARK: - EventKit Resource
 
 /// Resource management for EventKit
-public actor EventKitResource: CapabilityResource {
+public actor EventKitResource: AxiomCapabilityResource {
     private var activeQueries: Set<UUID> = []
     private var _isAvailable: Bool = true
     private let configuration: EventKitConfiguration
@@ -313,7 +313,7 @@ public actor EventKitResource: CapabilityResource {
     
     public func addQuery(_ queryId: UUID) async throws {
         guard await isAvailable() else {
-            throw CapabilityError.resourceAllocationFailed("EventKit resources not available")
+            throw AxiomCapabilityError.resourceAllocationFailed("EventKit resources not available")
         }
         activeQueries.insert(queryId)
     }
@@ -336,12 +336,12 @@ public actor EventKitCapability: DomainCapability {
     
     private var _configuration: EventKitConfiguration
     private var _resources: EventKitResource
-    private var _environment: CapabilityEnvironment
-    private var _state: CapabilityState = .unknown
+    private var _environment: AxiomCapabilityEnvironment
+    private var _state: AxiomCapabilityState = .unknown
     private var _activationTimeout: Duration = .milliseconds(10)
     
     private var eventStore: EKEventStore?
-    private var stateStreamContinuation: AsyncStream<CapabilityState>.Continuation?
+    private var stateStreamContinuation: AsyncStream<AxiomCapabilityState>.Continuation?
     private var eventStreamContinuation: AsyncStream<EventData>.Continuation?
     private var reminderStreamContinuation: AsyncStream<ReminderData>.Continuation?
     
@@ -351,11 +351,11 @@ public actor EventKitCapability: DomainCapability {
         get async { _state == .available }
     }
     
-    public var state: CapabilityState {
+    public var state: AxiomCapabilityState {
         get async { _state }
     }
     
-    public var stateStream: AsyncStream<CapabilityState> {
+    public var stateStream: AsyncStream<AxiomCapabilityState> {
         AsyncStream { [weak self] continuation in
             Task { [weak self] in
                 await self?.setStateStreamContinuation(continuation)
@@ -378,20 +378,20 @@ public actor EventKitCapability: DomainCapability {
         get async { _resources }
     }
     
-    public var environment: CapabilityEnvironment {
+    public var environment: AxiomCapabilityEnvironment {
         get async { _environment }
     }
     
     public init(
         configuration: EventKitConfiguration = EventKitConfiguration(),
-        environment: CapabilityEnvironment = CapabilityEnvironment()
+        environment: AxiomCapabilityEnvironment = AxiomCapabilityEnvironment()
     ) {
         self._configuration = configuration.adjusted(for: environment)
         self._resources = EventKitResource(configuration: self._configuration)
         self._environment = environment
     }
     
-    private func setStateStreamContinuation(_ continuation: AsyncStream<CapabilityState>.Continuation) {
+    private func setStateStreamContinuation(_ continuation: AsyncStream<AxiomCapabilityState>.Continuation) {
         self.stateStreamContinuation = continuation
     }
     
@@ -407,13 +407,13 @@ public actor EventKitCapability: DomainCapability {
     
     public func updateConfiguration(_ configuration: EventKitConfiguration) async throws {
         guard configuration.isValid else {
-            throw CapabilityError.initializationFailed("Invalid EventKit configuration")
+            throw AxiomCapabilityError.initializationFailed("Invalid EventKit configuration")
         }
         
         _configuration = configuration.adjusted(for: _environment)
     }
     
-    public func handleEnvironmentChange(_ environment: CapabilityEnvironment) async {
+    public func handleEnvironmentChange(_ environment: AxiomCapabilityEnvironment) async {
         _environment = environment
         let adjusted = _configuration.adjusted(for: environment)
         try? await updateConfiguration(adjusted)
@@ -427,7 +427,7 @@ public actor EventKitCapability: DomainCapability {
     
     public func requestPermission() async throws {
         guard let store = eventStore else {
-            throw CapabilityError.notAvailable("EventKit store not initialized")
+            throw AxiomCapabilityError.notAvailable("EventKit store not initialized")
         }
         
         for entityType in _configuration.entityTypes {
@@ -460,7 +460,7 @@ public actor EventKitCapability: DomainCapability {
                         false
                     }
                     if !granted {
-                        throw CapabilityError.permissionRequired("EventKit access denied for \(entityType)")
+                        throw AxiomCapabilityError.permissionRequired("EventKit access denied for \(entityType)")
                     }
                 } else {
                     let granted = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Bool, Error>) in
@@ -473,15 +473,15 @@ public actor EventKitCapability: DomainCapability {
                         }
                     }
                     if !granted {
-                        throw CapabilityError.permissionRequired("EventKit access denied for \(entityType)")
+                        throw AxiomCapabilityError.permissionRequired("EventKit access denied for \(entityType)")
                     }
                 }
             } else if #available(macOS 14.0, iOS 17.0, *) {
                 if status != .fullAccess && status != .writeOnly {
-                    throw CapabilityError.permissionRequired("EventKit access not authorized for \(entityType)")
+                    throw AxiomCapabilityError.permissionRequired("EventKit access not authorized for \(entityType)")
                 }
             } else if status != .authorized {
-                throw CapabilityError.permissionRequired("EventKit access not authorized for \(entityType)")
+                throw AxiomCapabilityError.permissionRequired("EventKit access not authorized for \(entityType)")
             }
         }
     }
@@ -494,7 +494,7 @@ public actor EventKitCapability: DomainCapability {
     
     public func activate() async throws {
         guard await _resources.isAvailable() else {
-            throw CapabilityError.initializationFailed("EventKit resources not available")
+            throw AxiomCapabilityError.initializationFailed("EventKit resources not available")
         }
         
         eventStore = EKEventStore()
@@ -514,7 +514,7 @@ public actor EventKitCapability: DomainCapability {
         reminderStreamContinuation?.finish()
     }
     
-    private func transitionTo(_ newState: CapabilityState) async {
+    private func transitionTo(_ newState: AxiomCapabilityState) async {
         guard _state != newState else { return }
         _state = newState
         stateStreamContinuation?.yield(newState)
@@ -529,11 +529,11 @@ public actor EventKitCapability: DomainCapability {
         calendars: [EKCalendar]? = nil
     ) async throws -> [EventData] {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("EventKit capability not available")
+            throw AxiomCapabilityError.notAvailable("EventKit capability not available")
         }
         
         guard let store = eventStore else {
-            throw CapabilityError.notAvailable("EventKit store not initialized")
+            throw AxiomCapabilityError.notAvailable("EventKit store not initialized")
         }
         
         let queryId = UUID()
@@ -566,11 +566,11 @@ public actor EventKitCapability: DomainCapability {
         url: URL? = nil
     ) async throws -> EventData {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("EventKit capability not available")
+            throw AxiomCapabilityError.notAvailable("EventKit capability not available")
         }
         
         guard let store = eventStore else {
-            throw CapabilityError.notAvailable("EventKit store not initialized")
+            throw AxiomCapabilityError.notAvailable("EventKit store not initialized")
         }
         
         let event = EKEvent(eventStore: store)
@@ -588,7 +588,7 @@ public actor EventKitCapability: DomainCapability {
         } else if let defaultCalendar = getDefaultCalendar() {
             event.calendar = defaultCalendar
         } else {
-            throw CapabilityError.initializationFailed("No calendar available for event creation")
+            throw AxiomCapabilityError.initializationFailed("No calendar available for event creation")
         }
         
         try store.save(event, span: .thisEvent)
@@ -609,15 +609,15 @@ public actor EventKitCapability: DomainCapability {
         location: String? = nil
     ) async throws -> EventData {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("EventKit capability not available")
+            throw AxiomCapabilityError.notAvailable("EventKit capability not available")
         }
         
         guard let store = eventStore else {
-            throw CapabilityError.notAvailable("EventKit store not initialized")
+            throw AxiomCapabilityError.notAvailable("EventKit store not initialized")
         }
         
         guard let event = store.event(withIdentifier: eventIdentifier) else {
-            throw CapabilityError.notAvailable("Event not found: \(eventIdentifier)")
+            throw AxiomCapabilityError.notAvailable("Event not found: \(eventIdentifier)")
         }
         
         if let title = title { event.title = title }
@@ -637,15 +637,15 @@ public actor EventKitCapability: DomainCapability {
     /// Delete event
     public func deleteEvent(eventIdentifier: String) async throws {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("EventKit capability not available")
+            throw AxiomCapabilityError.notAvailable("EventKit capability not available")
         }
         
         guard let store = eventStore else {
-            throw CapabilityError.notAvailable("EventKit store not initialized")
+            throw AxiomCapabilityError.notAvailable("EventKit store not initialized")
         }
         
         guard let event = store.event(withIdentifier: eventIdentifier) else {
-            throw CapabilityError.notAvailable("Event not found: \(eventIdentifier)")
+            throw AxiomCapabilityError.notAvailable("Event not found: \(eventIdentifier)")
         }
         
         try store.remove(event, span: .thisEvent)
@@ -656,15 +656,15 @@ public actor EventKitCapability: DomainCapability {
     /// Get reminders with predicate
     public func getReminders(predicate: NSPredicate? = nil) async throws -> [ReminderData] {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("EventKit capability not available")
+            throw AxiomCapabilityError.notAvailable("EventKit capability not available")
         }
         
         guard let store = eventStore else {
-            throw CapabilityError.notAvailable("EventKit store not initialized")
+            throw AxiomCapabilityError.notAvailable("EventKit store not initialized")
         }
         
         guard _configuration.entityTypes.contains(.reminder) else {
-            throw CapabilityError.notAvailable("Reminder access not configured")
+            throw AxiomCapabilityError.notAvailable("Reminder access not configured")
         }
         
         let queryId = UUID()
@@ -696,11 +696,11 @@ public actor EventKitCapability: DomainCapability {
         list: EKCalendar? = nil
     ) async throws -> ReminderData {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("EventKit capability not available")
+            throw AxiomCapabilityError.notAvailable("EventKit capability not available")
         }
         
         guard let store = eventStore else {
-            throw CapabilityError.notAvailable("EventKit store not initialized")
+            throw AxiomCapabilityError.notAvailable("EventKit store not initialized")
         }
         
         let reminder = EKReminder(eventStore: store)
@@ -715,7 +715,7 @@ public actor EventKitCapability: DomainCapability {
         } else if let defaultList = getDefaultReminderList() {
             reminder.calendar = defaultList
         } else {
-            throw CapabilityError.initializationFailed("No reminder list available")
+            throw AxiomCapabilityError.initializationFailed("No reminder list available")
         }
         
         try store.save(reminder, commit: true)
@@ -729,15 +729,15 @@ public actor EventKitCapability: DomainCapability {
     /// Complete reminder
     public func completeReminder(calendarItemIdentifier: String) async throws {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("EventKit capability not available")
+            throw AxiomCapabilityError.notAvailable("EventKit capability not available")
         }
         
         guard let store = eventStore else {
-            throw CapabilityError.notAvailable("EventKit store not initialized")
+            throw AxiomCapabilityError.notAvailable("EventKit store not initialized")
         }
         
         guard let reminder = store.calendarItem(withIdentifier: calendarItemIdentifier) as? EKReminder else {
-            throw CapabilityError.notAvailable("Reminder not found: \(calendarItemIdentifier)")
+            throw AxiomCapabilityError.notAvailable("Reminder not found: \(calendarItemIdentifier)")
         }
         
         reminder.isCompleted = true
@@ -754,11 +754,11 @@ public actor EventKitCapability: DomainCapability {
     /// Get available calendars
     public func getCalendars(for entityType: EKEntityType) async throws -> [CalendarInfo] {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("EventKit capability not available")
+            throw AxiomCapabilityError.notAvailable("EventKit capability not available")
         }
         
         guard let store = eventStore else {
-            throw CapabilityError.notAvailable("EventKit store not initialized")
+            throw AxiomCapabilityError.notAvailable("EventKit store not initialized")
         }
         
         let calendars = store.calendars(for: entityType)
@@ -802,28 +802,28 @@ public actor EventKitCapability: DomainCapability {
 
 // MARK: - Registration Extension
 
-extension CapabilityRegistry {
+extension AxiomCapabilityRegistry {
     /// Register EventKit capability
     public func registerEventKit() async throws {
         let capability = EventKitCapability()
         try await register(
             capability,
             requirements: [
-                CapabilityDiscoveryService.Requirement(
+                AxiomCapabilityDiscoveryService.Requirement(
                     type: .systemFeature("EventKit"),
                     isMandatory: true
                 ),
-                CapabilityDiscoveryService.Requirement(
+                AxiomCapabilityDiscoveryService.Requirement(
                     type: .permission("NSCalendarsUsageDescription"),
                     isMandatory: false
                 ),
-                CapabilityDiscoveryService.Requirement(
+                AxiomCapabilityDiscoveryService.Requirement(
                     type: .permission("NSRemindersUsageDescription"),
                     isMandatory: false
                 )
             ],
             category: "productivity",
-            metadata: CapabilityMetadata(
+            metadata: AxiomCapabilityMetadata(
                 name: "EventKit",
                 description: "Calendar and reminder management capability",
                 version: "1.0.0",

@@ -8,9 +8,9 @@ import Combine
 public struct DeepLinkHandler: Sendable {
     public init() {}
     
-    public func processDeepLink(_ url: URL) async throws -> any TypeSafeRoute {
+    public func processDeepLink(_ url: URL) async throws -> any AxiomTypeSafeRoute {
         // Simplified deep link processing - return a basic route
-        return StandardRoute.custom(path: url.path)
+        return AxiomStandardRoute.custom(path: url.path)
     }
 }
 
@@ -18,7 +18,7 @@ public struct DeepLinkHandler: Sendable {
 public struct AnyTypeRoute: Hashable, Sendable, Codable, Identifiable {
     private let _identifier: String
     
-    public init<R: TypeSafeRoute>(_ route: R) {
+    public init<R: AxiomTypeSafeRoute>(_ route: R) {
         self._identifier = route.routeIdentifier
     }
     
@@ -78,9 +78,9 @@ public final class NavigationContext: ObservableObject {
     
     // MARK: - Published State
     
-    @Published public var currentRoute: (any TypeSafeRoute)?
-    @Published public var navigationStack: [any TypeSafeRoute] = []
-    @Published public var presentedRoutes: [any TypeSafeRoute] = []
+    @Published public var currentRoute: (any AxiomTypeSafeRoute)?
+    @Published public var navigationStack: [any AxiomTypeSafeRoute] = []
+    @Published public var presentedRoutes: [any AxiomTypeSafeRoute] = []
     @Published public var isNavigating = false
     @Published public var navigationHistory: [NavigationHistoryEntry] = []
     @Published public var canGoBack = false
@@ -89,7 +89,7 @@ public final class NavigationContext: ObservableObject {
     // MARK: - Private State
     
     private var navigationCoordinator: SwiftUINavigationCoordinator?
-    private var navigationService: ModularNavigationService
+    private var navigationService: AxiomModularNavigationService
     private var routeResolver: RouteResolver
     private var deepLinkHandler: DeepLinkHandler
     private var navigationPersistence: NavigationPersistence
@@ -99,7 +99,7 @@ public final class NavigationContext: ObservableObject {
     // MARK: - Initialization
     
     private init() {
-        self.navigationService = ModularNavigationService()
+        self.navigationService = AxiomModularNavigationService()
         self.routeResolver = RouteResolver()
         self.deepLinkHandler = DeepLinkHandler()
         self.navigationPersistence = NavigationPersistence()
@@ -111,7 +111,7 @@ public final class NavigationContext: ObservableObject {
     /// Configure the navigation context with dependencies
     public func configure(
         coordinator: SwiftUINavigationCoordinator? = nil,
-        service: ModularNavigationService? = nil,
+        service: AxiomModularNavigationService? = nil,
         resolver: RouteResolver? = nil
     ) {
         if let coordinator = coordinator {
@@ -130,7 +130,7 @@ public final class NavigationContext: ObservableObject {
     // MARK: - Navigation Operations
     
     /// Navigate to a route with context tracking
-    public func navigate<R: TypeSafeRoute>(
+    public func navigate<R: AxiomTypeSafeRoute>(
         to route: R,
         context: NavigationOperationContext = .default
     ) async {
@@ -306,17 +306,17 @@ public final class NavigationContext: ObservableObject {
             .store(in: &contextSubscriptions)
     }
     
-    private func pushToStack<R: TypeSafeRoute>(_ route: R) async {
+    private func pushToStack<R: AxiomTypeSafeRoute>(_ route: R) async {
         navigationStack.append(route)
         updateNavigationState()
     }
     
-    private func presentRoute<R: TypeSafeRoute>(_ route: R, style: PresentationStyle.ModalPresentationStyle) async {
+    private func presentRoute<R: AxiomTypeSafeRoute>(_ route: R, style: PresentationStyle.ModalPresentationStyle) async {
         presentedRoutes.append(route)
         updateNavigationState()
     }
     
-    private func replaceCurrentRoute<R: TypeSafeRoute>(_ route: R) async {
+    private func replaceCurrentRoute<R: AxiomTypeSafeRoute>(_ route: R) async {
         if !navigationStack.isEmpty {
             navigationStack[navigationStack.count - 1] = route
         } else {
@@ -325,7 +325,7 @@ public final class NavigationContext: ObservableObject {
         updateNavigationState()
     }
     
-    private func replaceRootRoute<R: TypeSafeRoute>(_ route: R) async {
+    private func replaceRootRoute<R: AxiomTypeSafeRoute>(_ route: R) async {
         navigationStack = [route]
         presentedRoutes.removeAll()
         updateNavigationState()
@@ -345,7 +345,7 @@ public final class NavigationContext: ObservableObject {
         }
     }
     
-    private func trackNavigation<R: TypeSafeRoute>(
+    private func trackNavigation<R: AxiomTypeSafeRoute>(
         to route: R,
         context: NavigationOperationContext
     ) async {
@@ -354,7 +354,7 @@ public final class NavigationContext: ObservableObject {
     
     private func trackNavigation(
         action: NavigationAction,
-        route: (any TypeSafeRoute)?
+        route: (any AxiomTypeSafeRoute)?
     ) async {
         if let route = route {
             RouteAnalytics.trackNavigation(to: route.routeIdentifier)
@@ -473,7 +473,7 @@ private class NavigationContextObserver: NavigationObserver, @unchecked Sendable
     func navigationDidComplete(to route: AnyTypeRoute) async {
         await MainActor.run {
             context?.isNavigating = false
-            // Cannot assign AnyTypeRoute to TypeSafeRoute - would need route conversion
+            // Cannot assign AnyTypeRoute to AxiomTypeSafeRoute - would need route conversion
             // context?.currentRoute = route
         }
     }
@@ -529,18 +529,18 @@ public actor NavigationPersistence {
 public final class ContextAwareNavigationCoordinator: ObservableObject {
     public let context: NavigationContext
     private let swiftUICoordinator: SwiftUINavigationCoordinator?
-    private let navigationService: ModularNavigationService
+    private let navigationService: AxiomModularNavigationService
     private let routeResolver: RouteResolver
     
     public init(
         context: NavigationContext = .shared,
         swiftUICoordinator: SwiftUINavigationCoordinator? = nil,
-        navigationService: ModularNavigationService? = nil,
+        navigationService: AxiomModularNavigationService? = nil,
         routeResolver: RouteResolver? = nil
     ) {
         self.context = context
         self.swiftUICoordinator = swiftUICoordinator
-        self.navigationService = navigationService ?? ModularNavigationService()
+        self.navigationService = navigationService ?? AxiomModularNavigationService()
         self.routeResolver = routeResolver ?? RouteResolver()
         
         // Configure context with dependencies
@@ -552,7 +552,7 @@ public final class ContextAwareNavigationCoordinator: ObservableObject {
     }
     
     /// Navigate with context awareness
-    public func navigate<R: TypeSafeRoute>(
+    public func navigate<R: AxiomTypeSafeRoute>(
         to route: R,
         from source: NavigationSource = .userAction,
         animated: Bool = true,
@@ -568,7 +568,7 @@ public final class ContextAwareNavigationCoordinator: ObservableObject {
     }
     
     /// Present route with context
-    public func present<R: TypeSafeRoute>(
+    public func present<R: AxiomTypeSafeRoute>(
         _ route: R,
         style: PresentationStyle.ModalPresentationStyle = .sheet,
         animated: Bool = true
@@ -688,9 +688,9 @@ public extension NavigationContext {
 
 /// Route registration component
 public struct RouteRegistrationComponent: NavigationContextComponent {
-    let routes: [any TypeSafeRoute]
+    let routes: [any AxiomTypeSafeRoute]
     
-    public init(routes: [any TypeSafeRoute]) {
+    public init(routes: [any AxiomTypeSafeRoute]) {
         self.routes = routes
     }
     

@@ -33,6 +33,12 @@
   <ItemGroup>
     <ProjectReference Include="..\AxiomEndpoints.Core\AxiomEndpoints.Core.csproj" />
     <ProjectReference Include="..\AxiomEndpoints.AspNetCore\AxiomEndpoints.AspNetCore.csproj" />
+    <ProjectReference Include="..\AxiomEndpoints.ProtoGen\AxiomEndpoints.ProtoGen.csproj" />
+  </ItemGroup>
+
+  <!-- Include MSBuild targets for package generation -->
+  <ItemGroup>
+    <None Include="build/AxiomEndpoints.Aspire.targets" Pack="true" PackagePath="build/AxiomEndpoints.Aspire.targets" />
   </ItemGroup>
 
 </Project>

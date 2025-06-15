@@ -10,7 +10,7 @@ public protocol CapabilityTestable {
     
     /// Create a test instance of the capability
     func createTestCapability(
-        environment: CapabilityEnvironment,
+        environment: AxiomCapabilityEnvironment,
         configuration: CapabilityType.ConfigurationType?
     ) async throws -> CapabilityType
     
@@ -30,13 +30,13 @@ open class DomainCapabilityTestSuite<T: DomainCapability>: XCTestCase, Capabilit
     
     // Override points for specific capability testing
     open func createTestCapability(
-        environment: CapabilityEnvironment = .testing,
+        environment: AxiomCapabilityEnvironment = .testing,
         configuration: T.ConfigurationType? = nil
     ) async throws -> T {
         fatalError("Subclasses must implement createTestCapability")
     }
     
-    open func createTestConfiguration(for environment: CapabilityEnvironment) -> T.ConfigurationType {
+    open func createTestConfiguration(for environment: AxiomCapabilityEnvironment) -> T.ConfigurationType {
         fatalError("Subclasses must implement createTestConfiguration")
     }
     
@@ -93,7 +93,7 @@ open class DomainCapabilityTestSuite<T: DomainCapability>: XCTestCase, Capabilit
         XCTAssertTrue(configAfterChange.isValid, "Configuration should remain valid after environment change")
         
         // Test multiple environment changes
-        let environments: [CapabilityEnvironment] = [.development, .testing, .staging, .production, .preview]
+        let environments: [AxiomCapabilityEnvironment] = [.development, .testing, .staging, .production, .preview]
         for environment in environments {
             await capability.handleEnvironmentChange(environment)
             let config = await capability.configuration
@@ -180,14 +180,14 @@ open class DomainCapabilityTestSuite<T: DomainCapability>: XCTestCase, Capabilit
 public class MLCapabilityTestSuite: DomainCapabilityTestSuite<MLCapability> {
     
     public override func createTestCapability(
-        environment: CapabilityEnvironment = .testing,
+        environment: AxiomCapabilityEnvironment = .testing,
         configuration: MLCapabilityConfiguration? = nil
     ) async throws -> MLCapability {
         let config = configuration ?? createTestConfiguration(for: environment)
         return MLCapability(configuration: config, environment: environment)
     }
     
-    public override func createTestConfiguration(for environment: CapabilityEnvironment) -> MLCapabilityConfiguration {
+    public override func createTestConfiguration(for environment: AxiomCapabilityEnvironment) -> MLCapabilityConfiguration {
         MLCapabilityConfiguration(
             modelName: "test_model",
             batchSize: environment.isDebug ? 1 : 10
@@ -219,14 +219,14 @@ public class MLCapabilityTestSuite: DomainCapabilityTestSuite<MLCapability> {
 public class AnalyticsCapabilityTestSuite: DomainCapabilityTestSuite<AnalyticsCapability> {
     
     public override func createTestCapability(
-        environment: CapabilityEnvironment = .testing,
+        environment: AxiomCapabilityEnvironment = .testing,
         configuration: AnalyticsCapabilityConfiguration? = nil
     ) async throws -> AnalyticsCapability {
         let config = configuration ?? createTestConfiguration(for: environment)
         return AnalyticsCapability(configuration: config, environment: environment)
     }
     
-    public override func createTestConfiguration(for environment: CapabilityEnvironment) -> AnalyticsCapabilityConfiguration {
+    public override func createTestConfiguration(for environment: AxiomCapabilityEnvironment) -> AnalyticsCapabilityConfiguration {
         AnalyticsCapabilityConfiguration(
             trackingId: "test_tracking_id",
             batchSize: environment.isDebug ? 5 : 20,
@@ -526,7 +526,7 @@ public class CapabilityPerformanceTestSuite: XCTestCase {
 // MARK: - Mock Implementations for Testing
 
 /// Mock capability resource for testing
-public actor MockCapabilityResource: CapabilityResource {
+public actor MockCapabilityResource: AxiomCapabilityResource {
     private var _currentUsage: ResourceUsage
     public let maxUsage: ResourceUsage
     private var _isAllocated = false
@@ -547,7 +547,7 @@ public actor MockCapabilityResource: CapabilityResource {
     
     public func allocate() async throws {
         guard await isAvailable() else {
-            throw CapabilityError.resourceAllocationFailed("Mock resource not available")
+            throw AxiomCapabilityError.resourceAllocationFailed("Mock resource not available")
         }
         _isAllocated = true
     }
@@ -563,7 +563,7 @@ public actor MockCapabilityResource: CapabilityResource {
 }
 
 /// Mock configuration for testing
-public struct MockCapabilityConfiguration: CapabilityConfiguration {
+public struct MockCapabilityConfiguration: AxiomCapabilityConfiguration {
     public let isValidValue: Bool
     public let configId: String
     
@@ -583,7 +583,7 @@ public struct MockCapabilityConfiguration: CapabilityConfiguration {
         )
     }
     
-    public func adjusted(for environment: CapabilityEnvironment) -> MockCapabilityConfiguration {
+    public func adjusted(for environment: AxiomCapabilityEnvironment) -> MockCapabilityConfiguration {
         MockCapabilityConfiguration(
             isValid: isValidValue,
             configId: "\(configId)_\(environment.rawValue)"

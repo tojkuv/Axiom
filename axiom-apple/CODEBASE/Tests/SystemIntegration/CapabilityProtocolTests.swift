@@ -156,7 +156,7 @@ final class CapabilityProtocolTests: XCTestCase {
 // MARK: - Test Support Types
 
 // Basic mock capability
-actor MockCapability: Capability {
+actor MockCapability: AxiomCapability {
     private(set) var currentState: CapabilityState = .unavailable
     
     var isAvailable: Bool {
@@ -177,7 +177,7 @@ actor MockCapability: Capability {
 }
 
 // Capability that fails initialization
-actor FailingCapability: Capability {
+actor FailingCapability: AxiomCapability {
     private(set) var currentState: CapabilityState = .unavailable
     
     var isAvailable: Bool {
@@ -194,7 +194,7 @@ actor FailingCapability: Capability {
 }
 
 // Capability with resource management
-actor ResourceCapability: Capability {
+actor ResourceCapability: AxiomCapability {
     private(set) var currentState: CapabilityState = .unavailable
     private(set) var activeResources: Int = 0
     
@@ -219,7 +219,7 @@ actor ResourceCapability: Capability {
 }
 
 // Observable capability with state stream
-actor ObservableCapability: Capability {
+actor ObservableCapability: AxiomCapability {
     private(set) var currentState: CapabilityState = .unavailable
     private var continuation: AsyncStream<CapabilityState>.Continuation?
     

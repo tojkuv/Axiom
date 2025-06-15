@@ -7,7 +7,7 @@ final class EnhancedTypeSafeRoutingTests: XCTestCase {
     
     func testEnhancedTypeSafeRouteWithCompileTimeSafety() throws {
         // Test enhanced route enum with associated values and compile-time safety
-        enum AppRoute: TypeSafeRoute {
+        enum AppRoute: AxiomTypeSafeRoute {
             case profile(userId: String)
             case post(id: String, authorId: String? = nil)
             case search(query: String, filters: SearchFilters = .default)
@@ -81,7 +81,7 @@ final class EnhancedTypeSafeRoutingTests: XCTestCase {
     
     func testRouteBuilderDSLPattern() throws {
         // Test declarative route building pattern
-        enum TestRoute: TypeSafeRoute {
+        enum TestRoute: AxiomTypeSafeRoute {
             case detail(id: String, tab: String? = nil)
             
             var pathComponents: String {
@@ -107,7 +107,7 @@ final class EnhancedTypeSafeRoutingTests: XCTestCase {
         }
         
         // Test route builder pattern
-        let routeBuilder = TypeSafeRouteBuilder<TestRoute>()
+        let routeBuilder = AxiomTypeSafeRouteBuilder<TestRoute>()
         
         // This should be possible with the enhanced system
         let route = routeBuilder
@@ -121,7 +121,7 @@ final class EnhancedTypeSafeRoutingTests: XCTestCase {
     
     func testRouteMatchingWithEnhancedProtocol() throws {
         // Test advanced route matching with the enhanced protocol
-        enum NavigationRoute: TypeSafeRoute {
+        enum NavigationRoute: AxiomTypeSafeRoute {
             case profile(userId: String)
             case settings(section: String? = nil)
             
@@ -186,7 +186,7 @@ final class EnhancedTypeSafeRoutingTests: XCTestCase {
     
     func testNavigationServiceIntegrationWithEnhancedRoutes() async throws {
         // Test integration with NavigationService using enhanced routes
-        enum AppRoute: TypeSafeRoute {
+        enum AppRoute: AxiomTypeSafeRoute {
             case home
             case profile(userId: String)
             
@@ -228,7 +228,7 @@ final class EnhancedTypeSafeRoutingTests: XCTestCase {
     
     func testCompileTimeSafetyEnforcement() throws {
         // Test that compile-time safety is enforced
-        enum StrictRoute: TypeSafeRoute {
+        enum StrictRoute: AxiomTypeSafeRoute {
             case profile(userId: String)  // Required parameter
             case post(id: String, authorId: String? = nil)  // Optional parameter
             
@@ -296,13 +296,13 @@ enum SettingsSection: String, CaseIterable {
 }
 
 // Enhanced route builder for DSL pattern
-public class TypeSafeRouteBuilder<Route: TypeSafeRoute> {
+public class AxiomTypeSafeRouteBuilder<Route: AxiomTypeSafeRoute> {
     private var currentRoute: Route?
     private var additionalQueryParameters: [String: String] = [:]
     
     public init() {}
     
-    public func route(_ route: Route) -> TypeSafeRouteBuilder<Route> {
+    public func route(_ route: Route) -> AxiomTypeSafeRouteBuilder<Route> {
         self.currentRoute = route
         return self
     }

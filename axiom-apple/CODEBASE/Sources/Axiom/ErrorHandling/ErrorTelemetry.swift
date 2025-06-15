@@ -7,13 +7,13 @@ import Foundation
 public final class GlobalErrorHandler {
     public static let shared = GlobalErrorHandler()
     
-    private var logger: any ErrorLogger = ConsoleErrorLogger()
+    private var logger: any AxiomErrorLogger = AxiomConsoleErrorLogger()
     private var errorHandlers: [(AxiomError) -> Bool] = []
     
     private init() {}
     
     /// Set custom error logger
-    public func setLogger(_ logger: any ErrorLogger) {
+    public func setLogger(_ logger: any AxiomErrorLogger) {
         self.logger = logger
     }
     
@@ -23,7 +23,7 @@ public final class GlobalErrorHandler {
     }
     
     /// Handle an error with logging and registered handlers
-    public func handle(_ error: AxiomError, severity: ErrorSeverity = .error, context: [String: Any] = [:]) {
+    public func handle(_ error: AxiomError, severity: AxiomErrorSeverity = .error, context: [String: Any] = [:]) {
         // Log the error
         logger.log(error, severity: severity, context: context)
         
@@ -69,18 +69,18 @@ public struct TelemetryErrorContext: Sendable {
         self.metadata = metadata
     }
     
-    public var category: ErrorCategory {
-        return ErrorCategory.categorize(error)
+    public var category: AxiomErrorCategory {
+        return AxiomErrorCategory.categorize(error)
     }
 }
 
 /// Structured telemetry logging with comprehensive context capture
-public actor TelemetryLogger: ErrorLogger {
+public actor TelemetryLogger: AxiomErrorLogger {
     private var loggedEvents: [ErrorTelemetryEvent] = []
     
     public init() {}
     
-    public nonisolated func log(_ error: AxiomError, severity: ErrorSeverity, context: [String: Any]) {
+    public nonisolated func log(_ error: AxiomError, severity: AxiomErrorSeverity, context: [String: Any]) {
         let stringContext = context.compactMapValues { $0 as? String }
         let event = ErrorTelemetryEvent(
             error: error,
@@ -109,12 +109,12 @@ public actor TelemetryLogger: ErrorLogger {
 /// Telemetry event structure for logged errors
 public struct ErrorTelemetryEvent: Sendable {
     public let error: AxiomError
-    public let severity: ErrorSeverity
+    public let severity: AxiomErrorSeverity
     public let source: String
     public let metadata: [String: String]
     public let timestamp: Date
     
-    public init(error: AxiomError, severity: ErrorSeverity, source: String, metadata: [String: String], timestamp: Date) {
+    public init(error: AxiomError, severity: AxiomErrorSeverity, source: String, metadata: [String: String], timestamp: Date) {
         self.error = error
         self.severity = severity
         self.source = source
@@ -126,8 +126,8 @@ public struct ErrorTelemetryEvent: Sendable {
 /// Error metrics collection for comprehensive analytics (optimized for performance)
 public actor ErrorMetricsCollector {
     private var errorCounts: [String: Int] = [:]
-    private var errorCategories: [ErrorCategory: Int] = [:]
-    private var sourceCategories: [String: [ErrorCategory: Int]] = [:]
+    private var errorCategories: [AxiomErrorCategory: Int] = [:]
+    private var sourceCategories: [String: [AxiomErrorCategory: Int]] = [:]
     private var errorHistory: [TelemetryErrorContext] = []
     
     // Performance optimization: limit history size
@@ -239,10 +239,10 @@ public struct CollectorHealth {
 /// Error metrics for a specific source
 public struct ErrorSourceMetrics {
     public let errorCount: Int
-    public let errorCategory: [ErrorCategory: Int]
+    public let errorCategory: [AxiomErrorCategory: Int]
     public let errorRate: Double
     
-    public init(errorCount: Int, errorCategory: [ErrorCategory: Int], errorRate: Double) {
+    public init(errorCount: Int, errorCategory: [AxiomErrorCategory: Int], errorRate: Double) {
         self.errorCount = errorCount
         self.errorCategory = errorCategory
         self.errorRate = errorRate
@@ -252,7 +252,7 @@ public struct ErrorSourceMetrics {
 /// Error pattern analysis and spike detection (optimized with smart caching)
 public actor ErrorPatternAnalyzer {
     private var errorHistory: [TelemetryErrorContext] = []
-    private var categoryCache: [ErrorCategory: [TelemetryErrorContext]] = [:]
+    private var categoryCache: [AxiomErrorCategory: [TelemetryErrorContext]] = [:]
     private var sourceCache: [String: [TelemetryErrorContext]] = [:]
     private var lastCacheUpdate: Date = Date.distantPast
     
@@ -281,7 +281,7 @@ public actor ErrorPatternAnalyzer {
         updateCachesIfNeeded()
         
         return categoryCache.compactMap { category, errors in
-            guard errors.count > 0 else { return nil }
+            guard errors.count > 0 else { return nil as TelemetryErrorPattern? }
             
             // Use cached data for faster analysis
             let timeWindow = calculateTimeWindow(for: errors)
@@ -298,7 +298,7 @@ public actor ErrorPatternAnalyzer {
     }
     
     public func detectSpike(in timeWindow: TimeInterval, 
-                           category: ErrorCategory? = nil,
+                           category: AxiomErrorCategory? = nil,
                            source: String? = nil) -> SpikeDetectionResult {
             let now = Date()
             let windowStart = now.addingTimeInterval(-timeWindow)
@@ -347,7 +347,7 @@ public actor ErrorPatternAnalyzer {
     }
     
     // Enhanced pattern correlation analysis
-    public func findCorrelatedPatterns(category: ErrorCategory, 
+    public func findCorrelatedPatterns(category: AxiomErrorCategory, 
                                      timeWindow: TimeInterval = 3600) -> [PatternCorrelation] {
             let now = Date()
             let windowStart = now.addingTimeInterval(-timeWindow)
@@ -361,7 +361,7 @@ public actor ErrorPatternAnalyzer {
             var correlations: [PatternCorrelation] = []
             
             // Analyze temporal correlations with other categories
-            for otherCategory in ErrorCategory.allCases where otherCategory != category {
+            for otherCategory in AxiomErrorCategory.allCases where otherCategory != category {
                 let otherErrors = errorHistory.filter { 
                     $0.category == otherCategory && $0.timestamp >= windowStart 
                 }
@@ -518,13 +518,13 @@ public actor ErrorPatternAnalyzer {
 
 /// Error pattern detected by telemetry analysis (enhanced with correlation metrics)
 public struct TelemetryErrorPattern: Sendable {
-    public let category: ErrorCategory
+    public let category: AxiomErrorCategory
     public let frequency: Int
     public let timeWindow: TimeInterval
     public let commonSources: [String]
     public let correlationScore: Double
     
-    public init(category: ErrorCategory, frequency: Int, timeWindow: TimeInterval, commonSources: [String], correlationScore: Double = 0.0) {
+    public init(category: AxiomErrorCategory, frequency: Int, timeWindow: TimeInterval, commonSources: [String], correlationScore: Double = 0.0) {
         self.category = category
         self.frequency = frequency
         self.timeWindow = timeWindow
@@ -554,12 +554,12 @@ public struct SpikeDetectionResult {
 
 /// Pattern correlation analysis between error categories
 public struct PatternCorrelation {
-    public let primaryCategory: ErrorCategory
-    public let correlatedCategory: ErrorCategory
+    public let primaryCategory: AxiomErrorCategory
+    public let correlatedCategory: AxiomErrorCategory
     public let strength: Double // 0.0 to 1.0
     public let timeOffset: TimeInterval // Offset in seconds
     
-    public init(primaryCategory: ErrorCategory, correlatedCategory: ErrorCategory, strength: Double, timeOffset: TimeInterval) {
+    public init(primaryCategory: AxiomErrorCategory, correlatedCategory: AxiomErrorCategory, strength: Double, timeOffset: TimeInterval) {
         self.primaryCategory = primaryCategory
         self.correlatedCategory = correlatedCategory
         self.strength = strength
@@ -693,15 +693,15 @@ public extension URL {
 // MARK: - External Service Integration
 
 /// External service integration - Crash reporting logger
-public class CrashReportingLogger: ErrorLogger {
+public class CrashReportingLogger: AxiomErrorLogger {
     private let crashReporter: any CrashReporter
     
     public init(crashReporter: any CrashReporter) {
         self.crashReporter = crashReporter
     }
     
-    public func log(_ error: AxiomError, severity: ErrorSeverity, context: [String: Any]) {
-        guard severity >= .error else { return }
+    public func log(_ error: AxiomError, severity: AxiomErrorSeverity, context: [String: Any]) {
+        guard severity >= AxiomErrorSeverity.error else { return }
         
         let crashEvent = CrashEvent(
             error: error.sanitized(),
@@ -715,14 +715,14 @@ public class CrashReportingLogger: ErrorLogger {
 }
 
 /// External service integration - APM logger
-public class APMLogger: ErrorLogger {
+public class APMLogger: AxiomErrorLogger {
     private let apmService: any APMService
     
     public init(apmService: any APMService) {
         self.apmService = apmService
     }
     
-    public func log(_ error: AxiomError, severity: ErrorSeverity, context: [String: Any]) {
+    public func log(_ error: AxiomError, severity: AxiomErrorSeverity, context: [String: Any]) {
         let errorEvent = APMErrorEvent(
             error: error,
             severity: severity,
@@ -747,11 +747,11 @@ public protocol APMService {
 /// Crash event structure
 public struct CrashEvent {
     public let error: AxiomError
-    public let severity: ErrorSeverity
+    public let severity: AxiomErrorSeverity
     public let metadata: [String: Any]
     public let timestamp: Date
     
-    public init(error: AxiomError, severity: ErrorSeverity, metadata: [String: Any], timestamp: Date) {
+    public init(error: AxiomError, severity: AxiomErrorSeverity, metadata: [String: Any], timestamp: Date) {
         self.error = error
         self.severity = severity
         self.metadata = metadata
@@ -762,11 +762,11 @@ public struct CrashEvent {
 /// APM error event structure
 public struct APMErrorEvent {
     public let error: AxiomError
-    public let severity: ErrorSeverity
+    public let severity: AxiomErrorSeverity
     public let context: [String: Any]
     public let timestamp: Date
     
-    public init(error: AxiomError, severity: ErrorSeverity, context: [String: Any], timestamp: Date) {
+    public init(error: AxiomError, severity: AxiomErrorSeverity, context: [String: Any], timestamp: Date) {
         self.error = error
         self.severity = severity
         self.context = context

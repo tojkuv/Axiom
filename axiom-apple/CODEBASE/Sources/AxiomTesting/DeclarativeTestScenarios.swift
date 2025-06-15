@@ -157,7 +157,7 @@ public struct AsyncStreamTester<Element: Sendable> {
 // MARK: - ClientTestScenario
 
 /// Testing scenario for client implementations
-public struct ClientTestScenario<C: Client> {
+public struct ClientTestScenario<C: AxiomClient> {
     private let clientType: C.Type
     private let client: C
     
@@ -199,7 +199,7 @@ public struct ClientTestScenario<C: Client> {
 // MARK: - ClientAction
 
 /// Represents an action in a client test scenario
-public struct ClientAction<C: Client> {
+public struct ClientAction<C: AxiomClient> {
     private let scenario: ClientTestScenario<C>
     private let client: C
     private let action: C.ActionType
@@ -375,7 +375,7 @@ public struct CapabilityTestAction<Cap, T: Sendable> {
     
     private func createCapability() async throws -> Cap {
         // Try to create capability using common patterns
-        if let capType = Cap.self as? any (ExtendedCapability & DefaultInitializable).Type {
+        if let capType = Cap.self as? any (AxiomExtendedCapability & DefaultInitializable).Type {
             return capType.init() as! Cap
         } else {
             // For MVP, require manual capability creation

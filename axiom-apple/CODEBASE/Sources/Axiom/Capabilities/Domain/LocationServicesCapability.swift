@@ -4,7 +4,7 @@ import Foundation
 // MARK: - Location Services Configuration
 
 /// Configuration for location services capability
-public struct LocationServicesConfiguration: CapabilityConfiguration {
+public struct LocationServicesConfiguration: AxiomCapabilityConfiguration {
     public let desiredAccuracy: CLLocationAccuracy
     public let distanceFilter: CLLocationDistance
     public let allowsBackgroundLocationUpdates: Bool
@@ -43,7 +43,7 @@ public struct LocationServicesConfiguration: CapabilityConfiguration {
         )
     }
     
-    public func adjusted(for environment: CapabilityEnvironment) -> LocationServicesConfiguration {
+    public func adjusted(for environment: AxiomCapabilityEnvironment) -> LocationServicesConfiguration {
         var adjustedAccuracy = desiredAccuracy
         var adjustedTimeout = requestTimeout
         
@@ -176,7 +176,7 @@ public enum LocationAuthorizationStatus: Sendable, Codable {
 // MARK: - Location Services Resource
 
 /// Resource management for location services
-public actor LocationServicesResource: CapabilityResource {
+public actor LocationServicesResource: AxiomCapabilityResource {
     private var isLocationManagerActive: Bool = false
     private var _isAvailable: Bool = true
     private let configuration: LocationServicesConfiguration
@@ -219,7 +219,7 @@ public actor LocationServicesResource: CapabilityResource {
     
     public func activateLocationManager() async throws {
         guard await isAvailable() else {
-            throw CapabilityError.resourceAllocationFailed("Location services not available")
+            throw AxiomCapabilityError.resourceAllocationFailed("Location services not available")
         }
         isLocationManagerActive = true
     }
@@ -242,13 +242,13 @@ public actor LocationServicesCapability: DomainCapability {
     
     private var _configuration: LocationServicesConfiguration
     private var _resources: LocationServicesResource
-    private var _environment: CapabilityEnvironment
-    private var _state: CapabilityState = .unknown
+    private var _environment: AxiomCapabilityEnvironment
+    private var _state: AxiomCapabilityState = .unknown
     private var _activationTimeout: Duration = .milliseconds(10)
     
     private var locationManager: CLLocationManager?
     private var locationDelegate: LocationDelegate?
-    private var stateStreamContinuation: AsyncStream<CapabilityState>.Continuation?
+    private var stateStreamContinuation: AsyncStream<AxiomCapabilityState>.Continuation?
     private var locationStreamContinuation: AsyncStream<LocationUpdate>.Continuation?
     private var authStatusStreamContinuation: AsyncStream<LocationAuthorizationStatus>.Continuation?
     
@@ -258,11 +258,11 @@ public actor LocationServicesCapability: DomainCapability {
         get async { _state == .available }
     }
     
-    public var state: CapabilityState {
+    public var state: AxiomCapabilityState {
         get async { _state }
     }
     
-    public var stateStream: AsyncStream<CapabilityState> {
+    public var stateStream: AsyncStream<AxiomCapabilityState> {
         AsyncStream { [weak self] continuation in
             Task { [weak self] in
                 await self?.setStateStreamContinuation(continuation)
@@ -285,20 +285,20 @@ public actor LocationServicesCapability: DomainCapability {
         get async { _resources }
     }
     
-    public var environment: CapabilityEnvironment {
+    public var environment: AxiomCapabilityEnvironment {
         get async { _environment }
     }
     
     public init(
         configuration: LocationServicesConfiguration = LocationServicesConfiguration(),
-        environment: CapabilityEnvironment = CapabilityEnvironment()
+        environment: AxiomCapabilityEnvironment = AxiomCapabilityEnvironment()
     ) {
         self._configuration = configuration.adjusted(for: environment)
         self._resources = LocationServicesResource(configuration: self._configuration)
         self._environment = environment
     }
     
-    private func setStateStreamContinuation(_ continuation: AsyncStream<CapabilityState>.Continuation) {
+    private func setStateStreamContinuation(_ continuation: AsyncStream<AxiomCapabilityState>.Continuation) {
         self.stateStreamContinuation = continuation
     }
     
@@ -314,14 +314,14 @@ public actor LocationServicesCapability: DomainCapability {
     
     public func updateConfiguration(_ configuration: LocationServicesConfiguration) async throws {
         guard configuration.isValid else {
-            throw CapabilityError.initializationFailed("Invalid location services configuration")
+            throw AxiomCapabilityError.initializationFailed("Invalid location services configuration")
         }
         
         _configuration = configuration.adjusted(for: _environment)
         await updateLocationManager()
     }
     
-    public func handleEnvironmentChange(_ environment: CapabilityEnvironment) async {
+    public func handleEnvironmentChange(_ environment: AxiomCapabilityEnvironment) async {
         _environment = environment
         let adjusted = _configuration.adjusted(for: environment)
         try? await updateConfiguration(adjusted)
@@ -335,7 +335,7 @@ public actor LocationServicesCapability: DomainCapability {
     
     public func requestPermission() async throws {
         guard let manager = locationManager else {
-            throw CapabilityError.notAvailable("Location manager not initialized")
+            throw AxiomCapabilityError.notAvailable("Location manager not initialized")
         }
         
         let currentStatus = manager.authorizationStatus
@@ -357,11 +357,11 @@ public actor LocationServicesCapability: DomainCapability {
         let finalStatus = manager.authorizationStatus
         #if os(iOS) || os(watchOS) || os(tvOS)
         guard finalStatus == .authorizedAlways || finalStatus == .authorizedWhenInUse else {
-            throw CapabilityError.permissionRequired("Location access denied")
+            throw AxiomCapabilityError.permissionRequired("Location access denied")
         }
         #else
         guard finalStatus == .authorizedAlways else {
-            throw CapabilityError.permissionRequired("Location access denied")
+            throw AxiomCapabilityError.permissionRequired("Location access denied")
         }
         #endif
     }
@@ -374,11 +374,11 @@ public actor LocationServicesCapability: DomainCapability {
     
     public func activate() async throws {
         guard await _resources.isAvailable() else {
-            throw CapabilityError.initializationFailed("Location services not available")
+            throw AxiomCapabilityError.initializationFailed("Location services not available")
         }
         
         guard CLLocationManager.locationServicesEnabled() else {
-            throw CapabilityError.notAvailable("Location services disabled")
+            throw AxiomCapabilityError.notAvailable("Location services disabled")
         }
         
         try await setupLocationManager()
@@ -404,7 +404,7 @@ public actor LocationServicesCapability: DomainCapability {
         authStatusStreamContinuation?.finish()
     }
     
-    private func transitionTo(_ newState: CapabilityState) async {
+    private func transitionTo(_ newState: AxiomCapabilityState) async {
         guard _state != newState else { return }
         _state = newState
         stateStreamContinuation?.yield(newState)
@@ -489,11 +489,11 @@ public actor LocationServicesCapability: DomainCapability {
     /// Start receiving location updates
     public func startLocationUpdates() async throws {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("Location services not available")
+            throw AxiomCapabilityError.notAvailable("Location services not available")
         }
         
         guard let manager = locationManager else {
-            throw CapabilityError.notAvailable("Location manager not initialized")
+            throw AxiomCapabilityError.notAvailable("Location manager not initialized")
         }
         
         manager.startUpdatingLocation()
@@ -507,11 +507,11 @@ public actor LocationServicesCapability: DomainCapability {
     /// Get current location once
     public func getCurrentLocation() async throws -> LocationUpdate {
         guard _state == .available else {
-            throw CapabilityError.notAvailable("Location services not available")
+            throw AxiomCapabilityError.notAvailable("Location services not available")
         }
         
         guard let manager = locationManager else {
-            throw CapabilityError.notAvailable("Location manager not initialized")
+            throw AxiomCapabilityError.notAvailable("Location manager not initialized")
         }
         
         manager.requestLocation()
@@ -524,7 +524,7 @@ public actor LocationServicesCapability: DomainCapability {
             return location
         }
         
-        throw CapabilityError.initializationFailed("Location request timed out")
+        throw AxiomCapabilityError.initializationFailed("Location request timed out")
     }
     
     /// Stream of location updates
@@ -587,24 +587,24 @@ private class LocationDelegate: NSObject, @preconcurrency CLLocationManagerDeleg
 
 // MARK: - Registration Extension
 
-extension CapabilityRegistry {
+extension AxiomCapabilityRegistry {
     /// Register location services capability
     public func registerLocationServices() async throws {
         let capability = LocationServicesCapability()
         try await register(
             capability,
             requirements: [
-                CapabilityDiscoveryService.Requirement(
+                AxiomCapabilityDiscoveryService.Requirement(
                     type: .systemFeature("CoreLocation"),
                     isMandatory: true
                 ),
-                CapabilityDiscoveryService.Requirement(
+                AxiomCapabilityDiscoveryService.Requirement(
                     type: .permission("NSLocationWhenInUseUsageDescription"),
                     isMandatory: true
                 )
             ],
             category: "system",
-            metadata: CapabilityMetadata(
+            metadata: AxiomCapabilityMetadata(
                 name: "Location Services",
                 description: "GPS and location-based services capability",
                 version: "1.0.0",

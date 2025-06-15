@@ -4,7 +4,7 @@ import SwiftUI
 // MARK: - Context Lifecycle Protocol
 
 /// Protocol for contexts that can be managed by the framework
-public protocol ManagedContext: Context {
+public protocol ManagedContext: AxiomContext {
     /// Unique identifier for the context
     nonisolated var id: AnyHashable { get }
     
@@ -115,7 +115,7 @@ public extension View {
 /// Property wrapper for injected contexts
 @propertyWrapper
 @MainActor
-public struct InjectedContext<C: Context> {
+public struct InjectedContext<C: AxiomContext> {
     private let keyPath: KeyPath<ContextContainer, C>
     
     public init(_ keyPath: KeyPath<ContextContainer, C>) {
@@ -135,15 +135,15 @@ public final class ContextContainer {
     
     private init() {}
     
-    public func register<C: Context>(_ context: C, for type: C.Type) {
+    public func register<C: AxiomContext>(_ context: C, for type: C.Type) {
         storage[String(describing: type)] = context
     }
     
-    public func resolve<C: Context>(_ type: C.Type) -> C? {
+    public func resolve<C: AxiomContext>(_ type: C.Type) -> C? {
         storage[String(describing: type)] as? C
     }
     
-    subscript<C: Context>(keyPath: KeyPath<ContextContainer, C>) -> C {
+    subscript<C: AxiomContext>(keyPath: KeyPath<ContextContainer, C>) -> C {
         // This would require more sophisticated implementation
         // For now, use fatalError - proper implementation would
         // use reflection or registration patterns
@@ -155,7 +155,7 @@ public final class ContextContainer {
 
 /// Wrapper for lazy context creation
 @MainActor
-public final class LazyContext<C: Context>: ObservableObject {
+public final class LazyContext<C: AxiomContext>: ObservableObject {
     private var _context: C?
     private let create: () -> C
     
@@ -187,16 +187,16 @@ public final class LazyContext<C: Context>: ObservableObject {
 public protocol ListItemContext: ManagedContext {
     associatedtype Item: Identifiable
     var item: Item { get }
-    init(item: Item, parent: (any Context)?)
+    init(item: Item, parent: (any AxiomContext)?)
 }
 
 /// Helper for managing list contexts
 @MainActor
 public struct ListContextManager<Item: Identifiable, C: ListItemContext> where C.Item == Item {
     private let provider: ContextProvider
-    private let parent: (any Context)?
+    private let parent: (any AxiomContext)?
     
-    public init(provider: ContextProvider, parent: (any Context)?) {
+    public init(provider: ContextProvider, parent: (any AxiomContext)?) {
         self.provider = provider
         self.parent = parent
     }
@@ -214,11 +214,11 @@ public struct ListContextManager<Item: Identifiable, C: ListItemContext> where C
 
 // MARK: - Memory Management Utilities
 
-public extension Context {
+public extension AxiomContext {
     /// Automatically clean up child contexts with deallocated references
     func cleanupDetachedChildren() {
         // Only ObservableContext has childContexts property
-        if let observableContext = self as? ObservableContext {
+        if let observableContext = self as? AxiomObservableContext {
             _ = observableContext.childContexts.filter { wrapper in
                 wrapper.context != nil
             }
@@ -271,7 +271,7 @@ public func assertNoContextLeaks<T>(
 }
 
 /// Test context for leak detection
-private class TestLeakContext: ObservableContext, ManagedContext {
+private class TestLeakContext: AxiomObservableContext, ManagedContext {
     nonisolated var id: AnyHashable { "test-leak" }
     
     nonisolated func attached() {}

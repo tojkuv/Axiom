@@ -200,9 +200,9 @@ public enum ConditionalFlowStep<TrueStep: FlowStep, FalseStep: FlowStep>: FlowSt
     }
 }
 
-// MARK: - ModularNavigationService Flow Extensions
+// MARK: - AxiomModularNavigationService Flow Extensions
 
-extension ModularNavigationService {
+extension AxiomModularNavigationService {
     public func startFlow<Flow: NavigationFlow>(_ flow: Flow) async -> Result<Void, AxiomError> {
         let coordinator = FlowCoordinator(flow: flow, navigator: self)
         
@@ -239,10 +239,10 @@ public final class FlowCoordinator<Flow: NavigationFlow>: ObservableObject {
     @Published public var progress: Double = 0.0
     
     private var flow: Flow
-    private let navigator: ModularNavigationService
+    private let navigator: AxiomModularNavigationService
     private var steps: [any FlowStep] = []
     
-    public init(flow: Flow, navigator: ModularNavigationService) {
+    public init(flow: Flow, navigator: AxiomModularNavigationService) {
         self.flow = flow
         self.navigator = navigator
         self.steps = flow.body.flattened()
@@ -364,7 +364,7 @@ public protocol BusinessFlowStep: Sendable {
     var isRequired: Bool { get }
     var canSkip: Bool { get }
     var order: Int { get }
-    var route: (any TypeSafeRoute)? { get }
+    var route: (any AxiomTypeSafeRoute)? { get }
     
     func validate(data: FlowData) -> FlowValidationResult
     func onEnter(data: FlowData) async
@@ -568,9 +568,9 @@ public class BusinessFlowCoordinator: ObservableObject {
     }
 }
 
-// MARK: - ModularNavigationService Enhanced Flow Extensions
+// MARK: - AxiomModularNavigationService Enhanced Flow Extensions
 
-extension ModularNavigationService {
+extension AxiomModularNavigationService {
     /// Current active business flow
     public var currentFlow: (any BusinessNavigationFlow)? {
         // This will be enhanced in future iterations
@@ -644,7 +644,7 @@ public struct EnhancedFlowStep: BusinessFlowStep {
     public let isRequired: Bool
     public let canSkip: Bool
     public let order: Int
-    public let route: (any TypeSafeRoute)?
+    public let route: (any AxiomTypeSafeRoute)?
     
     private let validationHandler: @Sendable (FlowData) -> FlowValidationResult
     private let enterHandler: @Sendable (FlowData) async -> Void
@@ -656,7 +656,7 @@ public struct EnhancedFlowStep: BusinessFlowStep {
         order: Int,
         isRequired: Bool = true,
         canSkip: Bool = false,
-        route: (any TypeSafeRoute)? = nil,
+        route: (any AxiomTypeSafeRoute)? = nil,
         validation: @escaping @Sendable (FlowData) -> FlowValidationResult = { _ in .success },
         onEnter: @escaping @Sendable (FlowData) async -> Void = { _ in },
         onExit: @escaping @Sendable (FlowData) async throws -> Void = { _ in },
@@ -696,7 +696,7 @@ public struct ConditionalBusinessFlowStep: BusinessFlowStep {
     public let isRequired: Bool = true
     public let canSkip: Bool = false
     public let order: Int
-    public var route: (any TypeSafeRoute)? { nil } // No specific route for conditional steps
+    public var route: (any AxiomTypeSafeRoute)? { nil } // No specific route for conditional steps
     
     private let condition: @Sendable (FlowData) -> Bool
     private let trueStep: any BusinessFlowStep
@@ -883,7 +883,7 @@ private struct SubFlowStep: BusinessFlowStep {
         return originalStep.order + orderOffset
     }
     
-    var route: (any TypeSafeRoute)? {
+    var route: (any AxiomTypeSafeRoute)? {
         return originalStep.route
     }
     

@@ -3,7 +3,7 @@ import Foundation
 // MARK: - Error Categorization System
 
 /// Automatic error categorization for propagation patterns
-public enum ErrorCategory: String, CaseIterable, Sendable {
+public enum AxiomErrorCategory: String, CaseIterable, Sendable {
     case network
     case validation
     case authorization
@@ -12,7 +12,7 @@ public enum ErrorCategory: String, CaseIterable, Sendable {
     case unknown
     
     /// Automatically categorize errors based on type and content
-    public static func categorize(_ error: any Error) -> ErrorCategory {
+    public static func categorize(_ error: any Error) -> AxiomErrorCategory {
         switch error {
         case _ as URLError:
             return .network
@@ -60,10 +60,10 @@ public enum ErrorCategory: String, CaseIterable, Sendable {
 }
 
 /// Recovery strategies based on error category
-public enum PropagationRecoveryStrategy: Equatable {
+public enum AxiomPropagationRecoveryStrategy: Equatable {
     case retry(maxAttempts: Int, delay: TimeInterval)
     case fail
-    case log(level: ErrorSeverity)
+    case log(level: AxiomErrorSeverity)
 }
 
 // MARK: - Result Extensions for Error Propagation
@@ -257,28 +257,28 @@ public func withRetry<T>(
 // MARK: - Error Logging and Monitoring
 
 /// Error severity levels for logging
-public enum ErrorSeverity: Int, Comparable, Sendable {
+public enum AxiomErrorSeverity: Int, Comparable, Sendable {
     case debug = 0
     case info = 1
     case warning = 2
     case error = 3
     case critical = 4
     
-    public static func < (lhs: ErrorSeverity, rhs: ErrorSeverity) -> Bool {
+    public static func < (lhs: AxiomErrorSeverity, rhs: AxiomErrorSeverity) -> Bool {
         return lhs.rawValue < rhs.rawValue
     }
 }
 
 /// Protocol for error logging
-public protocol ErrorLogger {
-    func log(_ error: AxiomError, severity: ErrorSeverity, context: [String: Any])
+public protocol AxiomErrorLogger {
+    func log(_ error: AxiomError, severity: AxiomErrorSeverity, context: [String: Any])
 }
 
 /// Default console error logger
-public struct ConsoleErrorLogger: ErrorLogger {
+public struct AxiomConsoleErrorLogger: AxiomErrorLogger {
     public init() {}
     
-    public func log(_ error: AxiomError, severity: ErrorSeverity, context: [String: Any]) {
+    public func log(_ error: AxiomError, severity: AxiomErrorSeverity, context: [String: Any]) {
         print("[\(severity)] \(error.localizedDescription)")
         if !context.isEmpty {
             print("Context: \(context)")

@@ -225,7 +225,7 @@ public protocol PartitionableState: AxiomState {
 // MARK: - Compile-time State Ownership (REQUIREMENTS-W-01-002)
 
 /// Compile-time ownership wrapper that ensures type-safe state ownership
-public struct StateOwnership<S: AxiomState, Owner: Client> {
+public struct StateOwnership<S: AxiomState, Owner: AxiomClient> {
     public let state: S
     public let owner: Owner
     public var isValid: Bool { true }
@@ -261,7 +261,7 @@ public actor StateLifecycleManager<S: AxiomState> {
     }
     
     private let state: S
-    private let owner: any Client
+    private let owner: any AxiomClient
     private var phase: LifecyclePhase = .created
     private var activationStartTime: CFAbsoluteTime?
     private var resourceCleanupTasks: [Task<Void, Never>] = []
@@ -276,7 +276,7 @@ public actor StateLifecycleManager<S: AxiomState> {
         return Duration.seconds(duration)
     }
     
-    public init(state: S, owner: any Client) {
+    public init(state: S, owner: any AxiomClient) {
         self.state = state
         self.owner = owner
         
@@ -435,7 +435,7 @@ public struct TransferToken<S: TransferableState> {
         self.checksum = checksum
     }
     
-    public func complete<NewOwner: Client>(to newOwner: NewOwner) async throws -> S {
+    public func complete<NewOwner: AxiomClient>(to newOwner: NewOwner) async throws -> S {
         // Validate transfer integrity
         guard state.hashValue == checksum else {
             throw AxiomError.clientError(.stateUpdateFailed(

@@ -217,7 +217,7 @@ public struct StateChanges {
 
 // MARK: - Client Extension for Diffing
 
-extension Client where StateType: DiffableState {
+extension AxiomClient where StateType: DiffableState {
     /// Update state only if it differs from current state
     public func updateWithDiff(_ newState: StateType) async {
         // Need to get current state first

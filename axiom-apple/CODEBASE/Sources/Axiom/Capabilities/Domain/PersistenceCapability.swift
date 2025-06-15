@@ -2,7 +2,7 @@ import Foundation
 @preconcurrency import CoreData
 
 // Core persistence capability protocol
-public protocol PersistenceCapability: Capability {
+public protocol PersistenceCapability: AxiomCapability {
     /// Save state to persistent storage
     func save<T: Codable>(_ value: T, for key: String) async throws
     
@@ -29,7 +29,7 @@ public protocol PersistenceCapability: Capability {
 }
 
 // Persistable client protocol
-public protocol Persistable: Client {
+public protocol Persistable: AxiomClient {
     /// Keys for persisted properties
     static var persistedKeys: [String] { get }
     

@@ -6,7 +6,7 @@ import Combine
 
 /// Resource pool for managing shared resources across capabilities
 public actor CapabilityResourcePool {
-    private var resources: [String: any CapabilityResource] = [:]
+    private var resources: [String: any AxiomCapabilityResource] = [:]
     private var allocations: [String: Set<String>] = [:] // resource_id -> capability_ids
     private var reservations: [String: ResourceReservation] = [:]
     private let maxTotalUsage: ResourceUsage
@@ -16,7 +16,7 @@ public actor CapabilityResourcePool {
     }
     
     /// Register a shareable resource
-    public func registerResource<T: CapabilityResource>(_ resource: T, withId id: String) async {
+    public func registerResource<T: AxiomCapabilityResource>(_ resource: T, withId id: String) async {
         resources[id] = resource
         allocations[id] = Set()
     }
@@ -24,12 +24,12 @@ public actor CapabilityResourcePool {
     /// Request resource allocation for a capability
     public func requestResource(resourceId: String, capabilityId: String, priority: ResourcePriority = .normal) async throws {
         guard let resource = resources[resourceId] else {
-            throw CapabilityError.resourceAllocationFailed("Resource not found: \(resourceId)")
+            throw AxiomCapabilityError.resourceAllocationFailed("Resource not found: \(resourceId)")
         }
         
         // Check if resource is available
         guard await resource.isAvailable() else {
-            throw CapabilityError.resourceAllocationFailed("Resource not available: \(resourceId)")
+            throw AxiomCapabilityError.resourceAllocationFailed("Resource not available: \(resourceId)")
         }
         
         // Check total usage limits
@@ -43,12 +43,12 @@ public actor CapabilityResourcePool {
         )
         
         guard !projectedUsage.exceeds(maxTotalUsage) else {
-            throw CapabilityError.resourceAllocationFailed("Resource allocation would exceed limits")
+            throw AxiomCapabilityError.resourceAllocationFailed("Resource allocation would exceed limits")
         }
         
         // Check resource availability
         guard await resource.isAvailable() else {
-            throw CapabilityError.resourceAllocationFailed("Resource not available: \(resourceId)")
+            throw AxiomCapabilityError.resourceAllocationFailed("Resource not available: \(resourceId)")
         }
         allocations[resourceId]?.insert(capabilityId)
     }
@@ -196,10 +196,10 @@ public actor ExampleCompositeCapability: DomainCapability {
     
     private var _configuration: ExampleCompositeConfiguration
     private var _resources: ExampleCompositeResource
-    private var _environment: CapabilityEnvironment
-    private var _state: CapabilityState = .unknown
+    private var _environment: AxiomCapabilityEnvironment
+    private var _state: AxiomCapabilityState = .unknown
     private var _activationTimeout: Duration = .milliseconds(10)
-    private var stateStreamContinuation: AsyncStream<CapabilityState>.Continuation?
+    private var stateStreamContinuation: AsyncStream<AxiomCapabilityState>.Continuation?
     
     // Composed capabilities
     private var analyticsCapability: AnalyticsCapability?
@@ -207,7 +207,7 @@ public actor ExampleCompositeCapability: DomainCapability {
     
     public init(
         configuration: ExampleCompositeConfiguration,
-        environment: CapabilityEnvironment = CapabilityEnvironment(isDebug: true)
+        environment: AxiomCapabilityEnvironment = AxiomCapabilityEnvironment(isDebug: true)
     ) {
         self._configuration = configuration
         self._resources = ExampleCompositeResource(configuration: configuration)
@@ -224,7 +224,7 @@ public actor ExampleCompositeCapability: DomainCapability {
         get async { _resources }
     }
     
-    public var environment: CapabilityEnvironment {
+    public var environment: AxiomCapabilityEnvironment {
         get async { _environment }
     }
     
@@ -233,7 +233,7 @@ public actor ExampleCompositeCapability: DomainCapability {
         _resources = ExampleCompositeResource(configuration: _configuration)
     }
     
-    public func handleEnvironmentChange(_ environment: CapabilityEnvironment) async {
+    public func handleEnvironmentChange(_ environment: AxiomCapabilityEnvironment) async {
         _environment = environment
         let adjustedConfig = _configuration.adjusted(for: environment)
         try? await updateConfiguration(adjustedConfig)
@@ -241,11 +241,11 @@ public actor ExampleCompositeCapability: DomainCapability {
     
     // MARK: - ExtendedCapability Protocol
     
-    public var state: CapabilityState {
+    public var state: AxiomCapabilityState {
         get async { _state }
     }
     
-    public var stateStream: AsyncStream<CapabilityState> {
+    public var stateStream: AsyncStream<AxiomCapabilityState> {
         get async {
             AsyncStream { continuation in
                 continuation.yield(_state)
@@ -331,7 +331,7 @@ public actor ExampleCompositeCapability: DomainCapability {
 }
 
 /// Configuration for example composite capability
-public struct ExampleCompositeConfiguration: CapabilityConfiguration {
+public struct ExampleCompositeConfiguration: AxiomCapabilityConfiguration {
     public let enableAnalytics: Bool
     public let enableML: Bool
     public let analyticsConfig: AnalyticsCapabilityConfiguration
@@ -362,7 +362,7 @@ public struct ExampleCompositeConfiguration: CapabilityConfiguration {
         )
     }
     
-    public func adjusted(for environment: CapabilityEnvironment) -> ExampleCompositeConfiguration {
+    public func adjusted(for environment: AxiomCapabilityEnvironment) -> ExampleCompositeConfiguration {
         ExampleCompositeConfiguration(
             enableAnalytics: enableAnalytics,
             enableML: enableML && !environment.isDebug, // Disable ML in debug for performance
@@ -373,7 +373,7 @@ public struct ExampleCompositeConfiguration: CapabilityConfiguration {
 }
 
 /// Resource management for example composite capability
-public actor ExampleCompositeResource: CapabilityResource {
+public actor ExampleCompositeResource: AxiomCapabilityResource {
     private let configuration: ExampleCompositeConfiguration
     
     public init(configuration: ExampleCompositeConfiguration) {
@@ -404,7 +404,7 @@ public actor ExampleCompositeResource: CapabilityResource {
     
     public func allocate() async throws {
         guard await isAvailable() else {
-            throw CapabilityError.resourceAllocationFailed("Insufficient resources for composite capability")
+            throw AxiomCapabilityError.resourceAllocationFailed("Insufficient resources for composite capability")
         }
     }
 }
@@ -413,14 +413,14 @@ public actor ExampleCompositeResource: CapabilityResource {
 
 /// Utility for managing resource lifecycle across capabilities
 public actor ResourceLifecycleManager {
-    private var allocatedResources: [String: [any CapabilityResource]] = [:]
+    private var allocatedResources: [String: [any AxiomCapabilityResource]] = [:]
     private var resourceUsageHistory: [String: [ResourceUsage]] = [:]
     private let maxHistorySize = 100
     
     public init() {}
     
     /// Track resource allocation for a capability
-    public func trackAllocation(capabilityId: String, resource: any CapabilityResource) async {
+    public func trackAllocation(capabilityId: String, resource: any AxiomCapabilityResource) async {
         allocatedResources[capabilityId, default: []].append(resource)
         
         // Record usage snapshot

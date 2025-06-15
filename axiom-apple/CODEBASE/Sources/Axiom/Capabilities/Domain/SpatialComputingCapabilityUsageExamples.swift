@@ -315,7 +315,7 @@ public struct SpatialComputingUsageExamples {
         print("- Hand tracking accuracy: \(normalConfig.handTrackingAccuracy)")
         
         // Simulate low power mode
-        let lowPowerEnvironment = CapabilityEnvironment(
+        let lowPowerEnvironment = AxiomCapabilityEnvironment(
             isLowPowerMode: true,
             hasNetworkConnection: true,
             deviceClass: .phone
@@ -387,7 +387,7 @@ public struct SpatialComputingUsageExamples {
             do {
                 let entityId = try await capability.createEntity(at: SIMD3<Float>(0, 1, -2))
                 print("Entity created successfully: \(entityId)")
-            } catch CapabilityError.resourceAllocationFailed(let reason) {
+            } catch AxiomCapabilityError.resourceAllocationFailed(let reason) {
                 print("Resource allocation failed: \(reason)")
                 // Handle gracefully - maybe reduce quality or show message
             }
@@ -396,14 +396,14 @@ public struct SpatialComputingUsageExamples {
             do {
                 let audioData = Data(count: 1024)
                 try await capability.playSpatialAudio(data: audioData, at: SIMD3<Float>(0, 0, -1))
-            } catch CapabilityError.notAvailable(let feature) {
+            } catch AxiomCapabilityError.notAvailable(let feature) {
                 print("Spatial audio not available: \(feature)")
                 // Fall back to regular audio
             }
             
-        } catch CapabilityError.initializationFailed(let reason) {
+        } catch AxiomCapabilityError.initializationFailed(let reason) {
             print("Failed to initialize spatial computing: \(reason)")
-        } catch CapabilityError.permissionRequired(let permission) {
+        } catch AxiomCapabilityError.permissionRequired(let permission) {
             print("Permission required: \(permission)")
             // Guide user to settings or request permission
         } catch {

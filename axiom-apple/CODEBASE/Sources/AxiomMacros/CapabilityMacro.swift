@@ -27,22 +27,22 @@ public struct CapabilityMacro: MemberMacro {
             
             // State management
             """
-            private var _state: CapabilityState = .unknown
+            private var _state: AxiomCapabilityState = .unknown
             """,
             """
-            private var stateStreamContinuation: AsyncStream<CapabilityState>.Continuation?
+            private var stateStreamContinuation: AsyncStream<AxiomCapabilityState>.Continuation?
             """,
             
             // State property
             """
-            public var state: CapabilityState {
+            public var state: AxiomCapabilityState {
                 get async { _state }
             }
             """,
             
             // State stream
             """
-            public var stateStream: AsyncStream<CapabilityState> {
+            public var stateStream: AsyncStream<AxiomCapabilityState> {
                 get async {
                     AsyncStream { continuation in
                         self.stateStreamContinuation = continuation
@@ -86,7 +86,7 @@ public struct CapabilityMacro: MemberMacro {
             
             // State transition helper
             """
-            private func transitionTo(_ newState: CapabilityState) async {
+            private func transitionTo(_ newState: AxiomCapabilityState) async {
                 guard _state != newState else { return }
                 _state = newState
                 stateStreamContinuation?.yield(newState)

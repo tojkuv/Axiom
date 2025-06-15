@@ -3,9 +3,9 @@ import SwiftUI
 
 // MARK: - Modular Navigation Service (Temporary stub for build compatibility)
 
-/// Temporary stub for ModularNavigationService to ensure build compatibility
+/// Temporary stub for AxiomModularNavigationService to ensure build compatibility
 @MainActor
-public final class ModularNavigationService: ObservableObject {
+public final class AxiomModularNavigationService: ObservableObject {
     @Published public var currentRoute: String = "/"
     @Published public var navigationStack: [String] = []
     

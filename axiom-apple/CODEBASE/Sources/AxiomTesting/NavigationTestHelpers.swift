@@ -211,7 +211,7 @@ public struct NavigationTestHelpers {
     // MARK: - Context Integration Testing
     
     /// Assert navigation with context state changes
-    public static func assertContextNavigation<N: NavigationService, C: Context>(
+    public static func assertContextNavigation<N: NavigationService, C: AxiomContext>(
         navigator: N,
         context: C,
         action: Any,
@@ -245,7 +245,7 @@ public struct NavigationTestHelpers {
     }
     
     /// Assert context synchronization with navigation
-    public static func assertContextSynchronization<N: NavigationService, C: Context>(
+    public static func assertContextSynchronization<N: NavigationService, C: AxiomContext>(
         navigator: N,
         context: C,
         expectedState: @escaping @Sendable (C) -> Bool,

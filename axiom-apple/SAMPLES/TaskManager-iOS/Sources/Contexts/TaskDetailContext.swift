@@ -15,7 +15,7 @@ import Axiom
 
 /// Context for viewing and editing a single task on iOS
 @MainActor
-public final class TaskDetailContext: ClientObservingContext<TaskClient> {
+public final class TaskDetailContext: AxiomClientObservingContext<TaskClient> {
     
     // MARK: - Published Properties
     @Published public private(set) var task: Task?

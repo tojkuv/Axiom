@@ -10,7 +10,7 @@ import TaskManager_Shared
 
 /// Context for displaying comprehensive task statistics and analytics on macOS
 @MainActor
-public final class TaskStatisticsContext: ClientObservingContext<TaskClient> {
+public final class TaskStatisticsContext: AxiomClientObservingContext<TaskClient> {
     
     // MARK: - Published Properties
     

@@ -211,7 +211,7 @@ final class ContextProtocolTests: XCTestCase {
 
 // Basic test context
 @MainActor
-class ProtocolTestContext: Context {
+class ProtocolTestContext: AxiomContext {
     private(set) var appearCount = 0
     private(set) var disappearCount = 0
     private(set) var isActive = false
@@ -236,7 +236,7 @@ class ProtocolTestContext: Context {
 
 // Observable context for testing observation
 @MainActor
-class ObservableProtocolTestContext: Context {
+class ObservableProtocolTestContext: AxiomContext {
     @Published private(set) var state = ""
     @Published private(set) var counter = 0
     @Published private(set) var flag = false
@@ -259,7 +259,7 @@ class ObservableProtocolTestContext: Context {
 
 // Context that observes a client
 @MainActor
-class TestClientObservingContext: Context {
+class TestClientObservingContext: AxiomContext {
     private let client: MockContextClient
     private(set) var observedStates: [ContextClientState] = []
     private var observationTask: Task<Void, Never>?
@@ -287,7 +287,7 @@ class TestClientObservingContext: Context {
 
 // Memory test context
 @MainActor
-class MemoryProtocolTestContext: Context {
+class MemoryProtocolTestContext: AxiomContext {
     private var actions: [ProtocolTestContextAction] = []
     private(set) var processedActionCount = 0
     
@@ -325,7 +325,7 @@ class MemoryProtocolTestContext: Context {
 
 // Weak reference test context
 @MainActor
-class WeakReferenceContext: Context {
+class WeakReferenceContext: AxiomContext {
     private weak var client: MockContextClient?
     
     var hasAttachedClient: Bool {
@@ -342,7 +342,7 @@ class WeakReferenceContext: Context {
 
 // Error handling context
 @MainActor
-class ErrorHandlingContext: Context {
+class ErrorHandlingContext: AxiomContext {
     private let client: ErrorThrowingContextClient
     private(set) var handledErrorCount = 0
     private(set) var lastError: Error?
@@ -370,7 +370,7 @@ class ErrorHandlingContext: Context {
 }
 
 // Test client for context observation
-actor MockContextClient: Client {
+actor MockContextClient: AxiomClient {
     typealias StateType = ContextClientState
     typealias ActionType = ContextClientAction
     

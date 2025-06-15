@@ -5,28 +5,28 @@ import CoreLocation
 import Network
 
 /// Service for discovering and validating system and custom capabilities
-public actor CapabilityDiscoveryService {
-    public static let shared = CapabilityDiscoveryService()
+public actor AxiomCapabilityDiscoveryService {
+    public static let shared = AxiomCapabilityDiscoveryService()
     
-    private var registeredCapabilities: [String: CapabilityRegistration] = [:]
+    private var registeredCapabilities: [String: AxiomCapabilityRegistration] = [:]
     private var discoveredCapabilities: Set<String> = []
     private let discoveryQueue = AsyncStream<DiscoveryRequest>.makeStream()
     
     private init() {}
     
-    public struct CapabilityRegistration {
+    public struct AxiomCapabilityRegistration {
         let identifier: String
-        let capability: any Capability
+        let capability: any AxiomCapability
         let requirements: Set<Requirement>
         let validator: () async -> Bool
-        let metadata: CapabilityMetadata
+        let metadata: AxiomCapabilityMetadata
         
         public init(
             identifier: String,
-            capability: any Capability,
+            capability: any AxiomCapability,
             requirements: Set<Requirement>,
             validator: @escaping () async -> Bool,
-            metadata: CapabilityMetadata
+            metadata: AxiomCapabilityMetadata
         ) {
             self.identifier = identifier
             self.capability = capability
@@ -65,15 +65,15 @@ public actor CapabilityDiscoveryService {
     
     /// Register a capability with the discovery service
     public func register(
-        capability: any Capability,
+        capability: any AxiomCapability,
         identifier: String? = nil,
         requirements: Set<Requirement> = [],
         validator: @escaping () async -> Bool = { true },
-        metadata: CapabilityMetadata
+        metadata: AxiomCapabilityMetadata
     ) async {
         let capabilityId = identifier ?? String(describing: type(of: capability))
         
-        let registration = CapabilityRegistration(
+        let registration = AxiomCapabilityRegistration(
             identifier: capabilityId,
             capability: capability,
             requirements: requirements,
@@ -96,27 +96,27 @@ public actor CapabilityDiscoveryService {
         
         // Discover registered capabilities
         for (identifier, registration) in registeredCapabilities {
-            let isAvailable = await validateCapability(registration)
+            let isAvailable = await validateAxiomCapability(registration)
             if isAvailable {
                 discoveredCapabilities.insert(identifier)
-                await notifyCapabilityDiscovered(identifier)
+                await notifyAxiomCapabilityDiscovered(identifier)
             }
         }
     }
     
     /// Check if a specific capability type is available
-    public func hasCapability<C: Capability>(_ type: C.Type) -> Bool {
+    public func hasAxiomCapability<C: AxiomCapability>(_ type: C.Type) -> Bool {
         let identifier = String(describing: type)
         return discoveredCapabilities.contains(identifier)
     }
     
     /// Check if a capability by identifier is available
-    public func hasCapability(_ identifier: String) async -> Bool {
+    public func hasAxiomCapability(_ identifier: String) async -> Bool {
         return discoveredCapabilities.contains(identifier)
     }
     
     /// Get an instance of a specific capability type
-    public func capability<C: Capability>(_ type: C.Type) async -> C? {
+    public func capability<C: AxiomCapability>(_ type: C.Type) async -> C? {
         let identifier = String(describing: type)
         guard discoveredCapabilities.contains(identifier),
               let registration = registeredCapabilities[identifier],
@@ -127,7 +127,7 @@ public actor CapabilityDiscoveryService {
     }
     
     /// Get capability by identifier
-    public func capability(_ identifier: String) async -> (any Capability)? {
+    public func capability(_ identifier: String) async -> (any AxiomCapability)? {
         guard discoveredCapabilities.contains(identifier),
               let registration = registeredCapabilities[identifier] else {
             return nil
@@ -136,34 +136,34 @@ public actor CapabilityDiscoveryService {
     }
     
     /// Notify that a capability has been registered
-    public func capabilityRegistered(_ registration: CapabilityRegistration) async {
+    public func capabilityRegistered(_ registration: AxiomCapabilityRegistration) async {
         // Process immediate discovery for the new capability
-        let isAvailable = await validateCapability(registration)
+        let isAvailable = await validateAxiomCapability(registration)
         if isAvailable {
             discoveredCapabilities.insert(registration.identifier)
-            await notifyCapabilityDiscovered(registration.identifier)
+            await notifyAxiomCapabilityDiscovered(registration.identifier)
         }
     }
     
     /// Handle capability becoming available
     public func capabilityBecameAvailable(_ identifier: String) async {
         discoveredCapabilities.insert(identifier)
-        await notifyCapabilityDiscovered(identifier)
+        await notifyAxiomCapabilityDiscovered(identifier)
     }
     
     /// Handle capability becoming unavailable
     public func capabilityBecameUnavailable(_ identifier: String) async {
         discoveredCapabilities.remove(identifier)
-        await notifyCapabilityLost(identifier)
+        await notifyAxiomCapabilityLost(identifier)
     }
     
     /// Get all discovered capability identifiers
-    public func discoveredCapabilityIds() -> Set<String> {
+    public func discoveredAxiomCapabilityIds() -> Set<String> {
         return discoveredCapabilities
     }
     
     /// Validate a capability against its requirements
-    private func validateCapability(_ registration: CapabilityRegistration) async -> Bool {
+    private func validateAxiomCapability(_ registration: AxiomCapabilityRegistration) async -> Bool {
         // Check all requirements
         for requirement in registration.requirements {
             let isMet = await checkRequirement(requirement)
@@ -218,7 +218,7 @@ public actor CapabilityDiscoveryService {
         
         // Network capability
         let monitor = NWPathMonitor()
-        let queue = DispatchQueue(label: "NetworkCapabilityCheck")
+        let queue = DispatchQueue(label: "NetworkAxiomCapabilityCheck")
         monitor.start(queue: queue)
         
         // Check current network state
@@ -247,22 +247,22 @@ public actor CapabilityDiscoveryService {
             return
         }
         
-        let isAvailable = await validateCapability(registration)
+        let isAvailable = await validateAxiomCapability(registration)
         let wasAvailable = discoveredCapabilities.contains(request.identifier)
         
         if isAvailable != wasAvailable {
             if isAvailable {
                 discoveredCapabilities.insert(request.identifier)
-                await notifyCapabilityDiscovered(request.identifier)
+                await notifyAxiomCapabilityDiscovered(request.identifier)
             } else {
                 discoveredCapabilities.remove(request.identifier)
-                await notifyCapabilityLost(request.identifier)
+                await notifyAxiomCapabilityLost(request.identifier)
             }
         }
     }
     
     /// Notify observers that a capability was discovered
-    private func notifyCapabilityDiscovered(_ identifier: String) async {
+    private func notifyAxiomCapabilityDiscovered(_ identifier: String) async {
         NotificationCenter.default.post(
             name: .capabilityBecameAvailable,
             object: nil,
@@ -271,7 +271,7 @@ public actor CapabilityDiscoveryService {
     }
     
     /// Notify observers that a capability was lost
-    private func notifyCapabilityLost(_ identifier: String) async {
+    private func notifyAxiomCapabilityLost(_ identifier: String) async {
         NotificationCenter.default.post(
             name: .capabilityBecameUnavailable,
             object: nil,
@@ -392,13 +392,13 @@ private actor HardwareDetection {
 // MARK: - Notification Extensions
 
 extension Notification.Name {
-    static let capabilityBecameAvailable = Notification.Name("CapabilityBecameAvailable")
-    static let capabilityBecameUnavailable = Notification.Name("CapabilityBecameUnavailable")
+    static let capabilityBecameAvailable = Notification.Name("AxiomCapabilityBecameAvailable")
+    static let capabilityBecameUnavailable = Notification.Name("AxiomCapabilityBecameUnavailable")
 }
 
-// MARK: - Capability Metadata
+// MARK: - AxiomCapability Metadata
 
-public struct CapabilityMetadata: Sendable {
+public struct AxiomCapabilityMetadata: Sendable {
     public let name: String?
     public let description: String
     public let version: String

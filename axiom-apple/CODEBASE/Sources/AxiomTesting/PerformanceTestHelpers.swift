@@ -378,7 +378,7 @@ public struct PerformanceTestHelpers {
     // MARK: - Context-Specific Testing
     
     /// Test context performance under load
-    public static func testContextPerformance<C: Context>(
+    public static func testContextPerformance<C: AxiomContext>(
         context: C,
         actionCount: Int = 1000,
         concurrentClients: Int = 10

@@ -1,8 +1,8 @@
 import Foundation
 
-// MARK: - ObservableClient Mutation Implementation
+// MARK: - AxiomObservableClient Mutation Implementation
 
-extension ObservableClient: MutableClient {
+extension AxiomObservableClient: MutableClient {
     /// Perform a state mutation with automatic immutability preservation
     @MainActor
     @discardableResult
@@ -361,9 +361,9 @@ public struct StateDiff<S> {
     }
 }
 
-// MARK: - Enhanced ObservableClient with Stream Builder
+// MARK: - Enhanced AxiomObservableClient with Stream Builder
 
-extension ObservableClient {
+extension AxiomObservableClient {
     /// Create an optimized state stream using the builder pattern
     public var optimizedStateStream: AsyncStream<S> {
         get async {

@@ -13,67 +13,67 @@ import SwiftUI
 /// - Creates contexts with dependency injection
 /// - Monitors capability availability
 /// - Manages navigation state
-public protocol Orchestrator: Actor {
+public protocol AxiomOrchestrator: Actor {
     /// Create a context for a presentation type
-    func createContext<P: Presentation>(
+    func createContext<P: AxiomPresentation>(
         for presentation: P.Type
     ) async -> P.ContextType
     
     /// Navigate to a route
-    func navigate(to route: any TypeSafeRoute) async
+    func navigate(to route: any AxiomTypeSafeRoute) async
 }
 
 // MARK: - Extended Orchestrator Protocol
 
 /// Extended orchestrator with additional capabilities
-public protocol ExtendedOrchestrator: Orchestrator {
+public protocol AxiomExtendedOrchestrator: AxiomOrchestrator {
     /// Create a context with explicit type and configuration
-    func createContext<T: Context & Sendable>(
+    func createContext<T: AxiomContext & Sendable>(
         type: T.Type,
         identifier: String?,
         dependencies: [String]
     ) async throws -> T
     
     /// Register a client for dependency injection
-    func registerClient<C: Client>(_ client: C, for key: String) async
+    func registerClient<C: AxiomClient>(_ client: C, for key: String) async
     
     /// Register a capability for monitoring
-    func registerCapability<C: Capability>(_ capability: C, for key: String) async
+    func registerCapability<C: AxiomCapability>(_ capability: C, for key: String) async
     
     /// Check if a capability is available
     func isCapabilityAvailable(_ key: String) async -> Bool
     
     /// Get a context builder for fluent configuration
-    func contextBuilder<T: Context>(for type: T.Type) async -> OrchestratorContextBuilder<T>
+    func contextBuilder<T: AxiomContext>(for type: T.Type) async -> AxiomOrchestratorContextBuilder<T>
 }
 
 
 // MARK: - Standard Orchestrator Implementation
 
 /// Standard implementation providing common orchestrator behaviors
-public actor StandardOrchestrator: ExtendedOrchestrator {
+public actor AxiomStandardOrchestrator: AxiomExtendedOrchestrator {
     /// Registered contexts
-    private var contexts: [String: any Context] = [:]
+    private var contexts: [String: any AxiomContext] = [:]
     
     /// Registered clients for dependency injection
-    private var clients: [String: any Client] = [:]
+    private var clients: [String: any AxiomClient] = [:]
     
     /// Registered capabilities
-    private var capabilities: [String: any Capability] = [:]
+    private var capabilities: [String: any AxiomCapability] = [:]
     
     /// Current navigation route
-    public private(set) var currentRoute: (any TypeSafeRoute)?
+    public private(set) var currentRoute: (any AxiomTypeSafeRoute)?
     
     /// Navigation history
-    public private(set) var navigationHistory: [any TypeSafeRoute] = []
+    public private(set) var navigationHistory: [any AxiomTypeSafeRoute] = []
     
     /// Route handlers
-    private var routeHandlers: [AnyHashable: (any TypeSafeRoute) async -> any Context] = [:]
+    private var routeHandlers: [AnyHashable: (any AxiomTypeSafeRoute) async -> any AxiomContext] = [:]
     
     public init() {}
     
     /// Create context for presentation
-    public func createContext<P: Presentation>(
+    public func createContext<P: AxiomPresentation>(
         for presentation: P.Type
     ) async -> P.ContextType {
         // Default implementation - this should be overridden by subclasses
@@ -82,7 +82,7 @@ public actor StandardOrchestrator: ExtendedOrchestrator {
     }
     
     /// Create context with configuration
-    public func createContext<T: Context & Sendable>(
+    public func createContext<T: AxiomContext & Sendable>(
         type: T.Type,
         identifier: String? = nil,
         dependencies: [String] = []
@@ -99,17 +99,17 @@ public actor StandardOrchestrator: ExtendedOrchestrator {
     }
     
     /// Register a client
-    public func registerClient<C: Client>(_ client: C, for key: String) async {
+    public func registerClient<C: AxiomClient>(_ client: C, for key: String) async {
         clients[key] = client
     }
     
     /// Get a registered client
-    public func client<C: Client>(for key: String, as type: C.Type) async -> C? {
+    public func client<C: AxiomClient>(for key: String, as type: C.Type) async -> C? {
         clients[key] as? C
     }
     
     /// Register a capability
-    public func registerCapability<C: Capability>(_ capability: C, for key: String) async {
+    public func registerCapability<C: AxiomCapability>(_ capability: C, for key: String) async {
         capabilities[key] = capability
     }
     
@@ -120,12 +120,12 @@ public actor StandardOrchestrator: ExtendedOrchestrator {
     }
     
     /// Get context builder
-    public func contextBuilder<T: Context>(for type: T.Type) async -> OrchestratorContextBuilder<T> {
-        OrchestratorContextBuilder(orchestrator: self, contextType: type)
+    public func contextBuilder<T: AxiomContext>(for type: T.Type) async -> AxiomOrchestratorContextBuilder<T> {
+        AxiomOrchestratorContextBuilder(orchestrator: self, contextType: type)
     }
     
     /// Navigate to route
-    public func navigate(to route: any TypeSafeRoute) async {
+    public func navigate(to route: any AxiomTypeSafeRoute) async {
         currentRoute = route
         navigationHistory.append(route)
         
@@ -137,9 +137,9 @@ public actor StandardOrchestrator: ExtendedOrchestrator {
     }
     
     /// Register route handler
-    public func registerRoute<R: TypeSafeRoute>(
+    public func registerRoute<R: AxiomTypeSafeRoute>(
         _ route: R,
-        handler: @escaping (R) async -> any Context
+        handler: @escaping (R) async -> any AxiomContext
     ) async {
         routeHandlers[AnyHashable(route)] = { anyRoute in
             if let typedRoute = anyRoute as? R {
@@ -174,7 +174,7 @@ public actor StandardOrchestrator: ExtendedOrchestrator {
     }
     
     /// Store a context
-    public func storeContext(_ context: any Context, for identifier: String) async {
+    public func storeContext(_ context: any AxiomContext, for identifier: String) async {
         contexts[identifier] = context
     }
 }
@@ -182,16 +182,16 @@ public actor StandardOrchestrator: ExtendedOrchestrator {
 // MARK: - Context Builder
 
 /// Fluent builder for context configuration with enhanced features
-public final class OrchestratorContextBuilder<T: Context>: @unchecked Sendable {
-    private let orchestrator: any ExtendedOrchestrator
+public final class AxiomOrchestratorContextBuilder<T: AxiomContext>: @unchecked Sendable {
+    private let orchestrator: any AxiomExtendedOrchestrator
     private let contextType: T.Type
     private var identifier: String?
     private var dependencies: [String] = []
     private var configurations: [(T) async -> Void] = []
     private var errorHandlers: [(any Error) async -> Void] = []
-    private var lifecycleHooks: [(hook: LifecycleHook, action: (T) async -> Void)] = []
+    private var lifecycleHooks: [(hook: AxiomLifecycleHook, action: (T) async -> Void)] = []
     
-    public init(orchestrator: any ExtendedOrchestrator, contextType: T.Type) {
+    public init(orchestrator: any AxiomExtendedOrchestrator, contextType: T.Type) {
         self.orchestrator = orchestrator
         self.contextType = contextType
     }
@@ -227,7 +227,7 @@ public final class OrchestratorContextBuilder<T: Context>: @unchecked Sendable {
     }
     
     /// Add lifecycle hook
-    public func withLifecycleHook(_ hook: LifecycleHook, action: @escaping (T) async -> Void) -> Self {
+    public func withLifecycleHook(_ hook: AxiomLifecycleHook, action: @escaping (T) async -> Void) -> Self {
         lifecycleHooks.append((hook, action))
         return self
     }
@@ -263,7 +263,7 @@ public final class OrchestratorContextBuilder<T: Context>: @unchecked Sendable {
 }
 
 /// Lifecycle hooks for context creation
-public enum LifecycleHook {
+public enum AxiomLifecycleHook {
     case afterCreation
     case beforeConfiguration
     case afterConfiguration
@@ -273,15 +273,15 @@ public enum LifecycleHook {
 // MARK: - Navigation Manager
 
 /// Dedicated navigation management
-public actor NavigationManager {
+public actor AxiomNavigationManager {
     /// Current route stack
-    private var routeStack: [any TypeSafeRoute] = []
+    private var routeStack: [any AxiomTypeSafeRoute] = []
     
     /// Navigation handlers
     private var handlers: [AnyHashable: () async -> Void] = [:]
     
     /// Push a route
-    public func push(_ route: any TypeSafeRoute) async {
+    public func push(_ route: any AxiomTypeSafeRoute) async {
         routeStack.append(route)
         if let handler = handlers[AnyHashable(route)] {
             await handler()
@@ -289,8 +289,8 @@ public actor NavigationManager {
     }
     
     /// Pop current route
-    @discardableResult
-    public func pop() async -> Route? {
+@discardableResult
+    public func pop() async -> AxiomRoute? {
         guard !routeStack.isEmpty else { return nil }
         return routeStack.removeLast()
     }
@@ -301,17 +301,17 @@ public actor NavigationManager {
     }
     
     /// Register navigation handler
-    public func registerHandler(for route: any TypeSafeRoute, handler: @escaping () async -> Void) {
+    public func registerHandler(for route: any AxiomTypeSafeRoute, handler: @escaping () async -> Void) {
         handlers[AnyHashable(route)] = handler
     }
     
     /// Current route
-    public var currentRoute: (any TypeSafeRoute)? {
+    public var currentRoute: (any AxiomTypeSafeRoute)? {
         routeStack.last
     }
     
     /// Full navigation stack
-    public var stack: [Route] {
+    public var stack: [AxiomRoute] {
         routeStack
     }
 }
@@ -319,7 +319,7 @@ public actor NavigationManager {
 // MARK: - Dependency Resolution
 
 /// Protocol for dependency resolution
-public protocol DependencyResolver: Actor {
+public protocol AxiomDependencyResolver: Actor {
     /// Resolve a dependency by key
     func resolve<T>(_ key: String, as type: T.Type) async -> T?
     
@@ -333,35 +333,35 @@ public protocol DependencyResolver: Actor {
 // MARK: - Orchestrator Factory
 
 /// Factory for creating orchestrators with builder pattern
-public struct OrchestratorFactory {
+public struct AxiomOrchestratorFactory {
     /// Create a default orchestrator
-    public static func createDefault() -> any Orchestrator {
-        StandardOrchestrator()
+    public static func createDefault() -> any AxiomOrchestrator {
+        AxiomStandardOrchestrator()
     }
     
     /// Create an orchestrator with custom configuration
-    public static func create(
-        with configuration: OrchestratorConfiguration
-    ) -> any Orchestrator {
+public static func create(
+        with configuration: AxiomOrchestratorConfiguration
+    ) -> any AxiomOrchestrator {
         // In production, this would create configured orchestrators
-        StandardOrchestrator()
+        AxiomStandardOrchestrator()
     }
     
     /// Create orchestrator with builder
-    public static func builder() -> OrchestratorBuilder {
-        OrchestratorBuilder()
+    public static func builder() -> AxiomOrchestratorBuilder {
+        AxiomOrchestratorBuilder()
     }
 }
 
 // MARK: - Orchestrator Builder
 
 /// Builder for creating configured orchestrators
-public final class OrchestratorBuilder {
+public final class AxiomOrchestratorBuilder {
     private var navigationEnabled = true
     private var capabilityMonitoringEnabled = true
     private var maxContextCount = 100
-    private var preregisteredClients: [(String, any Client)] = []
-    private var preregisteredCapabilities: [(String, any Capability)] = []
+    private var preregisteredClients: [(String, any AxiomClient)] = []
+    private var preregisteredCapabilities: [(String, any AxiomCapability)] = []
     
     /// Enable or disable navigation
     public func withNavigation(_ enabled: Bool) -> Self {
@@ -382,26 +382,26 @@ public final class OrchestratorBuilder {
     }
     
     /// Pre-register a client
-    public func withClient<C: Client>(_ client: C, for key: String) -> Self {
+    public func withClient<C: AxiomClient>(_ client: C, for key: String) -> Self {
         preregisteredClients.append((key, client))
         return self
     }
     
     /// Pre-register a capability
-    public func withCapability<C: Capability>(_ capability: C, for key: String) -> Self {
+    public func withCapability<C: AxiomCapability>(_ capability: C, for key: String) -> Self {
         preregisteredCapabilities.append((key, capability))
         return self
     }
     
     /// Build the orchestrator
-    public func build() async -> any ExtendedOrchestrator {
-        _ = OrchestratorConfiguration(
+    public func build() async -> any AxiomExtendedOrchestrator {
+        _ = AxiomOrchestratorConfiguration(
             navigationEnabled: navigationEnabled,
             capabilityMonitoringEnabled: capabilityMonitoringEnabled,
             maxContextCount: maxContextCount
         )
         
-        let orchestrator = StandardOrchestrator()
+        let orchestrator = AxiomStandardOrchestrator()
         
         // Register pre-configured items
         for (key, client) in preregisteredClients {
@@ -417,7 +417,7 @@ public final class OrchestratorBuilder {
 }
 
 /// Configuration for orchestrator creation
-public struct OrchestratorConfiguration {
+public struct AxiomOrchestratorConfiguration {
     /// Enable navigation support
     public let navigationEnabled: Bool
     
@@ -456,7 +456,7 @@ public struct OrchestratorConfiguration {
 // MARK: - Performance Monitoring
 
 /// Performance metrics for orchestrator operations
-public struct OrchestratorPerformanceMetrics {
+public struct AxiomOrchestratorPerformanceMetrics {
     public let averageContextCreationTime: Duration
     public let totalContextsCreated: Int
     public let totalNavigations: Int

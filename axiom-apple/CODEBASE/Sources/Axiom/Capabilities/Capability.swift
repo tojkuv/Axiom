@@ -10,7 +10,7 @@
 /// - Manages lifecycle states: available, unavailable, restricted, unknown
 /// - Provides async initialization and termination
 /// - State transitions must complete in < 10ms
-public protocol Capability: Actor {
+public protocol AxiomCapability: Actor {
     /// Indicates whether the capability is currently available for use
     var isAvailable: Bool { get async }
     
@@ -25,7 +25,7 @@ public protocol Capability: Actor {
 // MARK: - Capability State
 
 /// Represents the current state of a capability
-public enum CapabilityState: Equatable, Sendable {
+public enum AxiomCapabilityState: Equatable, Sendable {
     /// The capability is available and ready for use
     case available
     /// The capability is not available (e.g., hardware not present)
@@ -37,7 +37,7 @@ public enum CapabilityState: Equatable, Sendable {
 }
 
 /// Capability status for internal state management
-public enum CapabilityStatus: Equatable, Sendable {
+public enum AxiomCapabilityStatus: Equatable, Sendable {
     /// The capability is idle and not currently active
     case idle
     /// The capability is ready for use
@@ -51,7 +51,7 @@ public enum CapabilityStatus: Equatable, Sendable {
 // MARK: - Capability Type
 
 /// Represents different types of capabilities supported by the framework
-public enum CapabilityType: Sendable {
+public enum AxiomCapabilityType: Sendable {
     case network
     case persistence
     case hardware
@@ -78,7 +78,7 @@ public enum CapabilityType: Sendable {
         }
     }
     
-    public static var allCases: [CapabilityType] {
+    public static var allCases: [AxiomCapabilityType] {
         return [.network, .persistence, .hardware, .media, .analytics, .payment, .ml, .service, .navigation]
     }
 }
@@ -96,18 +96,18 @@ public enum CapabilityType: Sendable {
 /// - State observation support
 /// - Unified lifecycle protocol adoption
 /// - Configurable timeout management
-public actor StandardCapability: Capability, Lifecycle {
+public actor AxiomStandardCapability: AxiomCapability, AxiomLifecycle {
     /// Current state of the capability
-    public private(set) var state: CapabilityState = .unknown
+    public private(set) var state: AxiomCapabilityState = .unknown
     
     /// Stream of state changes for observation
-    private var stateStreamContinuation: AsyncStream<CapabilityState>.Continuation?
+    private var stateStreamContinuation: AsyncStream<AxiomCapabilityState>.Continuation?
     
     /// Configured activation timeout
     private var _activationTimeout: Duration = .milliseconds(10)
     
     /// Creates a stream of state changes
-    public var stateStream: AsyncStream<CapabilityState> {
+    public var stateStream: AsyncStream<AxiomCapabilityState> {
         AsyncStream { [weak self] continuation in
             Task { [weak self] in
                 await self?.setStreamContinuation(continuation)
@@ -118,7 +118,7 @@ public actor StandardCapability: Capability, Lifecycle {
         }
     }
     
-    private func setStreamContinuation(_ continuation: AsyncStream<CapabilityState>.Continuation) {
+    private func setStreamContinuation(_ continuation: AsyncStream<AxiomCapabilityState>.Continuation) {
         self.stateStreamContinuation = continuation
     }
     
@@ -146,7 +146,7 @@ public actor StandardCapability: Capability, Lifecycle {
     
     /// Transition to a new state
     /// - Parameter newState: The state to transition to
-    public func transitionTo(_ newState: CapabilityState) async {
+    public func transitionTo(_ newState: AxiomCapabilityState) async {
         guard state != newState else { return }
         state = newState
         stateStreamContinuation?.yield(newState)
@@ -155,7 +155,7 @@ public actor StandardCapability: Capability, Lifecycle {
 
 // MARK: - StandardCapability ExtendedCapability Conformance
 
-extension StandardCapability: ExtendedCapability {
+extension AxiomStandardCapability: AxiomExtendedCapability {
     /// Configured activation timeout for this capability
     public var activationTimeout: Duration {
         get async { _activationTimeout }
@@ -181,12 +181,12 @@ extension StandardCapability: ExtendedCapability {
 // MARK: - Extended Capability Protocol
 
 /// Extended capability protocol with additional lifecycle management
-public protocol ExtendedCapability: Capability {
+public protocol AxiomExtendedCapability: AxiomCapability {
     /// The current state of the capability
-    var state: CapabilityState { get async }
+    var state: AxiomCapabilityState { get async }
     
     /// Stream of state changes for observation
-    var stateStream: AsyncStream<CapabilityState> { get async }
+    var stateStream: AsyncStream<AxiomCapabilityState> { get async }
     
     /// Configured activation timeout for this capability
     var activationTimeout: Duration { get async }
@@ -203,7 +203,7 @@ public protocol ExtendedCapability: Capability {
 
 // MARK: - Protocol Extensions
 
-extension Capability {
+extension AxiomCapability {
     /// Default timeout for state transitions (10ms)
     public static var transitionTimeout: Duration {
         .milliseconds(10)
@@ -225,7 +225,7 @@ extension Capability {
             
             group.addTask {
                 try await Task.sleep(for: timeout)
-                throw CapabilityError.initializationFailed("Activation timed out after \(timeout)")
+                throw AxiomCapabilityError.initializationFailed("Activation timed out after \(timeout)")
             }
             
             try await group.next()
@@ -234,14 +234,14 @@ extension Capability {
     }
 }
 
-extension ExtendedCapability {
+extension AxiomExtendedCapability {
     /// Check if the capability is in a specific state
-    public func isInState(_ targetState: CapabilityState) async -> Bool {
+    public func isInState(_ targetState: AxiomCapabilityState) async -> Bool {
         await state == targetState
     }
     
     /// Wait for a specific state with timeout
-    public func waitForState(_ targetState: CapabilityState, timeout: Duration) async throws {
+    public func waitForState(_ targetState: AxiomCapabilityState, timeout: Duration) async throws {
         let startTime = ContinuousClock.now
         
         for await currentState in await stateStream {
@@ -250,7 +250,7 @@ extension ExtendedCapability {
             }
             
             if ContinuousClock.now - startTime > timeout {
-                throw CapabilityError.initializationFailed(
+                throw AxiomCapabilityError.initializationFailed(
                     "Timeout waiting for state \(targetState)"
                 )
             }
@@ -261,12 +261,12 @@ extension ExtendedCapability {
 // MARK: - Capability Manager Protocol
 
 /// Protocol for managing multiple capabilities
-public protocol CapabilityManager: Actor {
+public protocol AxiomCapabilityManager: Actor {
     /// Register a capability with the manager
-    func register<T: Capability>(_ capability: T, for key: String) async
+    func register<T: AxiomCapability>(_ capability: T, for key: String) async
     
     /// Retrieve a registered capability
-    func capability<T: Capability>(for key: String, as type: T.Type) async -> T?
+    func capability<T: AxiomCapability>(for key: String, as type: T.Type) async -> T?
     
     /// Initialize all registered capabilities
     func initializeAll() async
@@ -278,18 +278,18 @@ public protocol CapabilityManager: Actor {
 // MARK: - Capability Manager Implementation
 
 /// Default implementation of capability manager
-public actor DefaultCapabilityManager: CapabilityManager {
-    private var capabilities: [String: any Capability] = [:]
+public actor AxiomDefaultCapabilityManager: AxiomCapabilityManager {
+    private var capabilities: [String: any AxiomCapability] = [:]
     private var initializationOrder: [String] = []
     
     public init() {}
     
-    public func register<T: Capability>(_ capability: T, for key: String) async {
+    public func register<T: AxiomCapability>(_ capability: T, for key: String) async {
         capabilities[key] = capability
         initializationOrder.append(key)
     }
     
-    public func capability<T: Capability>(for key: String, as type: T.Type) async -> T? {
+    public func capability<T: AxiomCapability>(for key: String, as type: T.Type) async -> T? {
         capabilities[key] as? T
     }
     

@@ -8,13 +8,13 @@ public enum AxiomError: Error, Codable, Equatable, Hashable {
     case contextError(AxiomContextError)
     case clientError(AxiomClientError)
     case navigationError(AxiomNavigationError)
-    case persistenceError(PersistenceError)
+    case persistenceError(AxiomPersistenceError)
     case validationError(AxiomValidationError)
-    case capabilityError(CapabilityError)
-    case actorError(ActorError)
-    case deviceError(DeviceError)
-    case infrastructureError(InfrastructureError)
-    case networkError(NetworkError)
+    case capabilityError(AxiomCapabilityError)
+    case actorError(AxiomActorError)
+    case deviceError(AxiomDeviceError)
+    case infrastructureError(AxiomInfrastructureError)
+    case networkError(AxiomNetworkError)
     case unknownError
     
     /// Human-readable error description
@@ -254,7 +254,7 @@ public enum AxiomNavigationError: Error, Codable, Equatable, Hashable {
 }
 
 /// Persistence-related errors
-public enum PersistenceError: Error, Codable, Equatable, Hashable {
+public enum AxiomPersistenceError: Error, Codable, Equatable, Hashable {
     case saveFailed(String)
     case loadFailed(String)
     case deleteFailed(String)
@@ -302,7 +302,7 @@ public enum AxiomValidationError: Error, Codable, Equatable, Hashable {
 }
 
 /// Actor-related errors for enhanced isolation patterns
-public enum ActorError: Error, Codable, Equatable, Hashable {
+public enum AxiomActorError: Error, Codable, Equatable, Hashable {
     case invariantViolation(String)
     case actorNotFound(ActorIdentifier)
     case reentrancyDenied(OperationIdentifier)
@@ -329,7 +329,7 @@ public enum ActorError: Error, Codable, Equatable, Hashable {
 }
 
 /// Capability-related errors
-public enum CapabilityError: Error, Codable, Equatable, Hashable {
+public enum AxiomCapabilityError: Error, Codable, Equatable, Hashable {
     case initializationFailed(String)
     case resourceAllocationFailed(String)
     case resourceUnavailable(String)
@@ -359,7 +359,7 @@ public enum CapabilityError: Error, Codable, Equatable, Hashable {
 }
 
 /// Device-related errors
-public enum DeviceError: Error, Codable, Equatable, Hashable {
+public enum AxiomDeviceError: Error, Codable, Equatable, Hashable {
     case platformDetectionFailed
     case memoryInfoUnavailable
     case thermalStateUnavailable
@@ -386,7 +386,7 @@ public enum DeviceError: Error, Codable, Equatable, Hashable {
 }
 
 /// Infrastructure-related errors
-public enum InfrastructureError: Error, Codable, Equatable, Hashable {
+public enum AxiomInfrastructureError: Error, Codable, Equatable, Hashable {
     case systemResourceUnavailable(String)
     case configurationMissing(String)
     case dependencyNotFound(String)
@@ -416,7 +416,7 @@ public enum InfrastructureError: Error, Codable, Equatable, Hashable {
 }
 
 /// Network-related errors
-public enum NetworkError: Error, Codable, Equatable, Hashable {
+public enum AxiomNetworkError: Error, Codable, Equatable, Hashable {
     case invalidURL(String)
     case sessionNotAvailable
     case requestFailed(String)
@@ -681,17 +681,17 @@ private class FallbackContainer {
 
 // MARK: - Enhanced Observable Context
 
-/// Extension to ObservableContext for error boundary support
-extension ObservableContext: ErrorBoundaryManaged {
+/// Extension to AxiomObservableContext for error boundary support
+extension AxiomObservableContext: ErrorBoundaryManaged {
     private static var errorBoundaryKey: UInt8 = 0
     
     /// Error boundary for this context
     public var errorBoundary: AxiomErrorBoundary {
-        if let boundary = objc_getAssociatedObject(self, &ObservableContext.errorBoundaryKey) as? AxiomErrorBoundary {
+        if let boundary = objc_getAssociatedObject(self, &AxiomObservableContext.errorBoundaryKey) as? AxiomErrorBoundary {
             return boundary
         }
         let boundary = AxiomErrorBoundary()
-        objc_setAssociatedObject(self, &ObservableContext.errorBoundaryKey, boundary, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        objc_setAssociatedObject(self, &AxiomObservableContext.errorBoundaryKey, boundary, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         return boundary
     }
     

@@ -28,17 +28,17 @@ extension CLLocationCoordinate2D: @retroactive Codable, @retroactive @unchecked 
 }
 
 // MARK: - Environment Awareness
-// Note: CapabilityEnvironment defined in DomainCapabilityPatterns.swift
+// Note: AxiomCapabilityEnvironment defined in DomainCapabilityPatterns.swift
 
 // MARK: - Resource Management  
 // Note: ResourceUsage and CapabilityResource defined in DomainCapabilityPatterns.swift
 
 // MARK: - Configuration Framework
-// Note: CapabilityConfiguration defined in DomainCapabilityPatterns.swift
+// Note: AxiomCapabilityConfiguration defined in DomainCapabilityPatterns.swift
 
 // MARK: - Network Configuration Example
 
-public struct NetworkConfiguration: CapabilityConfiguration {
+public struct NetworkConfiguration: AxiomCapabilityConfiguration {
     public let baseURL: URL
     public let timeout: TimeInterval
     public let maxRetries: Int
@@ -81,7 +81,7 @@ public struct NetworkConfiguration: CapabilityConfiguration {
         sslPinningEnabled: true
     )
     
-    public func adjusted(for environment: CapabilityEnvironment) -> NetworkConfiguration {
+    public func adjusted(for environment: AxiomCapabilityEnvironment) -> NetworkConfiguration {
         if environment.isDebug {
             return NetworkConfiguration(
                 baseURL: baseURL,
@@ -104,7 +104,7 @@ public struct NetworkConfiguration: CapabilityConfiguration {
 
 // MARK: - Network Resource Example
 
-public actor NetworkResource: CapabilityResource {
+public actor NetworkResource: AxiomCapabilityResource {
     private var activeConnections: Set<String> = []
     private let maxConnections: Int
     private var _isAvailable: Bool = true
@@ -147,7 +147,7 @@ public actor NetworkResource: CapabilityResource {
     
     public func allocate() async throws {
         guard await isAvailable else {
-            throw CapabilityError.resourceAllocationFailed("Connection limit reached or resource unavailable")
+            throw AxiomCapabilityError.resourceAllocationFailed("Connection limit reached or resource unavailable")
         }
         
         let connectionId = UUID().uuidString
