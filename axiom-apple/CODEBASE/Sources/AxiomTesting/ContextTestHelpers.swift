@@ -1,7 +1,8 @@
 import XCTest
+import AxiomCore
 import Foundation
 import SwiftUI
-@testable import Axiom
+@testable import AxiomArchitecture
 
 // MARK: - Helper Types for Delegation
 
@@ -40,7 +41,7 @@ public struct ContextTestHelpers {
         description: String,
         file: StaticString = #filePath,
         line: UInt = #line
-    ) async throws where S: Axiom.AxiomState {
+    ) async throws where S: AxiomState {
         // This is a simplified version - in real implementation we'd use reflection
         // or require contexts to expose their state in a testable way
         XCTAssertTrue(true, "State assertion placeholder - implement with specific state access")

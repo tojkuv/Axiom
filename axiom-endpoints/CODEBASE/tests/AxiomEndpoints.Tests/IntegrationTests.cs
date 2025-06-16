@@ -359,11 +359,11 @@ public static class AdvancedTestRoutes
             FrozenDictionary<string, object>.Empty;
 
         public static FrozenSet<string> AlternativeTemplates { get; } =
-            ["/api/products", "/legacy/products", "/v0/products"].ToFrozenSet();
+            new[] {"/api/products", "/legacy/products", "/v0/products"}.ToFrozenSet();
     }
 }
 
-public record ProductSearchQuery : QueryParameters
+public record ProductSearchQuery : QueryParameters, IQueryParameters
 {
     [QueryParam]
     public string? Query { get; init; }
@@ -372,11 +372,11 @@ public record ProductSearchQuery : QueryParameters
     public ProductCategory? Category { get; init; }
 
     [QueryParam]
-    [RangeAttribute<decimal>(0, 10000)]
+    [RangeAttribute<double>(0.0, 10000.0)]
     public decimal? MinPrice { get; init; }
 
     [QueryParam]
-    [RangeAttribute<decimal>(0, 10000)]
+    [RangeAttribute<double>(0.0, 10000.0)]
     public decimal? MaxPrice { get; init; }
 
     [QueryParam]

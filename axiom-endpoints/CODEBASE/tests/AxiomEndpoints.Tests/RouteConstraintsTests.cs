@@ -96,10 +96,10 @@ public class RouteConstraintsTests
     }
 
     [Theory]
-    [InlineData("5", true)]         // Within range
-    [InlineData("10", true)]        // Min boundary
-    [InlineData("9", false)]        // Below min
-    [InlineData("", false)]         // Empty
+    [InlineData("1234567890", true)]         // Exactly min length (10 chars)
+    [InlineData("12345678901", true)]        // Above min length (11 chars)
+    [InlineData("123456789", false)]         // Below min (9 chars)
+    [InlineData("", false)]                  // Empty
     public void LengthConstraint_MinOnly_Should_Validate_Correctly(string? value, bool expectedValid)
     {
         var constraint = new LengthConstraint { MinLength = 10, MaxLength = null };

@@ -1,6 +1,7 @@
 import Foundation
+import AxiomCore
 import XCTest
-@testable import Axiom
+@testable import AxiomArchitecture
 
 // MARK: - Performance Test Suite
 

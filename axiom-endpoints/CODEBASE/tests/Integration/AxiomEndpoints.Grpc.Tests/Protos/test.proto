@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option csharp_namespace = "AxiomEndpoints.Grpc.Tests";
+
+package test;
+
+service TestService {
+  rpc ProcessRequest (TestRequest) returns (TestResponse);
+  rpc StreamResponses (TestRequest) returns (stream TestResponse);
+  rpc StreamRequests (stream TestRequest) returns (TestResponse);
+  rpc BidirectionalStream (stream TestRequest) returns (stream TestResponse);
+}
+
+message TestRequest {
+  string message = 1;
+  int32 id = 2;
+}
+
+message TestResponse {
+  string message = 1;
+  int32 count = 2;
+  bool success = 3;
+}

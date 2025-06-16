@@ -1,6 +1,7 @@
 import XCTest
+import AxiomCore
 import SwiftUI
-@testable import Axiom
+@testable import AxiomArchitecture
 
 // MARK: - SwiftUI Testing Framework
 

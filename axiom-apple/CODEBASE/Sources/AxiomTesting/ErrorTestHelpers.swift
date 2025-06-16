@@ -1,5 +1,6 @@
 import XCTest
-@testable import Axiom
+import AxiomCore
+@testable import AxiomArchitecture
 
 // MARK: - Error Test Helpers
 
@@ -202,15 +203,16 @@ public class MockErrorBoundary: AxiomErrorBoundary {
         await super.handle(error)
     }
     
-    public override func executeWithRecovery<T>(
-        _ operation: () async throws -> T,
-        maxRetries: Int? = nil
+    public override func executeWithRecovery<T: Sendable>(
+        _ operation: @Sendable () async throws -> T,
+        maxRetries: Int? = nil,
+        strategy: ErrorRecoveryStrategy = .propagate
     ) async throws -> T {
         let key = UUID().uuidString
         recoveryAttempts[key] = 0
         
         do {
-            let result = try await super.executeWithRecovery(operation, maxRetries: maxRetries)
+            let result = try await super.executeWithRecovery(operation, maxRetries: maxRetries, strategy: strategy)
             recoveryAttempts[key] = (recoveryAttempts[key] ?? 0) + 1
             return result
         } catch {

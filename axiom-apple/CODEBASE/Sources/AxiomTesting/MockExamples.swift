@@ -1,5 +1,6 @@
 import Foundation
-@testable import Axiom
+import AxiomCore
+@testable import AxiomArchitecture
 
 // MARK: - Example Mock Implementations
 

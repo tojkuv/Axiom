@@ -1,6 +1,7 @@
 import Foundation
+import AxiomCore
 import XCTest
-@testable import Axiom
+@testable import AxiomArchitecture
 
 // MARK: - Memory Leak Detection
 
@@ -234,7 +235,7 @@ public struct PerformanceTestGenerator {
         
         var code = """
         import XCTest
-        @testable import Axiom
+        @testable import AxiomArchitecture
         
         final class \(className)PerformanceTests: XCTestCase {
         

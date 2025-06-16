@@ -119,13 +119,13 @@ public class UrlBuilderTests
         var query = new UserSearchQuery
         {
             IsActive = true,
-            IsDeleted = false
+            IsDeleted = true // Set to non-default value so it appears in URL
         };
         
         var url = route.ToUrl(query);
         
         url.Should().Contain("isactive=true");
-        url.Should().Contain("isdeleted=false");
+        url.Should().Contain("isdeleted=true");
     }
 
     [Fact]
@@ -330,7 +330,7 @@ public static class TestUrlRoutes
 
             public static OptionalRouteParameters GetOptionalParameters() => new()
             {
-                OptionalSegments = ["version"].ToFrozenSet(),
+                OptionalSegments = new[] {"version"}.ToFrozenSet(),
                 DefaultValues = new Dictionary<string, object>
                 {
                     ["version"] = "latest"
@@ -340,7 +340,7 @@ public static class TestUrlRoutes
     }
 }
 
-public record UserSearchQuery : QueryParameters
+public record UserSearchQuery : QueryParameters, IQueryParameters
 {
     [QueryParam]
     public string? Name { get; init; }
@@ -366,7 +366,7 @@ public record UserSearchQuery : QueryParameters
     [QueryParam]
     public int PageSize { get; init; } = 20;
 
-    public static QueryParameterMetadata GetMetadata() => new()
+    public static new QueryParameterMetadata GetMetadata() => new()
     {
         Parameters = new Dictionary<string, QueryParameterInfo>
         {

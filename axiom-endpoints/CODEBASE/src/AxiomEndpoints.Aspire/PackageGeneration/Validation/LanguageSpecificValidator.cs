@@ -168,7 +168,7 @@ public class LanguageSpecificValidator : BaseConfigurationValidator
 
         foreach (var required in requiredDependencies)
         {
-            if (!config.Dependencies.ContainsKey(required))
+            if (!config.Dependencies.Any(dep => dep.Name == required))
             {
                 result.AddWarning(
                     "SWIFT_MISSING_REQUIRED_DEPENDENCY",
@@ -180,7 +180,7 @@ public class LanguageSpecificValidator : BaseConfigurationValidator
 
         foreach (var recommended in recommendedDependencies)
         {
-            if (!config.Dependencies.ContainsKey(recommended))
+            if (!config.Dependencies.Any(dep => dep.Name == recommended))
             {
                 result.AddSuggestion(
                     "SWIFT_MISSING_RECOMMENDED_DEPENDENCY",
@@ -191,16 +191,16 @@ public class LanguageSpecificValidator : BaseConfigurationValidator
         }
 
         // Check dependency versions
-        foreach (var (name, version) in config.Dependencies)
+        foreach (var dependency in config.Dependencies)
         {
-            if (name == "SwiftProtobuf" && !string.IsNullOrEmpty(version))
+            if (dependency.Name == "SwiftProtobuf" && !string.IsNullOrEmpty(dependency.Version))
             {
-                if (Version.TryParse(version, out var v) && v < new Version(1, 20, 0))
+                if (Version.TryParse(dependency.Version, out var v) && v < new Version(1, 20, 0))
                 {
                     result.AddWarning(
                         "SWIFT_OLD_PROTOBUF_VERSION",
-                        $"SwiftProtobuf version {version} is quite old",
-                        $"{path}.Dependencies[{name}]",
+                        $"SwiftProtobuf version {dependency.Version} is quite old",
+                        $"{path}.Dependencies[{dependency.Name}]",
                         "Consider updating to 1.25.0 or later");
                 }
             }
@@ -214,7 +214,7 @@ public class LanguageSpecificValidator : BaseConfigurationValidator
 
         foreach (var required in requiredDependencies)
         {
-            if (!config.Dependencies.ContainsKey(required))
+            if (!config.Dependencies.Any(dep => dep.Name == required))
             {
                 result.AddWarning(
                     "KOTLIN_MISSING_REQUIRED_DEPENDENCY",
@@ -226,7 +226,7 @@ public class LanguageSpecificValidator : BaseConfigurationValidator
 
         foreach (var recommended in recommendedDependencies)
         {
-            if (!config.Dependencies.ContainsKey(recommended))
+            if (!config.Dependencies.Any(dep => dep.Name == recommended))
             {
                 result.AddSuggestion(
                     "KOTLIN_MISSING_RECOMMENDED_DEPENDENCY",
@@ -244,7 +244,7 @@ public class LanguageSpecificValidator : BaseConfigurationValidator
 
         foreach (var required in requiredDependencies)
         {
-            if (!config.Dependencies.ContainsKey(required))
+            if (!config.Dependencies.Any(dep => dep.Name == required))
             {
                 result.AddWarning(
                     "CSHARP_MISSING_REQUIRED_DEPENDENCY",
@@ -256,7 +256,7 @@ public class LanguageSpecificValidator : BaseConfigurationValidator
 
         foreach (var recommended in recommendedDependencies)
         {
-            if (!config.Dependencies.ContainsKey(recommended))
+            if (!config.Dependencies.Any(dep => dep.Name == recommended))
             {
                 result.AddSuggestion(
                     "CSHARP_MISSING_RECOMMENDED_DEPENDENCY",
@@ -267,16 +267,16 @@ public class LanguageSpecificValidator : BaseConfigurationValidator
         }
 
         // Check for .NET version compatibility
-        foreach (var (name, version) in config.Dependencies)
+        foreach (var dependency in config.Dependencies)
         {
-            if (name == "Google.Protobuf" && !string.IsNullOrEmpty(version))
+            if (dependency.Name == "Google.Protobuf" && !string.IsNullOrEmpty(dependency.Version))
             {
-                if (Version.TryParse(version, out var v) && v < new Version(3, 21, 0))
+                if (Version.TryParse(dependency.Version, out var v) && v < new Version(3, 21, 0))
                 {
                     result.AddWarning(
                         "CSHARP_OLD_PROTOBUF_VERSION",
-                        $"Google.Protobuf version {version} may have compatibility issues",
-                        $"{path}.Dependencies[{name}]",
+                        $"Google.Protobuf version {dependency.Version} may have compatibility issues",
+                        $"{path}.Dependencies[{dependency.Name}]",
                         "Consider updating to 3.25.0 or later");
                 }
             }

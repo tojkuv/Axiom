@@ -126,7 +126,7 @@ public static class QueryParameterMetadataGenerator
                 Name = paramName,
                 Type = property.PropertyType,
                 IsRequired = isRequired,
-                DefaultValue = GetDefaultValue(property.PropertyType),
+                DefaultValue = GetPropertyDefaultValue(property),
                 Constraint = constraintAttr?.Constraint,
                 Description = description
             };
@@ -139,11 +139,44 @@ public static class QueryParameterMetadataGenerator
         };
     }
 
-    private static object? GetDefaultValue(Type type)
+    private static object? GetPropertyDefaultValue(PropertyInfo property)
     {
-        if (type.IsValueType)
+        // For record properties with default values, we need to create an instance
+        // and get the actual property value to determine the real default
+        try
         {
-            return Activator.CreateInstance(type);
+            var declaringType = property.DeclaringType;
+            if (declaringType != null)
+            {
+                // Create an instance using the parameterless constructor (if available)
+                var constructor = declaringType.GetConstructor(Type.EmptyTypes);
+                if (constructor != null)
+                {
+                    var instance = Activator.CreateInstance(declaringType);
+                    return property.GetValue(instance);
+                }
+                
+                // For record types, try to create using default constructor
+                try
+                {
+                    var instance = Activator.CreateInstance(declaringType);
+                    return property.GetValue(instance);
+                }
+                catch
+                {
+                    // If we can't create an instance, fall back to type default
+                }
+            }
+        }
+        catch
+        {
+            // If reflection fails, fall back to type default
+        }
+        
+        // Fallback to .NET type default
+        if (property.PropertyType.IsValueType)
+        {
+            return Activator.CreateInstance(property.PropertyType);
         }
 
         return null;

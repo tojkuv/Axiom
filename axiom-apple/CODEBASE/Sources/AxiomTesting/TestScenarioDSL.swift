@@ -1,4 +1,5 @@
 import XCTest
+import AxiomCore
 import Foundation
 
 // MARK: - Test Scenario DSL

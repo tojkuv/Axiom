@@ -1,6 +1,7 @@
 import XCTest
+import AxiomCore
 import Foundation
-@testable import Axiom
+@testable import AxiomArchitecture
 
 // MARK: - Navigation Testing Framework
 

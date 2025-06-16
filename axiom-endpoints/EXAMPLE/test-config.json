@@ -1,0 +1,167 @@
+{
+  "TestConfiguration": {
+    "DatabaseSettings": {
+      "UseInMemoryDatabase": false,
+      "ConnectionString": "Host=localhost;Port=5432;Database=axiom_test;Username=test_user;Password=test_password",
+      "TestDatabasePrefix": "AxiomTest_",
+      "AutoMigrate": true,
+      "SeedTestData": true,
+      "CleanupAfterTests": true
+    },
+    "RedisSettings": {
+      "ConnectionString": "localhost:6379",
+      "TestKeyPrefix": "test:",
+      "FlushOnStartup": true,
+      "FlushOnCleanup": true
+    },
+    "ApiSettings": {
+      "BaseUrl": "https://localhost:7001",
+      "Timeout": "00:00:30",
+      "RetryAttempts": 3,
+      "RetryDelay": "00:00:01"
+    },
+    "NotificationSettings": {
+      "GrpcUrl": "https://localhost:7002",
+      "Timeout": "00:00:15",
+      "StreamingTimeout": "00:01:00"
+    },
+    "TestExecution": {
+      "ParallelExecution": true,
+      "MaxParallelThreads": 4,
+      "TestTimeout": "00:05:00",
+      "RetryFailedTests": false,
+      "CaptureConsoleOutput": true,
+      "DetailedLogging": false
+    },
+    "Performance": {
+      "WarmupDuration": "00:00:10",
+      "TestDuration": "00:00:30",
+      "CooldownDuration": "00:00:05",
+      "SampleSize": 1000,
+      "PercentileTargets": [50, 75, 90, 95, 99],
+      "ResponseTimeThresholds": {
+        "HealthEndpoint": 50,
+        "GetUsers": 200,
+        "GetUserById": 100,
+        "SearchUsers": 300,
+        "NotificationService": 150
+      },
+      "ThroughputTargets": {
+        "HealthEndpoint": 1000,
+        "GetUsers": 500,
+        "GetUserById": 800,
+        "SearchUsers": 200,
+        "NotificationService": 300
+      }
+    },
+    "QualityGates": {
+      "MinTestSuccessRate": 95.0,
+      "MinCodeCoverage": {
+        "Line": 80.0,
+        "Branch": 70.0,
+        "Method": 85.0
+      },
+      "MaxErrorRate": 1.0,
+      "Performance": {
+        "MaxMeanResponseTime": 200,
+        "Max95thPercentile": 500,
+        "MinThroughput": 100
+      },
+      "Security": {
+        "MaxCriticalVulnerabilities": 0,
+        "MaxHighVulnerabilities": 0,
+        "MaxMediumVulnerabilities": 5
+      }
+    },
+    "Reporting": {
+      "GenerateHtmlReport": true,
+      "GenerateJsonReport": true,
+      "GenerateXmlReport": true,
+      "ReportDirectory": "./TestResults",
+      "IncludePerformanceCharts": true,
+      "IncludeCoverageDetails": true,
+      "IncludeFailureAnalysis": true
+    },
+    "TestData": {
+      "UserCount": 1000,
+      "PostsPerUser": 5,
+      "CommentsPerPost": 3,
+      "ActiveUserPercentage": 85.0,
+      "DataVariation": {
+        "NamePatterns": ["User {0}", "Test User {0}", "Example {0}"],
+        "EmailDomains": ["example.com", "test.org", "demo.net"],
+        "BioMaxLength": 500,
+        "PostTitleMaxLength": 200,
+        "PostContentMaxLength": 2000,
+        "CommentMaxLength": 500
+      }
+    },
+    "Environment": {
+      "TestEnvironment": "Local",
+      "LogLevel": "Information",
+      "EnableSensitiveDataLogging": false,
+      "EnableDetailedErrors": true,
+      "TreatWarningsAsErrors": false
+    },
+    "ContainerSettings": {
+      "UseTestContainers": false,
+      "PostgresImage": "postgres:15",
+      "RedisImage": "redis:7",
+      "NetworkName": "axiom-test-network",
+      "ContainerPrefix": "axiom-test-",
+      "AutoCleanup": true,
+      "PortRange": {
+        "Start": 15432,
+        "End": 15500
+      }
+    }
+  },
+  "Categories": {
+    "Unit": {
+      "Enabled": true,
+      "Timeout": "00:00:30",
+      "Parallel": true,
+      "Tags": ["Fast", "Isolated", "NoDatabase"]
+    },
+    "Integration": {
+      "Enabled": true,
+      "Timeout": "00:02:00",
+      "Parallel": false,
+      "Tags": ["Database", "Redis", "HTTP"],
+      "RequiredServices": ["PostgreSQL", "Redis"]
+    },
+    "Performance": {
+      "Enabled": true,
+      "Timeout": "00:10:00",
+      "Parallel": false,
+      "Tags": ["Load", "Stress", "NBomber"],
+      "RequiredServices": ["PostgreSQL", "Redis", "API", "Notifications"]
+    },
+    "Security": {
+      "Enabled": true,
+      "Timeout": "00:05:00",
+      "Parallel": true,
+      "Tags": ["SAST", "Dependencies", "Vulnerabilities"]
+    },
+    "EndToEnd": {
+      "Enabled": false,
+      "Timeout": "00:15:00",
+      "Parallel": false,
+      "Tags": ["E2E", "UI", "Selenium"],
+      "RequiredServices": ["PostgreSQL", "Redis", "API", "Notifications", "Client"]
+    }
+  },
+  "Notifications": {
+    "EnableSlackNotifications": false,
+    "EnableEmailNotifications": false,
+    "NotifyOnFailure": true,
+    "NotifyOnSuccess": false,
+    "NotifyOnPerformanceRegression": true,
+    "Webhooks": {
+      "OnTestStart": "",
+      "OnTestComplete": "",
+      "OnFailure": "",
+      "OnQualityGateFailure": ""
+    }
+  }
+}

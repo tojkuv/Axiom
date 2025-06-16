@@ -138,12 +138,19 @@ public class FastRouteMatcherTests
         var matcher = new FastRouteMatcher(endpoints);
 
         // Test with optional parameter
-        var result1 = _matcher.Match("/files/document.pdf/v2");
+        var result1 = matcher.Match("/files/document.pdf/v2");
         result1.Should().NotBeNull();
+        result1!.Parameters.Should().ContainKey("path");
+        result1.Parameters.Should().ContainKey("version");
+        result1.Parameters["path"].Should().Be("document.pdf");
+        result1.Parameters["version"].Should().Be("v2");
 
         // Test without optional parameter
-        var result2 = _matcher.Match("/files/document.pdf");
+        var result2 = matcher.Match("/files/document.pdf");
         result2.Should().NotBeNull();
+        result2!.Parameters.Should().ContainKey("path");
+        result2.Parameters.Should().NotContainKey("version");
+        result2.Parameters["path"].Should().Be("document.pdf");
     }
 
     [Fact]

@@ -1,5 +1,7 @@
 import XCTest
-@testable import Axiom
+import AxiomCore
+@testable import AxiomArchitecture
+@testable import AxiomCapabilities
 
 // Test helper for persistence assertions
 public func XCTAssertPersisted<T: Codable & Equatable & Sendable>(

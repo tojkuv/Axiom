@@ -44,7 +44,7 @@ public class RouteTemplateGeneratorTests
         var template = RouteTemplateGenerator.Generate<Orders.ByUserAndId>();
 
         // Assert
-        Assert.Equal("/orders/{userid}/{id}", template);
+        Assert.Equal("/orders/{userId}/{id}", template);
     }
 
     [Fact]

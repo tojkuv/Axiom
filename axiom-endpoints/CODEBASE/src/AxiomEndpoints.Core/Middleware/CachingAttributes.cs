@@ -101,7 +101,7 @@ public class CacheAttribute : EndpointFilterAttribute, IEndpointResultFilter
             {
                 if (context.Context.HttpContext.Request.Query.TryGetValue(key, out var values))
                 {
-                    keyBuilder.Append($":q_{key}={string.Join(",", values)}");
+                    keyBuilder.Append($":q_{key}={string.Join(",", values.ToArray())}");
                 }
             }
         }
@@ -114,7 +114,7 @@ public class CacheAttribute : EndpointFilterAttribute, IEndpointResultFilter
             {
                 if (context.Context.HttpContext.Request.Headers.TryGetValue(key, out var values))
                 {
-                    keyBuilder.Append($":h_{key}={string.Join(",", values)}");
+                    keyBuilder.Append($":h_{key}={string.Join(",", values.ToArray())}");
                 }
             }
         }
@@ -158,13 +158,6 @@ public class CacheAttribute : EndpointFilterAttribute, IEndpointResultFilter
     }
 }
 
-public enum CacheLocation
-{
-    Any,
-    Client,
-    Server,
-    None
-}
 
 /// <summary>
 /// Cache invalidation attribute

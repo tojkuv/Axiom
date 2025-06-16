@@ -99,7 +99,7 @@ public readonly struct Unit
 }
 
 /// <summary>
-/// Endpoint metadata for middleware
+/// Endpoint metadata for middleware - composed of focused metadata types
 /// </summary>
 public record EndpointMetadata
 {
@@ -108,17 +108,6 @@ public record EndpointMetadata
     public required HttpMethod Method { get; init; }
     public Type? RequestType { get; init; }
     public Type? ResponseType { get; init; }
-    public string? Summary { get; init; }
-    public string? Description { get; init; }
-    public IReadOnlyList<string> Tags { get; init; } = Array.Empty<string>();
-    
-    // Authentication/Authorization
-    public bool RequiresAuthentication { get; init; }
-    public bool RequiresAuthorization { get; init; }
-    public string? AuthorizationPolicy { get; init; }
-    public bool AllowAnonymous { get; init; }
-    public string[] RequiredRoles { get; init; } = Array.Empty<string>();
-    public string[] RequiredPolicies { get; init; } = Array.Empty<string>();
     
     // Advanced routing properties
     public AxiomEndpoints.Core.ApiVersion? Version { get; init; }
@@ -126,21 +115,35 @@ public record EndpointMetadata
     public bool HasQueryParameters { get; init; }
     public AxiomEndpoints.Core.QueryParameterMetadata? QueryMetadata { get; init; }
     
-    // Caching
-    public CachePolicyInfo? CachePolicy { get; init; }
-    public int CacheDuration { get; init; }
-    public string? CacheVaryByQuery { get; init; }
-    public string? CacheVaryByHeader { get; init; }
-    
-    // Rate limiting and CORS
-    public RateLimitPolicyInfo? RateLimitPolicy { get; init; }
-    public string? CorsPolicy { get; init; }
-    
-    // Documentation
-    public RouteDocumentationInfo? Documentation { get; init; }
+    // Focused metadata types
+    public AuthMetadata Auth { get; init; } = AuthMetadata.None;
+    public CacheMetadata Cache { get; init; } = CacheMetadata.None;
+    public RateLimitMetadata RateLimit { get; init; } = RateLimitMetadata.None;
+    public DocsMetadata Docs { get; init; } = DocsMetadata.None;
     
     // Additional metadata
     public FrozenDictionary<string, object> Metadata { get; init; } = FrozenDictionary<string, object>.Empty;
+
+    // Legacy properties for backward compatibility
+    public bool RequiresAuthentication => Auth.RequiresAuthentication;
+    public bool RequiresAuthorization => Auth.RequiresAuthorization;
+    public string? AuthorizationPolicy => Auth.AuthorizationPolicy;
+    public bool AllowAnonymous => Auth.AllowAnonymous;
+    public string[] RequiredRoles => Auth.RequiredRoles;
+    public string[] RequiredPolicies => Auth.RequiredPolicies;
+    
+    public CachePolicyInfo? CachePolicy => Cache.CachePolicy;
+    public int CacheDuration => Cache.CacheDuration;
+    public string? CacheVaryByQuery => Cache.CacheVaryByQuery;
+    public string? CacheVaryByHeader => Cache.CacheVaryByHeader;
+    
+    public RateLimitPolicyInfo? RateLimitPolicy => RateLimit.RateLimitPolicy;
+    public string? CorsPolicy => RateLimit.CorsPolicy;
+    
+    public string? Summary => Docs.Summary;
+    public string? Description => Docs.Description;
+    public IReadOnlyList<string> Tags => Docs.Tags;
+    public RouteDocumentationInfo? Documentation => Docs.Documentation;
 
     public static EndpointMetadata FromType<TEndpoint>()
     {
@@ -162,6 +165,28 @@ public record EndpointMetadata
             Method = HttpMethod.Get
         };
     }
+
+    public static EndpointMetadata Create(
+        Type endpointType,
+        string template,
+        HttpMethod method,
+        Type? requestType = null,
+        Type? responseType = null,
+        AuthMetadata? auth = null,
+        CacheMetadata? cache = null,
+        RateLimitMetadata? rateLimit = null,
+        DocsMetadata? docs = null) => new()
+    {
+        EndpointType = endpointType,
+        Template = template,
+        Method = method,
+        RequestType = requestType,
+        ResponseType = responseType,
+        Auth = auth ?? AuthMetadata.None,
+        Cache = cache ?? CacheMetadata.None,
+        RateLimit = rateLimit ?? RateLimitMetadata.None,
+        Docs = docs ?? DocsMetadata.None
+    };
 }
 
 /// <summary>
@@ -173,41 +198,6 @@ public interface IEndpointMetadata
 
 
 
-
-/// <summary>
-/// Cache policy information
-/// </summary>
-public record CachePolicyInfo
-{
-    public TimeSpan Duration { get; init; }
-    public string? VaryByQuery { get; init; }
-    public string? VaryByHeader { get; init; }
-    public bool VaryByUser { get; init; }
-    public CacheLocation Location { get; init; }
-}
-
-/// <summary>
-/// Rate limiting policy information
-/// </summary>
-public record RateLimitPolicyInfo
-{
-    public required string PolicyName { get; init; }
-    public int PermitLimit { get; init; } = 100;
-    public TimeSpan Window { get; init; } = TimeSpan.FromMinutes(1);
-    public int QueueLimit { get; init; } = 0;
-}
-
-/// <summary>
-/// Route documentation information
-/// </summary>
-public record RouteDocumentationInfo
-{
-    public string? Summary { get; init; }
-    public string? Description { get; init; }
-    public IReadOnlyList<string> Tags { get; init; } = Array.Empty<string>();
-    public bool IsDeprecated { get; init; }
-    public string? DeprecationMessage { get; init; }
-}
 
 /// <summary>
 /// Constraint validation result

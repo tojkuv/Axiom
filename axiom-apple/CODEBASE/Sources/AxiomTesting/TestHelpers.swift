@@ -1,4 +1,5 @@
 import Foundation
+import AxiomCore
 import XCTest
 
 /// Base test environment for framework tests

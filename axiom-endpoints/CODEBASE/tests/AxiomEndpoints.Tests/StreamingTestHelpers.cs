@@ -1,4 +1,6 @@
 using System.Runtime.CompilerServices;
+using System.Buffers;
+using Microsoft.AspNetCore.Http;
 using AxiomEndpoints.Core;
 using AxiomEndpoints.Core.Streaming;
 using FluentAssertions;
@@ -66,7 +68,7 @@ public static class StreamingTestHelpers
 /// </summary>
 public abstract class StreamingEndpointTest<TEndpoint>
 {
-    protected TestContext Context { get; } = new();
+    protected IContext Context { get; } = new TestContext();
 
     protected async Task<List<TResponse>> TestServerStreamAsync<TRequest, TResponse>(
         IServerStreamAxiom<TRequest, TResponse> endpoint,
@@ -90,7 +92,7 @@ public abstract class StreamingEndpointTest<TEndpoint>
             requests.ToAsyncEnumerable(),
             Context);
 
-        result.Should().BeSuccess();
+        result.Should().BeSuccess<TResponse>();
         return result;
     }
 
@@ -136,3 +138,4 @@ public static class ResultAssertionExtensions
         result.IsSuccess.Should().BeFalse("Expected failure but got success");
     }
 }
+

@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 
 namespace AxiomEndpoints.Aspire.PackageGeneration.Validation;
 
@@ -50,9 +51,16 @@ public interface IValidationPipeline
 public class ValidationPipeline : IValidationPipeline
 {
     private readonly List<IConfigurationValidator> _validators = new();
+    private readonly ILogger<ValidationPipeline> _logger;
+
+    public ValidationPipeline(ILogger<ValidationPipeline> logger)
+    {
+        _logger = logger;
+    }
 
     public IValidationPipeline AddValidator(IConfigurationValidator validator)
     {
+        _logger.LogDebug("Adding validator: {ValidatorName}", validator.ValidatorName);
         _validators.Add(validator);
         return this;
     }
@@ -64,6 +72,8 @@ public class ValidationPipeline : IValidationPipeline
 
     public async Task<ValidationResult> ValidateAsync(PackageGenerationOptions options, ValidationSeverity minimumSeverity, CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("Starting validation pipeline with {ValidatorCount} validators", _validators.Count);
+        
         var result = new ValidationResult();
         var orderedValidators = _validators.OrderBy(v => v.Priority);
 
@@ -73,11 +83,15 @@ public class ValidationPipeline : IValidationPipeline
 
             try
             {
+                _logger.LogDebug("Running validator: {ValidatorName}", validator.ValidatorName);
                 var validationResult = await validator.ValidateAsync(options, cancellationToken);
                 result = result.Merge(validationResult);
+                _logger.LogDebug("Validator {ValidatorName} completed with {ErrorCount} errors, {WarningCount} warnings", 
+                    validator.ValidatorName, validationResult.Errors.Count, validationResult.Warnings.Count);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Validator {ValidatorName} threw an exception", validator.ValidatorName);
                 result.AddError(
                     "VALIDATION_EXCEPTION", 
                     $"Validator '{validator.ValidatorName}' threw an exception: {ex.Message}",
@@ -85,6 +99,8 @@ public class ValidationPipeline : IValidationPipeline
             }
         }
 
+        _logger.LogInformation("Validation pipeline completed with {ErrorCount} errors, {WarningCount} warnings", 
+            result.Errors.Count, result.Warnings.Count);
         return result;
     }
 }

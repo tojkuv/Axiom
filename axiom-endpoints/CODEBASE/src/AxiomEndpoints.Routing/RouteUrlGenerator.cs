@@ -19,7 +19,7 @@ public static class UrlBuilder
     [SuppressMessage("Design", "CA1055:URI-like return values should not be strings", Justification = "Internal utility for URL string generation; conversion to Uri happens at API boundary")]
     public static string BuildUrl<TRoute>(TRoute route) where TRoute : IRoute<TRoute>
     {
-        var template = TRoute.Template;
+        var template = RouteTemplateGenerator.Generate<TRoute>();
         var url = new StringBuilder();
 
         var segments = template.Split('/', StringSplitOptions.RemoveEmptyEntries);
@@ -31,6 +31,13 @@ public static class UrlBuilder
             if (segment.StartsWith('{') && segment.EndsWith('}'))
             {
                 var paramName = segment[1..^1];
+                bool isCatchAll = paramName.StartsWith('*');
+                
+                if (isCatchAll)
+                {
+                    paramName = paramName[1..]; // Remove the '*'
+                }
+                
                 var colonIndex = paramName.IndexOf(':');
                 if (colonIndex > 0)
                 {
@@ -38,11 +45,74 @@ public static class UrlBuilder
                 }
 
                 var value = GetParameterValue(route, paramName);
-                url.Append(Uri.EscapeDataString(value?.ToString() ?? ""));
+                if (isCatchAll)
+                {
+                    // For catch-all parameters, encode everything except forward slashes
+                    var stringValue = value?.ToString() ?? "";
+                    if (!string.IsNullOrEmpty(stringValue))
+                    {
+                        // Split by forward slashes, encode each segment, then rejoin with slashes
+                        var pathSegments = stringValue.Split('/');
+                        var encodedSegments = pathSegments.Select(Uri.EscapeDataString);
+                        url.Append(string.Join("/", encodedSegments));
+                    }
+                }
+                else
+                {
+                    url.Append(Uri.EscapeDataString(value?.ToString() ?? ""));
+                }
             }
             else
             {
                 url.Append(segment);
+            }
+        }
+
+        // Handle optional parameters for IOptionalRoute
+        var optionalRouteType = typeof(TRoute).GetInterfaces()
+            .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition().Name.Contains("IOptionalRoute"));
+        
+        if (optionalRouteType != null)
+        {
+            // Get optional parameters configuration
+            var getOptionalParametersMethod = typeof(TRoute).GetMethod("GetOptionalParameters", BindingFlags.Public | BindingFlags.Static);
+            if (getOptionalParametersMethod != null)
+            {
+                var optionalParams = getOptionalParametersMethod.Invoke(null, null);
+                if (optionalParams != null)
+                {
+                    var optionalSegmentsProperty = optionalParams.GetType().GetProperty("OptionalSegments");
+                    var defaultValuesProperty = optionalParams.GetType().GetProperty("DefaultValues");
+                    
+                    if (optionalSegmentsProperty != null && defaultValuesProperty != null)
+                    {
+                        var optionalSegments = optionalSegmentsProperty.GetValue(optionalParams) as System.Collections.IEnumerable;
+                        var defaultValues = defaultValuesProperty.GetValue(optionalParams) as System.Collections.IDictionary;
+                        
+                        if (optionalSegments != null && defaultValues != null)
+                        {
+                            // Check for optional parameters and add them if they differ from defaults
+                            foreach (var segment in optionalSegments)
+                            {
+                                var segmentName = segment?.ToString();
+                                if (!string.IsNullOrEmpty(segmentName))
+                                {
+                                    var property = typeof(TRoute).GetProperty(segmentName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                                    if (property != null)
+                                    {
+                                        var value = property.GetValue(route);
+                                        var defaultValue = defaultValues.Contains(segmentName) ? defaultValues[segmentName] : null;
+                                        
+                                        if (value != null && !Equals(value, defaultValue))
+                                        {
+                                            url.Append('/').Append(Uri.EscapeDataString(value.ToString()!));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -108,7 +178,19 @@ public static class UrlBuilder
 
         foreach (var (name, info) in metadata.Parameters)
         {
+            // Try to find property by parameter name first, then by all properties
             var property = parameters.GetType().GetProperty(info.Name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+            if (property == null)
+            {
+                // If not found by parameter name, look for property with QueryParam attribute that matches
+                property = parameters.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .FirstOrDefault(p => 
+                    {
+                        var attr = p.GetCustomAttribute<QueryParamAttribute>();
+                        var paramName = attr?.Name ?? p.Name.ToLowerInvariant();
+                        return paramName == name;
+                    });
+            }
             if (property == null) continue;
 
             var value = property.GetValue(parameters);
@@ -129,6 +211,7 @@ public static class UrlBuilder
                     DateTime dt => dt.ToString("O"),
                     DateTimeOffset dto => dto.ToString("O"),
                     bool b => b.ToString().ToLowerInvariant(),
+                    Enum e => e.ToString().ToLowerInvariant(),
                     _ => value.ToString()
                 };
 
@@ -176,6 +259,7 @@ public static class UrlBuilder
                     DateTime dt => dt.ToString("O"),
                     DateTimeOffset dto => dto.ToString("O"),
                     bool b => b.ToString().ToLowerInvariant(),
+                    Enum e => e.ToString().ToLowerInvariant(),
                     _ => value.ToString()
                 };
 

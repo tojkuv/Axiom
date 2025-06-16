@@ -115,21 +115,28 @@ public class StreamingEndpointTests
         // Arrange
         var endpoint = new TestServerStreamEndpoint();
         var request = new TestRequest("test");
-        var context = new TestContext();
         using var cts = new CancellationTokenSource();
+        var context = new TestContext(cts.Token);
 
         // Act
         var responses = new List<TestResponse>();
-        await foreach (var response in endpoint.StreamAsync(request, context)
-            .WithCancellation(cts.Token))
+        try
         {
-            responses.Add(response);
-            
-            // Cancel after first response
-            if (responses.Count == 1)
+            await foreach (var response in endpoint.StreamAsync(request, context)
+                .WithCancellation(cts.Token))
             {
-                cts.Cancel();
+                responses.Add(response);
+                
+                // Cancel after first response
+                if (responses.Count == 1)
+                {
+                    cts.Cancel();
+                }
             }
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected when cancellation occurs
         }
 
         // Assert
@@ -156,8 +163,16 @@ internal sealed class TestServerStreamEndpoint : IServerStreamAxiom<TestRequest,
         
         for (int i = 0; i < 3; i++)
         {
+            // Check for cancellation before yielding each item
+            context.CancellationToken.ThrowIfCancellationRequested();
+            
             yield return new TestResponse($"Response {i}");
-            await Task.Delay(100, context.CancellationToken).ConfigureAwait(false);
+            
+            // Only delay if not the last item to avoid unnecessary waiting
+            if (i < 2)
+            {
+                await Task.Delay(100, context.CancellationToken).ConfigureAwait(false);
+            }
         }
     }
 }
@@ -193,11 +208,18 @@ internal sealed class TestBidirectionalStreamEndpoint : IBidirectionalStreamAxio
 internal sealed record TestRequest(string Message);
 internal sealed record TestResponse(string Message);
 
-internal sealed class TestContext : IContext
+public sealed class TestContext : IContext
 {
+    private readonly CancellationToken _cancellationToken;
+
+    public TestContext(CancellationToken cancellationToken = default)
+    {
+        _cancellationToken = cancellationToken;
+    }
+
     public HttpContext HttpContext => null!;
     public IServiceProvider Services => null!;
-    public CancellationToken CancellationToken => CancellationToken.None;
+    public CancellationToken CancellationToken => _cancellationToken;
     public TimeProvider TimeProvider => TimeProvider.System;
     public MemoryPool<byte> MemoryPool => MemoryPool<byte>.Shared;
 

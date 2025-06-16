@@ -1,5 +1,7 @@
 import XCTest
-@testable import Axiom
+import AxiomCore
+@testable import AxiomArchitecture
+@testable import AxiomPlatform
 
 // MARK: - Launch Action Test Helpers
 

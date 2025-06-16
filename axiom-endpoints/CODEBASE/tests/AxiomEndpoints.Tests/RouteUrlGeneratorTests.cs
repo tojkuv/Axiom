@@ -30,7 +30,7 @@ public class RouteUrlGeneratorTests
         var url = RouteUrlGenerator.GenerateUrl(route);
 
         // Assert
-        Assert.Equal("/userbyid/12345678-1234-5678-9abc-123456789012", url);
+        Assert.Equal("/user/12345678-1234-5678-9abc-123456789012", url);
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public class RouteUrlGeneratorTests
         var url = RouteUrlGenerator.GenerateUrl(route);
 
         // Assert
-        Assert.Equal("/orderbyuserandid/12345678-1234-5678-9abc-123456789012/42", url);
+        Assert.Equal("/order/12345678-1234-5678-9abc-123456789012/42", url);
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public class RouteUrlGeneratorTests
         var url = RouteUrlGenerator.GenerateUrl(route);
 
         // Assert
-        Assert.Equal("/userbyname/John%20Doe%20%26%20Jane", url);
+        Assert.Equal("/user/John%20Doe%20%26%20Jane", url);
     }
 
 }

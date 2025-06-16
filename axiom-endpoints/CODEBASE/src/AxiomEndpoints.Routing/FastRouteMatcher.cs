@@ -72,6 +72,28 @@ public sealed class FastRouteMatcher
         return new RouteMatchResult(endpoint, parameters.ToFrozenDictionary());
     }
 
+    private static int FindSegmentEnd(ReadOnlySpan<char> template)
+    {
+        int braceDepth = 0;
+        for (int i = 0; i < template.Length; i++)
+        {
+            char c = template[i];
+            if (c == '{')
+            {
+                braceDepth++;
+            }
+            else if (c == '}')
+            {
+                braceDepth--;
+            }
+            else if (braceDepth == 0 && (c == '/' || c == '#'))
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     private void AddRoute(RouteNode node, ReadOnlySpan<char> template, RouteEndpoint endpoint)
     {
         if (template.IsEmpty)
@@ -85,12 +107,90 @@ public sealed class FastRouteMatcher
             template = template[1..];
         }
 
-        var segmentEnd = template.IndexOfAny(_parameterDelimiters);
+        // Find the end of the current segment, but don't split on '?' inside parameter braces
+        var segmentEnd = FindSegmentEnd(template);
         if (segmentEnd == -1) segmentEnd = template.Length;
 
         var segment = template[..segmentEnd];
         var remaining = segmentEnd < template.Length ? template[(segmentEnd + 1)..] : ReadOnlySpan<char>.Empty;
 
+        // Handle segments that mix literal text with parameters (e.g., "v{version}")
+        // Skip this logic if the segment is purely a parameter
+        var segmentString = segment.ToString();
+        var openBrace = segmentString.IndexOf('{');
+        if (openBrace > 0) // Only if there's literal text BEFORE the parameter
+        {
+            var closeBrace = segmentString.IndexOf('}', openBrace + 1);
+            if (closeBrace > openBrace)
+            {
+                // We have a parameter in this segment with literal prefix
+                var literalPrefix = segment[..openBrace];
+                var paramPart = segment[openBrace..(closeBrace + 1)];
+                var literalSuffix = segment[(closeBrace + 1)..];
+
+                // Add the literal prefix
+                var prefixString = literalPrefix.ToString();
+                if (!node.LiteralNodes.TryGetValue(prefixString, out var prefixNode))
+                {
+                    prefixNode = new RouteNode();
+                    node.LiteralNodes[prefixString] = prefixNode;
+                }
+
+                // Process the parameter part
+                var paramName = paramPart[1..^1]; // Remove { and }
+                var colonIndex = paramName.IndexOf(':');
+                if (colonIndex > 0)
+                {
+                    paramName = paramName[..colonIndex];
+                }
+
+                // Check if parameter is optional (ends with '?')
+                bool isOptional = false;
+                if (paramName.Length > 0 && paramName[^1] == '?')
+                {
+                    isOptional = true;
+                    paramName = paramName[..^1]; // Remove the '?' suffix
+                }
+
+                var paramString = paramName.ToString();
+                if (!prefixNode.ParameterNodes.TryGetValue(paramString, out var paramNode))
+                {
+                    paramNode = new RouteNode();
+                    prefixNode.ParameterNodes[paramString] = paramNode;
+                    
+                    // Mark the parameter as optional in the node
+                    if (isOptional)
+                    {
+                        paramNode.IsOptional = true;
+                    }
+                }
+
+                // If there's a literal suffix, we need to continue building from the parameter node
+                var nextTemplate = literalSuffix.Length > 0 
+                    ? $"{literalSuffix.ToString()}/{remaining.ToString()}".TrimEnd('/') 
+                    : remaining.ToString();
+                
+                AddRoute(paramNode, nextTemplate, endpoint);
+                
+                // For optional parameters, also add a route that skips this parameter
+                if (isOptional)
+                {
+                    if (remaining.IsEmpty)
+                    {
+                        // If this is the last segment, set the endpoint on the prefix node
+                        prefixNode.Endpoint = endpoint;
+                    }
+                    else
+                    {
+                        AddRoute(prefixNode, remaining, endpoint);
+                    }
+                }
+                
+                return;
+            }
+        }
+
+        // Handle pure parameter segments {param}
         if (segment.Length > 0 && segment[0] == '{' && segment[^1] == '}')
         {
             var paramName = segment[1..^1];
@@ -100,22 +200,51 @@ public sealed class FastRouteMatcher
                 paramName = paramName[..colonIndex];
             }
 
+            // Check if parameter is optional (ends with '?')
+            bool isOptional = false;
+            if (paramName.Length > 0 && paramName[^1] == '?')
+            {
+                isOptional = true;
+                paramName = paramName[..^1]; // Remove the '?' suffix
+            }
+
             var paramString = paramName.ToString();
             if (!node.ParameterNodes.TryGetValue(paramString, out var paramNode))
             {
                 paramNode = new RouteNode();
                 node.ParameterNodes[paramString] = paramNode;
+                
+                // Mark the parameter as optional in the node
+                if (isOptional)
+                {
+                    paramNode.IsOptional = true;
+                }
             }
             
             AddRoute(paramNode, remaining, endpoint);
+            
+            // For optional parameters, also add a route that skips this parameter
+            if (isOptional)
+            {
+                if (remaining.IsEmpty)
+                {
+                    // If this is the last segment, set the endpoint on the current node
+                    node.Endpoint = endpoint;
+                }
+                else
+                {
+                    AddRoute(node, remaining, endpoint);
+                }
+            }
         }
         else
         {
-            var segmentString = segment.ToString();
-            if (!node.LiteralNodes.TryGetValue(segmentString, out var literalNode))
+            // Handle pure literal segments
+            var literalSegmentString = segment.ToString();
+            if (!node.LiteralNodes.TryGetValue(literalSegmentString, out var literalNode))
             {
                 literalNode = new RouteNode();
-                node.LiteralNodes[segmentString] = literalNode;
+                node.LiteralNodes[literalSegmentString] = literalNode;
             }
             
             AddRoute(literalNode, remaining, endpoint);
@@ -140,12 +269,41 @@ public sealed class FastRouteMatcher
         var segment = path[..segmentEnd];
         var remaining = segmentEnd < path.Length ? path[(segmentEnd + 1)..] : ReadOnlySpan<char>.Empty;
 
+        // Try literal matches first
         if (node.LiteralNodes.TryGetValue(segment.ToString(), out var literalNode))
         {
             var result = MatchNode(literalNode, remaining, parameters);
             if (result != null) return result;
         }
 
+        // Try partial literal matches (for mixed literal/parameter patterns like "v{version}")
+        foreach (var (literalKey, literalSubNode) in node.LiteralNodes)
+        {
+            if (segment.StartsWith(literalKey))
+            {
+                // The segment starts with this literal, check if we can match the rest as parameters
+                var remainingSegment = segment[literalKey.Length..];
+                
+                // Try to match the remaining part of the segment with parameters
+                foreach (var (paramName, paramNode) in literalSubNode.ParameterNodes)
+                {
+                    var originalParameterCount = parameters.Count;
+                    parameters[paramName] = remainingSegment.ToString();
+                    
+                    var result = MatchNode(paramNode, remaining, parameters);
+                    if (result != null) return result;
+                    
+                    // Cleanup on failure
+                    while (parameters.Count > originalParameterCount)
+                    {
+                        var lastKey = parameters.Keys.Last();
+                        parameters.Remove(lastKey);
+                    }
+                }
+            }
+        }
+
+        // Try parameter matches
         foreach (var (paramName, paramNode) in node.ParameterNodes)
         {
             var originalParameterCount = parameters.Count;
@@ -154,6 +312,7 @@ public sealed class FastRouteMatcher
             var result = MatchNode(paramNode, remaining, parameters);
             if (result != null) return result;
             
+            // Cleanup on failure
             while (parameters.Count > originalParameterCount)
             {
                 var lastKey = parameters.Keys.Last();
@@ -185,6 +344,7 @@ public sealed class FastRouteMatcher
         public RouteEndpoint? Endpoint { get; set; }
         public Dictionary<string, RouteNode> LiteralNodes { get; } = new();
         public Dictionary<string, RouteNode> ParameterNodes { get; } = new();
+        public bool IsOptional { get; set; }
     }
 
     public void ClearCache()

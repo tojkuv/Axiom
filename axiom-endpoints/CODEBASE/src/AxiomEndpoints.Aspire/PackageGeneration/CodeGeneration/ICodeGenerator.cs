@@ -84,7 +84,7 @@ public abstract class BaseCodeGenerator : ICodeGenerator
         CodeQualityConfig qualityConfig,
         CancellationToken cancellationToken = default);
 
-    protected static string GenerateFileHeader(string fileName, CodeQualityConfig qualityConfig)
+    public static string GenerateFileHeader(string fileName, CodeQualityConfig qualityConfig)
     {
         if (!qualityConfig.Documentation.GenerateInlineComments)
             return string.Empty;
@@ -103,7 +103,7 @@ public abstract class BaseCodeGenerator : ICodeGenerator
             """;
     }
 
-    protected static string GenerateDocComment(string description, PackageLanguage language, bool includeExample = false)
+    public static string GenerateDocComment(string description, PackageLanguage language, bool includeExample = false)
     {
         return language switch
         {

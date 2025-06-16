@@ -205,7 +205,7 @@ public static class TestRoutes
                     public record Tasks(
                         Guid OrgId,
                         Guid ProjectId,
-                        [property: QueryParam] TaskQuery? Query = null
+                        [property: QueryParam] TaskQuery Query = null!
                     ) : IRouteWithQuery<Tasks, TaskQuery>
                     {
                         public static FrozenDictionary<string, object> Metadata { get; } =
@@ -231,7 +231,7 @@ public static class TestRoutes
 
             public static OptionalRouteParameters GetOptionalParameters() => new()
             {
-                OptionalSegments = ["version"].ToFrozenSet(),
+                OptionalSegments = new[] {"version"}.ToFrozenSet(),
                 DefaultValues = new Dictionary<string, object>
                 {
                     ["version"] = "latest"
@@ -246,11 +246,11 @@ public static class TestRoutes
             FrozenDictionary<string, object>.Empty;
 
         public static FrozenSet<string> AlternativeTemplates { get; } =
-            ["/api/old", "/legacy/api", "/v0/api"].ToFrozenSet();
+            new[] {"/api/old", "/legacy/api", "/v0/api"}.ToFrozenSet();
     }
 }
 
-public record SearchQuery : QueryParameters
+public record SearchQuery : QueryParameters, IQueryParameters
 {
     [QueryParam(Description = "Search text")]
     public string? Query { get; init; }
@@ -272,7 +272,7 @@ public record SearchQuery : QueryParameters
     [QueryParam(Description = "Filter by categories")]
     public IReadOnlyList<string> Categories { get; init; } = Array.Empty<string>();
 
-    public static QueryParameterMetadata GetMetadata() => new()
+    public static new QueryParameterMetadata GetMetadata() => new()
     {
         Parameters = new Dictionary<string, QueryParameterInfo>
         {
@@ -287,7 +287,7 @@ public record SearchQuery : QueryParameters
     };
 }
 
-public record TaskQuery : QueryParameters
+public record TaskQuery : QueryParameters, IQueryParameters
 {
     [QueryParam]
     public TaskStatus? Status { get; init; }

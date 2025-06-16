@@ -1,5 +1,6 @@
 import XCTest
-@testable import Axiom
+import AxiomCore
+@testable import AxiomArchitecture
 
 // MARK: - Helper Types for Delegation
 

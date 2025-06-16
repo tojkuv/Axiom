@@ -48,7 +48,7 @@ public class RouteMatcherTests
         // Assert
         Assert.True(result);
         Assert.Equal(2, parameters.Count);
-        Assert.Equal("456", parameters["userid"]);
+        Assert.Equal("456", parameters["userId"]);
         Assert.Equal("789", parameters["id"]);
     }
 
