@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+option csharp_namespace = "AxiomEndpointsExample.Notifications";
+
+package notifications;
+
+// Notification service definition
+service NotificationService {
+  // Send a notification
+  rpc SendNotification(SendNotificationRequest) returns (SendNotificationResponse);
+  
+  // Get notification status
+  rpc GetNotificationStatus(GetNotificationStatusRequest) returns (GetNotificationStatusResponse);
+  
+  // Stream real-time notifications
+  rpc StreamNotifications(StreamNotificationsRequest) returns (stream NotificationEvent);
+}
+
+// Send notification request
+message SendNotificationRequest {
+  string user_id = 1;
+  string title = 2;
+  string message = 3;
+  NotificationType type = 4;
+  map<string, string> metadata = 5;
+}
+
+// Send notification response
+message SendNotificationResponse {
+  string notification_id = 1;
+  bool success = 2;
+  string error_message = 3;
+}
+
+// Get notification status request
+message GetNotificationStatusRequest {
+  string notification_id = 1;
+}
+
+// Get notification status response
+message GetNotificationStatusResponse {
+  string notification_id = 1;
+  NotificationStatus status = 2;
+  int64 sent_at = 3;
+  int64 delivered_at = 4;
+  string error_message = 5;
+}
+
+// Stream notifications request
+message StreamNotificationsRequest {
+  string user_id = 1;
+}
+
+// Notification event for streaming
+message NotificationEvent {
+  string notification_id = 1;
+  string user_id = 2;
+  string title = 3;
+  string message = 4;
+  NotificationType type = 5;
+  int64 timestamp = 6;
+  map<string, string> metadata = 7;
+}
+
+// Notification types
+enum NotificationType {
+  INFO = 0;
+  WARNING = 1;
+  ERROR = 2;
+  SUCCESS = 3;
+}
+
+// Notification status
+enum NotificationStatus {
+  PENDING = 0;
+  SENT = 1;
+  DELIVERED = 2;
+  FAILED = 3;
+}

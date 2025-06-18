@@ -1,0 +1,82 @@
+// Generated Swift service contracts
+import Foundation
+{% if axiom_core %}
+import AxiomCore
+{% endif %}
+{% if package_name %}
+import {{ package_name }}
+{% endif %}
+{% for import in imports %}
+import {{ import }}
+{% endfor %}
+
+{% for message in messages %}
+// MARK: - {{ message.name }}
+{% if message.documentation %}
+/// {{ message.documentation }}
+{% endif %}
+public struct {{ message.name }}: Codable{% if message.identifiable %}, Identifiable{% endif %}{% if message.equatable %}, Equatable{% endif %}{% if message.hashable %}, Hashable{% endif %} {
+    {% for field in message.fields %}
+    {% if field.documentation %}
+    /// {{ field.documentation }}
+    {% endif %}
+    {% if field.is_array %}
+    public let {{ field.name }}: [{{ field.swift_type }}]
+    {% elif field.is_optional %}
+    public let {{ field.name }}: {{ field.swift_type }}?
+    {% else %}
+    public let {{ field.name }}: {{ field.swift_type }}
+    {% endif %}
+    {% endfor %}
+    
+    {% if message.has_fields %}
+    public init({% for field in message.fields %}{{ field.name }}: {% if field.is_array %}[{{ field.swift_type }}]{% elif field.is_optional %}{{ field.swift_type }}? = nil{% else %}{{ field.swift_type }}{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}) {
+        {% for field in message.fields %}
+        self.{{ field.name }} = {{ field.name }}
+        {% endfor %}
+    }
+    {% else %}
+    public init() {}
+    {% endif %}
+    
+    {% if message.coding_keys %}
+    private enum CodingKeys: String, CodingKey {
+        {% for field in message.fields %}
+        case {{ field.name }}{% if field.json_name != field.name %} = "{{ field.json_name }}"{% endif %}
+        {% endfor %}
+    }
+    {% endif %}
+}
+
+{% endfor %}
+
+{% for enum in enums %}
+// MARK: - {{ enum.name }}
+{% if enum.documentation %}
+/// {{ enum.documentation }}
+{% endif %}
+public enum {{ enum.name }}: String, Codable, CaseIterable, Sendable {
+    {% for value in enum.values %}
+    {% if value.documentation %}
+    /// {{ value.documentation }}
+    {% endif %}
+    case {{ value.swift_name }} = "{{ value.proto_name }}"
+    {% endfor %}
+}
+
+{% endfor %}
+
+{% if service %}
+// MARK: - {{ service.name }} Protocol
+{% if service.documentation %}
+/// {{ service.documentation }}
+{% endif %}
+public protocol {{ service.name }}Protocol {
+    {% for method in service.methods %}
+    {% if method.documentation %}
+    /// {{ method.documentation }}
+    {% endif %}
+    func {{ method.name }}(_ request: {{ method.input_type }}) async throws{% if method.output_type != "Void" %} -> {{ method.output_type }}{% endif %}
+    {% endfor %}
+}
+{% endif %}

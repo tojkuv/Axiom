@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <OutputType>Library</OutputType>
+    <NoWarn>$(NoWarn);CA1707;CA1305;CA1307;CA1310;CA1031;CS8769;CS0017;CA1515;CA1052;CA2234;CA2000;CA1062</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="7.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <Using Include="FluentAssertions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../../src/AxiomEndpoints.Core/AxiomEndpoints.Core.csproj" />
+    <ProjectReference Include="../../../src/AxiomEndpoints.Routing/AxiomEndpoints.Routing.csproj" />
+    <ProjectReference Include="../../../src/AxiomEndpoints.AspNetCore/AxiomEndpoints.AspNetCore.csproj" />
+    <ProjectReference Include="../../Shared/AxiomEndpoints.Testing.Common/AxiomEndpoints.Testing.Common.csproj" />
+  </ItemGroup>
+
+</Project>

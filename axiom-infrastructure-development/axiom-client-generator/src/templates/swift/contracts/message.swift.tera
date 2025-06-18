@@ -1,0 +1,42 @@
+// MARK: - {{ message.name }}
+{% if message.documentation %}
+/// {{ message.documentation }}
+{% endif %}
+public struct {{ message.name | pascal_case }}: Codable{% if message.equatable %}, Equatable{% endif %}{% if message.sendable %}, Sendable{% endif %} {
+    {% for field in message.fields %}
+    {% if field.documentation %}
+    /// {{ field.documentation }}
+    {% endif %}
+    public let {{ field.swift_name }}: {{ field.type }}{% if field.optional %}?{% endif %}
+    {% endfor %}
+    
+    public init({% for field in message.fields %}{{ field.swift_name }}: {{ field.type }}{% if field.optional %}? = nil{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}) {
+        {% for field in message.fields %}
+        self.{{ field.swift_name }} = {{ field.swift_name }}
+        {% endfor %}
+    }
+}
+
+{% set coding_keys_needed = false %}
+{% for field in message.fields %}
+    {% if field.coding_key_needed %}
+        {% set_global coding_keys_needed = true %}
+    {% endif %}
+{% endfor %}
+
+{% if coding_keys_needed %}
+
+// MARK: - CodingKeys
+
+extension {{ message.name | pascal_case }} {
+    enum CodingKeys: String, CodingKey {
+        {% for field in message.fields %}
+        {% if field.coding_key_needed %}
+        case {{ field.swift_name }} = "{{ field.name }}"
+        {% else %}
+        case {{ field.swift_name }}
+        {% endif %}
+        {% endfor %}
+    }
+}
+{% endif %}

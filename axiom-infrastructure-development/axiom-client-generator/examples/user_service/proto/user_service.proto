@@ -1,0 +1,471 @@
+syntax = "proto3";
+
+package userservice.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "axiom_options.proto";
+
+// User Management Service with authentication and authorization
+service UserService {
+  option (axiom.service_options) = {
+    client_name: "UserManagerClient"
+    state_name: "UserManagerState"
+    action_name: "UserManagerAction"
+    import_modules: ["AxiomCore", "AxiomArchitecture", "AuthenticationServices"]
+    supports_pagination: true
+    generate_tests: true
+    collections: [
+      {
+        name: "users"
+        item_type: "User"
+        primary_key: "id"
+        paginated: true
+        searchable: true
+        sortable: true
+        default_sort_field: "created_at"
+        max_cached_items: 200
+      },
+      {
+        name: "sessions"
+        item_type: "UserSession"
+        primary_key: "id"
+        paginated: false
+        searchable: false
+        sortable: true
+        default_sort_field: "created_at"
+        max_cached_items: 10
+      }
+    ]
+  };
+
+  // Authentication operations
+  rpc Register(RegisterRequest) returns (AuthResponse) {
+    option (axiom.method_options) = {
+      state_update_strategy: CUSTOM
+      requires_network: true
+      modifies_state: true
+      show_loading_state: true
+      collection_name: "users"
+      validation_rules: [
+        "!request.email.isEmpty",
+        "request.email.contains('@')",
+        "!request.password.isEmpty",
+        "request.password.length >= 8"
+      ]
+      cache_strategy: NONE
+      supports_offline: false
+      action_documentation: "Registers a new user account"
+    };
+  }
+
+  rpc Login(LoginRequest) returns (AuthResponse) {
+    option (axiom.method_options) = {
+      state_update_strategy: CUSTOM
+      requires_network: true
+      modifies_state: true
+      show_loading_state: true
+      collection_name: "sessions"
+      validation_rules: [
+        "!request.email.isEmpty",
+        "!request.password.isEmpty"
+      ]
+      cache_strategy: MEMORY
+      supports_offline: false
+      action_documentation: "Authenticates user and creates session"
+    };
+  }
+
+  rpc Logout(LogoutRequest) returns (google.protobuf.Empty) {
+    option (axiom.method_options) = {
+      state_update_strategy: CUSTOM
+      requires_network: true
+      modifies_state: true
+      show_loading_state: false
+      collection_name: "sessions"
+      validation_rules: ["!request.session_token.isEmpty"]
+      cache_strategy: NONE
+      supports_offline: false
+      action_documentation: "Logs out user and invalidates session"
+    };
+  }
+
+  rpc RefreshToken(RefreshTokenRequest) returns (AuthResponse) {
+    option (axiom.method_options) = {
+      state_update_strategy: CUSTOM
+      requires_network: true
+      modifies_state: true
+      show_loading_state: false
+      collection_name: "sessions"
+      validation_rules: ["!request.refresh_token.isEmpty"]
+      cache_strategy: MEMORY
+      supports_offline: false
+      action_documentation: "Refreshes authentication token"
+    };
+  }
+
+  // Profile management
+  rpc GetProfile(GetProfileRequest) returns (User) {
+    option (axiom.method_options) = {
+      state_update_strategy: CUSTOM
+      requires_network: true
+      modifies_state: true
+      show_loading_state: true
+      collection_name: "users"
+      validation_rules: ["!request.user_id.isEmpty"]
+      cache_strategy: MEMORY
+      supports_offline: true
+      action_documentation: "Retrieves user profile information"
+    };
+  }
+
+  rpc UpdateProfile(UpdateProfileRequest) returns (User) {
+    option (axiom.method_options) = {
+      state_update_strategy: UPDATE_BY_ID
+      requires_network: true
+      modifies_state: true
+      show_loading_state: true
+      collection_name: "users"
+      id_field_name: "user_id"
+      validation_rules: [
+        "!request.user_id.isEmpty",
+        "request.email.isEmpty || request.email.contains('@')"
+      ]
+      cache_strategy: MEMORY
+      supports_offline: false
+      action_documentation: "Updates user profile information"
+    };
+  }
+
+  rpc ChangePassword(ChangePasswordRequest) returns (google.protobuf.Empty) {
+    option (axiom.method_options) = {
+      state_update_strategy: NO_CHANGE
+      requires_network: true
+      modifies_state: false
+      show_loading_state: true
+      collection_name: "users"
+      validation_rules: [
+        "!request.current_password.isEmpty",
+        "!request.new_password.isEmpty",
+        "request.new_password.length >= 8",
+        "request.new_password != request.current_password"
+      ]
+      cache_strategy: NONE
+      supports_offline: false
+      action_documentation: "Changes user password"
+    };
+  }
+
+  // User management (admin operations)
+  rpc GetUsers(GetUsersRequest) returns (GetUsersResponse) {
+    option (axiom.method_options) = {
+      state_update_strategy: REPLACE_ALL
+      requires_network: true
+      modifies_state: true
+      show_loading_state: true
+      collection_name: "users"
+      cache_strategy: MEMORY
+      supports_offline: true
+      action_documentation: "Retrieves paginated list of users (admin only)"
+    };
+  }
+
+  rpc DeleteUser(DeleteUserRequest) returns (google.protobuf.Empty) {
+    option (axiom.method_options) = {
+      state_update_strategy: REMOVE_BY_ID
+      requires_network: true
+      modifies_state: true
+      show_loading_state: true
+      collection_name: "users"
+      id_field_name: "user_id"
+      validation_rules: ["!request.user_id.isEmpty"]
+      cache_strategy: NONE
+      supports_offline: false
+      action_documentation: "Deletes user account (admin only)"
+    };
+  }
+
+  // Password reset flow
+  rpc RequestPasswordReset(PasswordResetRequest) returns (google.protobuf.Empty) {
+    option (axiom.method_options) = {
+      state_update_strategy: NO_CHANGE
+      requires_network: true
+      modifies_state: false
+      show_loading_state: true
+      validation_rules: [
+        "!request.email.isEmpty",
+        "request.email.contains('@')"
+      ]
+      cache_strategy: NONE
+      supports_offline: false
+      action_documentation: "Initiates password reset process"
+    };
+  }
+
+  rpc ResetPassword(ResetPasswordRequest) returns (google.protobuf.Empty) {
+    option (axiom.method_options) = {
+      state_update_strategy: NO_CHANGE
+      requires_network: true
+      modifies_state: false
+      show_loading_state: true
+      validation_rules: [
+        "!request.reset_token.isEmpty",
+        "!request.new_password.isEmpty",
+        "request.new_password.length >= 8"
+      ]
+      cache_strategy: NONE
+      supports_offline: false
+      action_documentation: "Completes password reset with token"
+    };
+  }
+
+  // Account verification
+  rpc VerifyEmail(VerifyEmailRequest) returns (User) {
+    option (axiom.method_options) = {
+      state_update_strategy: UPDATE_BY_ID
+      requires_network: true
+      modifies_state: true
+      show_loading_state: true
+      collection_name: "users"
+      validation_rules: ["!request.verification_token.isEmpty"]
+      cache_strategy: MEMORY
+      supports_offline: false
+      action_documentation: "Verifies user email address"
+    };
+  }
+
+  rpc ResendVerification(ResendVerificationRequest) returns (google.protobuf.Empty) {
+    option (axiom.method_options) = {
+      state_update_strategy: NO_CHANGE
+      requires_network: true
+      modifies_state: false
+      show_loading_state: true
+      validation_rules: [
+        "!request.email.isEmpty",
+        "request.email.contains('@')"
+      ]
+      cache_strategy: NONE
+      supports_offline: false
+      action_documentation: "Resends email verification"
+    };
+  }
+}
+
+// Core user entity
+message User {
+  string id = 1;
+  string email = 2;
+  string username = 3;
+  string first_name = 4;
+  string last_name = 5;
+  string display_name = 6;
+  string avatar_url = 7;
+  UserRole role = 8;
+  UserStatus status = 9;
+  bool email_verified = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+  google.protobuf.Timestamp last_login_at = 13;
+  UserPreferences preferences = 14;
+  UserProfile profile = 15;
+  repeated string permissions = 16;
+  repeated UserDevice devices = 17;
+}
+
+// User session for authentication
+message UserSession {
+  string id = 1;
+  string user_id = 2;
+  string access_token = 3;
+  string refresh_token = 4;
+  google.protobuf.Timestamp expires_at = 5;
+  google.protobuf.Timestamp created_at = 6;
+  string device_info = 7;
+  string ip_address = 8;
+  string user_agent = 9;
+  bool is_active = 10;
+}
+
+// User preferences
+message UserPreferences {
+  string language = 1;
+  string timezone = 2;
+  bool notifications_enabled = 3;
+  bool email_notifications = 4;
+  bool push_notifications = 5;
+  string theme = 6;
+  repeated string disabled_features = 7;
+}
+
+// Extended user profile
+message UserProfile {
+  string bio = 1;
+  string phone = 2;
+  string location = 3;
+  string website = 4;
+  google.protobuf.Timestamp date_of_birth = 5;
+  string company = 6;
+  string job_title = 7;
+  repeated string interests = 8;
+  repeated SocialLink social_links = 9;
+}
+
+// Social media links
+message SocialLink {
+  string platform = 1;
+  string url = 2;
+  bool is_public = 3;
+}
+
+// User device information
+message UserDevice {
+  string id = 1;
+  string name = 2;
+  string type = 3;
+  string os = 4;
+  string browser = 5;
+  google.protobuf.Timestamp last_seen = 6;
+  bool is_trusted = 7;
+  string push_token = 8;
+}
+
+// Authentication request/response messages
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+  string username = 3;
+  string first_name = 4;
+  string last_name = 5;
+  bool accept_terms = 6;
+  bool subscribe_newsletter = 7;
+  string invitation_code = 8;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+  bool remember_me = 3;
+  string device_info = 4;
+  string captcha_token = 5;
+}
+
+message LogoutRequest {
+  string session_token = 1;
+  bool logout_all_devices = 2;
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+  string device_info = 2;
+}
+
+message AuthResponse {
+  User user = 1;
+  UserSession session = 2;
+  bool requires_verification = 3;
+  bool requires_2fa = 4;
+  repeated string required_actions = 5;
+}
+
+// Profile management messages
+message GetProfileRequest {
+  string user_id = 1;
+  bool include_preferences = 2;
+  bool include_devices = 3;
+}
+
+message UpdateProfileRequest {
+  string user_id = 1;
+  optional string email = 2;
+  optional string username = 3;
+  optional string first_name = 4;
+  optional string last_name = 5;
+  optional string display_name = 6;
+  optional string avatar_url = 7;
+  optional UserPreferences preferences = 8;
+  optional UserProfile profile = 9;
+}
+
+message ChangePasswordRequest {
+  string current_password = 1;
+  string new_password = 2;
+  bool logout_other_sessions = 3;
+}
+
+// User management messages
+message GetUsersRequest {
+  int32 limit = 1;
+  string cursor = 2;
+  string search_query = 3;
+  UserRole role_filter = 4;
+  UserStatus status_filter = 5;
+  bool email_verified_filter = 6;
+  string sort_field = 7;
+  bool sort_ascending = 8;
+  google.protobuf.Timestamp created_after = 9;
+  google.protobuf.Timestamp created_before = 10;
+}
+
+message GetUsersResponse {
+  repeated User users = 1;
+  string next_cursor = 2;
+  int32 total_count = 3;
+  bool has_more = 4;
+  UserStatistics statistics = 5;
+}
+
+message DeleteUserRequest {
+  string user_id = 1;
+  bool hard_delete = 2;
+  string reason = 3;
+}
+
+// Password reset messages
+message PasswordResetRequest {
+  string email = 1;
+  string captcha_token = 2;
+}
+
+message ResetPasswordRequest {
+  string reset_token = 1;
+  string new_password = 2;
+}
+
+// Email verification messages
+message VerifyEmailRequest {
+  string verification_token = 1;
+}
+
+message ResendVerificationRequest {
+  string email = 1;
+  string captcha_token = 2;
+}
+
+// Supporting messages
+message UserStatistics {
+  int32 total_users = 1;
+  int32 active_users = 2;
+  int32 verified_users = 3;
+  int32 new_users_today = 4;
+  int32 new_users_this_week = 5;
+  int32 new_users_this_month = 6;
+  double verification_rate = 7;
+}
+
+// Enums
+enum UserRole {
+  USER_ROLE_UNSPECIFIED = 0;
+  USER_ROLE_USER = 1;
+  USER_ROLE_MODERATOR = 2;
+  USER_ROLE_ADMIN = 3;
+  USER_ROLE_SUPER_ADMIN = 4;
+}
+
+enum UserStatus {
+  USER_STATUS_UNSPECIFIED = 0;
+  USER_STATUS_ACTIVE = 1;
+  USER_STATUS_INACTIVE = 2;
+  USER_STATUS_SUSPENDED = 3;
+  USER_STATUS_BANNED = 4;
+  USER_STATUS_PENDING_VERIFICATION = 5;
+}

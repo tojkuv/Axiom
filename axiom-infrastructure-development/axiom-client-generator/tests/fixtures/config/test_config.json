@@ -1,0 +1,58 @@
+{
+  "swift": {
+    "axiom_version": "2.0.0",
+    "client_suffix": "Client",
+    "generate_tests": true,
+    "package_name": "TaskManager",
+    "module_imports": ["AxiomCore", "AxiomArchitecture", "Foundation"],
+    "style_guide": "axiom"
+  },
+  "generation": {
+    "generate_contracts": true,
+    "generate_clients": true,
+    "force_overwrite": false,
+    "include_documentation": true,
+    "generate_tests": true
+  },
+  "validation": {
+    "validate_syntax": true,
+    "validate_compilation": true,
+    "swift_version": "5.9",
+    "additional_flags": ["--enable-testing", "--enable-library-evolution"]
+  },
+  "output": {
+    "base_path": "./Generated/Swift",
+    "sources_dir": "Sources",
+    "tests_dir": "Tests",
+    "create_package_swift": true,
+    "organize_by_service": true
+  },
+  "proto_paths": [
+    "./tests/fixtures/proto/task_service.proto",
+    "./tests/fixtures/proto/user_service.proto"
+  ],
+  "services": ["TaskService", "UserService"],
+  "template": {
+    "custom_template_path": null,
+    "enable_custom_filters": true,
+    "template_cache_size": 50,
+    "additional_context": {
+      "company_name": "Axiom",
+      "copyright_year": "2024"
+    }
+  },
+  "proto": {
+    "include_paths": ["./proto", "./tests/fixtures/proto"],
+    "import_paths": ["./proto/common"],
+    "file_descriptor_set_path": null,
+    "preserve_proto_names": false,
+    "enable_custom_options": true
+  },
+  "mcp": {
+    "tool_name": "axiom_swift_generator",
+    "description": "Generates Swift clients for Axiom framework from gRPC proto definitions",
+    "timeout_seconds": 300,
+    "max_concurrent_requests": 3,
+    "enable_progress_reporting": true
+  }
+}

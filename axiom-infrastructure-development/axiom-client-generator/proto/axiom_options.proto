@@ -1,0 +1,159 @@
+syntax = "proto3";
+
+package axiom.options.v1;
+
+import "google/protobuf/descriptor.proto";
+
+// Axiom service configuration options
+message AxiomServiceOptions {
+  // The client actor name (defaults to service name + "Client")
+  optional string client_name = 1;
+  
+  // The state struct name (defaults to service name + "State")
+  optional string state_name = 2;
+  
+  // The action enum name (defaults to service name + "Action")
+  optional string action_name = 3;
+  
+  // Base import modules for generated Swift code
+  repeated string import_modules = 4;
+  
+  // Whether to generate test files
+  optional bool generate_tests = 5;
+  
+  // Custom package name for Swift imports
+  optional string swift_package_name = 6;
+  
+  // Collections managed by this service
+  repeated AxiomCollection collections = 7;
+  
+  // Whether this service supports pagination
+  optional bool supports_pagination = 8;
+}
+
+// Axiom method configuration options
+message AxiomMethodOptions {
+  // State update strategy for this method
+  optional StateUpdateStrategy state_update_strategy = 1;
+  
+  // Collection name this method operates on
+  optional string collection_name = 2;
+  
+  // Whether this method requires network access
+  optional bool requires_network = 3;
+  
+  // Whether this method modifies state
+  optional bool modifies_state = 4;
+  
+  // Whether to show loading state for this action
+  optional bool show_loading_state = 5;
+  
+  // Validation rules for the input
+  repeated string validation_rules = 6;
+  
+  // Custom documentation for the generated action
+  optional string action_documentation = 7;
+  
+  // ID field name for operations that work with specific entities
+  optional string id_field_name = 8;
+  
+  // Whether this method can be executed offline
+  optional bool supports_offline = 9;
+  
+  // Cache strategy for this method
+  optional CacheStrategy cache_strategy = 10;
+}
+
+// Axiom field configuration options
+message AxiomFieldOptions {
+  // Whether this field is used for entity identification
+  optional bool is_id_field = 1;
+  
+  // Whether this field should be indexed for search
+  optional bool searchable = 2;
+  
+  // Whether this field can be sorted on
+  optional bool sortable = 3;
+  
+  // Whether this field is required for validation
+  optional bool required = 4;
+  
+  // Custom validation pattern (regex)
+  optional string validation_pattern = 5;
+  
+  // Minimum value for numeric fields
+  optional double min_value = 6;
+  
+  // Maximum value for numeric fields
+  optional double max_value = 7;
+  
+  // Minimum length for string fields
+  optional int32 min_length = 8;
+  
+  // Maximum length for string fields
+  optional int32 max_length = 9;
+  
+  // Whether this field should be excluded from state equality checks
+  optional bool exclude_from_equality = 10;
+}
+
+// Collection configuration for state management
+message AxiomCollection {
+  // Name of the collection (e.g., "tasks")
+  string name = 1;
+  
+  // Type of items in the collection (e.g., "Task")
+  string item_type = 2;
+  
+  // Primary key field name for items in this collection
+  optional string primary_key = 3;
+  
+  // Whether this collection supports pagination
+  optional bool paginated = 4;
+  
+  // Default sort field for this collection
+  optional string default_sort_field = 5;
+  
+  // Whether this collection supports search
+  optional bool searchable = 6;
+  
+  // Maximum number of items to keep in memory
+  optional int32 max_cached_items = 7;
+}
+
+// State update strategies
+enum StateUpdateStrategy {
+  STATE_UPDATE_STRATEGY_UNSPECIFIED = 0;
+  STATE_UPDATE_STRATEGY_APPEND = 1;        // Add new item to collection
+  STATE_UPDATE_STRATEGY_REPLACE_ALL = 2;   // Replace entire collection
+  STATE_UPDATE_STRATEGY_UPDATE_BY_ID = 3;  // Update existing item by ID
+  STATE_UPDATE_STRATEGY_REMOVE_BY_ID = 4;  // Remove item by ID
+  STATE_UPDATE_STRATEGY_CUSTOM = 5;        // Custom update logic required
+  STATE_UPDATE_STRATEGY_NO_CHANGE = 6;     // Method doesn't change state
+}
+
+// Cache strategies for methods
+enum CacheStrategy {
+  CACHE_STRATEGY_UNSPECIFIED = 0;
+  CACHE_STRATEGY_NONE = 1;           // No caching
+  CACHE_STRATEGY_MEMORY = 2;         // Cache in memory
+  CACHE_STRATEGY_PERSISTENT = 3;     // Cache persistently
+  CACHE_STRATEGY_CONDITIONAL = 4;    // Cache based on conditions
+}
+
+// Extend proto descriptors with Axiom options
+extend google.protobuf.ServiceOptions {
+  AxiomServiceOptions axiom_service = 50001;
+}
+
+extend google.protobuf.MethodOptions {
+  AxiomMethodOptions axiom_method = 50002;
+}
+
+extend google.protobuf.FieldOptions {
+  AxiomFieldOptions axiom_field = 50003;
+}
+
+extend google.protobuf.MessageOptions {
+  AxiomCollection axiom_collection = 50004;
+}

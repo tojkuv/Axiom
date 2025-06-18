@@ -1,0 +1,238 @@
+// Generated Axiom error types for {{ service_name }}
+import Foundation
+
+// MARK: - AxiomError
+
+/// Axiom framework errors
+public enum AxiomError: Error, Equatable, Sendable {
+    /// Client-related errors
+    case clientError(AxiomClientError)
+    
+    /// Network-related errors
+    case networkError(String)
+    
+    /// State management errors
+    case stateError(String)
+    
+    /// Action processing errors
+    case actionError(String)
+    
+    /// Validation errors
+    case validationError(String)
+    
+    /// Framework integration errors
+    case frameworkError(String)
+}
+
+// MARK: - AxiomClientError
+
+/// Client-specific errors
+public enum AxiomClientError: Error, Equatable, Sendable {
+    /// Invalid action provided
+    case invalidAction(String)
+    
+    /// State update failed
+    case stateUpdateFailed(String)
+    
+    /// Stream error
+    case streamError(String)
+    
+    /// Initialization error
+    case initializationError(String)
+    
+    /// Concurrency error
+    case concurrencyError(String)
+    
+    /// Configuration error
+    case configurationError(String)
+}
+
+// MARK: - AxiomError Extensions
+
+extension AxiomError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .clientError(let clientError):
+            return "Client Error: \(clientError.localizedDescription)"
+        case .networkError(let message):
+            return "Network Error: \(message)"
+        case .stateError(let message):
+            return "State Error: \(message)"
+        case .actionError(let message):
+            return "Action Error: \(message)"
+        case .validationError(let message):
+            return "Validation Error: \(message)"
+        case .frameworkError(let message):
+            return "Framework Error: \(message)"
+        }
+    }
+    
+    public var failureReason: String? {
+        switch self {
+        case .clientError(let clientError):
+            return clientError.failureReason
+        case .networkError:
+            return "A network operation failed"
+        case .stateError:
+            return "State management operation failed"
+        case .actionError:
+            return "Action processing failed"
+        case .validationError:
+            return "Input validation failed"
+        case .frameworkError:
+            return "Framework integration failed"
+        }
+    }
+}
+
+extension AxiomClientError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .invalidAction(let message):
+            return "Invalid Action: \(message)"
+        case .stateUpdateFailed(let message):
+            return "State Update Failed: \(message)"
+        case .streamError(let message):
+            return "Stream Error: \(message)"
+        case .initializationError(let message):
+            return "Initialization Error: \(message)"
+        case .concurrencyError(let message):
+            return "Concurrency Error: \(message)"
+        case .configurationError(let message):
+            return "Configuration Error: \(message)"
+        }
+    }
+    
+    public var failureReason: String? {
+        switch self {
+        case .invalidAction:
+            return "The provided action is invalid or malformed"
+        case .stateUpdateFailed:
+            return "Failed to update the internal state"
+        case .streamError:
+            return "An error occurred with the state stream"
+        case .initializationError:
+            return "Failed to initialize the client"
+        case .concurrencyError:
+            return "A concurrency issue occurred"
+        case .configurationError:
+            return "Client configuration is invalid"
+        }
+    }
+}
+
+// MARK: - Convenience Constructors
+
+extension AxiomError {
+    /// Create an invalid action error
+    public static func invalidAction(_ message: String) -> AxiomError {
+        .clientError(.invalidAction(message))
+    }
+    
+    /// Create a state update failure error
+    public static func stateUpdateFailed(_ message: String) -> AxiomError {
+        .clientError(.stateUpdateFailed(message))
+    }
+    
+    /// Create a stream error
+    public static func streamError(_ message: String) -> AxiomError {
+        .clientError(.streamError(message))
+    }
+    
+    /// Create a validation error
+    public static func validation(_ message: String) -> AxiomError {
+        .validationError(message)
+    }
+    
+    /// Create a network error
+    public static func network(_ message: String) -> AxiomError {
+        .networkError(message)
+    }
+    
+    /// Create a framework error
+    public static func framework(_ message: String) -> AxiomError {
+        .frameworkError(message)
+    }
+}
+
+// MARK: - Error Recovery
+
+extension AxiomError {
+    /// Whether this error is recoverable
+    public var isRecoverable: Bool {
+        switch self {
+        case .clientError(let clientError):
+            return clientError.isRecoverable
+        case .networkError:
+            return true  // Network errors are typically recoverable
+        case .stateError:
+            return false // State errors usually require reset
+        case .actionError:
+            return true  // Action errors can often be retried
+        case .validationError:
+            return false // Validation errors require user input
+        case .frameworkError:
+            return false // Framework errors usually require restart
+        }
+    }
+    
+    /// Suggested recovery strategy
+    public var recoveryStrategy: ErrorRecoveryStrategy {
+        switch self {
+        case .clientError(let clientError):
+            return clientError.recoveryStrategy
+        case .networkError:
+            return .retry
+        case .stateError:
+            return .reset
+        case .actionError:
+            return .retry
+        case .validationError:
+            return .userInput
+        case .frameworkError:
+            return .restart
+        }
+    }
+}
+
+extension AxiomClientError {
+    /// Whether this client error is recoverable
+    public var isRecoverable: Bool {
+        switch self {
+        case .invalidAction, .configurationError:
+            return false
+        case .stateUpdateFailed, .streamError, .concurrencyError:
+            return true
+        case .initializationError:
+            return false
+        }
+    }
+    
+    /// Suggested recovery strategy for client errors
+    public var recoveryStrategy: ErrorRecoveryStrategy {
+        switch self {
+        case .invalidAction:
+            return .userInput
+        case .stateUpdateFailed:
+            return .reset
+        case .streamError:
+            return .retry
+        case .initializationError:
+            return .restart
+        case .concurrencyError:
+            return .retry
+        case .configurationError:
+            return .restart
+        }
+    }
+}
+
+// MARK: - Error Recovery Strategy
+
+public enum ErrorRecoveryStrategy: String, Sendable {
+    case retry = "retry"
+    case reset = "reset"
+    case restart = "restart"
+    case userInput = "user_input"
+    case ignore = "ignore"
+}

@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\AxiomEndpoints.Core\AxiomEndpoints.Core.csproj" />
+    <ProjectReference Include="..\AxiomEndpoints.Routing\AxiomEndpoints.Routing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.60.0" />
+    <PackageReference Include="Grpc.AspNetCore.Web" Version="2.60.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+    <PackageReference Include="System.Linq.Async" Version="6.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn);CA1062;CA1819;CA2007;CA1813;CA1032;CA1040;CA1711;CA1716;CA1720;CA1724;CA1051;CA1304;CA1305;CA1310;CA1507;CA1708;CA2211;CA2234;CA1000;CA1019;CA1308;CA1307;CA1860;CA1859;CA1031;CA1852;CA2227;CA1052;CA1849;ASP0019;CA1805</NoWarn>
+  </PropertyGroup>
+
+</Project>

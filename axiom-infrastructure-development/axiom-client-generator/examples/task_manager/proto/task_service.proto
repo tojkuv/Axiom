@@ -1,0 +1,370 @@
+syntax = "proto3";
+
+package taskmanager.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "axiom_options.proto";
+
+// Task Management Service with comprehensive Axiom integration
+service TaskService {
+  option (axiom.service_options) = {
+    client_name: "TaskManagerClient"
+    state_name: "TaskManagerState" 
+    action_name: "TaskManagerAction"
+    import_modules: ["AxiomCore", "AxiomArchitecture"]
+    supports_pagination: true
+    generate_tests: true
+    collections: [
+      {
+        name: "tasks"
+        item_type: "Task"
+        primary_key: "id"
+        paginated: true
+        searchable: true
+        sortable: true
+        default_sort_field: "created_at"
+        max_cached_items: 500
+      },
+      {
+        name: "categories"
+        item_type: "Category"
+        primary_key: "id"
+        paginated: false
+        searchable: true
+        sortable: true
+        default_sort_field: "name"
+        max_cached_items: 50
+      }
+    ]
+  };
+
+  // Create a new task
+  rpc CreateTask(CreateTaskRequest) returns (Task) {
+    option (axiom.method_options) = {
+      state_update_strategy: APPEND
+      requires_network: true
+      modifies_state: true
+      show_loading_state: true
+      collection_name: "tasks"
+      validation_rules: ["!request.title.isEmpty", "request.title.length >= 3"]
+      cache_strategy: MEMORY
+      supports_offline: false
+      action_documentation: "Creates a new task and adds it to the tasks collection"
+    };
+  }
+
+  // Get tasks with filtering and pagination
+  rpc GetTasks(GetTasksRequest) returns (GetTasksResponse) {
+    option (axiom.method_options) = {
+      state_update_strategy: REPLACE_ALL
+      requires_network: true
+      modifies_state: true
+      show_loading_state: true
+      collection_name: "tasks"
+      cache_strategy: MEMORY
+      supports_offline: true
+      action_documentation: "Retrieves paginated list of tasks with optional filtering"
+    };
+  }
+
+  // Update an existing task
+  rpc UpdateTask(UpdateTaskRequest) returns (Task) {
+    option (axiom.method_options) = {
+      state_update_strategy: UPDATE_BY_ID
+      requires_network: true
+      modifies_state: true
+      show_loading_state: true
+      collection_name: "tasks"
+      id_field_name: "task_id"
+      validation_rules: ["!request.task_id.isEmpty"]
+      cache_strategy: MEMORY
+      supports_offline: false
+      action_documentation: "Updates an existing task by ID"
+    };
+  }
+
+  // Delete a task
+  rpc DeleteTask(DeleteTaskRequest) returns (google.protobuf.Empty) {
+    option (axiom.method_options) = {
+      state_update_strategy: REMOVE_BY_ID
+      requires_network: true
+      modifies_state: true
+      show_loading_state: true
+      collection_name: "tasks"
+      id_field_name: "task_id"
+      validation_rules: ["!request.task_id.isEmpty"]
+      cache_strategy: NONE
+      supports_offline: false
+      action_documentation: "Removes a task by ID"
+    };
+  }
+
+  // Toggle task completion status
+  rpc ToggleTaskCompletion(ToggleTaskCompletionRequest) returns (Task) {
+    option (axiom.method_options) = {
+      state_update_strategy: UPDATE_BY_ID
+      requires_network: true
+      modifies_state: true
+      show_loading_state: false
+      collection_name: "tasks"
+      id_field_name: "task_id"
+      validation_rules: ["!request.task_id.isEmpty"]
+      cache_strategy: MEMORY
+      supports_offline: false
+      action_documentation: "Toggles the completion status of a task"
+    };
+  }
+
+  // Get task categories
+  rpc GetCategories(GetCategoriesRequest) returns (GetCategoriesResponse) {
+    option (axiom.method_options) = {
+      state_update_strategy: REPLACE_ALL
+      requires_network: true
+      modifies_state: true
+      show_loading_state: false
+      collection_name: "categories"
+      cache_strategy: PERSISTENT
+      supports_offline: true
+      action_documentation: "Retrieves all task categories"
+    };
+  }
+
+  // Create a new category
+  rpc CreateCategory(CreateCategoryRequest) returns (Category) {
+    option (axiom.method_options) = {
+      state_update_strategy: APPEND
+      requires_network: true
+      modifies_state: true
+      show_loading_state: true
+      collection_name: "categories"
+      validation_rules: ["!request.name.isEmpty", "request.name.length >= 2"]
+      cache_strategy: PERSISTENT
+      supports_offline: false
+      action_documentation: "Creates a new task category"
+    };
+  }
+
+  // Search tasks by query
+  rpc SearchTasks(SearchTasksRequest) returns (SearchTasksResponse) {
+    option (axiom.method_options) = {
+      state_update_strategy: NO_CHANGE
+      requires_network: true
+      modifies_state: false
+      show_loading_state: true
+      collection_name: "tasks"
+      validation_rules: ["!request.query.isEmpty", "request.query.length >= 2"]
+      cache_strategy: MEMORY
+      supports_offline: false
+      action_documentation: "Searches tasks by title and description"
+    };
+  }
+}
+
+// Core task entity
+message Task {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  bool is_completed = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  google.protobuf.Timestamp due_date = 7;
+  TaskPriority priority = 8;
+  TaskStatus status = 9;
+  repeated string tags = 10;
+  string category_id = 11;
+  string assigned_to = 12;
+  int32 estimated_hours = 13;
+  int32 actual_hours = 14;
+  repeated TaskComment comments = 15;
+  repeated TaskAttachment attachments = 16;
+}
+
+// Task category for organization
+message Category {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string color = 4;
+  string icon = 5;
+  int32 task_count = 6;
+  bool is_default = 7;
+  google.protobuf.Timestamp created_at = 8;
+}
+
+// Task comment for collaboration
+message TaskComment {
+  string id = 1;
+  string task_id = 2;
+  string author = 3;
+  string content = 4;
+  google.protobuf.Timestamp created_at = 5;
+  bool is_system_comment = 6;
+}
+
+// Task attachment for file management
+message TaskAttachment {
+  string id = 1;
+  string task_id = 2;
+  string filename = 3;
+  string url = 4;
+  int64 size_bytes = 5;
+  string mime_type = 6;
+  google.protobuf.Timestamp uploaded_at = 7;
+}
+
+// Request/Response messages
+message CreateTaskRequest {
+  string title = 1;
+  string description = 2;
+  TaskPriority priority = 3;
+  google.protobuf.Timestamp due_date = 4;
+  repeated string tags = 5;
+  string category_id = 6;
+  string assigned_to = 7;
+  int32 estimated_hours = 8;
+}
+
+message GetTasksRequest {
+  // Filtering options
+  optional bool completed = 1;
+  optional TaskPriority priority = 2;
+  optional string category_id = 3;
+  optional string assigned_to = 4;
+  optional TaskStatus status = 5;
+  
+  // Pagination
+  int32 limit = 6;
+  string cursor = 7;
+  
+  // Search and sorting
+  string search_query = 8;
+  string sort_field = 9;
+  bool sort_ascending = 10;
+  
+  // Date filtering
+  google.protobuf.Timestamp created_after = 11;
+  google.protobuf.Timestamp created_before = 12;
+  google.protobuf.Timestamp due_after = 13;
+  google.protobuf.Timestamp due_before = 14;
+}
+
+message GetTasksResponse {
+  repeated Task tasks = 1;
+  string next_cursor = 2;
+  int32 total_count = 3;
+  bool has_more = 4;
+  TaskStatistics statistics = 5;
+}
+
+message UpdateTaskRequest {
+  string task_id = 1;
+  optional string title = 2;
+  optional string description = 3;
+  optional bool is_completed = 4;
+  optional TaskPriority priority = 5;
+  optional TaskStatus status = 6;
+  optional google.protobuf.Timestamp due_date = 7;
+  repeated string tags = 8;
+  optional string category_id = 9;
+  optional string assigned_to = 10;
+  optional int32 estimated_hours = 11;
+  optional int32 actual_hours = 12;
+}
+
+message DeleteTaskRequest {
+  string task_id = 1;
+  bool soft_delete = 2;
+}
+
+message ToggleTaskCompletionRequest {
+  string task_id = 1;
+}
+
+message GetCategoriesRequest {
+  optional string search_query = 1;
+  string sort_field = 2;
+  bool sort_ascending = 3;
+  bool include_task_counts = 4;
+}
+
+message GetCategoriesResponse {
+  repeated Category categories = 1;
+  int32 total_count = 2;
+}
+
+message CreateCategoryRequest {
+  string name = 1;
+  string description = 2;
+  string color = 3;
+  string icon = 4;
+  bool is_default = 5;
+}
+
+message SearchTasksRequest {
+  string query = 1;
+  int32 limit = 2;
+  SearchScope scope = 3;
+  repeated TaskPriority priority_filter = 4;
+  repeated string category_filter = 5;
+}
+
+message SearchTasksResponse {
+  repeated Task tasks = 1;
+  int32 total_matches = 2;
+  repeated SearchHighlight highlights = 3;
+  SearchStatistics statistics = 4;
+}
+
+// Supporting messages
+message TaskStatistics {
+  int32 total_tasks = 1;
+  int32 completed_tasks = 2;
+  int32 pending_tasks = 3;
+  int32 overdue_tasks = 4;
+  double completion_rate = 5;
+  int32 total_estimated_hours = 6;
+  int32 total_actual_hours = 7;
+}
+
+message SearchHighlight {
+  string field = 1;
+  string highlighted_text = 2;
+  int32 start_offset = 3;
+  int32 end_offset = 4;
+}
+
+message SearchStatistics {
+  int32 total_searched = 1;
+  int32 matches_found = 2;
+  double search_time_ms = 3;
+}
+
+// Enums
+enum TaskPriority {
+  TASK_PRIORITY_UNSPECIFIED = 0;
+  TASK_PRIORITY_LOW = 1;
+  TASK_PRIORITY_MEDIUM = 2;
+  TASK_PRIORITY_HIGH = 3;
+  TASK_PRIORITY_URGENT = 4;
+}
+
+enum TaskStatus {
+  TASK_STATUS_UNSPECIFIED = 0;
+  TASK_STATUS_DRAFT = 1;
+  TASK_STATUS_OPEN = 2;
+  TASK_STATUS_IN_PROGRESS = 3;
+  TASK_STATUS_REVIEW = 4;
+  TASK_STATUS_COMPLETED = 5;
+  TASK_STATUS_CANCELLED = 6;
+  TASK_STATUS_ARCHIVED = 7;
+}
+
+enum SearchScope {
+  SEARCH_SCOPE_UNSPECIFIED = 0;
+  SEARCH_SCOPE_TITLE = 1;
+  SEARCH_SCOPE_DESCRIPTION = 2;
+  SEARCH_SCOPE_TAGS = 3;
+  SEARCH_SCOPE_ALL = 4;
+}

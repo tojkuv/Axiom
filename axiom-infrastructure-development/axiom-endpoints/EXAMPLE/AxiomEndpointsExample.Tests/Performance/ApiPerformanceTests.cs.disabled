@@ -1,0 +1,129 @@
+using NBomber.Contracts;
+using NBomber.CSharp;
+using AxiomEndpointsExample.Tests.Integration;
+using Microsoft.Extensions.DependencyInjection;
+using AxiomEndpointsExample.Api;
+using System.Text.Json;
+
+namespace AxiomEndpointsExample.Tests.Performance;
+
+[TestClass]
+public class ApiPerformanceTests : ApiIntegrationTestBase
+{
+    private const int WarmupDurationSeconds = 10;
+    private const int TestDurationSeconds = 30;
+
+    protected override async Task SeedTestDataAsync()
+    {
+        var users = DataBuilder.CreateUsers(1000);
+        var posts = new List<Post>();
+        
+        for (int i = 0; i < 100; i++)
+        {
+            for (int j = 0; j < 5; j++)
+            {
+                posts.Add(DataBuilder.CreatePost(users[i]));
+            }
+        }
+        
+        DbContext.Users.AddRange(users);
+        DbContext.Posts.AddRange(posts);
+        await DbContext.SaveChangesAsync();
+    }
+
+    [TestMethod]
+    public async Task HealthEndpoint_LoadTest()
+    {
+        var scenario = Scenario.Create("health_endpoint_load", async context =>
+        {
+            try
+            {
+                var response = await Client.GetAsync("/health");
+                return response.IsSuccessStatusCode ? Response.Ok() : Response.Fail("Request failed");
+            }
+            catch (Exception ex)
+            {
+                return Response.Fail($"Exception: {ex.Message}");
+            }
+        })
+        .WithLoadSimulations(
+            LoadSimulation.KeepConstant(100, TimeSpan.FromSeconds(WarmupDurationSeconds)),
+            LoadSimulation.KeepConstant(500, TimeSpan.FromSeconds(TestDurationSeconds))
+        );
+
+        var stats = NBomberRunner
+            .RegisterScenarios(scenario)
+            .Run();
+
+        var scenarioStats = stats.ScenarioStats.First();
+        
+        Assert.IsTrue(scenarioStats.AllOkCount > 0, "Should have successful requests");
+        Assert.IsTrue(scenarioStats.AllFailCount == 0, $"Should have no failed requests, actual: {scenarioStats.AllFailCount}");
+    }
+
+    [TestMethod]
+    public async Task GetUsersEndpoint_LoadTest()
+    {
+        var scenario = Scenario.Create("get_users_load", async context =>
+        {
+            try
+            {
+                var response = await Client.GetAsync("/v1/users");
+                if (!response.IsSuccessStatusCode)
+                    return Response.Fail("No data returned");
+
+                var content = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<ApiResponse<List<User>>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                return result?.Data?.Any() == true ? Response.Ok() : Response.Fail("No data returned");
+            }
+            catch (Exception ex)
+            {
+                return Response.Fail($"Exception: {ex.Message}");
+            }
+        })
+        .WithLoadSimulations(
+            LoadSimulation.KeepConstant(50, TimeSpan.FromSeconds(WarmupDurationSeconds)),
+            LoadSimulation.KeepConstant(200, TimeSpan.FromSeconds(TestDurationSeconds))
+        );
+
+        var stats = NBomberRunner
+            .RegisterScenarios(scenario)
+            .Run();
+
+        var scenarioStats = stats.ScenarioStats.First();
+        
+        Assert.IsTrue(scenarioStats.AllOkCount > 0, "Should have successful requests");
+        Assert.IsTrue(scenarioStats.AllFailCount < scenarioStats.AllOkCount * 0.01, "Error rate should be < 1%");
+    }
+
+    [TestMethod]
+    public async Task StressTest_GradualLoad()
+    {
+        var scenario = Scenario.Create("stress_test", async context =>
+        {
+            try
+            {
+                var response = await Client.GetAsync("/v1/users");
+                return response.IsSuccessStatusCode ? Response.Ok() : Response.Fail($"HTTP {response.StatusCode}");
+            }
+            catch (Exception ex)
+            {
+                return Response.Fail($"Exception: {ex.Message}");
+            }
+        })
+        .WithLoadSimulations(
+            LoadSimulation.RampPerSec(50, TimeSpan.FromSeconds(10)),
+            LoadSimulation.RampPerSec(100, TimeSpan.FromSeconds(10)),
+            LoadSimulation.KeepConstant(200, TimeSpan.FromSeconds(10))
+        );
+
+        var stats = NBomberRunner
+            .RegisterScenarios(scenario)
+            .Run();
+
+        var scenarioStats = stats.ScenarioStats.First();
+        
+        Assert.IsTrue(scenarioStats.AllOkCount > 0, "Should have successful requests under stress");
+        Assert.IsTrue(scenarioStats.AllFailCount < scenarioStats.AllOkCount * 0.1, "Error rate should be < 10% under stress");
+    }
+}

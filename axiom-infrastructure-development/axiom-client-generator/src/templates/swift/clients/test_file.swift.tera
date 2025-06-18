@@ -1,0 +1,72 @@
+// Generated tests for {{ client_name }}
+import XCTest
+@testable import {{ package_name | default(value="YourPackage") }}
+
+final class {{ client_name }}Tests: XCTestCase {
+    var client: {{ client_name }}!
+    var mockApiClient: Mock{{ service_name }}Client!
+    
+    override func setUp() {
+        super.setUp()
+        mockApiClient = Mock{{ service_name }}Client()
+        client = {{ client_name }}(apiClient: mockApiClient)
+    }
+    
+    override func tearDown() {
+        client = nil
+        mockApiClient = nil
+        super.tearDown()
+    }
+    
+    {% for method in methods %}
+    func test{{ method.name | pascal_case }}() async throws {
+        // Given
+        let request = {{ method.input_type | pascal_case }}(/* initialize with test data */)
+        {% if method.output_type != "Empty" and method.output_type != "Void" %}
+        let expectedResult = {{ method.output_type | pascal_case }}(/* initialize with test data */)
+        mockApiClient.{{ method.name | camel_case }}Result = expectedResult
+        {% endif %}
+        
+        // When
+        {% if method.output_type != "Empty" and method.output_type != "Void" %}
+        try await client.process(.{{ method.name | camel_case }}(request))
+        {% else %}
+        try await client.process(.{{ method.name | camel_case }}(request))
+        {% endif %}
+        
+        // Then
+        let state = await client.state
+        XCTAssertFalse(state.isLoading)
+        XCTAssertNil(state.lastError)
+        {% if method.state_update == "append" %}
+        XCTAssertTrue(state.{{ method.collection_name | camel_case }}.contains(expectedResult))
+        {% elif method.state_update == "replace_all" %}
+        XCTAssertEqual(state.{{ method.collection_name | camel_case }}, [expectedResult])
+        {% endif %}
+    }
+    
+    {% endfor %}
+}
+
+// Mock API client for testing
+class Mock{{ service_name }}Client {
+    {% for method in methods %}
+    {% if method.output_type != "Empty" and method.output_type != "Void" %}
+    var {{ method.name | camel_case }}Result: {{ method.output_type | pascal_case }}!
+    {% endif %}
+    var {{ method.name | camel_case }}Error: Error?
+    
+    {% endfor %}
+    
+    {% for method in methods %}
+    func {{ method.name | camel_case }}(_ request: {{ method.input_type | pascal_case }}) async throws{% if method.output_type != "Empty" and method.output_type != "Void" %} -> {{ method.output_type | pascal_case }}{% endif %} {
+        if let error = {{ method.name | camel_case }}Error {
+            throw error
+        }
+        {% if method.output_type != "Empty" and method.output_type != "Void" %}
+        return {{ method.name | camel_case }}Result
+        {% endif %}
+    }
+    
+    {% endfor %}
+}

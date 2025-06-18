@@ -1,0 +1,140 @@
+// Generated action enum for {{ service_name }}
+import Foundation
+
+// MARK: - {{ action_name }}
+
+/// Actions that can be performed on {{ service_name }}
+public enum {{ action_name }}: Sendable, Equatable {
+    {% for method in methods %}
+    {% if method.documentation %}
+    /// {{ method.documentation }}
+    /// - Parameter request: The {{ method.input_type }} for this action
+    {% endif %}
+    case {{ method.swift_name }}({{ method.input_type }})
+    {% endfor %}
+}
+
+// MARK: - Action Validation
+
+extension {{ action_name }} {
+    /// Validates the action and its associated request
+    public var isValid: Bool {
+        switch self {
+        {% for method in methods %}
+        case .{{ method.swift_name }}(let request):
+            {% if method.validation_rules %}
+            return {{ method.validation_rules }}
+            {% else %}
+            return true // No specific validation rules
+            {% endif %}
+        {% endfor %}
+        }
+    }
+    
+    /// Returns validation errors for the action
+    public var validationErrors: [String] {
+        switch self {
+        {% for method in methods %}
+        case .{{ method.swift_name }}(let request):
+            var errors: [String] = []
+            {% if method.validation_checks %}
+            {% for check in method.validation_checks %}
+            {{ check }}
+            {% endfor %}
+            {% endif %}
+            return errors
+        {% endfor %}
+        }
+    }
+}
+
+// MARK: - Action Metadata
+
+extension {{ action_name }} {
+    /// Whether this action requires network access
+    public var requiresNetworkAccess: Bool {
+        switch self {
+        {% for method in methods %}
+        case .{{ method.swift_name }}:
+            return {{ method.requires_network | default(value="true") }}
+        {% endfor %}
+        }
+    }
+    
+    /// Whether this action modifies state
+    public var modifiesState: Bool {
+        switch self {
+        {% for method in methods %}
+        case .{{ method.swift_name }}:
+            return {{ method.modifies_state | default(value="true") }}
+        {% endfor %}
+        }
+    }
+    
+    /// The name of this action for logging and analytics
+    public var actionName: String {
+        switch self {
+        {% for method in methods %}
+        case .{{ method.swift_name }}:
+            return "{{ method.swift_name }}"
+        {% endfor %}
+        }
+    }
+    
+    /// Whether this action should show loading state
+    public var showsLoadingState: Bool {
+        switch self {
+        {% for method in methods %}
+        case .{{ method.swift_name }}:
+            return {{ method.loading_state | default(value="true") }}
+        {% endfor %}
+        }
+    }
+    
+    /// The state update strategy for this action
+    public var stateUpdateStrategy: StateUpdateStrategy {
+        switch self {
+        {% for method in methods %}
+        case .{{ method.swift_name }}:
+            return .{{ method.state_update | default(value="custom") }}
+        {% endfor %}
+        }
+    }
+}
+
+// MARK: - State Update Strategy
+
+public enum StateUpdateStrategy: String, Sendable {
+    case append = "append"
+    case replaceAll = "replace_all"
+    case updateById = "update_by_id"
+    case removeById = "remove_by_id"
+    case custom = "custom"
+}
+
+// MARK: - Action Request Access
+
+extension {{ action_name }} {
+    /// The request associated with this action
+    public var request: Any {
+        switch self {
+        {% for method in methods %}
+        case .{{ method.swift_name }}(let request):
+            return request
+        {% endfor %}
+        }
+    }
+}
+
+// MARK: - CustomStringConvertible
+
+extension {{ action_name }}: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        {% for method in methods %}
+        case .{{ method.swift_name }}(let request):
+            return "{{ action_name }}.{{ method.swift_name }}(\(request))"
+        {% endfor %}
+        }
+    }
+}

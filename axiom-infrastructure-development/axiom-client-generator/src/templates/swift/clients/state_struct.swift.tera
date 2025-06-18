@@ -1,0 +1,448 @@
+// Generated state for {{ service_name }}
+import Foundation
+import AxiomCore
+
+// MARK: - {{ state_name }}
+
+/// State container for {{ service_name }} operations
+public struct {{ state_name }}: AxiomState {
+    
+    // MARK: - Collections
+    {% for collection in collections %}
+    /// Collection of {{ collection.type }} entities
+    public let {{ collection.name }}: [{{ collection.type }}]
+    {% endfor %}
+    
+    // MARK: - Loading State
+    /// Indicates if an operation is currently in progress
+    public let isLoading: Bool
+    
+    /// The last error that occurred, if any
+    public let error: Error?
+    
+    /// Last time the state was updated
+    public let lastUpdated: Date
+    
+    // MARK: - Pagination
+    {% if has_pagination %}
+    /// Cursor for pagination
+    public let nextCursor: String
+    
+    /// Total count of items (if provided by server)
+    public let totalCount: Int32
+    {% endif %}
+    
+    // MARK: - Additional Properties
+    {% for property in custom_properties %}
+    /// {{ property.description | default(value=property.name) }}
+    public let {{ property.name }}: {{ property.type }}
+    {% endfor %}
+    
+    // MARK: - Initialization
+    
+    public init(
+        {% for collection in collections %}
+        {{ collection.name }}: [{{ collection.type }}] = [],
+        {% endfor %}
+        isLoading: Bool = false,
+        error: Error? = nil,
+        lastUpdated: Date = Date(){% if has_pagination %},
+        nextCursor: String = "",
+        totalCount: Int32 = 0{% endif %}{% for property in custom_properties %},
+        {{ property.name }}: {{ property.type }} = {{ property.default_value }}{% endfor %}
+    ) {
+        {% for collection in collections %}
+        self.{{ collection.name }} = {{ collection.name }}
+        {% endfor %}
+        self.isLoading = isLoading
+        self.error = error
+        self.lastUpdated = lastUpdated
+        {% if has_pagination %}
+        self.nextCursor = nextCursor
+        self.totalCount = totalCount
+        {% endif %}
+        {% for property in custom_properties %}
+        self.{{ property.name }} = {{ property.name }}
+        {% endfor %}
+    }
+    
+    // MARK: - Immutable Update Methods
+    
+    {% for collection in collections %}
+    /// Add a {{ collection.type | lower }} to the collection
+    public func adding{{ collection.type }}(_ item: {{ collection.type }}) -> {{ state_name }} {
+        {{ state_name }}(
+            {% for c in collections %}
+            {{ c.name }}: {% if c.name == collection.name %}{{ c.name }} + [item]{% else %}{{ c.name }}{% endif %},
+            {% endfor %}
+            isLoading: false,
+            error: nil,
+            lastUpdated: Date(){% if has_pagination %},
+            nextCursor: nextCursor,
+            totalCount: totalCount{% endif %}{% for property in custom_properties %},
+            {{ property.name }}: {{ property.name }}{% endfor %}
+        )
+    }
+    
+    /// Replace the entire {{ collection.name }} collection
+    public func with{{ collection.type }}s(_ new{{ collection.type }}s: [{{ collection.type }}]) -> {{ state_name }} {
+        {{ state_name }}(
+            {% for c in collections %}
+            {{ c.name }}: {% if c.name == collection.name %}new{{ collection.type }}s{% else %}{{ c.name }}{% endif %},
+            {% endfor %}
+            isLoading: false,
+            error: nil,
+            lastUpdated: Date(){% if has_pagination %},
+            nextCursor: nextCursor,
+            totalCount: totalCount{% endif %}{% for property in custom_properties %},
+            {{ property.name }}: {{ property.name }}{% endfor %}
+        )
+    }
+    
+    /// Update a {{ collection.type | lower }} in the collection
+    public func updating{{ collection.type }}(_ updated{{ collection.type }}: {{ collection.type }}) -> {{ state_name }} {
+        let updated{{ collection.type }}s = {{ collection.name }}.map { item in
+            item.id == updated{{ collection.type }}.id ? updated{{ collection.type }} : item
+        }
+        return {{ state_name }}(
+            {% for c in collections %}
+            {{ c.name }}: {% if c.name == collection.name %}updated{{ collection.type }}s{% else %}{{ c.name }}{% endif %},
+            {% endfor %}
+            isLoading: false,
+            error: nil,
+            lastUpdated: Date(){% if has_pagination %},
+            nextCursor: nextCursor,
+            totalCount: totalCount{% endif %}{% for property in custom_properties %},
+            {{ property.name }}: {{ property.name }}{% endfor %}
+        )
+    }
+    
+    /// Remove a {{ collection.type | lower }} from the collection by ID
+    public func removing{{ collection.type }}(withId id: String) -> {{ state_name }} {
+        {{ state_name }}(
+            {% for c in collections %}
+            {{ c.name }}: {% if c.name == collection.name %}{{ c.name }}.filter { $0.id != id }{% else %}{{ c.name }}{% endif %},
+            {% endfor %}
+            isLoading: false,
+            error: nil,
+            lastUpdated: Date(){% if has_pagination %},
+            nextCursor: nextCursor,
+            totalCount: totalCount{% endif %}{% for property in custom_properties %},
+            {{ property.name }}: {{ property.name }}{% endfor %}
+        )
+    }
+    
+    {% endfor %}
+    
+    /// Update the loading state
+    public func withLoading(_ loading: Bool) -> {{ state_name }} {
+        {{ state_name }}(
+            {% for collection in collections %}
+            {{ collection.name }}: {{ collection.name }},
+            {% endfor %}
+            isLoading: loading,
+            error: error,
+            lastUpdated: lastUpdated{% if has_pagination %},
+            nextCursor: nextCursor,
+            totalCount: totalCount{% endif %}{% for property in custom_properties %},
+            {{ property.name }}: {{ property.name }}{% endfor %}
+        )
+    }
+    
+    /// Update the error state
+    public func withError(_ error: Error?) -> {{ state_name }} {
+        {{ state_name }}(
+            {% for collection in collections %}
+            {{ collection.name }}: {{ collection.name }},
+            {% endfor %}
+            isLoading: false,
+            error: error,
+            lastUpdated: Date(){% if has_pagination %},
+            nextCursor: nextCursor,
+            totalCount: totalCount{% endif %}{% for property in custom_properties %},
+            {{ property.name }}: {{ property.name }}{% endfor %}
+        )
+    }
+    
+    // MARK: - Computed Properties
+    
+    {% for collection in collections %}
+    /// Number of {{ collection.name }} in the collection
+    public var {{ collection.name }}Count: Int {
+        {{ collection.name }}.count
+    }
+    
+    /// Returns true if {{ collection.name }} collection is empty
+    public var is{{ collection.type }}Empty: Bool {
+        {{ collection.name }}.isEmpty
+    }
+    
+    /// Find a {{ collection.type }} by ID
+    public func {{ collection.type | lower }}(withId id: String) -> {{ collection.type }}? {
+        {{ collection.name }}.first { $0.id == id }
+    }
+    
+    {% if collection.searchable %}
+    /// Search {{ collection.name }} by query (if collection is searchable)
+    public func search{{ collection.type }}s(query: String) -> [{{ collection.type }}] {
+        guard !query.isEmpty else { return {{ collection.name }} }
+        return {{ collection.name }}.filter { item in
+            // Search in searchable fields (assuming title, name, description are searchable)
+            let searchText = [
+                item.title,
+                item.name, 
+                item.description
+            ].compactMap { $0 }.joined(separator: " ").lowercased()
+            return searchText.contains(query.lowercased())
+        }
+    }
+    {% endif %}
+    
+    {% if collection.sortable %}
+    /// Sort {{ collection.name }} by specified field
+    public func sorted{{ collection.type }}s(by sortField: String, ascending: Bool = true) -> [{{ collection.type }}] {
+        return {{ collection.name }}.sorted { lhs, rhs in
+            // Dynamic sorting based on field name
+            let result: Bool
+            switch sortField.lowercased() {
+            case "createdat", "created_at":
+                result = lhs.createdAt < rhs.createdAt
+            case "updatedat", "updated_at":
+                result = lhs.updatedAt < rhs.updatedAt
+            case "title":
+                result = lhs.title < rhs.title
+            case "priority":
+                result = lhs.priority.rawValue < rhs.priority.rawValue
+            default:
+                result = lhs.id < rhs.id
+            }
+            return ascending ? result : !result
+        }
+    }
+    {% endif %}
+    
+    {% if collection.paginated %}
+    /// Get page of {{ collection.name }} items
+    public func paginated{{ collection.type }}s(offset: Int, limit: Int) -> [{{ collection.type }}] {
+        guard offset >= 0, limit > 0 else { return [] }
+        let startIndex = offset
+        let endIndex = min(startIndex + limit, {{ collection.name }}.count)
+        guard startIndex < {{ collection.name }}.count else { return [] }
+        return Array({{ collection.name }}[startIndex..<endIndex])
+    }
+    {% endif %}
+    
+    {% endfor %}
+    
+    /// Returns true if any operation is currently loading
+    public var hasActiveOperation: Bool {
+        isLoading
+    }
+    
+    /// Returns true if there was an error in the last operation
+    public var hasError: Bool {
+        error != nil
+    }
+    
+    /// Statistics for this state
+    public var statistics: Statistics {
+        Statistics(
+            {% for collection in collections %}
+            total{{ collection.type }}s: {{ collection.name }}.count,
+            {% if collection.max_cached_items %}
+            {{ collection.name }}CacheUtilization: Double({{ collection.name }}.count) / Double({{ collection.max_cached_items }}),
+            {% endif %}
+            {% endfor %}
+            lastUpdated: lastUpdated,
+            hasActiveOperations: isLoading,
+            hasErrors: hasError{% if has_pagination %},
+            paginationStats: PaginationStatistics(
+                currentPageSize: {{ collections.0.name }}.count,
+                totalCount: Int(totalCount),
+                hasNextPage: !nextCursor.isEmpty
+            ){% endif %}
+        )
+    }
+    
+    /// Performance metrics for large state objects
+    public var performanceMetrics: PerformanceMetrics {
+        let totalItems = {% for collection in collections %}{{ collection.name }}.count{% if not loop.last %} + {% endif %}{% endfor %}
+        let memoryFootprint = totalItems * MemoryLayout<AnyObject>.stride
+        
+        return PerformanceMetrics(
+            totalItems: totalItems,
+            estimatedMemoryFootprint: memoryFootprint,
+            collectionsCount: {{ collections | length }},
+            isOptimizedForLargeDatasets: totalItems > 1000
+        )
+    }
+    
+    /// State validation based on Axiom field constraints
+    public var validationResults: StateValidationResults {
+        var issues: [ValidationIssue] = []
+        
+        {% for collection in collections %}
+        // Validate {{ collection.name }} collection
+        {% if collection.max_cached_items %}
+        if {{ collection.name }}.count > {{ collection.max_cached_items }} {
+            issues.append(.collectionSizeExceeded("{{ collection.name }}", current: {{ collection.name }}.count, max: {{ collection.max_cached_items }}))
+        }
+        {% endif %}
+        
+        // Validate individual items in {{ collection.name }}
+        for (index, item) in {{ collection.name }}.enumerated() {
+            // Add validation based on field constraints
+            if item.id.isEmpty {
+                issues.append(.invalidFieldValue("{{ collection.name }}[\(index)].id", reason: "ID cannot be empty"))
+            }
+        }
+        {% endfor %}
+        
+        return StateValidationResults(
+            isValid: issues.isEmpty,
+            issues: issues,
+            validatedAt: Date()
+        )
+    }
+}
+
+// MARK: - {{ state_name }} + Equatable & Hashable
+
+extension {{ state_name }} {
+    public static func == (lhs: {{ state_name }}, rhs: {{ state_name }}) -> Bool {
+        return {% for collection in collections %}lhs.{{ collection.name }} == rhs.{{ collection.name }}{% if not loop.last %} &&
+               {% endif %}{% endfor %}{% if collections %} &&
+               {% endif %}lhs.isLoading == rhs.isLoading &&
+               lhs.hasError == rhs.hasError{% if has_pagination %} &&
+               lhs.nextCursor == rhs.nextCursor &&
+               lhs.totalCount == rhs.totalCount{% endif %}{% for property in custom_properties %} &&
+               lhs.{{ property.name }} == rhs.{{ property.name }}{% endfor %}
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        {% for collection in collections %}
+        hasher.combine({{ collection.name }})
+        {% endfor %}
+        hasher.combine(isLoading)
+        hasher.combine(hasError)
+        {% if has_pagination %}
+        hasher.combine(nextCursor)
+        hasher.combine(totalCount)
+        {% endif %}
+        {% for property in custom_properties %}
+        hasher.combine({{ property.name }})
+        {% endfor %}
+    }
+}
+
+// MARK: - Supporting Types
+
+extension {{ state_name }} {
+    /// Enhanced statistics for state monitoring
+    public struct Statistics: Sendable, Equatable {
+        {% for collection in collections %}
+        public let total{{ collection.type }}s: Int
+        {% if collection.max_cached_items %}
+        public let {{ collection.name }}CacheUtilization: Double
+        {% endif %}
+        {% endfor %}
+        public let lastUpdated: Date
+        public let hasActiveOperations: Bool
+        public let hasErrors: Bool
+        {% if has_pagination %}
+        public let paginationStats: PaginationStatistics
+        {% endif %}
+        
+        public init(
+            {% for collection in collections %}
+            total{{ collection.type }}s: Int,
+            {% if collection.max_cached_items %}
+            {{ collection.name }}CacheUtilization: Double,
+            {% endif %}
+            {% endfor %}
+            lastUpdated: Date,
+            hasActiveOperations: Bool,
+            hasErrors: Bool{% if has_pagination %},
+            paginationStats: PaginationStatistics{% endif %}
+        ) {
+            {% for collection in collections %}
+            self.total{{ collection.type }}s = total{{ collection.type }}s
+            {% if collection.max_cached_items %}
+            self.{{ collection.name }}CacheUtilization = {{ collection.name }}CacheUtilization
+            {% endif %}
+            {% endfor %}
+            self.lastUpdated = lastUpdated
+            self.hasActiveOperations = hasActiveOperations
+            self.hasErrors = hasErrors
+            {% if has_pagination %}
+            self.paginationStats = paginationStats
+            {% endif %}
+        }
+    }
+    
+    {% if has_pagination %}
+    /// Pagination statistics
+    public struct PaginationStatistics: Sendable, Equatable {
+        public let currentPageSize: Int
+        public let totalCount: Int
+        public let hasNextPage: Bool
+        
+        public init(currentPageSize: Int, totalCount: Int, hasNextPage: Bool) {
+            self.currentPageSize = currentPageSize
+            self.totalCount = totalCount
+            self.hasNextPage = hasNextPage
+        }
+    }
+    {% endif %}
+    
+    /// Performance metrics for optimization
+    public struct PerformanceMetrics: Sendable, Equatable {
+        public let totalItems: Int
+        public let estimatedMemoryFootprint: Int
+        public let collectionsCount: Int
+        public let isOptimizedForLargeDatasets: Bool
+        
+        public init(
+            totalItems: Int,
+            estimatedMemoryFootprint: Int,
+            collectionsCount: Int,
+            isOptimizedForLargeDatasets: Bool
+        ) {
+            self.totalItems = totalItems
+            self.estimatedMemoryFootprint = estimatedMemoryFootprint
+            self.collectionsCount = collectionsCount
+            self.isOptimizedForLargeDatasets = isOptimizedForLargeDatasets
+        }
+    }
+    
+    /// State validation results based on Axiom constraints
+    public struct StateValidationResults: Sendable, Equatable {
+        public let isValid: Bool
+        public let issues: [ValidationIssue]
+        public let validatedAt: Date
+        
+        public init(isValid: Bool, issues: [ValidationIssue], validatedAt: Date) {
+            self.isValid = isValid
+            self.issues = issues
+            self.validatedAt = validatedAt
+        }
+    }
+    
+    /// Individual validation issues
+    public enum ValidationIssue: Sendable, Equatable {
+        case collectionSizeExceeded(String, current: Int, max: Int)
+        case invalidFieldValue(String, reason: String)
+        case constraintViolation(String, constraint: String)
+        
+        public var description: String {
+            switch self {
+            case .collectionSizeExceeded(let collection, let current, let max):
+                return "Collection '\(collection)' size \(current) exceeds maximum \(max)"
+            case .invalidFieldValue(let field, let reason):
+                return "Field '\(field)': \(reason)"
+            case .constraintViolation(let field, let constraint):
+                return "Field '\(field)' violates constraint: \(constraint)"
+            }
+        }
+    }
+}

@@ -1,0 +1,201 @@
+// Generated Swift client for {{ service_name }}
+import Foundation
+import AxiomCore
+import AxiomArchitecture
+{% if package_name %}
+import {{ package_name }}
+{% endif %}
+{% for import in imports %}
+import {{ import }}
+{% endfor %}
+
+{% if service.documentation %}
+/// {{ service.documentation }}
+{% endif %}
+@globalActor
+public actor {{ client_name }}: AxiomClient {
+    public typealias StateType = {{ state_name }}
+    public typealias ActionType = {{ action_name }}
+    
+    // MARK: - Private Properties
+    private var _state: {{ state_name }}
+    private let apiClient: {{ service_name }}Protocol
+    private var streamContinuations: [UUID: AsyncStream<{{ state_name }}>.Continuation] = [:]
+    
+    // MARK: - Initialization
+    
+    /// Initialize the client with an API client implementation
+    /// - Parameters:
+    ///   - apiClient: The API client that implements {{ service_name }}Protocol
+    ///   - initialState: The initial state (defaults to empty state)
+    public init(apiClient: {{ service_name }}Protocol, initialState: {{ state_name }} = {{ state_name }}()) {
+        self._state = initialState
+        self.apiClient = apiClient
+    }
+    
+    // MARK: - AxiomClient Protocol Implementation
+    
+    public var stateStream: AsyncStream<{{ state_name }}> {
+        AsyncStream { [weak self] continuation in
+            let id = UUID()
+            Task { [weak self] in
+                await self?.addContinuation(continuation, id: id)
+                
+                // Emit current state immediately
+                if let currentState = await self?._state {
+                    continuation.yield(currentState)
+                }
+                
+                // Handle stream termination
+                continuation.onTermination = { [weak self, id] _ in
+                    Task { await self?.removeContinuation(id: id) }
+                }
+            }
+        }
+    }
+    
+    private func addContinuation(_ continuation: AsyncStream<{{ state_name }}>.Continuation, id: UUID) {
+        streamContinuations[id] = continuation
+    }
+    
+    private func removeContinuation(id: UUID) {
+        streamContinuations.removeValue(forKey: id)
+    }
+    
+    public func getCurrentState() async -> {{ state_name }} {
+        return _state
+    }
+    
+    public func rollbackToState(_ state: {{ state_name }}) async {
+        let oldState = _state
+        _state = state
+        
+        // Notify observers
+        for (_, continuation) in streamContinuations {
+            continuation.yield(state)
+        }
+        
+        await stateDidUpdate(from: oldState, to: state)
+    }
+    
+    /// Process an action and update the state accordingly
+    /// - Parameter action: The action to process
+    /// - Throws: Any error that occurs during processing
+    public func process(_ action: {{ action_name }}) async throws {
+        // Validate action
+        guard action.isValid else {
+            let errors = action.validationErrors
+            throw AxiomError.clientError(.invalidAction("Action validation failed: \(errors.joined(separator: ", "))"))
+        }
+        
+        // Get old state for lifecycle hooks
+        let oldState = _state
+        
+        // Process the action
+        let newState = try await processAction(action, currentState: _state)
+        
+        // Only update if state actually changed
+        guard newState != oldState else { return }
+        
+        // Call lifecycle hooks
+        await stateWillUpdate(from: oldState, to: newState)
+        
+        // Update state
+        _state = newState
+        
+        // Notify observers
+        for (_, continuation) in streamContinuations {
+            continuation.yield(newState)
+        }
+        
+        // Call lifecycle hooks
+        await stateDidUpdate(from: oldState, to: newState)
+    }
+    
+    // MARK: - Action Processing
+    
+    private func processAction(_ action: {{ action_name }}, currentState: {{ state_name }}) async throws -> {{ state_name }} {
+        switch action {
+        {% for method in methods %}
+        case .{{ method.swift_name }}(let request):
+            {% if method.documentation %}
+            // {{ method.documentation }}
+            {% endif %}
+            {% if method.output_type != "Void" %}
+            let result = try await apiClient.{{ method.swift_name }}(request)
+            {% else %}
+            try await apiClient.{{ method.swift_name }}(request)
+            {% endif %}
+            
+            {% if method.state_update == "append" and method.output_type != "Void" %}
+            {% if method.collection_name %}
+            return currentState.adding{{ method.collection_name | capitalize | singular }}(result)
+            {% else %}
+            return currentState
+            {% endif %}
+            {% elif method.state_update == "replace_all" %}
+            {% if method.output_type and method.collection_name %}
+            return currentState.with{{ method.collection_name | capitalize }}(result.{{ method.collection_name }})
+            {% elif method.collection_name and method.output_type != "Void" %}
+            return currentState.with{{ method.collection_name | capitalize }}([result])
+            {% else %}
+            return currentState
+            {% endif %}
+            {% elif method.state_update == "update_by_id" and method.output_type != "Void" %}
+            {% if method.collection_name %}
+            return currentState.updating{{ method.collection_name | capitalize | singular }}(result)
+            {% else %}
+            return currentState
+            {% endif %}
+            {% elif method.state_update == "remove_by_id" %}
+            {% if method.collection_name and method.id_field %}
+            return currentState.removing{{ method.collection_name | capitalize | singular }}(withId: request.{{ method.id_field }})
+            {% else %}
+            return currentState
+            {% endif %}
+            {% else %}
+            return currentState
+            {% endif %}
+        
+        {% endfor %}
+        }
+    }
+    
+    // MARK: - Lifecycle Hooks
+    
+    public func stateWillUpdate(from old: {{ state_name }}, to new: {{ state_name }}) async {
+        // Override in subclasses if needed
+    }
+    
+    public func stateDidUpdate(from old: {{ state_name }}, to new: {{ state_name }}) async {
+        // Override in subclasses if needed
+    }
+    
+    // MARK: - Public Query Methods
+    
+    /// Get current statistics
+    public func getStatistics() async -> {{ state_name }}.Statistics {
+        return _state.statistics
+    }
+    
+    /// Get performance metrics
+    public func getPerformanceMetrics() async -> {{ client_name }}Metrics {
+        {{ client_name }}Metrics(
+            lastActionTime: Date(),
+            stateStreamSubscribers: streamContinuations.count
+        )
+    }
+}
+
+// MARK: - Performance Metrics
+
+/// Performance metrics for the {{ client_name }}
+public struct {{ client_name }}Metrics: Sendable, Equatable {
+    public let lastActionTime: Date
+    public let stateStreamSubscribers: Int
+    
+    public init(lastActionTime: Date, stateStreamSubscribers: Int) {
+        self.lastActionTime = lastActionTime
+        self.stateStreamSubscribers = stateStreamSubscribers
+    }
+}

@@ -1,0 +1,214 @@
+syntax = "proto3";
+
+package task.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "axiom_options.proto";
+
+// Task service definition
+service TaskService {
+  option (axiom.options.v1.axiom_service) = {
+    client_name: "TaskClient"
+    state_name: "TaskState"
+    action_name: "TaskAction"
+    import_modules: ["AxiomCore", "AxiomArchitecture"]
+    generate_tests: true
+    swift_package_name: "TaskManager"
+    supports_pagination: true
+    collections: [
+      {
+        name: "tasks"
+        item_type: "Task"
+        primary_key: "id"
+        paginated: true
+        searchable: true
+        default_sort_field: "created_at"
+        max_cached_items: 1000
+      }
+    ]
+  };
+  
+  // Create a new task
+  rpc CreateTask(CreateTaskRequest) returns (Task) {
+    option (axiom.options.v1.axiom_method) = {
+      state_update_strategy: STATE_UPDATE_STRATEGY_APPEND
+      collection_name: "tasks"
+      requires_network: true
+      modifies_state: true
+      show_loading_state: true
+      validation_rules: ["!request.title.isEmpty"]
+      action_documentation: "Creates a new task and adds it to the task list"
+      cache_strategy: CACHE_STRATEGY_MEMORY
+    };
+  };
+  
+  // Get tasks with optional filtering
+  rpc GetTasks(GetTasksRequest) returns (GetTasksResponse) {
+    option (axiom.options.v1.axiom_method) = {
+      state_update_strategy: STATE_UPDATE_STRATEGY_REPLACE_ALL
+      collection_name: "tasks"
+      requires_network: true
+      modifies_state: true
+      show_loading_state: true
+      action_documentation: "Loads all tasks with optional filtering"
+      cache_strategy: CACHE_STRATEGY_CONDITIONAL
+    };
+  };
+  
+  // Update an existing task
+  rpc UpdateTask(UpdateTaskRequest) returns (Task) {
+    option (axiom.options.v1.axiom_method) = {
+      state_update_strategy: STATE_UPDATE_STRATEGY_UPDATE_BY_ID
+      collection_name: "tasks"
+      requires_network: true
+      modifies_state: true
+      show_loading_state: true
+      validation_rules: ["!request.id.isEmpty"]
+      action_documentation: "Updates an existing task in the task list"
+      id_field_name: "id"
+      cache_strategy: CACHE_STRATEGY_MEMORY
+    };
+  };
+  
+  // Delete a task
+  rpc DeleteTask(DeleteTaskRequest) returns (google.protobuf.Empty) {
+    option (axiom.options.v1.axiom_method) = {
+      state_update_strategy: STATE_UPDATE_STRATEGY_REMOVE_BY_ID
+      collection_name: "tasks"
+      requires_network: true
+      modifies_state: true
+      show_loading_state: true
+      validation_rules: ["!request.id.isEmpty"]
+      action_documentation: "Removes a task from the task list"
+      id_field_name: "id"
+      cache_strategy: CACHE_STRATEGY_NONE
+    };
+  };
+  
+  // Mark task as completed
+  rpc CompleteTask(CompleteTaskRequest) returns (Task) {
+    option (axiom.options.v1.axiom_method) = {
+      state_update_strategy: STATE_UPDATE_STRATEGY_UPDATE_BY_ID
+      collection_name: "tasks"
+      requires_network: true
+      modifies_state: true
+      show_loading_state: true
+      validation_rules: ["!request.id.isEmpty"]
+      action_documentation: "Marks a task as completed"
+      id_field_name: "id"
+      cache_strategy: CACHE_STRATEGY_MEMORY
+    };
+  };
+}
+
+// Task entity
+message Task {
+  string id = 1 [(axiom.options.v1.axiom_field) = {
+    is_id_field: true
+    required: true
+    exclude_from_equality: false
+  }];
+  
+  string title = 2 [(axiom.options.v1.axiom_field) = {
+    searchable: true
+    sortable: true
+    required: true
+    min_length: 1
+    max_length: 200
+  }];
+  
+  string description = 3 [(axiom.options.v1.axiom_field) = {
+    searchable: true
+    max_length: 1000
+  }];
+  
+  bool is_completed = 4 [(axiom.options.v1.axiom_field) = {
+    sortable: true
+  }];
+  
+  google.protobuf.Timestamp created_at = 5 [(axiom.options.v1.axiom_field) = {
+    sortable: true
+    exclude_from_equality: true
+  }];
+  
+  google.protobuf.Timestamp updated_at = 6 [(axiom.options.v1.axiom_field) = {
+    sortable: true
+    exclude_from_equality: true
+  }];
+  
+  google.protobuf.Timestamp due_date = 7 [(axiom.options.v1.axiom_field) = {
+    sortable: true
+  }];
+  
+  TaskPriority priority = 8 [(axiom.options.v1.axiom_field) = {
+    sortable: true
+  }];
+  
+  string assignee_id = 9 [(axiom.options.v1.axiom_field) = {
+    searchable: true
+    sortable: true
+  }];
+  
+  repeated string tags = 10 [(axiom.options.v1.axiom_field) = {
+    searchable: true
+  }];
+}
+
+// Create task request
+message CreateTaskRequest {
+  string title = 1;
+  string description = 2;
+  google.protobuf.Timestamp due_date = 3;
+  TaskPriority priority = 4;
+  string assignee_id = 5;
+  repeated string tags = 6;
+}
+
+// Get tasks request with filtering
+message GetTasksRequest {
+  optional bool completed = 1;
+  optional TaskPriority priority = 2;
+  optional string assignee_id = 3;
+  repeated string tags = 4;
+  int32 page_size = 5;
+  string page_token = 6;
+}
+
+// Get tasks response
+message GetTasksResponse {
+  repeated Task tasks = 1;
+  string next_page_token = 2;
+  int32 total_count = 3;
+}
+
+// Update task request
+message UpdateTaskRequest {
+  string id = 1;
+  optional string title = 2;
+  optional string description = 3;
+  optional bool is_completed = 4;
+  optional google.protobuf.Timestamp due_date = 5;
+  optional TaskPriority priority = 6;
+  optional string assignee_id = 7;
+  repeated string tags = 8;
+}
+
+// Delete task request
+message DeleteTaskRequest {
+  string id = 1;
+}
+
+// Complete task request
+message CompleteTaskRequest {
+  string id = 1;
+}
+
+// Task priority levels
+enum TaskPriority {
+  TASK_PRIORITY_UNSPECIFIED = 0;
+  TASK_PRIORITY_LOW = 1;
+  TASK_PRIORITY_MEDIUM = 2;
+  TASK_PRIORITY_HIGH = 3;
+  TASK_PRIORITY_URGENT = 4;
+}

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <NoWarn>$(NoWarn);CA1062;CA1819;CA2007;CA1813;CA1032;CA1040;CA1711;CA1716;CA1720;CA1724;CA1051;CA1304;CA1305;CA1310;CA1507;CA1708;CA2211;CA2234;CA1000;CA1019;CA1308;CA1031;CA1848;CA1859;CA1852;CA1822</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.65.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.27.3" />
+    <PackageReference Include="Google.Api.CommonProtos" Version="2.15.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.65.0" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AxiomEndpoints.Core\AxiomEndpoints.Core.csproj" />
+  </ItemGroup>
+
+</Project>

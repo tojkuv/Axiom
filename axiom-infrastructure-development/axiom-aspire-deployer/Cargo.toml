@@ -1,0 +1,82 @@
+[package]
+name = "axiom-aspire-mcp"
+version = "1.0.0"
+edition = "2021"
+description = "Axiom Aspire Deployer MCP - Standalone Rust MCP server for .NET Aspire integration"
+authors = ["Axiom Team"]
+
+[[bin]]
+name = "axiom-aspire-mcp"
+path = "src/main.rs"
+
+[dependencies]
+# Async runtime
+tokio = { version = "1.0", features = ["full"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# HTTP client
+reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+
+# gRPC
+tonic = "0.11"
+prost = "0.12"
+
+# Configuration
+config = "0.14"
+toml = "0.8"
+
+# Logging and tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Utilities
+uuid = { version = "1.0", features = ["v4"] }
+dashmap = "5.0"
+once_cell = "1.0"
+
+# Process monitoring
+sysinfo = "0.30"
+
+# File system monitoring
+notify = "6.0"
+
+# CLI
+clap = { version = "4.0", features = ["derive"] }
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Network
+local-ip-address = "0.5"
+
+[dev-dependencies]
+# Testing
+tokio-test = "0.4"
+mockall = "0.12"
+wiremock = "0.6"
+assert_matches = "1.5"
+rstest = "0.18"
+proptest = "1.0"
+tempfile = "3.0"
+
+# Benchmarking
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "mcp_performance"
+harness = false
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[profile.dev]
+debug = true

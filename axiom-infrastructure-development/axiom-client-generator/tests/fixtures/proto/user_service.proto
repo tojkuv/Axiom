@@ -1,0 +1,188 @@
+syntax = "proto3";
+
+package user.v1;
+
+import "google/protobuf/timestamp.proto";
+import "axiom_options.proto";
+
+option (axiom.swift_package_name) = "UserManager";
+
+service UserService {
+  option (axiom.swift_client_actor) = "UserClient";
+  
+  rpc RegisterUser(RegisterUserRequest) returns (User) {
+    option (axiom.swift_action_name) = "registerUser";
+    option (axiom.swift_state_update) = "append";
+  }
+  
+  rpc GetUser(GetUserRequest) returns (User) {
+    option (axiom.swift_action_name) = "fetchUser";
+    option (axiom.swift_state_update) = "none";
+  }
+  
+  rpc UpdateUserProfile(UpdateUserProfileRequest) returns (User) {
+    option (axiom.swift_action_name) = "updateProfile";
+    option (axiom.swift_state_update) = "update";
+  }
+  
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse) {
+    option (axiom.swift_action_name) = "deleteUser";
+    option (axiom.swift_state_update) = "remove";
+  }
+  
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
+    option (axiom.swift_action_name) = "loadUsers";
+    option (axiom.swift_state_update) = "replace_all";
+  }
+  
+  rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse) {
+    option (axiom.swift_action_name) = "changePassword";
+    option (axiom.swift_state_update) = "none";
+  }
+}
+
+message RegisterUserRequest {
+  string email = 1 [(axiom.swift_validation) = "required,email"];
+  string password = 2 [(axiom.swift_validation) = "required,min_length:8"];
+  string first_name = 3 [(axiom.swift_validation) = "required,min_length:1"];
+  string last_name = 4 [(axiom.swift_validation) = "required,min_length:1"];
+  UserProfile profile = 5;
+}
+
+message GetUserRequest {
+  string id = 1 [(axiom.swift_validation) = "required,uuid"];
+}
+
+message UpdateUserProfileRequest {
+  string id = 1 [(axiom.swift_validation) = "required,uuid"];
+  UserProfile profile = 2;
+}
+
+message DeleteUserRequest {
+  string id = 1 [(axiom.swift_validation) = "required,uuid"];
+}
+
+message DeleteUserResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ListUsersRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+  UserFilter filter = 3;
+  UserSort sort = 4;
+}
+
+message ListUsersResponse {
+  repeated User users = 1;
+  string next_page_token = 2;
+  int32 total_count = 3;
+}
+
+message ChangePasswordRequest {
+  string id = 1 [(axiom.swift_validation) = "required,uuid"];
+  string current_password = 2 [(axiom.swift_validation) = "required"];
+  string new_password = 3 [(axiom.swift_validation) = "required,min_length:8"];
+}
+
+message ChangePasswordResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message User {
+  option (axiom.swift_state_root) = true;
+  
+  string id = 1;
+  string email = 2;
+  string first_name = 3;
+  string last_name = 4;
+  UserProfile profile = 5;
+  UserStatus status = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+  google.protobuf.Timestamp last_login_at = 9;
+  repeated Address addresses = 10;
+  UserPreferences preferences = 11;
+}
+
+message UserProfile {
+  string bio = 1;
+  string avatar_url = 2;
+  string phone_number = 3;
+  google.protobuf.Timestamp date_of_birth = 4;
+  string timezone = 5;
+  string language = 6;
+  map<string, string> custom_fields = 7;
+}
+
+message Address {
+  string id = 1;
+  string street = 2;
+  string city = 3;
+  string state = 4;
+  string postal_code = 5;
+  string country = 6;
+  AddressType type = 7;
+  bool is_primary = 8;
+}
+
+message UserPreferences {
+  bool email_notifications = 1;
+  bool push_notifications = 2;
+  bool marketing_emails = 3;
+  string theme = 4;
+  string notification_frequency = 5;
+  repeated string subscribed_topics = 6;
+}
+
+message UserFilter {
+  repeated UserStatus statuses = 1;
+  repeated string emails = 2;
+  DateRange created_date_range = 3;
+  DateRange last_login_range = 4;
+  repeated string countries = 5;
+}
+
+message UserSort {
+  UserSortField field = 1;
+  SortDirection direction = 2;
+}
+
+message DateRange {
+  google.protobuf.Timestamp start = 1;
+  google.protobuf.Timestamp end = 2;
+}
+
+enum UserStatus {
+  USER_STATUS_UNSPECIFIED = 0;
+  USER_STATUS_ACTIVE = 1;
+  USER_STATUS_INACTIVE = 2;
+  USER_STATUS_SUSPENDED = 3;
+  USER_STATUS_DELETED = 4;
+}
+
+enum AddressType {
+  ADDRESS_TYPE_UNSPECIFIED = 0;
+  ADDRESS_TYPE_HOME = 1;
+  ADDRESS_TYPE_WORK = 2;
+  ADDRESS_TYPE_BILLING = 3;
+  ADDRESS_TYPE_SHIPPING = 4;
+}
+
+enum UserSortField {
+  USER_SORT_FIELD_UNSPECIFIED = 0;
+  USER_SORT_FIELD_CREATED_AT = 1;
+  USER_SORT_FIELD_UPDATED_AT = 2;
+  USER_SORT_FIELD_LAST_LOGIN_AT = 3;
+  USER_SORT_FIELD_EMAIL = 4;
+  USER_SORT_FIELD_FIRST_NAME = 5;
+  USER_SORT_FIELD_LAST_NAME = 6;
+}
+
+enum SortDirection {
+  SORT_DIRECTION_UNSPECIFIED = 0;
+  SORT_DIRECTION_ASC = 1;
+  SORT_DIRECTION_DESC = 2;
+}

@@ -1,0 +1,12 @@
+// MARK: - {{ enum.name }}
+{% if enum.documentation %}
+/// {{ enum.documentation }}
+{% endif %}
+public enum {{ enum.name | pascal_case }}: String, Codable, CaseIterable {
+    {% for value in enum.values %}
+    {% if value.documentation %}
+    /// {{ value.documentation }}
+    {% endif %}
+    case {{ value.name | camel_case }} = "{{ value.name }}"
+    {% endfor %}
+}
