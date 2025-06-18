@@ -21,9 +21,9 @@ internal sealed class RouteParameter
     public string? Constraint { get; set; }
 }
 
-internal sealed class CompilationInfo
+public sealed class CompilationInfo
 {
     public string AssemblyName { get; set; } = string.Empty;
     public string RootNamespace { get; set; } = string.Empty;
-    public Compilation Compilation { get; set; } = null!;
+    public Compilation? Compilation { get; set; }
 }

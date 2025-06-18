@@ -974,7 +974,7 @@ private struct NavigationStack {
     let name: String
     let routes: [RouteBuilder]
     
-    init(_ name: String, @RouteBuilder builder: () -> [RouteBuilder]) {
+    init(_ name: String, @RouteListBuilder builder: () -> [RouteBuilder]) {
         self.name = name
         self.routes = builder()
     }
@@ -1007,7 +1007,7 @@ private struct NavigationBuilder {
 }
 
 @resultBuilder
-private struct RouteBuilder {
+private struct RouteListBuilder {
     static func buildBlock(_ components: RouteBuilder...) -> [RouteBuilder] {
         return components
     }
@@ -1139,7 +1139,7 @@ private struct NavigationContext {
         self.hasRequiredPermissions = hasRequiredPermissions
     }
     
-    func hasRequiredPermissions() -> Bool {
+    func checkRequiredPermissions() -> Bool {
         return hasRequiredPermissions
     }
 }

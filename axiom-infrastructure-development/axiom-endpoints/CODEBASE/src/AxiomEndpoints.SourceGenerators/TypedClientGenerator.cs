@@ -1,12 +1,14 @@
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using Microsoft.CodeAnalysis;
 
 namespace AxiomEndpoints.SourceGenerators;
 
 internal static class TypedClientGenerator
 {
-    public static string GenerateTypedClient(
+    public static string GenerateTypedClients(
         ImmutableArray<EndpointInfo> endpoints,
         CompilationInfo compilation)
     {
@@ -30,10 +32,80 @@ internal static class TypedClientGenerator
         sb.AppendLine("using System.Net.Http.Json;");
         sb.AppendLine("using System.Threading;");
         sb.AppendLine("using System.Threading.Tasks;");
+        sb.AppendLine("using Microsoft.Extensions.Logging;");
         sb.AppendLine("using AxiomEndpoints.Core;");
         sb.AppendLine();
-        sb.AppendLine($"namespace {compilation.RootNamespace}.Client;");
+        sb.AppendLine($"namespace {compilation.RootNamespace}.Generated.Clients;");
         sb.AppendLine();
+
+        // Group endpoints by service for better organization
+        var serviceGroups = concreteEndpoints
+            .GroupBy(e => ExtractServiceName(e.Namespace))
+            .ToArray();
+
+        foreach (var serviceGroup in serviceGroups)
+        {
+            GenerateServiceClient(sb, serviceGroup.Key, serviceGroup.ToArray(), compilation);
+        }
+
+        // Generate the main AxiomClient for backward compatibility
+        GenerateMainClient(sb, concreteEndpoints, compilation);
+
+        return sb.ToString();
+    }
+
+    private static void GenerateServiceClient(StringBuilder sb, string serviceName, EndpointInfo[] endpoints, CompilationInfo compilation)
+    {
+        var clientName = $"{serviceName}Client";
+
+        // Generate interface
+        sb.AppendLine($"/// <summary>");
+        sb.AppendLine($"/// Typed client interface for {serviceName} service");
+        sb.AppendLine($"/// </summary>");
+        sb.AppendLine($"[System.CodeDom.Compiler.GeneratedCode(\"AxiomEndpoints.SourceGenerators\", \"1.0.0\")]");
+        sb.AppendLine($"public interface I{clientName}");
+        sb.AppendLine("{");
+
+        foreach (var endpoint in endpoints)
+        {
+            GenerateClientMethodSignature(sb, endpoint, isInterface: true);
+        }
+
+        sb.AppendLine("}");
+        sb.AppendLine();
+
+        // Generate implementation
+        sb.AppendLine($"/// <summary>");
+        sb.AppendLine($"/// HTTP client implementation for {serviceName} service");
+        sb.AppendLine($"/// </summary>");
+        sb.AppendLine($"[System.CodeDom.Compiler.GeneratedCode(\"AxiomEndpoints.SourceGenerators\", \"1.0.0\")]");
+        sb.AppendLine($"public class {clientName} : I{clientName}");
+        sb.AppendLine("{");
+        sb.AppendLine("    private readonly HttpClient _httpClient;");
+        sb.AppendLine("    private readonly ILogger<" + clientName + "> _logger;");
+        sb.AppendLine();
+        sb.AppendLine($"    public {clientName}(HttpClient httpClient, ILogger<{clientName}> logger)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        _httpClient = httpClient;");
+        sb.AppendLine("        _logger = logger;");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+
+        foreach (var endpoint in endpoints)
+        {
+            GenerateClientMethodImplementation(sb, endpoint);
+            sb.AppendLine();
+        }
+
+        sb.AppendLine("}");
+        sb.AppendLine();
+    }
+
+    private static void GenerateMainClient(StringBuilder sb, EndpointInfo[] endpoints, CompilationInfo compilation)
+    {
+        sb.AppendLine("/// <summary>");
+        sb.AppendLine("/// Main Axiom client for backward compatibility");
+        sb.AppendLine("/// </summary>");
         sb.AppendLine("[System.CodeDom.Compiler.GeneratedCode(\"AxiomEndpoints.SourceGenerators\", \"1.0.0\")]");
         sb.AppendLine("public partial class AxiomClient");
         sb.AppendLine("{");
@@ -44,19 +116,30 @@ internal static class TypedClientGenerator
         sb.AppendLine("        _httpClient = httpClient;");
         sb.AppendLine("    }");
 
-        foreach (var endpoint in concreteEndpoints)
+        foreach (var endpoint in endpoints)
         {
-            GenerateClientMethod(sb, endpoint);
+            GenerateClientMethodImplementation(sb, endpoint);
         }
 
         sb.AppendLine("}");
-
-        return sb.ToString();
     }
 
-    private static void GenerateClientMethod(StringBuilder sb, EndpointInfo endpoint)
+    private static void GenerateClientMethodSignature(StringBuilder sb, EndpointInfo endpoint, bool isInterface)
     {
-        var methodName = endpoint.TypeName.Replace("Endpoint", "");
+        var methodName = endpoint.TypeName.Replace("Endpoint", "").Replace("Handler", "");
+        var returnType = $"Task<Result<{endpoint.ResponseType}>>";
+
+        sb.AppendLine($"    /// <summary>");
+        sb.AppendLine($"    /// Call {endpoint.TypeName} endpoint");
+        sb.AppendLine($"    /// </summary>");
+        sb.AppendLine($"    {returnType} {methodName}Async(");
+        sb.AppendLine($"        {endpoint.RequestType} request,");
+        sb.AppendLine($"        CancellationToken cancellationToken = default);");
+    }
+
+    private static void GenerateClientMethodImplementation(StringBuilder sb, EndpointInfo endpoint)
+    {
+        var methodName = endpoint.TypeName.Replace("Endpoint", "").Replace("Handler", "");
         var returnType = $"Task<Result<{endpoint.ResponseType}>>";
 
         sb.AppendLine();
@@ -67,25 +150,77 @@ internal static class TypedClientGenerator
         sb.AppendLine("        try");
         sb.AppendLine("        {");
 
-        if (endpoint.HttpMethod == "GET")
-        {
-            sb.AppendLine($"            var url = BuildUrl<{endpoint.RouteType}>(request);");
-            sb.AppendLine($"            var response = await _httpClient.GetAsync(url, cancellationToken);");
-        }
-        else
-        {
-            sb.AppendLine($"            var url = Generated.RouteTemplates.GetTemplate<{endpoint.RouteType}>();");
-            sb.AppendLine($"            var response = await _httpClient.{endpoint.HttpMethod}AsJsonAsync(url, request, cancellationToken);");
-        }
+        GenerateHttpCall(sb, endpoint);
 
-        sb.AppendLine("            response.EnsureSuccessStatusCode();");
-        sb.AppendLine($"            var result = await response.Content.ReadFromJsonAsync<{endpoint.ResponseType}>(cancellationToken);");
-        sb.AppendLine($"            return Result<{endpoint.ResponseType}>.Success(result!);");
         sb.AppendLine("        }");
         sb.AppendLine("        catch (HttpRequestException ex)");
         sb.AppendLine("        {");
-        sb.AppendLine($"            return Result<{endpoint.ResponseType}>.Failure(new Error(\"HTTP_ERROR\", ex.Message));");
+        sb.AppendLine($"            return ResultFactory.Failure<{endpoint.ResponseType}>(");
+        sb.AppendLine("                new AxiomError(\"HTTP_ERROR\", ex.Message, ErrorType.Unavailable));");
+        sb.AppendLine("        }");
+        sb.AppendLine("        catch (Exception ex)");
+        sb.AppendLine("        {");
+        sb.AppendLine($"            return ResultFactory.Failure<{endpoint.ResponseType}>(");
+        sb.AppendLine("                new AxiomError(\"UNEXPECTED_ERROR\", ex.Message, ErrorType.Internal));");
         sb.AppendLine("        }");
         sb.AppendLine("    }");
+    }
+
+    private static void GenerateHttpCall(StringBuilder sb, EndpointInfo endpoint)
+    {
+        var routeTemplate = string.IsNullOrEmpty(endpoint.RouteType) 
+            ? $"\"/api/{endpoint.TypeName.ToLowerInvariant()}\""
+            : $"Generated.RouteTemplates.GetTemplate<{endpoint.RouteType}>()";
+
+        switch (endpoint.HttpMethod.ToLowerInvariant())
+        {
+            case "get":
+                sb.AppendLine($"            var url = {routeTemplate};");
+                sb.AppendLine("            var response = await _httpClient.GetAsync(url, cancellationToken);");
+                break;
+
+            case "post":
+                sb.AppendLine($"            var url = {routeTemplate};");
+                sb.AppendLine("            var response = await _httpClient.PostAsJsonAsync(url, request, cancellationToken);");
+                break;
+
+            case "put":
+                sb.AppendLine($"            var url = {routeTemplate};");
+                sb.AppendLine("            var response = await _httpClient.PutAsJsonAsync(url, request, cancellationToken);");
+                break;
+
+            case "patch":
+                sb.AppendLine($"            var url = {routeTemplate};");
+                sb.AppendLine("            var response = await _httpClient.PatchAsJsonAsync(url, request, cancellationToken);");
+                break;
+
+            case "delete":
+                sb.AppendLine($"            var url = {routeTemplate};");
+                sb.AppendLine("            var response = await _httpClient.DeleteAsync(url, cancellationToken);");
+                break;
+
+            default:
+                sb.AppendLine($"            var url = {routeTemplate};");
+                sb.AppendLine("            var response = await _httpClient.PostAsJsonAsync(url, request, cancellationToken);");
+                break;
+        }
+
+        sb.AppendLine();
+        sb.AppendLine("            if (response.IsSuccessStatusCode)");
+        sb.AppendLine("            {");
+        sb.AppendLine($"                var result = await response.Content.ReadFromJsonAsync<{endpoint.ResponseType}>(cancellationToken: cancellationToken);");
+        sb.AppendLine($"                return ResultFactory.Success(result!);");
+        sb.AppendLine("            }");
+        sb.AppendLine();
+        sb.AppendLine("            var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);");
+        sb.AppendLine("            return ResultFactory.Failure<" + endpoint.ResponseType + ">(");
+        sb.AppendLine("                new AxiomError(response.StatusCode.ToString(), errorContent, ErrorType.Unavailable));");
+    }
+
+    private static string ExtractServiceName(string namespaceName)
+    {
+        // Extract service name from namespace like "MyApp.Services.Users" -> "Users"
+        var parts = namespaceName.Split('.');
+        return parts.Length > 0 ? parts[parts.Length - 1] : "Unknown";
     }
 }

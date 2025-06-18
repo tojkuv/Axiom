@@ -2,7 +2,11 @@ import XCTest
 import AxiomTesting
 @testable import AxiomMacros
 @testable import AxiomCore
+import SwiftSyntax
+import SwiftSyntaxBuilder
+import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
+import SwiftDiagnostics
 
 /// Comprehensive tests for AxiomMacros action macro functionality
 final class ActionMacroTests: XCTestCase {
@@ -230,7 +234,7 @@ final class ActionMacroTests: XCTestCase {
         let iterations = 100
         let expectation = self.expectation(description: "Macro expansion performance")
         
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.global(qos: .userInitiated).async(execute: {
             let startTime = CFAbsoluteTimeGetCurrent()
             
             for _ in 0..<iterations {
@@ -254,7 +258,7 @@ final class ActionMacroTests: XCTestCase {
             XCTAssertLessThan(averageTime, 0.001, "Macro expansion should be fast (< 1ms per expansion)")
             
             expectation.fulfill()
-        }
+        })
         
         wait(for: [expectation], timeout: 10.0)
     }
@@ -379,16 +383,7 @@ final class ActionMacroTests: XCTestCase {
 
 // MARK: - Test Helper
 
-/// Test macro expansion context for unit testing
-class TestMacroExpansionContext: MacroExpansionContext {
-    func makeUniqueName(_ name: String) -> TokenSyntax {
-        return TokenSyntax(.identifier("\\(name)_\\(UUID().uuidString.prefix(8))"), presence: .present)
-    }
-    
-    func diagnose(_ diagnostic: Diagnostic) {
-        // Handle diagnostics in tests
-    }
-}
+// Using TestMacroExpansionContext from MacroIntegrationTests.swift
 
 // MARK: - ActionMacroError for Testing
 

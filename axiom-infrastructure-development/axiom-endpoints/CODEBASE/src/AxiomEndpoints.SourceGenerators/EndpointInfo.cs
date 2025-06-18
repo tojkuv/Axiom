@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 
 namespace AxiomEndpoints.SourceGenerators;
 
-internal sealed class EndpointInfo
+public sealed class EndpointInfo
 {
     public string TypeName { get; set; } = string.Empty;
     public string Namespace { get; set; } = string.Empty;
@@ -15,7 +15,7 @@ internal sealed class EndpointInfo
     public EndpointKind Kind { get; set; }
 }
 
-internal enum EndpointKind
+public enum EndpointKind
 {
     Unary,
     ServerStream,

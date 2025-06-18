@@ -134,13 +134,13 @@ final class PersistenceCapabilityTests: XCTestCase {
     }
     
     // Test client state
-    struct TestClientState: State, Codable, Equatable {
+    struct TestClientState: AxiomState, Codable, Equatable {
         var value: String
         var counter: Int
     }
     
     // Mock persistable client
-    actor MockPersistableClient: Client, Persistable {
+    actor MockPersistableClient: AxiomClient, Persistable {
         typealias StateType = TestClientState
         typealias ActionType = TestClientAction
         
@@ -200,7 +200,7 @@ final class PersistenceCapabilityTests: XCTestCase {
     }
     
     // Test persistable client for WORKER-05 CB-SESSION-003 integration tests
-    actor TestPersistableClient: Client, Persistable {
+    actor TestPersistableClient: AxiomClient, Persistable {
         typealias StateType = TestIntegrationState
         typealias ActionType = TestAction
         

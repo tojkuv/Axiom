@@ -2,7 +2,11 @@ import XCTest
 import AxiomTesting
 @testable import AxiomMacros
 @testable import AxiomCapabilities
+import SwiftSyntax
+import SwiftSyntaxBuilder
+import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
+import SwiftDiagnostics
 
 /// Comprehensive tests for AxiomMacros capability macro functionality
 final class CapabilityMacroTests: XCTestCase {
@@ -242,10 +246,6 @@ final class CapabilityMacroTests: XCTestCase {
                         )
                     ])
                 ),
-                attachedTo: ProtocolDeclSyntax(
-                    name: .identifier("TestProtocol"),
-                    memberBlock: MemberBlockSyntax(members: MemberBlockItemListSyntax([]))
-                ),
                 providingMembersOf: ProtocolDeclSyntax(
                     name: .identifier("TestProtocol"),
                     memberBlock: MemberBlockSyntax(members: MemberBlockItemListSyntax([]))
@@ -268,10 +268,6 @@ final class CapabilityMacroTests: XCTestCase {
                         )
                     ])
                 ),
-                attachedTo: EnumDeclSyntax(
-                    name: .identifier("TestEnum"),
-                    memberBlock: MemberBlockSyntax(members: MemberBlockItemListSyntax([]))
-                ),
                 providingMembersOf: EnumDeclSyntax(
                     name: .identifier("TestEnum"),
                     memberBlock: MemberBlockSyntax(members: MemberBlockItemListSyntax([]))
@@ -288,10 +284,6 @@ final class CapabilityMacroTests: XCTestCase {
             try CapabilityMacro.expansion(
                 of: AttributeSyntax(
                     attributeName: IdentifierTypeSyntax(name: .identifier("AxiomCapability"))
-                ),
-                attachedTo: StructDeclSyntax(
-                    name: .identifier("TestCapability"),
-                    memberBlock: MemberBlockSyntax(members: MemberBlockItemListSyntax([]))
                 ),
                 providingMembersOf: StructDeclSyntax(
                     name: .identifier("TestCapability"),
@@ -321,10 +313,6 @@ final class CapabilityMacroTests: XCTestCase {
                         )
                     ])
                 ),
-                attachedTo: StructDeclSyntax(
-                    name: .identifier("TestCapability"),
-                    memberBlock: MemberBlockSyntax(members: MemberBlockItemListSyntax([]))
-                ),
                 providingMembersOf: StructDeclSyntax(
                     name: .identifier("TestCapability"),
                     memberBlock: MemberBlockSyntax(members: MemberBlockItemListSyntax([]))
@@ -346,7 +334,7 @@ final class CapabilityMacroTests: XCTestCase {
         let iterations = 50
         let expectation = self.expectation(description: "Capability macro expansion performance")
         
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.global(qos: .userInitiated).async(execute: {
             let startTime = CFAbsoluteTimeGetCurrent()
             
             for i in 0..<iterations {
@@ -358,10 +346,6 @@ final class CapabilityMacroTests: XCTestCase {
                                 expression: StringLiteralExprSyntax(content: "test_\\(i)")
                             )
                         ])
-                    ),
-                    attachedTo: StructDeclSyntax(
-                        name: .identifier("TestCapability"),
-                        memberBlock: MemberBlockSyntax(members: MemberBlockItemListSyntax([]))
                     ),
                     providingMembersOf: StructDeclSyntax(
                         name: .identifier("TestCapability"),
@@ -377,7 +361,7 @@ final class CapabilityMacroTests: XCTestCase {
             XCTAssertLessThan(averageTime, 0.003, "Capability macro expansion should be fast (< 3ms per expansion)")
             
             expectation.fulfill()
-        }
+        })
         
         wait(for: [expectation], timeout: 15.0)
     }
@@ -439,16 +423,7 @@ final class CapabilityMacroTests: XCTestCase {
 
 // MARK: - Test Helper
 
-/// Test macro expansion context for capability testing
-class TestMacroExpansionContext: MacroExpansionContext {
-    func makeUniqueName(_ name: String) -> TokenSyntax {
-        return TokenSyntax(.identifier("\\(name)_\\(UUID().uuidString.prefix(8))"), presence: .present)
-    }
-    
-    func diagnose(_ diagnostic: Diagnostic) {
-        // Handle diagnostics in tests
-    }
-}
+// Using TestMacroExpansionContext from MacroIntegrationTests.swift
 
 // MARK: - CapabilityMacroError for Testing
 

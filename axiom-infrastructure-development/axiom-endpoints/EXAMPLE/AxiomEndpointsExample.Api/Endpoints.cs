@@ -249,3 +249,303 @@ public class LegacyApiEndpoint : IRouteAxiom<Routes.LegacyApi, ApiResponse<objec
         return response.Success();
     }
 }
+
+// =================================================================
+// PERFORMANCE OPTIMIZATION DEMONSTRATION ENDPOINTS
+// =================================================================
+
+/// <summary>
+/// Demonstrates caching with user statistics
+/// </summary>
+public class GetUserStatsEndpoint : IRouteAxiom<Routes.V1.Users.Stats, ApiResponse<UserStatsDto>>
+{
+    public static HttpMethod Method => HttpMethod.Get;
+    
+    private readonly IDataService _dataService;
+
+    public GetUserStatsEndpoint(IDataService dataService)
+    {
+        _dataService = dataService;
+    }
+
+    public async ValueTask<Result<ApiResponse<UserStatsDto>>> HandleAsync(Routes.V1.Users.Stats route, IContext context)
+    {
+        var stats = await _dataService.GetUserStatsAsync(route.UserId, context.CancellationToken);
+        
+        var response = new ApiResponse<UserStatsDto>
+        {
+            Data = stats,
+            Message = "User statistics retrieved (cached for 5 minutes)"
+        };
+        
+        return response.Success();
+    }
+}
+
+/// <summary>
+/// Demonstrates caching with active users list
+/// </summary>
+public class GetActiveUsersEndpoint : IRouteAxiom<Routes.V1.Users.Active, ApiResponse<List<UserDto>>>
+{
+    public static HttpMethod Method => HttpMethod.Get;
+    
+    private readonly IDataService _dataService;
+
+    public GetActiveUsersEndpoint(IDataService dataService)
+    {
+        _dataService = dataService;
+    }
+
+    public async ValueTask<Result<ApiResponse<List<UserDto>>>> HandleAsync(Routes.V1.Users.Active route, IContext context)
+    {
+        var users = await _dataService.GetActiveUsersAsync(context.CancellationToken);
+        
+        var response = new ApiResponse<List<UserDto>>
+        {
+            Data = users,
+            Message = $"Retrieved {users.Count} active users (cached for 10 minutes)"
+        };
+        
+        return response.Success();
+    }
+}
+
+/// <summary>
+/// Demonstrates caching with recent posts
+/// </summary>
+public class GetRecentPostsEndpoint : IRouteAxiom<Routes.V1.Posts.Recent, ApiResponse<List<PostDto>>>
+{
+    public static HttpMethod Method => HttpMethod.Get;
+    
+    private readonly IDataService _dataService;
+
+    public GetRecentPostsEndpoint(IDataService dataService)
+    {
+        _dataService = dataService;
+    }
+
+    public async ValueTask<Result<ApiResponse<List<PostDto>>>> HandleAsync(Routes.V1.Posts.Recent route, IContext context)
+    {
+        var limit = Math.Min(route.Limit ?? 10, 50); // Cap at 50 for performance
+        var posts = await _dataService.GetRecentPostsAsync(limit, context.CancellationToken);
+        
+        var response = new ApiResponse<List<PostDto>>
+        {
+            Data = posts,
+            Message = $"Retrieved {posts.Count} recent posts (cached for 3 minutes)"
+        };
+        
+        return response.Success();
+    }
+}
+
+/// <summary>
+/// Demonstrates expensive computation with caching
+/// </summary>
+public class GetExpensiveDataEndpoint : IRouteAxiom<Routes.V1.Data.Expensive, ApiResponse<object>>
+{
+    public static HttpMethod Method => HttpMethod.Get;
+    
+    private readonly IDataService _dataService;
+
+    public GetExpensiveDataEndpoint(IDataService dataService)
+    {
+        _dataService = dataService;
+    }
+
+    public async ValueTask<Result<ApiResponse<object>>> HandleAsync(Routes.V1.Data.Expensive route, IContext context)
+    {
+        var data = await _dataService.GetExpensiveDataAsync(route.Key, context.CancellationToken);
+        
+        var response = new ApiResponse<object>
+        {
+            Data = data,
+            Message = "Expensive computation result (cached for 30 minutes)"
+        };
+        
+        return response.Success();
+    }
+}
+
+/// <summary>
+/// Demonstrates object pooling with report generation
+/// </summary>
+public class GenerateUserReportEndpoint : IRouteAxiom<Routes.V1.Reports.User, ApiResponse<string>>
+{
+    public static HttpMethod Method => HttpMethod.Get;
+    
+    private readonly IReportService _reportService;
+
+    public GenerateUserReportEndpoint(IReportService reportService)
+    {
+        _reportService = reportService;
+    }
+
+    public async ValueTask<Result<ApiResponse<string>>> HandleAsync(Routes.V1.Reports.User route, IContext context)
+    {
+        var report = await _reportService.GenerateUserReportAsync(route.UserId, context.CancellationToken);
+        
+        // Set content type for text response
+        context.HttpContext.Response.ContentType = "text/plain";
+        
+        var response = new ApiResponse<string>
+        {
+            Data = report,
+            Message = "User report generated using object pooling for memory efficiency"
+        };
+        
+        return response.Success();
+    }
+}
+
+/// <summary>
+/// Demonstrates object pooling with large report generation (compression-friendly)
+/// </summary>
+public class GenerateLargeReportEndpoint : IRouteAxiom<Routes.V1.Reports.Large, ApiResponse<string>>
+{
+    public static HttpMethod Method => HttpMethod.Get;
+    
+    private readonly IReportService _reportService;
+
+    public GenerateLargeReportEndpoint(IReportService reportService)
+    {
+        _reportService = reportService;
+    }
+
+    public async ValueTask<Result<ApiResponse<string>>> HandleAsync(Routes.V1.Reports.Large route, IContext context)
+    {
+        var reportType = route.Type ?? "default";
+        var report = await _reportService.GenerateLargeReportAsync(reportType, context.CancellationToken);
+        
+        // Set content type for text response (will be compressed by middleware)
+        context.HttpContext.Response.ContentType = "text/plain";
+        
+        var response = new ApiResponse<string>
+        {
+            Data = report,
+            Message = "Large report generated (object pooling + compression)"
+        };
+        
+        return response.Success();
+    }
+}
+
+/// <summary>
+/// Performance metrics endpoint to view collected performance data
+/// </summary>
+public class GetPerformanceMetricsEndpoint : IRouteAxiom<Routes.V1.Metrics.Performance, ApiResponse<Dictionary<string, object>>>
+{
+    public static HttpMethod Method => HttpMethod.Get;
+    
+    private readonly IMetricsCollector _metricsCollector;
+
+    public GetPerformanceMetricsEndpoint(IMetricsCollector metricsCollector)
+    {
+        _metricsCollector = metricsCollector;
+    }
+
+    public async ValueTask<Result<ApiResponse<Dictionary<string, object>>>> HandleAsync(Routes.V1.Metrics.Performance route, IContext context)
+    {
+        await Task.CompletedTask;
+        
+        var allMetrics = _metricsCollector.GetAllMetrics();
+        
+        var summary = allMetrics.ToDictionary(
+            kvp => kvp.Key,
+            kvp => (object)new
+            {
+                TotalRequests = kvp.Value.TotalRequests,
+                AverageResponseTimeMs = Math.Round(kvp.Value.AverageResponseTimeMs, 2),
+                MinResponseTimeMs = kvp.Value.MinResponseTimeMs,
+                MaxResponseTimeMs = kvp.Value.MaxResponseTimeMs,
+                ErrorRate = Math.Round(kvp.Value.ErrorRate * 100, 2), // Convert to percentage
+                AverageMemoryPerRequestBytes = Math.Round(kvp.Value.AverageMemoryPerRequest, 0),
+                TotalMemoryUsedBytes = kvp.Value.TotalMemoryUsed
+            }
+        );
+
+        var response = new ApiResponse<Dictionary<string, object>>
+        {
+            Data = summary,
+            Message = "Performance metrics collected by monitoring middleware"
+        };
+        
+        return response.Success();
+    }
+}
+
+/// <summary>
+/// Slow endpoint to demonstrate performance monitoring
+/// </summary>
+public class SlowEndpointExample : IRouteAxiom<Routes.V1.Test.Slow, ApiResponse<object>>
+{
+    public static HttpMethod Method => HttpMethod.Get;
+
+    public async ValueTask<Result<ApiResponse<object>>> HandleAsync(Routes.V1.Test.Slow route, IContext context)
+    {
+        var delay = Math.Min(route.DelayMs ?? 1000, 5000); // Cap at 5 seconds for safety
+        
+        // Simulate slow operation
+        await Task.Delay(delay, context.CancellationToken);
+        
+        // Simulate memory allocation for monitoring
+        var largeData = new byte[1024 * 1024]; // 1MB allocation
+        Array.Fill(largeData, (byte)1);
+        
+        var response = new ApiResponse<object>
+        {
+            Data = new 
+            { 
+                message = "Slow operation completed",
+                delayMs = delay,
+                allocatedMemoryMB = largeData.Length / (1024 * 1024),
+                timestamp = DateTime.UtcNow
+            },
+            Message = "This endpoint intentionally slow to demonstrate performance monitoring"
+        };
+        
+        return response.Success();
+    }
+}
+
+/// <summary>
+/// Cache stress test endpoint
+/// </summary>
+public class CacheStressTestEndpoint : IRouteAxiom<Routes.V1.Test.CacheStress, ApiResponse<object>>
+{
+    public static HttpMethod Method => HttpMethod.Get;
+    
+    private readonly IDataService _dataService;
+
+    public CacheStressTestEndpoint(IDataService dataService)
+    {
+        _dataService = dataService;
+    }
+
+    public async ValueTask<Result<ApiResponse<object>>> HandleAsync(Routes.V1.Test.CacheStress route, IContext context)
+    {
+        var iterations = Math.Min(route.Iterations ?? 10, 100); // Cap for safety
+        var results = new List<object>();
+        
+        for (int i = 0; i < iterations; i++)
+        {
+            var key = $"stress_test_{i}";
+            var data = await _dataService.GetExpensiveDataAsync(key, context.CancellationToken);
+            results.Add(new { iteration = i, key, hasData = data != null });
+        }
+        
+        var response = new ApiResponse<object>
+        {
+            Data = new
+            {
+                iterations,
+                results = results.Take(10), // Return first 10 for response size
+                totalResults = results.Count,
+                message = "Cache stress test completed"
+            },
+            Message = $"Executed {iterations} cache operations"
+        };
+        
+        return response.Success();
+    }
+}

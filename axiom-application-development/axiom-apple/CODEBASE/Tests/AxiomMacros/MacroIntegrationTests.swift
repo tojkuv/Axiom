@@ -3,7 +3,11 @@ import AxiomTesting
 @testable import AxiomMacros
 @testable import AxiomArchitecture
 @testable import AxiomCore
+import SwiftSyntax
+import SwiftSyntaxBuilder
+import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
+import SwiftDiagnostics
 
 /// Integration tests for multiple AxiomMacros working together
 final class MacroIntegrationTests: XCTestCase {
@@ -470,7 +474,7 @@ final class MacroIntegrationTests: XCTestCase {
         let iterations = 10
         let expectation = self.expectation(description: "Macro integration performance")
         
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.global(qos: .userInitiated).async(execute: {
             let startTime = CFAbsoluteTimeGetCurrent()
             
             for _ in 0..<iterations {
@@ -492,12 +496,10 @@ final class MacroIntegrationTests: XCTestCase {
                     of: AttributeSyntax(
                         attributeName: IdentifierTypeSyntax(name: .identifier("AxiomContext"))
                     ),
-                    attachedTo: ClassDeclSyntax(
+                    providingMembersOf: ClassDeclSyntax(
                         name: .identifier("TestContext"),
                         memberBlock: MemberBlockSyntax(members: MemberBlockItemListSyntax([]))
                     ),
-                    providingExtensionsOf: IdentifierTypeSyntax(name: .identifier("TestContext")),
-                    conformingTo: [],
                     in: TestMacroExpansionContext()
                 )
             }
@@ -508,7 +510,7 @@ final class MacroIntegrationTests: XCTestCase {
             XCTAssertLessThan(averageTime, 0.02, "Multiple macro expansion should be fast (< 20ms per iteration)")
             
             expectation.fulfill()
-        }
+        })
         
         wait(for: [expectation], timeout: 30.0)
     }
@@ -547,6 +549,18 @@ class TestMacroExpansionContext: MacroExpansionContext {
     func diagnose(_ diagnostic: Diagnostic) {
         // Handle diagnostics in tests
     }
+    
+    func location(
+        of node: some SyntaxProtocol,
+        at position: PositionInSyntaxNode,
+        filePathMode: SourceLocationFilePathMode = .fileID
+    ) -> AbstractSourceLocation? {
+        return nil
+    }
+    
+    var lexicalContext: [Syntax] {
+        return []
+    }
 }
 
 // MARK: - Test Types
@@ -571,7 +585,7 @@ struct AppRoute: Equatable {
     }
 }
 
-struct TodoContext: ObservableObject {
+class TodoContext: ObservableObject {
     func viewAppeared() {}
     func viewDisappeared() {}
     var updateTrigger: Int = 0

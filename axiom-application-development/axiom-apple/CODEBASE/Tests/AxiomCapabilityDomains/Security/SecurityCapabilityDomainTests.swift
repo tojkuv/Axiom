@@ -273,6 +273,34 @@ final class SecurityCapabilityDomainTests: XCTestCase {
     }
 }
 
+// MARK: - Test Helper Types
+
+private enum SecurityType {
+    case encryption
+    case authentication
+    case hashing
+}
+
+private enum SecurityStrength {
+    case low
+    case medium
+    case high
+}
+
+private enum SecurityPerformance {
+    case slow
+    case medium
+    case fast
+}
+
+private protocol SecurityCapability {
+    var identifier: String { get }
+    var isAvailable: Bool { get }
+    var securityType: SecurityType { get }
+    var strength: SecurityStrength { get }
+    var performance: SecurityPerformance { get }
+}
+
 // MARK: - Test Helper Classes
 
 private struct AESEncryptionCapability: SecurityCapability {
@@ -389,28 +417,6 @@ private struct TestSecurityCapability: SecurityCapability {
     init(index: Int) {
         self.identifier = "test.security.capability.\(index)"
     }
-}
-
-private enum SecurityType {
-    case encryption
-    case authentication
-    case digitalSignature
-    case secureStorage
-    case accessControl
-}
-
-private enum SecurityStrength {
-    case low
-    case medium
-    case high
-    case highest
-}
-
-private enum SecurityPerformance {
-    case slow
-    case medium
-    case fast
-    case fastest
 }
 
 private enum SecurityLevel {

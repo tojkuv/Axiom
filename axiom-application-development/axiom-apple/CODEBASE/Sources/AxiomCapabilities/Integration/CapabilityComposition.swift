@@ -155,6 +155,12 @@ public actor HierarchicalCapability<Parent: DomainCapability, Child: DomainCapab
                 await child.deactivate()
             case .unknown:
                 break
+            case .initializing:
+                // Capability is initializing, wait for completion
+                break
+            case .terminating:
+                // Begin terminating child capabilities
+                await child.deactivate()
             }
         }
     }

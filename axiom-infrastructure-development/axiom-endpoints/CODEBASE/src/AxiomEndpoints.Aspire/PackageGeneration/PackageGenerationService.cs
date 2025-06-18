@@ -7,12 +7,12 @@ using Microsoft.Extensions.Logging;
 namespace AxiomEndpoints.Aspire.PackageGeneration;
 
 /// <summary>
-/// Service for managing package generation in Aspire applications
+/// Service for managing protobuf package generation in Aspire applications
 /// </summary>
 public interface IPackageGenerationService
 {
     /// <summary>
-    /// Generate packages for a project
+    /// Generate protobuf packages for a project
     /// </summary>
     Task<PackageGenerationResult> GeneratePackagesAsync(
         string projectPath,
@@ -20,7 +20,7 @@ public interface IPackageGenerationService
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Generate packages from assembly
+    /// Generate protobuf packages from assembly
     /// </summary>
     Task<PackageGenerationResult> GeneratePackagesFromAssemblyAsync(
         Assembly assembly,
@@ -61,7 +61,7 @@ public class GeneratedPackage
 }
 
 /// <summary>
-/// Implementation of package generation service
+/// Implementation of protobuf package generation service
 /// </summary>
 public class PackageGenerationService : IPackageGenerationService
 {
@@ -86,7 +86,7 @@ public class PackageGenerationService : IPackageGenerationService
 
         try
         {
-            _logger.LogInformation("Starting package generation for project: {ProjectPath}", projectPath);
+            _logger.LogInformation("Starting protobuf package generation for project: {ProjectPath}", projectPath);
 
             // Build project to get assembly
             var buildResult = await BuildProjectAsync(projectPath, cancellationToken);
@@ -104,7 +104,7 @@ public class PackageGenerationService : IPackageGenerationService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error generating packages for project: {ProjectPath}", projectPath);
+            _logger.LogError(ex, "Error generating protobuf packages for project: {ProjectPath}", projectPath);
             result.Error = ex.Message;
             return result;
         }
@@ -124,42 +124,37 @@ public class PackageGenerationService : IPackageGenerationService
 
         try
         {
-            _logger.LogInformation("Generating packages from assembly: {AssemblyName}", assembly.GetName().Name);
+            _logger.LogInformation("Generating protobuf packages from assembly: {AssemblyName}", assembly.GetName().Name);
 
             // Setup base output directory
             var baseOutputDir = Path.GetFullPath(options.BaseOutputPath);
             Directory.CreateDirectory(baseOutputDir);
 
-            // Generate packages for each language
-            foreach (var (language, config) in options.Languages)
+            // Generate protobuf package
+            try
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                try
+                var packageResult = await GenerateProtoPackageAsync(
+                    assembly, options, cancellationToken);
+                
+                if (packageResult != null)
                 {
-                    var packageResult = await GenerateLanguagePackageAsync(
-                        assembly, language, config, cancellationToken);
-                    
-                    if (packageResult != null)
-                    {
-                        result.GeneratedPackages.Add(packageResult);
-                    }
+                    result.GeneratedPackages.Add(packageResult);
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to generate {Language} package", language.ToProtoGenString());
-                    result.Warnings.Add($"Failed to generate {language.ToProtoGenString()} package: {ex.Message}");
-                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to generate protobuf package");
+                result.Warnings.Add($"Failed to generate protobuf package: {ex.Message}");
             }
 
             result.Success = result.GeneratedPackages.Count > 0;
             
-            _logger.LogInformation("Package generation completed. Generated {Count} packages in {Duration}",
+            _logger.LogInformation("Protobuf package generation completed. Generated {Count} packages in {Duration}",
                 result.GeneratedPackages.Count, stopwatch.Elapsed);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error generating packages from assembly: {AssemblyName}", assembly.GetName().Name);
+            _logger.LogError(ex, "Error generating protobuf packages from assembly: {AssemblyName}", assembly.GetName().Name);
             result.Error = ex.Message;
         }
         finally
@@ -209,51 +204,91 @@ public class PackageGenerationService : IPackageGenerationService
         }
     }
 
-    private async Task<GeneratedPackage?> GenerateLanguagePackageAsync(
+    private async Task<GeneratedPackage?> GenerateProtoPackageAsync(
         Assembly assembly,
-        PackageLanguage language,
-        LanguagePackageConfig config,
+        PackageGenerationOptions options,
         CancellationToken cancellationToken)
     {
-        var languageOutputDir = Path.GetFullPath(config.OutputPath);
+        var outputDir = Path.GetFullPath(options.BaseOutputPath);
         
         // Clean output if requested
-        if (config.CleanOutput && Directory.Exists(languageOutputDir))
+        if (Directory.Exists(outputDir))
         {
-            Directory.Delete(languageOutputDir, true);
+            Directory.Delete(outputDir, true);
         }
-        Directory.CreateDirectory(languageOutputDir);
+        Directory.CreateDirectory(outputDir);
 
         var startTime = DateTime.UtcNow;
 
-        // For now, simulate package generation since ProtoGen integration needs work
-        // TODO: Integrate with actual ProtoGen service when ready
-        await Task.Delay(100, cancellationToken); // Simulate work
-        
-        // Create a dummy file to show generation worked
-        var dummyFile = Path.Combine(languageOutputDir, $"Generated_{language.ToProtoGenString()}.txt");
-        await File.WriteAllTextAsync(dummyFile, 
-            $"Generated {language.ToProtoGenString()} package '{config.PackageName}' at {startTime}\n" +
-            $"Version: {config.Version}\n" +
-            $"Documentation: {config.IncludeDocumentation}\n" +
-            $"Samples: {config.IncludeSamples}\n", 
-            cancellationToken);
-
-        // Collect generated files
-        var files = Directory.GetFiles(languageOutputDir, "*", SearchOption.AllDirectories)
-            .Select(f => Path.GetRelativePath(languageOutputDir, f))
-            .ToList();
-
-        var totalSize = files.Sum(f => new FileInfo(Path.Combine(languageOutputDir, f)).Length);
-
-        return new GeneratedPackage
+        try
         {
-            Language = language.ToProtoGenString(),
-            OutputPath = languageOutputDir,
-            Files = files,
-            SizeBytes = totalSize,
-            GeneratedAt = startTime
+            // Use actual ProtoGen service to generate protobuf files
+            var packageName = options.DefaultPackagePrefix ?? "axiom-package";
+            var protoGenOptions = new AxiomEndpoints.ProtoGen.Core.GenerateOptions
+            {
+                AssemblyPath = assembly.Location,
+                OutputPath = outputDir,
+                PackageName = packageName,
+                Version = options.DefaultVersion,
+                Organization = "axiom",
+                Authors = "Axiom Endpoints",
+                Description = $"Generated protobuf package for {packageName}",
+                RepositoryUrl = ""
+            };
+
+            var result = await _protoService.GenerateAsync(protoGenOptions);
+            
+            if (!result.Success)
+            {
+                _logger.LogError("Failed to generate protobuf package: {Error}", result.Error);
+                return null;
+            }
+
+            // Create package metadata
+            await CreateProtoPackageMetadataAsync(outputDir, options, result.ProtoPackage, cancellationToken);
+
+            // Collect all generated files
+            var files = Directory.GetFiles(outputDir, "*", SearchOption.AllDirectories)
+                .Select(f => Path.GetRelativePath(outputDir, f))
+                .ToList();
+
+            var totalSize = files.Sum(f => new FileInfo(Path.Combine(outputDir, f)).Length);
+
+            return new GeneratedPackage
+            {
+                Language = "protobuf",
+                OutputPath = outputDir,
+                Files = files,
+                SizeBytes = totalSize,
+                GeneratedAt = startTime
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating protobuf package");
+            return null;
+        }
+    }
+
+    private async Task CreateProtoPackageMetadataAsync(
+        string outputDir, 
+        PackageGenerationOptions options, 
+        AxiomEndpoints.ProtoGen.Core.ProtoPackage? protoPackage,
+        CancellationToken cancellationToken)
+    {
+        var packageName = options.DefaultPackagePrefix ?? "axiom-package";
+        var metadata = new
+        {
+            packageName = packageName,
+            version = options.DefaultVersion,
+            language = "protobuf",
+            generatedAt = DateTime.UtcNow,
+            protoPackage = protoPackage?.Name,
+            description = $"Generated protobuf package for {packageName}"
         };
+
+        var json = System.Text.Json.JsonSerializer.Serialize(metadata, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+        await File.WriteAllTextAsync(Path.Combine(outputDir, "package-metadata.json"), json, cancellationToken);
     }
 
     private async Task<BuildResult> BuildProjectAsync(string projectPath, CancellationToken cancellationToken)

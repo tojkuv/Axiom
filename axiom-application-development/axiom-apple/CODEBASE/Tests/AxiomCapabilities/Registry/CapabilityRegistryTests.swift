@@ -1,5 +1,6 @@
 import XCTest
 import AxiomTesting
+@testable import AxiomCore
 @testable import AxiomCapabilities
 @testable import AxiomPlatform
 @testable import AxiomArchitecture
@@ -169,25 +170,66 @@ final class CapabilityRegistryTests: XCTestCase {
 
 // MARK: - Test Helper Classes
 
-private struct TestCapability: AxiomCapability {
+private actor TestCapability: AxiomCapability {
     static let baseIdentifier = "test.capability"
     let identifier: String
-    let isAvailable: Bool = true
     
     init(suffix: String = "") {
         self.identifier = Self.baseIdentifier + suffix
     }
+    
+    var isAvailable: Bool {
+        get async { true }
+    }
+    
+    func activate() async throws {
+        // Test implementation
+    }
+    
+    func deactivate() async {
+        // Test implementation
+    }
 }
 
-private struct AnotherTestCapability: AxiomCapability {
+private actor AnotherTestCapability: AxiomCapability {
     static let identifier = "another.test.capability"
-    let identifier: String = Self.identifier
-    let isAvailable: Bool = true
+    let identifier: String
+    
+    init() {
+        self.identifier = Self.identifier
+    }
+    
+    var isAvailable: Bool {
+        get async { true }
+    }
+    
+    func activate() async throws {
+        // Test implementation
+    }
+    
+    func deactivate() async {
+        // Test implementation
+    }
 }
 
-private struct DependentCapability: AxiomCapability {
+private actor DependentCapability: AxiomCapability {
     static let identifier = "dependent.capability"
-    let identifier: String = Self.identifier
-    let isAvailable: Bool = true
+    let identifier: String
     let dependencies: [String] = [TestCapability.baseIdentifier]
+    
+    init() {
+        self.identifier = Self.identifier
+    }
+    
+    var isAvailable: Bool {
+        get async { true }
+    }
+    
+    func activate() async throws {
+        // Test implementation
+    }
+    
+    func deactivate() async {
+        // Test implementation
+    }
 }

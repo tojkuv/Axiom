@@ -2,11 +2,15 @@
 import PackageDescription
 
 let package = Package(
-    name: "axiom-hotreload-server",
+    name: "axiom-applications-observability-server",
     platforms: [
         .macOS(.v13)
     ],
     products: [
+        .library(
+            name: "AxiomObservabilityServer",
+            targets: ["AxiomHotReloadServer"]
+        ),
         .library(
             name: "AxiomHotReloadServer",
             targets: ["AxiomHotReloadServer"]

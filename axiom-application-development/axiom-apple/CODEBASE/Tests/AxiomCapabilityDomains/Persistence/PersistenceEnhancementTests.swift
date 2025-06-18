@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 import AxiomTesting
 @testable import AxiomCapabilityDomains
@@ -222,4 +223,37 @@ func testFileStorageAdapterEnhanced() async throws {
     
     // Cleanup
     try? FileManager.default.removeItem(at: tempDir)
+}
+
+// MARK: - Test Helper Classes
+
+private actor TestPersistableClient {
+    private var value: String = ""
+    private var count: Int = 0
+    
+    func updateValue(_ newValue: String) {
+        value = newValue
+    }
+    
+    func updateCount(_ newCount: Int) {
+        count = newCount
+    }
+    
+    func getValue() -> String {
+        return value
+    }
+    
+    func getCount() -> Int {
+        return count
+    }
+    
+    func persistState() async throws {
+        // Mock persistence logic
+    }
+    
+    func restoreState() async throws {
+        // Mock restore logic - for test purposes, restore some values
+        value = "test_value"
+        count = 42
+    }
 }

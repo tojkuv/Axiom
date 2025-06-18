@@ -1,0 +1,13 @@
+import SwiftUI
+
+@MainActor
+class {name}: AxiomClientObservingContext {
+    {properties}
+    
+    private let client: {client_binding}
+    
+    init(client: {client_binding}) {
+        self.client = client
+        super.init()
+    }
+}

@@ -13,7 +13,7 @@ import {{ import }}
 /// {{ service.documentation }}
 {% endif %}
 @globalActor
-public actor {{ client_name }}: AxiomClient {
+public actor {{ client_name }}: AxiomObservableClient<{{ state_name }}, {{ action_name }}> {
     public typealias StateType = {{ state_name }}
     public typealias ActionType = {{ action_name }}
     

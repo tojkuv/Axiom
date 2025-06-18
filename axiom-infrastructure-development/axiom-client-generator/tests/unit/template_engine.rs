@@ -4,6 +4,7 @@ use axiom_universal_client_generator::generators::swift::templates::*;
 use axiom_universal_client_generator::proto::types::*;
 use axiom_universal_client_generator::error::Result;
 use std::collections::HashMap;
+use std::error::Error;
 use tempfile::TempDir;
 use tera::{Tera, Context};
 
@@ -112,7 +113,7 @@ async fn test_client_actor_template() {
     
     // Verify template rendering
     assert!(output.contains("public actor TaskClient"));
-    assert!(output.contains(": AxiomClient"));
+    assert!(output.contains(": AxiomObservableClient"));
     assert!(output.contains("public typealias StateType = TaskState"));
     assert!(output.contains("public typealias ActionType = TaskAction"));
     assert!(output.contains("import TaskManager"));
@@ -249,67 +250,60 @@ async fn test_message_struct_template() {
     let mut context = Context::new();
     
     let fields = vec![
-        HashMap::from([
-            ("name".to_string(), "id".to_string()),
-            ("type".to_string(), "String".to_string()),
-            ("documentation".to_string(), "Unique identifier for the task".to_string()),
-            ("optional".to_string(), "false".to_string()),
-        ]),
-        HashMap::from([
-            ("name".to_string(), "title".to_string()),
-            ("type".to_string(), "String".to_string()),
-            ("documentation".to_string(), "Task title".to_string()),
-            ("optional".to_string(), "false".to_string()),
-        ]),
-        HashMap::from([
-            ("name".to_string(), "is_completed".to_string()),
-            ("type".to_string(), "Bool".to_string()),
-            ("documentation".to_string(), "Whether the task is completed".to_string()),
-            ("optional".to_string(), "false".to_string()),
-        ]),
+        serde_json::json!({
+            "name": "id",
+            "swift_name": "id",
+            "type": "String",
+            "documentation": "Unique identifier for the task",
+            "optional": false,
+            "coding_key_needed": false
+        }),
+        serde_json::json!({
+            "name": "title",
+            "swift_name": "title",
+            "type": "String",
+            "documentation": "Task title",
+            "optional": false,
+            "coding_key_needed": false
+        }),
+        serde_json::json!({
+            "name": "is_completed",
+            "swift_name": "isCompleted",
+            "type": "Bool",
+            "documentation": "Whether the task is completed",
+            "optional": false,
+            "coding_key_needed": true
+        })
     ];
     
-    let mut message = HashMap::new();
-    message.insert("name", "Task");
-    message.insert("documentation", "A task entity representing a unit of work");
-    message.insert("identifiable", "true");
-    message.insert("equatable", "true");
-    
-    // Create a complete message structure with nested fields
-    let mut complete_message = HashMap::new();
-    complete_message.insert("name".to_string(), "Task".to_string());
-    complete_message.insert("documentation".to_string(), "A task entity representing a unit of work".to_string());
-    complete_message.insert("identifiable".to_string(), "true".to_string());
-    complete_message.insert("equatable".to_string(), "true".to_string());
-    
-    // Create a serializable structure with all the data the template needs
-    #[derive(serde::Serialize)]
-    struct MessageData {
-        name: String,
-        documentation: String,
-        identifiable: bool,
-        equatable: bool,
-        fields: Vec<HashMap<String, String>>,
-    }
-    
-    let message_data = MessageData {
-        name: "Task".to_string(),
-        documentation: "A task entity representing a unit of work".to_string(),
-        identifiable: true,
-        equatable: true,
-        fields,
-    };
+    let message_data = serde_json::json!({
+        "name": "Task",
+        "documentation": "A task entity representing a unit of work",
+        "identifiable": true,
+        "equatable": true,
+        "sendable": true,
+        "fields": fields
+    });
     
     context.insert("message", &message_data);
     
     let result = template_engine.render_message_struct(&context).await;
+    if let Err(ref e) = result {
+        println!("Template rendering error: {:?}", e);
+        // Print detailed error chain
+        let mut source = e.source();
+        while let Some(err) = source {
+            println!("Caused by: {:?}", err);
+            source = err.source();
+        }
+    }
     assert!(result.is_ok());
     
     let output = result.unwrap();
     
     // Verify structure
     assert!(output.contains("public struct Task"));
-    assert!(output.contains(": Codable, Identifiable, Equatable"));
+    assert!(output.contains(": Codable, Equatable, Sendable"));
     
     // Verify fields
     assert!(output.contains("public let id: String"));

@@ -244,3 +244,111 @@ private struct CLLocationCoordinate2D {
     let latitude: Double
     let longitude: Double
 }
+
+// MARK: - Mock Capability Implementations
+
+private actor SpatialCapability {
+    let identifier = "axiom.spatial"
+    
+    func isAvailable() async -> Bool {
+        return true
+    }
+}
+
+private actor LocationTrackingCapability {
+    func isAvailable() async -> Bool {
+        return true
+    }
+    
+    func startTracking(mode: TrackingMode) async throws {
+        // Mock implementation
+    }
+    
+    func startTrackingStrict(mode: TrackingMode) async throws {
+        // Mock implementation that might throw for testing
+        if mode == .navigation {
+            throw MockError.simulatedFailure
+        }
+    }
+    
+    func stopTracking() async {
+        // Mock implementation
+    }
+}
+
+private actor GeofencingCapability {
+    func isAvailable() async -> Bool {
+        return true
+    }
+    
+    func addGeofence(_ geofence: Geofence) async throws {
+        // Mock implementation
+    }
+    
+    func addGeofenceStrict(_ geofence: Geofence) async throws {
+        // Mock implementation that validates parameters
+        if geofence.center.latitude > 90 || geofence.center.latitude < -90 ||
+           geofence.center.longitude > 180 || geofence.center.longitude < -180 ||
+           geofence.radius < 0 {
+            throw MockError.invalidParameters
+        }
+    }
+    
+    func removeGeofence(_ geofence: Geofence) async {
+        // Mock implementation
+    }
+}
+
+private actor ARCapability {
+    func isAvailable() async -> Bool {
+        return true
+    }
+    
+    func startARSession(features: [ARFeature]) async throws {
+        // Mock implementation
+    }
+    
+    func stopARSession() async {
+        // Mock implementation
+    }
+}
+
+private actor MotionCapability {
+    func isAvailable() async -> Bool {
+        return true
+    }
+    
+    func startMotionUpdates(frequency: Double) async throws {
+        // Mock implementation
+    }
+    
+    func startMotionUpdatesStrict(frequency: Double) async throws {
+        // Mock implementation that validates frequency
+        if frequency < 0 {
+            throw MockError.invalidParameters
+        }
+    }
+    
+    func stopMotionUpdates() async {
+        // Mock implementation
+    }
+}
+
+private actor MappingCapability {
+    func isAvailable() async -> Bool {
+        return true
+    }
+    
+    func loadMap(type: MapType) async throws {
+        // Mock implementation
+    }
+    
+    func unloadMap() async {
+        // Mock implementation
+    }
+}
+
+private enum MockError: Error {
+    case simulatedFailure
+    case invalidParameters
+}

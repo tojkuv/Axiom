@@ -49,7 +49,7 @@ public class AxiomSourceGenerator : IIncrementalGenerator
             .Collect()
             .Combine(routeTemplates)
             .Combine(compilationInfo)
-            .Select(static (data, _) => HasAspNetCoreReferences(data.Right.Compilation) 
+            .Select(static (data, _) => (data.Right.Compilation != null && HasAspNetCoreReferences(data.Right.Compilation)) 
                 ? EndpointRegistrationGenerator.GenerateEndpointRegistrations(data.Left.Left, data.Left.Right, data.Right)
                 : string.Empty);
 
@@ -57,21 +57,14 @@ public class AxiomSourceGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(routeTemplates, EmitRouteTemplates);
         context.RegisterSourceOutput(endpointRegistrations, EmitEndpointRegistrations);
 
-        // Step 6.1: Generate OpenAPI documentation - temporarily disabled
-        // var openApiGeneration = endpointTypes
-        //     .Collect()
-        //     .Combine(compilationInfo)
-        //     .Select(static (data, _) => OpenApiGenerator.GenerateOpenApiDocuments(data.Left, data.Right));
+        // Step 6.1: Generate OpenAPI documentation
+        var openApiGeneration = endpointTypes
+            .Collect()
+            .Combine(compilationInfo)
+            .Select(static (data, _) => OpenApiGenerator.GenerateOpenApiDocuments(data.Left, data.Right));
 
-        // context.RegisterSourceOutput(openApiGeneration, EmitOpenApiDocuments);
+        context.RegisterSourceOutput(openApiGeneration, EmitOpenApiDocuments);
 
-        // Step 6.2: Generate validation - temporarily disabled
-        // var validationGeneration = endpointTypes
-        //     .Collect()
-        //     .Combine(compilationInfo)
-        //     .Select(static (data, _) => ValidationGenerator.GenerateValidators(data.Left, data.Right));
-
-        // context.RegisterSourceOutput(validationGeneration, EmitValidationCode);
 
         // Step 6.3: Generate minimal endpoints
         var minimalEndpoints = context.SyntaxProvider
@@ -96,27 +89,75 @@ public class AxiomSourceGenerator : IIncrementalGenerator
 
         context.RegisterSourceOutput(queryParameterBindingGeneration, EmitQueryParameterBinding);
 
-        // Client generation removed - MCP tool will handle all client generation
+        // Step 6.5: Generate typed clients for cross-service communication
+        var typedClientGeneration = endpointTypes
+            .Collect()
+            .Combine(compilationInfo)
+            .Select(static (data, _) => TypedClientGenerator.GenerateTypedClients(data.Left, data.Right));
 
-        // Step 7: Generate proto files (for MCP tool consumption) - temporarily disabled
-        // var streamingTypes = context.SyntaxProvider
-        //     .CreateSyntaxProvider(
-        //         predicate: static (node, _) => node is TypeDeclarationSyntax,
-        //         transform: static (context, _) => StreamingEndpointDetector.GetStreamingInfo(context))
-        //     .Where(static info => info is not null)
-        //     .Select(static (info, _) => info!);
+        context.RegisterSourceOutput(typedClientGeneration, EmitTypedClients);
 
-        // var protoGeneration = endpointTypes
-        //     .Collect()
-        //     .Combine(streamingTypes.Collect())
-        //     .Combine(compilationInfo)
-        //     .Select(static (data, _) => ProtoGenerator.GenerateProtoFile(data.Left.Left, data.Left.Right, data.Right));
+        // Step 6.6: Generate typed client registration extensions
+        var typedClientRegistrationGeneration = endpointTypes
+            .Collect()
+            .Combine(compilationInfo)
+            .Select(static (data, _) => TypedClientRegistrationGenerator.GenerateClientRegistration(data.Left, data.Right));
 
-        // context.RegisterSourceOutput(protoGeneration, EmitProtoFile);
+        context.RegisterSourceOutput(typedClientRegistrationGeneration, EmitTypedClientRegistration);
+
+        // Step 6.7: Generate configuration-driven middleware
+        var configurationMiddlewareGeneration = endpointTypes
+            .Collect()
+            .Combine(compilationInfo)
+            .Select(static (data, _) => ConfigurationDrivenMiddlewareGenerator.GenerateMiddlewareConfiguration(data.Left, data.Right));
+
+        context.RegisterSourceOutput(configurationMiddlewareGeneration, EmitConfigurationMiddleware);
+
+        // Step 6.8: Generate fluent endpoint configuration API
+        var fluentConfigurationGeneration = endpointTypes
+            .Collect()
+            .Combine(compilationInfo)
+            .Select(static (data, _) => FluentEndpointConfigurationGenerator.GenerateFluentConfiguration(data.Left, data.Right));
+
+        context.RegisterSourceOutput(fluentConfigurationGeneration, EmitFluentConfiguration);
+
+        // Step 6.9: Generate validation system
+        var validationGeneration = endpointTypes
+            .Collect()
+            .Combine(compilationInfo)
+            .Select(static (data, _) => ValidationGenerator.GenerateValidationCode(data.Left, data.Right));
+
+        context.RegisterSourceOutput(validationGeneration, EmitValidation);
+
+        // Step 6.10: Generate performance optimizations
+        var performanceGeneration = endpointTypes
+            .Collect()
+            .Combine(compilationInfo)
+            .Select(static (data, _) => PerformanceOptimizationGenerator.GeneratePerformanceOptimizations(data.Left, data.Right));
+
+        context.RegisterSourceOutput(performanceGeneration, EmitPerformanceOptimizations);
+
+        // Other client generation removed - MCP tool will handle platform-specific generation
+
+        // Step 7: Generate proto files (for MCP tool consumption)
+        var streamingTypes = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: static (node, _) => node is TypeDeclarationSyntax,
+                transform: static (context, _) => StreamingEndpointDetector.GetStreamingInfo(context))
+            .Where(static info => info is not null)
+            .Select(static (info, _) => info!);
+
+        var protoGeneration = endpointTypes
+            .Collect()
+            .Combine(streamingTypes.Collect())
+            .Combine(compilationInfo)
+            .Select(static (data, _) => ProtoGenerator.GenerateProtoFile(data.Left.Left, data.Left.Right, data.Right));
+
+        context.RegisterSourceOutput(protoGeneration, EmitProtoFile);
 
         // All client and service generation removed - MCP tool will handle this
 
-        // Step 8: Generate middleware pipelines (for all projects with middleware) - temporarily disabled
+        // Step 8: Generate middleware pipelines (for all projects with middleware) - DISABLED TEMPORARILY
         // var middlewareEndpoints = context.SyntaxProvider
         //     .CreateSyntaxProvider(
         //         predicate: static (node, _) => node is TypeDeclarationSyntax,
@@ -386,6 +427,54 @@ namespace Generated.Debug
         if (!string.IsNullOrEmpty(source))
         {
             context.AddSource("QueryParameterBinding.g.cs", SourceText.From(source, Encoding.UTF8));
+        }
+    }
+
+    private static void EmitTypedClients(SourceProductionContext context, string source)
+    {
+        if (!string.IsNullOrEmpty(source))
+        {
+            context.AddSource("TypedClients.g.cs", SourceText.From(source, Encoding.UTF8));
+        }
+    }
+
+    private static void EmitTypedClientRegistration(SourceProductionContext context, string source)
+    {
+        if (!string.IsNullOrEmpty(source))
+        {
+            context.AddSource("TypedClientRegistration.g.cs", SourceText.From(source, Encoding.UTF8));
+        }
+    }
+
+    private static void EmitConfigurationMiddleware(SourceProductionContext context, string source)
+    {
+        if (!string.IsNullOrEmpty(source))
+        {
+            context.AddSource("ConfigurationMiddleware.g.cs", SourceText.From(source, Encoding.UTF8));
+        }
+    }
+
+    private static void EmitFluentConfiguration(SourceProductionContext context, string source)
+    {
+        if (!string.IsNullOrEmpty(source))
+        {
+            context.AddSource("FluentConfiguration.g.cs", SourceText.From(source, Encoding.UTF8));
+        }
+    }
+
+    private static void EmitValidation(SourceProductionContext context, string source)
+    {
+        if (!string.IsNullOrEmpty(source))
+        {
+            context.AddSource("Validation.g.cs", SourceText.From(source, Encoding.UTF8));
+        }
+    }
+
+    private static void EmitPerformanceOptimizations(SourceProductionContext context, string source)
+    {
+        if (!string.IsNullOrEmpty(source))
+        {
+            context.AddSource("PerformanceOptimizations.g.cs", SourceText.From(source, Encoding.UTF8));
         }
     }
 

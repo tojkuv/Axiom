@@ -1,0 +1,12 @@
+import SwiftUI
+
+struct {name}: View {
+    @EnvironmentObject var context: {context_binding}
+    
+    var body: some View {
+        VStack {
+            {ui_components}
+        }
+        .navigationTitle("{title}")
+    }
+}

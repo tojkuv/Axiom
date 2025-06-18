@@ -2,7 +2,11 @@ import XCTest
 import AxiomTesting
 @testable import AxiomMacros
 @testable import AxiomArchitecture
+import SwiftSyntax
+import SwiftSyntaxBuilder
+import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
+import SwiftDiagnostics
 
 /// Comprehensive tests for AxiomMacros context macro functionality
 final class ContextMacroTests: XCTestCase {
@@ -134,16 +138,14 @@ final class ContextMacroTests: XCTestCase {
                 of: AttributeSyntax(
                     attributeName: IdentifierTypeSyntax(name: .identifier("AxiomContext"))
                 ),
-                attachedTo: StructDeclSyntax(
+                providingMembersOf: StructDeclSyntax(
                     name: .identifier("TestStruct"),
                     memberBlock: MemberBlockSyntax(members: MemberBlockItemListSyntax([]))
                 ),
-                providingExtensionsOf: IdentifierTypeSyntax(name: .identifier("TestStruct")),
-                conformingTo: [],
                 in: TestMacroExpansionContext()
             )
         ) { error in
-            XCTAssertTrue(error is ContextMacroError)
+            XCTAssertTrue(error is MacroError)
         }
     }
     
@@ -153,16 +155,14 @@ final class ContextMacroTests: XCTestCase {
                 of: AttributeSyntax(
                     attributeName: IdentifierTypeSyntax(name: .identifier("AxiomContext"))
                 ),
-                attachedTo: EnumDeclSyntax(
+                providingMembersOf: EnumDeclSyntax(
                     name: .identifier("TestEnum"),
                     memberBlock: MemberBlockSyntax(members: MemberBlockItemListSyntax([]))
                 ),
-                providingExtensionsOf: IdentifierTypeSyntax(name: .identifier("TestEnum")),
-                conformingTo: [],
                 in: TestMacroExpansionContext()
             )
         ) { error in
-            XCTAssertTrue(error is ContextMacroError)
+            XCTAssertTrue(error is MacroError)
         }
     }
     
@@ -175,19 +175,17 @@ final class ContextMacroTests: XCTestCase {
                 of: AttributeSyntax(
                     attributeName: IdentifierTypeSyntax(name: .identifier("AxiomContext"))
                 ),
-                attachedTo: ClassDeclSyntax(
+                providingMembersOf: ClassDeclSyntax(
                     name: .identifier("TestContext"),
                     memberBlock: MemberBlockSyntax(members: MemberBlockItemListSyntax([]))
                 ),
-                providingExtensionsOf: IdentifierTypeSyntax(name: .identifier("TestContext")),
-                conformingTo: [],
                 in: TestMacroExpansionContext()
             )
         ) { error in
-            if let contextError = error as? ContextMacroError {
-                XCTAssertEqual(contextError, .missingClientParameter)
+            if let contextError = error as? MacroError {
+                XCTAssertEqual(contextError, .missingClientType)
             } else {
-                XCTFail("Expected ContextMacroError.missingClientParameter")
+                XCTFail("Expected MacroError.missingClientType")
             }
         }
     }
@@ -244,7 +242,7 @@ final class ContextMacroTests: XCTestCase {
         let iterations = 50
         let expectation = self.expectation(description: "Context macro expansion performance")
         
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.global(qos: .userInitiated).async(execute: {
             let startTime = CFAbsoluteTimeGetCurrent()
             
             for _ in 0..<iterations {
@@ -262,12 +260,10 @@ final class ContextMacroTests: XCTestCase {
                             )
                         ])
                     ),
-                    attachedTo: ClassDeclSyntax(
+                    providingMembersOf: ClassDeclSyntax(
                         name: .identifier("TestContext"),
                         memberBlock: MemberBlockSyntax(members: MemberBlockItemListSyntax([]))
                     ),
-                    providingExtensionsOf: IdentifierTypeSyntax(name: .identifier("TestContext")),
-                    conformingTo: [],
                     in: TestMacroExpansionContext()
                 )
             }
@@ -278,7 +274,7 @@ final class ContextMacroTests: XCTestCase {
             XCTAssertLessThan(averageTime, 0.002, "Context macro expansion should be fast (< 2ms per expansion)")
             
             expectation.fulfill()
-        }
+        })
         
         wait(for: [expectation], timeout: 10.0)
     }
@@ -340,16 +336,7 @@ final class ContextMacroTests: XCTestCase {
 
 // MARK: - Test Helper
 
-/// Test macro expansion context for context testing
-class TestMacroExpansionContext: MacroExpansionContext {
-    func makeUniqueName(_ name: String) -> TokenSyntax {
-        return TokenSyntax(.identifier("\\(name)_\\(UUID().uuidString.prefix(8))"), presence: .present)
-    }
-    
-    func diagnose(_ diagnostic: Diagnostic) {
-        // Handle diagnostics in tests
-    }
-}
+// Using TestMacroExpansionContext from MacroIntegrationTests.swift
 
 // MARK: - ContextMacroError for Testing
 

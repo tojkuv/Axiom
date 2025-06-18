@@ -757,7 +757,7 @@ private struct ParameterConfig {
     let required: Bool
 }
 
-private enum ParameterType {
+private indirect enum ParameterType {
     case string
     case integer
     case array(ParameterType)

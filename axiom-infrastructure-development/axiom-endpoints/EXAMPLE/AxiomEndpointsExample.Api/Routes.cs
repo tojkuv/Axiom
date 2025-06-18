@@ -47,6 +47,27 @@ public static class Routes
                 public static string Pattern => "/v1/users/search";
                 public static FrozenDictionary<string, object> Metadata => FrozenDictionary<string, object>.Empty;
             }
+
+            // Performance demonstration routes - Caching
+            public record Stats(Guid UserId) : IRoute<Stats>
+            {
+                public static string Pattern => "/v1/users/{UserId}/stats";
+                public static FrozenDictionary<string, object> Metadata => new Dictionary<string, object>
+                {
+                    ["cache"] = "5min",
+                    ["description"] = "User statistics with caching"
+                }.ToFrozenDictionary();
+            }
+
+            public record Active() : IRoute<Active>
+            {
+                public static string Pattern => "/v1/users/active";
+                public static FrozenDictionary<string, object> Metadata => new Dictionary<string, object>
+                {
+                    ["cache"] = "10min",
+                    ["description"] = "Active users list with caching"
+                }.ToFrozenDictionary();
+            }
         }
 
         public static class Posts
@@ -61,6 +82,95 @@ public static class Routes
             {
                 public static string Pattern => "/v1/posts/{Id}";
                 public static FrozenDictionary<string, object> Metadata => FrozenDictionary<string, object>.Empty;
+            }
+
+            // Performance demonstration - Caching
+            public record Recent(int? Limit = null) : IRoute<Recent>
+            {
+                public static string Pattern => "/v1/posts/recent";
+                public static FrozenDictionary<string, object> Metadata => new Dictionary<string, object>
+                {
+                    ["cache"] = "3min",
+                    ["description"] = "Recent posts with caching"
+                }.ToFrozenDictionary();
+            }
+        }
+
+        // Performance demonstration - Expensive operations with caching
+        public static class Data
+        {
+            public record Expensive(string Key) : IRoute<Expensive>
+            {
+                public static string Pattern => "/v1/data/expensive/{Key}";
+                public static FrozenDictionary<string, object> Metadata => new Dictionary<string, object>
+                {
+                    ["cache"] = "30min",
+                    ["description"] = "Expensive computation with long-term caching"
+                }.ToFrozenDictionary();
+            }
+        }
+
+        // Performance demonstration - Object pooling with report generation
+        public static class Reports
+        {
+            public record User(Guid UserId) : IRoute<User>
+            {
+                public static string Pattern => "/v1/reports/user/{UserId}";
+                public static FrozenDictionary<string, object> Metadata => new Dictionary<string, object>
+                {
+                    ["objectPooling"] = "true",
+                    ["description"] = "User report generation with object pooling"
+                }.ToFrozenDictionary();
+            }
+
+            public record Large(string? Type = null) : IRoute<Large>
+            {
+                public static string Pattern => "/v1/reports/large";
+                public static FrozenDictionary<string, object> Metadata => new Dictionary<string, object>
+                {
+                    ["objectPooling"] = "true",
+                    ["compression"] = "true",
+                    ["description"] = "Large report generation with object pooling and compression"
+                }.ToFrozenDictionary();
+            }
+        }
+
+        // Performance demonstration - Metrics and monitoring
+        public static class Metrics
+        {
+            public record Performance() : IRoute<Performance>
+            {
+                public static string Pattern => "/v1/metrics/performance";
+                public static FrozenDictionary<string, object> Metadata => new Dictionary<string, object>
+                {
+                    ["monitoring"] = "true",
+                    ["description"] = "Performance metrics collected by monitoring middleware"
+                }.ToFrozenDictionary();
+            }
+        }
+
+        // Performance demonstration - Test endpoints
+        public static class Test
+        {
+            public record Slow(int? DelayMs = null) : IRoute<Slow>
+            {
+                public static string Pattern => "/v1/test/slow";
+                public static FrozenDictionary<string, object> Metadata => new Dictionary<string, object>
+                {
+                    ["monitoring"] = "true",
+                    ["description"] = "Intentionally slow endpoint for performance monitoring demonstration"
+                }.ToFrozenDictionary();
+            }
+
+            public record CacheStress(int? Iterations = null) : IRoute<CacheStress>
+            {
+                public static string Pattern => "/v1/test/cache-stress";
+                public static FrozenDictionary<string, object> Metadata => new Dictionary<string, object>
+                {
+                    ["cache"] = "true",
+                    ["stress"] = "true",
+                    ["description"] = "Cache stress test endpoint"
+                }.ToFrozenDictionary();
             }
         }
     }

@@ -642,14 +642,14 @@ public class ErrorMonitor: ObservableObject {
 public extension AxiomError {
     func sanitized() -> AxiomError {
         switch self {
-        case .validationError(.invalidInput(let field, let reason)):
+        case .validationError(.invalidInput(_, _)):
             // Remove potentially sensitive field values
             return .validationError(.invalidInput("***", "***"))
             
         case .navigationError(let navError):
             // Sanitize navigation errors that might contain sensitive URLs
             switch navError {
-            case .invalidRoute(let route):
+            case .invalidRoute(_):
                 return .navigationError(.invalidRoute("***"))
             default:
                 return self

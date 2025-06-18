@@ -1,5 +1,6 @@
 import XCTest
 import AxiomTesting
+@testable import AxiomCore
 @testable import AxiomCapabilityDomains
 @testable import AxiomCapabilities
 @testable import AxiomPlatform

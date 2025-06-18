@@ -2,7 +2,12 @@ import XCTest
 import AxiomTesting
 @testable import AxiomMacros
 @testable import AxiomArchitecture
+@testable import AxiomCore
+import SwiftSyntax
+import SwiftSyntaxBuilder
+import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
+import SwiftDiagnostics
 
 /// Comprehensive tests for AxiomMacros client macro functionality
 final class ClientMacroTests: XCTestCase {
@@ -278,12 +283,10 @@ final class ClientMacroTests: XCTestCase {
                 of: AttributeSyntax(
                     attributeName: IdentifierTypeSyntax(name: .identifier("AxiomClient"))
                 ),
-                attachedTo: ClassDeclSyntax(
+                providingMembersOf: ClassDeclSyntax(
                     name: .identifier("TestClass"),
                     memberBlock: MemberBlockSyntax(members: MemberBlockItemListSyntax([]))
                 ),
-                providingExtensionsOf: IdentifierTypeSyntax(name: .identifier("TestClass")),
-                conformingTo: [],
                 in: TestMacroExpansionContext()
             )
         ) { error in
@@ -297,12 +300,10 @@ final class ClientMacroTests: XCTestCase {
                 of: AttributeSyntax(
                     attributeName: IdentifierTypeSyntax(name: .identifier("AxiomClient"))
                 ),
-                attachedTo: StructDeclSyntax(
+                providingMembersOf: StructDeclSyntax(
                     name: .identifier("TestStruct"),
                     memberBlock: MemberBlockSyntax(members: MemberBlockItemListSyntax([]))
                 ),
-                providingExtensionsOf: IdentifierTypeSyntax(name: .identifier("TestStruct")),
-                conformingTo: [],
                 in: TestMacroExpansionContext()
             )
         ) { error in
@@ -316,12 +317,10 @@ final class ClientMacroTests: XCTestCase {
                 of: AttributeSyntax(
                     attributeName: IdentifierTypeSyntax(name: .identifier("AxiomClient"))
                 ),
-                attachedTo: ActorDeclSyntax(
+                providingMembersOf: ActorDeclSyntax(
                     name: .identifier("TestActor"),
                     memberBlock: MemberBlockSyntax(members: MemberBlockItemListSyntax([]))
                 ),
-                providingExtensionsOf: IdentifierTypeSyntax(name: .identifier("TestActor")),
-                conformingTo: [],
                 in: TestMacroExpansionContext()
             )
         ) { error in
@@ -430,7 +429,7 @@ final class ClientMacroTests: XCTestCase {
         let iterations = 20
         let expectation = self.expectation(description: "Client macro expansion performance")
         
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.global(qos: .userInitiated).async(execute: {
             let startTime = CFAbsoluteTimeGetCurrent()
             
             for i in 0..<iterations {
@@ -448,12 +447,10 @@ final class ClientMacroTests: XCTestCase {
                             )
                         ])
                     ),
-                    attachedTo: ActorDeclSyntax(
+                    providingMembersOf: ActorDeclSyntax(
                         name: .identifier("TestClient"),
                         memberBlock: MemberBlockSyntax(members: MemberBlockItemListSyntax([]))
                     ),
-                    providingExtensionsOf: IdentifierTypeSyntax(name: .identifier("TestClient")),
-                    conformingTo: [],
                     in: TestMacroExpansionContext()
                 )
             }
@@ -464,7 +461,7 @@ final class ClientMacroTests: XCTestCase {
             XCTAssertLessThan(averageTime, 0.01, "Client macro expansion should be fast (< 10ms per expansion)")
             
             expectation.fulfill()
-        }
+        })
         
         wait(for: [expectation], timeout: 20.0)
     }
@@ -571,16 +568,7 @@ final class ClientMacroTests: XCTestCase {
 
 // MARK: - Test Helper
 
-/// Test macro expansion context for client testing
-class TestMacroExpansionContext: MacroExpansionContext {
-    func makeUniqueName(_ name: String) -> TokenSyntax {
-        return TokenSyntax(.identifier("\\(name)_\\(UUID().uuidString.prefix(8))"), presence: .present)
-    }
-    
-    func diagnose(_ diagnostic: Diagnostic) {
-        // Handle diagnostics in tests
-    }
-}
+// Using TestMacroExpansionContext from MacroIntegrationTests.swift
 
 // MARK: - ClientMacroError for Testing
 
@@ -613,20 +601,36 @@ enum ClientMacroError: Error, LocalizedError, Equatable {
 // MARK: - Test Types
 
 struct TodoState: AxiomState {
-    let items: [String] = []
+    let items: [String]
+    
+    init(items: [String] = []) {
+        self.items = items
+    }
 }
 
 struct UserState: AxiomState {
-    let userId: String = ""
+    let userId: String
+    
+    init(userId: String = "") {
+        self.userId = userId
+    }
 }
 
 struct DataState: AxiomState {
-    let data: [String: Any] = [:]
+    let data: [String: String]
+    
+    init(data: [String: String] = [:]) {
+        self.data = data
+    }
 }
 
 struct ComplexState: AxiomState {
     static let `default` = ComplexState()
-    let complexData: [String: [String: Any]] = [:]
+    let complexData: [String: [String: String]]
+    
+    init(complexData: [String: [String: String]] = [:]) {
+        self.complexData = complexData
+    }
 }
 
 enum TodoAction {

@@ -35,6 +35,10 @@ public enum AxiomCapabilityState: Equatable, Sendable {
     case restricted
     /// The capability state is unknown or being determined
     case unknown
+    /// The capability is being initialized
+    case initializing
+    /// The capability is being terminated
+    case terminating
 }
 
 /// Capability status for internal state management

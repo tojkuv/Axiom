@@ -1,6 +1,7 @@
 import Testing
 import AxiomTesting
-@testable import AxiomApple
+@testable import AxiomCapabilities
+@testable import AxiomCore
 
 // MARK: - Test Infrastructure
 

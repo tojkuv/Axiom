@@ -1,6 +1,7 @@
 import Testing
 import AxiomTesting
-@testable import AxiomApple
+@testable import AxiomCapabilities
+@testable import AxiomCore
 
 @Test("DomainCapability protocol with configuration management")
 func testDomainCapabilityConfiguration() async throws {

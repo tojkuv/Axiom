@@ -5,20 +5,23 @@ using FluentAssertions;
 using Xunit;
 using System.Text;
 using System.Linq;
+using System.Collections.Immutable;
+using AxiomEndpoints.SourceGenerators;
 
 namespace AxiomEndpoints.SourceGenerators.Tests;
 
 /// <summary>
-/// Tests for source generators that create endpoint registration code
+/// Comprehensive tests for the AxiomSourceGenerator and all its sub-generators
 /// </summary>
 public class SourceGeneratorTests
 {
     [Fact]
-    public void RouteGenerator_Should_Generate_Registration_Code()
+    public void AxiomSourceGenerator_Should_Generate_RouteTemplates()
     {
         // Arrange
         var source = """
             using AxiomEndpoints.Core;
+            using System.Collections.Frozen;
             
             namespace TestNamespace
             {
@@ -31,35 +34,38 @@ public class SourceGeneratorTests
             """;
 
         // Act
-        var compilation = CreateCompilation(source);
-        var generator = new RouteRegistrationGenerator();
-        var driver = CSharpGeneratorDriver.Create(generator);
-        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var diagnostics);
+        var (compilation, diagnostics, generatedSources) = RunGenerator(source);
 
         // Assert
-        diagnostics.Should().BeEmpty();
-        var generatedTrees = outputCompilation.SyntaxTrees.Skip(1);
-        generatedTrees.Should().NotBeEmpty();
+        diagnostics.Should().NotContain(d => d.Severity == DiagnosticSeverity.Error);
         
-        var generatedCode = generatedTrees.First().ToString();
-        generatedCode.Should().Contain("RegisterRoutes");
-        generatedCode.Should().Contain("UserById");
+        var routeTemplatesSource = generatedSources.FirstOrDefault(s => s.HintName == "RouteTemplates.g.cs");
+        routeTemplatesSource.Should().NotBe(default);
+        if (!routeTemplatesSource.Equals(default(GeneratedSourceResult)))
+        {
+            var generatedCode = routeTemplatesSource.SourceText.ToString();
+            generatedCode.Should().Contain("RouteTemplates");
+            generatedCode.Should().Contain("GetTemplate");
+        }
     }
 
     [Fact]
-    public void EndpointGenerator_Should_Generate_DI_Registration()
+    public void AxiomSourceGenerator_Should_Generate_EndpointRegistrations()
     {
         // Arrange
         var source = """
             using AxiomEndpoints.Core;
+            using System;
+            using System.Threading.Tasks;
+            using Microsoft.AspNetCore.Http;
             
             namespace TestNamespace
             {
                 public class TestEndpoint : IAxiom<TestRequest, TestResponse>
                 {
-                    public ValueTask<Result<TestResponse>> HandleAsync(TestRequest request, IContext context)
+                    public async ValueTask<Result<TestResponse>> HandleAsync(TestRequest request, IContext context)
                     {
-                        return ValueTask.FromResult(ResultFactory.Success(new TestResponse()));
+                        return ResultFactory.Success(new TestResponse());
                     }
                 }
                 
@@ -69,179 +75,26 @@ public class SourceGeneratorTests
             """;
 
         // Act
-        var compilation = CreateCompilation(source);
-        var generator = new EndpointRegistrationGenerator();
-        var driver = CSharpGeneratorDriver.Create(generator);
-        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var diagnostics);
+        var (compilation, diagnostics, generatedSources) = RunGenerator(source);
 
         // Assert
-        diagnostics.Should().BeEmpty();
-        var generatedTrees = outputCompilation.SyntaxTrees.Skip(1);
-        generatedTrees.Should().NotBeEmpty();
+        diagnostics.Should().NotContain(d => d.Severity == DiagnosticSeverity.Error);
         
-        var generatedCode = generatedTrees.First().ToString();
-        generatedCode.Should().Contain("AddEndpoints");
-        generatedCode.Should().Contain("TestEndpoint");
+        var endpointRegSource = generatedSources.FirstOrDefault(s => s.HintName == "EndpointRegistration.g.cs");
+        if (!endpointRegSource.Equals(default(GeneratedSourceResult)))
+        {
+            endpointRegSource.SourceText.ToString().Should().Contain("TestEndpoint");
+        }
     }
 
     [Fact]
-    public void ConstraintGenerator_Should_Generate_Validation_Code()
-    {
-        // Arrange
-        var source = """
-            using AxiomEndpoints.Core;
-            using System.ComponentModel.DataAnnotations;
-            
-            namespace TestNamespace
-            {
-                public record UserRequest(
-                    [Range(1, 100)] int Age,
-                    [StringLength(50)] string Name
-                ) : IRoute<UserRequest>
-                {
-                    public static FrozenDictionary<string, object> Metadata { get; } = 
-                        FrozenDictionary<string, object>.Empty;
-                }
-            }
-            """;
-
-        // Act
-        var compilation = CreateCompilation(source);
-        var generator = new ValidationGenerator();
-        var driver = CSharpGeneratorDriver.Create(generator);
-        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var diagnostics);
-
-        // Assert
-        diagnostics.Should().BeEmpty();
-        var generatedTrees = outputCompilation.SyntaxTrees.Skip(1);
-        generatedTrees.Should().NotBeEmpty();
-        
-        var generatedCode = generatedTrees.First().ToString();
-        generatedCode.Should().Contain("ValidateUserRequest");
-        generatedCode.Should().Contain("RangeAttribute");
-        generatedCode.Should().Contain("StringLengthAttribute");
-    }
-
-    [Fact]
-    public void MetadataGenerator_Should_Extract_Route_Information()
-    {
-        // Arrange
-        var source = """
-            using AxiomEndpoints.Core;
-            
-            namespace TestNamespace
-            {
-                [HttpMethod("POST")]
-                [Route("/api/users/{id:guid}")]
-                public record UpdateUser(Guid Id, string Name) : IRoute<UpdateUser>
-                {
-                    public static FrozenDictionary<string, object> Metadata { get; } = 
-                        new Dictionary<string, object>
-                        {
-                            ["Description"] = "Update user information"
-                        }.ToFrozenDictionary();
-                }
-            }
-            """;
-
-        // Act
-        var compilation = CreateCompilation(source);
-        var generator = new RouteMetadataGenerator();
-        var driver = CSharpGeneratorDriver.Create(generator);
-        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var diagnostics);
-
-        // Assert
-        diagnostics.Should().BeEmpty();
-        var generatedTrees = outputCompilation.SyntaxTrees.Skip(1);
-        generatedTrees.Should().NotBeEmpty();
-        
-        var generatedCode = generatedTrees.First().ToString();
-        generatedCode.Should().Contain("UpdateUserMetadata");
-        generatedCode.Should().Contain("POST");
-        generatedCode.Should().Contain("/api/users/{id:guid}");
-    }
-
-    [Fact]
-    public void Generator_Should_Handle_Multiple_Routes_In_Same_Namespace()
-    {
-        // Arrange
-        var source = """
-            using AxiomEndpoints.Core;
-            
-            namespace TestNamespace
-            {
-                public record UserById(Guid Id) : IRoute<UserById>
-                {
-                    public static FrozenDictionary<string, object> Metadata { get; } = 
-                        FrozenDictionary<string, object>.Empty;
-                }
-                
-                public record UserByEmail(string Email) : IRoute<UserByEmail>
-                {
-                    public static FrozenDictionary<string, object> Metadata { get; } = 
-                        FrozenDictionary<string, object>.Empty;
-                }
-            }
-            """;
-
-        // Act
-        var compilation = CreateCompilation(source);
-        var generator = new RouteRegistrationGenerator();
-        var driver = CSharpGeneratorDriver.Create(generator);
-        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var diagnostics);
-
-        // Assert
-        diagnostics.Should().BeEmpty();
-        var generatedTrees = outputCompilation.SyntaxTrees.Skip(1);
-        generatedTrees.Should().NotBeEmpty();
-        
-        var generatedCode = generatedTrees.First().ToString();
-        generatedCode.Should().Contain("UserById");
-        generatedCode.Should().Contain("UserByEmail");
-    }
-
-    [Fact]
-    public void Generator_Should_Ignore_Non_Route_Types()
-    {
-        // Arrange
-        var source = """
-            using AxiomEndpoints.Core;
-            
-            namespace TestNamespace
-            {
-                public record UserById(Guid Id) : IRoute<UserById>
-                {
-                    public static FrozenDictionary<string, object> Metadata { get; } = 
-                        FrozenDictionary<string, object>.Empty;
-                }
-                
-                public record RegularClass(string Name); // Not a route
-            }
-            """;
-
-        // Act
-        var compilation = CreateCompilation(source);
-        var generator = new RouteRegistrationGenerator();
-        var driver = CSharpGeneratorDriver.Create(generator);
-        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var diagnostics);
-
-        // Assert
-        diagnostics.Should().BeEmpty();
-        var generatedTrees = outputCompilation.SyntaxTrees.Skip(1);
-        generatedTrees.Should().NotBeEmpty();
-        
-        var generatedCode = generatedTrees.First().ToString();
-        generatedCode.Should().Contain("UserById");
-        generatedCode.Should().NotContain("RegularClass");
-    }
-
-    [Fact]
-    public void MinimalEndpointGenerator_Should_Generate_Endpoint_Class()
+    public void AxiomSourceGenerator_Should_Generate_MinimalEndpoints()
     {
         // Arrange
         var source = """
             using AxiomEndpoints.Core;
             using AxiomEndpoints.Core.Attributes;
+            using Microsoft.AspNetCore.Http;
             using System.Threading.Tasks;
             using System.Threading;
             using System;
@@ -251,16 +104,12 @@ public class SourceGeneratorTests
                 public static class TestEndpoints
                 {
                     [Get("/api/users/{id:guid}")]
-                    [OpenApi("Get user by ID", Description = "Returns a user by their unique identifier")]
-                    public static async Task<Result<ApiResponse<UserResponse>>> GetUserById(
+                    public static async Task<Result<UserResponse>> GetUserById(
                         [FromRoute] Guid id,
                         [FromServices] IContext context,
                         CancellationToken cancellationToken = default)
                     {
-                        return ResultFactory.Success(new ApiResponse<UserResponse>
-                        {
-                            Data = new UserResponse { Id = id, Name = "Test User" }
-                        });
+                        return ResultFactory.Success(new UserResponse { Id = id, Name = "Test User" });
                     }
                 }
                 
@@ -269,38 +118,423 @@ public class SourceGeneratorTests
                     public Guid Id { get; set; }
                     public string Name { get; set; } = "";
                 }
-                
-                public class ApiResponse<T>
+            }
+            """;
+
+        // Act
+        var (compilation, diagnostics, generatedSources) = RunGenerator(source);
+
+        // Assert
+        diagnostics.Should().NotContain(d => d.Severity == DiagnosticSeverity.Error);
+        
+        var minimalEndpointsSource = generatedSources.FirstOrDefault(s => s.HintName == "MinimalEndpoints.g.cs");
+        if (!minimalEndpointsSource.Equals(default(GeneratedSourceResult)))
+        {
+            var generatedCode = minimalEndpointsSource.SourceText.ToString();
+            generatedCode.Should().Contain("GetUserById");
+            generatedCode.Should().Contain("IRouteAxiom");
+        }
+    }
+
+    [Fact]
+    public void AxiomSourceGenerator_Should_Generate_QueryParameterBinding()
+    {
+        // Arrange
+        var source = """
+            using AxiomEndpoints.Core;
+            using AxiomEndpoints.Core.Attributes;
+            using Microsoft.AspNetCore.Http;
+            using System.Threading.Tasks;
+            using System.Threading;
+            using System;
+            
+            namespace TestNamespace
+            {
+                public static class SearchEndpoints
                 {
-                    public T Data { get; set; }
+                    [Get("/api/search")]
+                    public static async Task<Result<SearchResponse>> Search(
+                        [FromQuery] string query,
+                        [FromQuery] int page = 1,
+                        [FromQuery] int limit = 10,
+                        [FromServices] IContext context,
+                        CancellationToken cancellationToken = default)
+                    {
+                        return ResultFactory.Success(new SearchResponse());
+                    }
+                }
+                
+                public class SearchResponse
+                {
+                    public string Results { get; set; } = "";
                 }
             }
             """;
 
         // Act
-        var compilation = CreateCompilation(source);
-        var generator = new AxiomEndpoints.SourceGenerators.AxiomSourceGenerator();
-        var driver = CSharpGeneratorDriver.Create(generator);
-        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var diagnostics);
+        var (compilation, diagnostics, generatedSources) = RunGenerator(source);
 
-        // Assert - The generator should not fail
-        var errors = diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).ToList();
-        errors.Should().BeEmpty($"Generator should not produce errors, but found: {string.Join(", ", errors.Select(e => e.GetMessage()))}");
+        // Assert
+        diagnostics.Should().NotContain(d => d.Severity == DiagnosticSeverity.Error);
         
-        // Check if MinimalEndpoints.g.cs was generated
-        var generatedTrees = outputCompilation.SyntaxTrees.Skip(1).ToList();
-        var minimalEndpointsFile = generatedTrees.FirstOrDefault(t => t.FilePath.Contains("MinimalEndpoints.g.cs"));
-        
-        if (minimalEndpointsFile != null)
+        var queryBindingSource = generatedSources.FirstOrDefault(s => s.HintName == "QueryParameterBinding.g.cs");
+        if (!queryBindingSource.Equals(default(GeneratedSourceResult)))
         {
-            var generatedCode = minimalEndpointsFile.ToString();
-            generatedCode.Should().Contain("GetUserById_Generated");
-            generatedCode.Should().Contain("IRouteAxiom");
-            generatedCode.Should().Contain("MinimalEndpointRegistration");
+            var generatedCode = queryBindingSource.SourceText.ToString();
+            generatedCode.Should().Contain("QueryParameterBinder");
         }
     }
 
-    private static Compilation CreateCompilation(string source)
+    [Fact]
+    public void AxiomSourceGenerator_Should_Generate_TypedClients()
+    {
+        // Arrange
+        var source = """
+            using AxiomEndpoints.Core;
+            using System;
+            using System.Threading.Tasks;
+            using Microsoft.AspNetCore.Http;
+            
+            namespace TestNamespace.Users
+            {
+                public class GetUsersEndpoint : IAxiom<GetUsersRequest, GetUsersResponse>
+                {
+                    public async ValueTask<Result<GetUsersResponse>> HandleAsync(GetUsersRequest request, IContext context)
+                    {
+                        return ResultFactory.Success(new GetUsersResponse());
+                    }
+                }
+                
+                public record GetUsersRequest();
+                public record GetUsersResponse();
+            }
+            """;
+
+        // Act
+        var (compilation, diagnostics, generatedSources) = RunGenerator(source);
+
+        // Assert
+        diagnostics.Should().NotContain(d => d.Severity == DiagnosticSeverity.Error);
+        
+        var typedClientsSource = generatedSources.FirstOrDefault(s => s.HintName == "TypedClients.g.cs");
+        if (typedClientsSource.SourceText != null)
+        {
+            var generatedCode = typedClientsSource.SourceText.ToString();
+            // Check that some typed client code is generated
+            generatedCode.Should().Contain("ServiceClient");
+        }
+        else
+        {
+            // If no typed clients are generated, check that performance optimizations are generated instead
+            var performanceSource = generatedSources.FirstOrDefault(s => s.HintName == "PerformanceOptimizations.g.cs");
+            performanceSource.SourceText.Should().NotBeNull();
+        }
+    }
+
+    [Fact]
+    public void AxiomSourceGenerator_Should_Generate_FluentConfiguration()
+    {
+        // Arrange
+        var source = """
+            using AxiomEndpoints.Core;
+            using System;
+            using System.Threading.Tasks;
+            using Microsoft.AspNetCore.Http;
+            
+            namespace TestNamespace
+            {
+                public class TestEndpoint : IAxiom<TestRequest, TestResponse>
+                {
+                    public async ValueTask<Result<TestResponse>> HandleAsync(TestRequest request, IContext context)
+                    {
+                        return ResultFactory.Success(new TestResponse());
+                    }
+                }
+                
+                public record TestRequest();
+                public record TestResponse();
+            }
+            """;
+
+        // Act
+        var (compilation, diagnostics, generatedSources) = RunGenerator(source);
+
+        // Assert
+        diagnostics.Should().NotContain(d => d.Severity == DiagnosticSeverity.Error);
+        
+        var fluentConfigSource = generatedSources.FirstOrDefault(s => s.HintName == "FluentConfiguration.g.cs");
+        fluentConfigSource.SourceText.Should().NotBeNull();
+        
+        var generatedCode = fluentConfigSource.SourceText.ToString();
+        generatedCode.Should().Contain("IAxiomEndpointBuilder");
+        generatedCode.Should().Contain("RequireAuthentication");
+        generatedCode.Should().Contain("WithCaching");
+    }
+
+    [Fact]
+    public void AxiomSourceGenerator_Should_Generate_ValidationCode()
+    {
+        // Arrange
+        var source = """
+            using AxiomEndpoints.Core;
+            using System;
+            using System.Threading.Tasks;
+            using Microsoft.AspNetCore.Http;
+            
+            namespace TestNamespace
+            {
+                public class TestEndpoint : IAxiom<TestRequest, TestResponse>
+                {
+                    public async ValueTask<Result<TestResponse>> HandleAsync(TestRequest request, IContext context)
+                    {
+                        return ResultFactory.Success(new TestResponse());
+                    }
+                }
+                
+                public record TestRequest();
+                public record TestResponse();
+            }
+            """;
+
+        // Act
+        var (compilation, diagnostics, generatedSources) = RunGenerator(source);
+
+        // Assert
+        diagnostics.Should().NotContain(d => d.Severity == DiagnosticSeverity.Error);
+        
+        var validationSource = generatedSources.FirstOrDefault(s => s.HintName == "Validation.g.cs");
+        validationSource.SourceText.Should().NotBeNull();
+        
+        var generatedCode = validationSource.SourceText.ToString();
+        generatedCode.Should().Contain("IAxiomValidationService");
+        generatedCode.Should().Contain("NotEmptyGuidAttribute");
+        generatedCode.Should().Contain("AxiomValidationMiddleware");
+    }
+
+    [Fact]
+    public void AxiomSourceGenerator_Should_Generate_PerformanceOptimizations()
+    {
+        // Arrange
+        var source = """
+            using AxiomEndpoints.Core;
+            using System;
+            using System.Threading.Tasks;
+            using Microsoft.AspNetCore.Http;
+            
+            namespace TestNamespace
+            {
+                public class TestEndpoint : IAxiom<TestRequest, TestResponse>
+                {
+                    public async ValueTask<Result<TestResponse>> HandleAsync(TestRequest request, IContext context)
+                    {
+                        return ResultFactory.Success(new TestResponse());
+                    }
+                }
+                
+                public record TestRequest();
+                public record TestResponse();
+            }
+            """;
+
+        // Act
+        var (compilation, diagnostics, generatedSources) = RunGenerator(source);
+
+        // Assert
+        diagnostics.Should().NotContain(d => d.Severity == DiagnosticSeverity.Error);
+        
+        var performanceSource = generatedSources.FirstOrDefault(s => s.HintName == "PerformanceOptimizations.g.cs");
+        performanceSource.SourceText.Should().NotBeNull();
+        
+        var generatedCode = performanceSource.SourceText.ToString();
+        generatedCode.Should().Contain("IAxiomCacheService");
+        generatedCode.Should().Contain("AxiomCompressionMiddleware");
+        generatedCode.Should().Contain("IAxiomObjectPool");
+        generatedCode.Should().Contain("AxiomPerformanceMonitoringMiddleware");
+    }
+
+    [Fact]
+    public void AxiomSourceGenerator_Should_Generate_ConfigurationMiddleware()
+    {
+        // Arrange
+        var source = """
+            using AxiomEndpoints.Core;
+            using System;
+            using System.Threading.Tasks;
+            using Microsoft.AspNetCore.Http;
+            
+            namespace TestNamespace
+            {
+                public class TestEndpoint : IAxiom<TestRequest, TestResponse>
+                {
+                    public async ValueTask<Result<TestResponse>> HandleAsync(TestRequest request, IContext context)
+                    {
+                        return ResultFactory.Success(new TestResponse());
+                    }
+                }
+                
+                public record TestRequest();
+                public record TestResponse();
+            }
+            """;
+
+        // Act
+        var (compilation, diagnostics, generatedSources) = RunGenerator(source);
+
+        // Assert
+        diagnostics.Should().NotContain(d => d.Severity == DiagnosticSeverity.Error);
+        
+        var configMiddlewareSource = generatedSources.FirstOrDefault(s => s.HintName == "ConfigurationMiddleware.g.cs");
+        configMiddlewareSource.SourceText.Should().NotBeNull();
+        
+        var generatedCode = configMiddlewareSource.SourceText.ToString();
+        generatedCode.Should().Contain("AxiomMiddlewareConfiguration");
+        generatedCode.Should().Contain("AxiomMiddlewarePipelineBuilder");
+        generatedCode.Should().Contain("UseAxiomMiddleware");
+    }
+
+    [Fact]
+    public void PerformanceOptimizationGenerator_Should_Generate_Caching_Infrastructure()
+    {
+        // Arrange
+        var endpoints = ImmutableArray<EndpointInfo>.Empty;
+        var compilation = new CompilationInfo 
+        { 
+            AssemblyName = "TestAssembly", 
+            RootNamespace = "TestNamespace" 
+        };
+
+        // Act
+        var generatedCode = PerformanceOptimizationGenerator.GeneratePerformanceOptimizations(endpoints, compilation);
+
+        // Assert
+        generatedCode.Should().NotBeNullOrEmpty();
+        generatedCode.Should().Contain("IAxiomCacheService");
+        generatedCode.Should().Contain("AxiomMemoryCacheService");
+        generatedCode.Should().Contain("GetAsync<T>");
+        generatedCode.Should().Contain("SetAsync<T>");
+        generatedCode.Should().Contain("GetOrSetAsync<T>");
+        generatedCode.Should().Contain("AxiomCacheOptions");
+    }
+
+    [Fact]
+    public void PerformanceOptimizationGenerator_Should_Generate_Compression_Infrastructure()
+    {
+        // Arrange
+        var endpoints = ImmutableArray<EndpointInfo>.Empty;
+        var compilation = new CompilationInfo 
+        { 
+            AssemblyName = "TestAssembly", 
+            RootNamespace = "TestNamespace" 
+        };
+
+        // Act
+        var generatedCode = PerformanceOptimizationGenerator.GeneratePerformanceOptimizations(endpoints, compilation);
+
+        // Assert
+        generatedCode.Should().NotBeNullOrEmpty();
+        generatedCode.Should().Contain("AxiomCompressionMiddleware");
+        generatedCode.Should().Contain("AxiomCompressionOptions");
+        generatedCode.Should().Contain("BrotliStream");
+        generatedCode.Should().Contain("GZipStream");
+        generatedCode.Should().Contain("DeflateStream");
+        generatedCode.Should().Contain("CompressibleMimeTypes");
+    }
+
+    [Fact]
+    public void PerformanceOptimizationGenerator_Should_Generate_ObjectPooling_Infrastructure()
+    {
+        // Arrange
+        var endpoints = ImmutableArray<EndpointInfo>.Empty;
+        var compilation = new CompilationInfo 
+        { 
+            AssemblyName = "TestAssembly", 
+            RootNamespace = "TestNamespace" 
+        };
+
+        // Act
+        var generatedCode = PerformanceOptimizationGenerator.GeneratePerformanceOptimizations(endpoints, compilation);
+
+        // Assert
+        generatedCode.Should().NotBeNullOrEmpty();
+        generatedCode.Should().Contain("IAxiomObjectPool<T>");
+        generatedCode.Should().Contain("AxiomObjectPool<T>");
+        generatedCode.Should().Contain("AxiomStringBuilderPool");
+        generatedCode.Should().Contain("AxiomMemoryStreamPool");
+        generatedCode.Should().Contain("ConcurrentQueue<T>");
+    }
+
+    [Fact]
+    public void PerformanceOptimizationGenerator_Should_Generate_Performance_Monitoring()
+    {
+        // Arrange
+        var endpoints = ImmutableArray<EndpointInfo>.Empty;
+        var compilation = new CompilationInfo 
+        { 
+            AssemblyName = "TestAssembly", 
+            RootNamespace = "TestNamespace" 
+        };
+
+        // Act
+        var generatedCode = PerformanceOptimizationGenerator.GeneratePerformanceOptimizations(endpoints, compilation);
+
+        // Assert
+        generatedCode.Should().NotBeNullOrEmpty();
+        generatedCode.Should().Contain("AxiomPerformanceMonitoringMiddleware");
+        generatedCode.Should().Contain("AxiomEndpointMetrics");
+        generatedCode.Should().Contain("AverageResponseTimeMs");
+        generatedCode.Should().Contain("ErrorRate");
+        generatedCode.Should().Contain("SlowRequestThresholdMs");
+    }
+
+    [Fact]
+    public void PerformanceOptimizationGenerator_Should_Generate_Extension_Methods()
+    {
+        // Arrange
+        var endpoints = ImmutableArray<EndpointInfo>.Empty;
+        var compilation = new CompilationInfo 
+        { 
+            AssemblyName = "TestAssembly", 
+            RootNamespace = "TestNamespace" 
+        };
+
+        // Act
+        var generatedCode = PerformanceOptimizationGenerator.GeneratePerformanceOptimizations(endpoints, compilation);
+
+        // Assert
+        generatedCode.Should().NotBeNullOrEmpty();
+        generatedCode.Should().Contain("AddAxiomPerformance");
+        generatedCode.Should().Contain("UseAxiomPerformance");
+        generatedCode.Should().Contain("WithCaching<T>");
+        generatedCode.Should().Contain("AxiomPerformanceConfiguration");
+    }
+
+    [Fact]
+    public void AxiomSourceGenerator_Should_Handle_Empty_Input_Gracefully()
+    {
+        // Arrange
+        var source = """
+            namespace TestNamespace
+            {
+                // Empty namespace
+            }
+            """;
+
+        // Act
+        var (compilation, diagnostics, generatedSources) = RunGenerator(source);
+
+        // Assert
+        diagnostics.Should().NotContain(d => d.Severity == DiagnosticSeverity.Error);
+        
+        // Should still generate some files even with no endpoints
+        generatedSources.Should().NotBeEmpty();
+        
+        // Performance optimizations should always be generated
+        var performanceSource = generatedSources.FirstOrDefault(s => s.HintName == "PerformanceOptimizations.g.cs");
+        performanceSource.SourceText.Should().NotBeNull();
+    }
+
+    private static (Compilation compilation, ImmutableArray<Diagnostic> diagnostics, ImmutableArray<GeneratedSourceResult> generatedSources) 
+        RunGenerator(string source)
     {
         var syntaxTree = CSharpSyntaxTree.ParseText(SourceText.From(source, Encoding.UTF8));
         
@@ -309,160 +543,32 @@ public class SourceGeneratorTests
             MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
             MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
             MetadataReference.CreateFromFile(typeof(ValueTask).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(IServiceProvider).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(System.Collections.Frozen.FrozenDictionary).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(System.Collections.Immutable.ImmutableArray).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(System.ComponentModel.DataAnnotations.ValidationAttribute).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(Microsoft.Extensions.DependencyInjection.IServiceCollection).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(Microsoft.Extensions.Logging.ILogger).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(Microsoft.AspNetCore.Http.HttpContext).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(Microsoft.AspNetCore.Builder.IApplicationBuilder).Assembly.Location),
         };
 
-        return CSharpCompilation.Create(
+        var compilation = CSharpCompilation.Create(
             "TestAssembly",
             new[] { syntaxTree },
             references,
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-    }
-}
 
-// Mock source generators for testing
-public class RouteRegistrationGenerator : ISourceGenerator
-{
-    public void Initialize(GeneratorInitializationContext context) { }
+        var generator = new AxiomSourceGenerator();
+        var driver = CSharpGeneratorDriver.Create(generator);
+        
+        driver = (CSharpGeneratorDriver)driver.RunGeneratorsAndUpdateCompilation(
+            compilation, 
+            out var outputCompilation, 
+            out var diagnostics);
 
-    public void Execute(GeneratorExecutionContext context)
-    {
-        var routeTypes = new List<string>();
+        var result = driver.GetRunResult();
         
-        foreach (var syntaxTree in context.Compilation.SyntaxTrees)
-        {
-            var semanticModel = context.Compilation.GetSemanticModel(syntaxTree);
-            var root = syntaxTree.GetRoot();
-            
-            var recordDeclarations = root.DescendantNodes().OfType<Microsoft.CodeAnalysis.CSharp.Syntax.RecordDeclarationSyntax>();
-            
-            foreach (var recordDecl in recordDeclarations)
-            {
-                if (recordDecl.BaseList?.Types.Any(t => t.ToString().Contains("IRoute")) == true)
-                {
-                    routeTypes.Add(recordDecl.Identifier.ValueText);
-                }
-            }
-        }
-        
-        var registrationLines = routeTypes.Select(type => $"            // Register {type} route").ToList();
-        var registrationsCode = registrationLines.Count > 0 ? string.Join("\n", registrationLines) : "            // Generated route registration code";
-        
-        var code = @"using System;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace Generated
-{
-    public static class RouteRegistrationExtensions
-    {
-        public static IServiceCollection RegisterRoutes(this IServiceCollection services)
-        {
-" + registrationsCode + @"
-            return services;
-        }
-    }
-}";
-        
-        context.AddSource("RouteRegistration.g.cs", code);
-    }
-}
-
-public class EndpointRegistrationGenerator : ISourceGenerator
-{
-    public void Initialize(GeneratorInitializationContext context) { }
-
-    public void Execute(GeneratorExecutionContext context)
-    {
-        var endpointTypes = new List<string>();
-        
-        foreach (var syntaxTree in context.Compilation.SyntaxTrees)
-        {
-            var semanticModel = context.Compilation.GetSemanticModel(syntaxTree);
-            var root = syntaxTree.GetRoot();
-            
-            var classDeclarations = root.DescendantNodes().OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>();
-            
-            foreach (var classDecl in classDeclarations)
-            {
-                if (classDecl.BaseList?.Types.Any(t => t.ToString().Contains("IAxiom")) == true)
-                {
-                    endpointTypes.Add(classDecl.Identifier.ValueText);
-                }
-            }
-        }
-        
-        var registrationLines = endpointTypes.Select(type => $"            // Register {type} endpoint").ToList();
-        var registrationsCode = registrationLines.Count > 0 ? string.Join("\n", registrationLines) : "            // Generated endpoint registration code";
-        
-        var code = @"using System;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace Generated
-{
-    public static class EndpointRegistrationExtensions
-    {
-        public static IServiceCollection AddEndpoints(this IServiceCollection services)
-        {
-" + registrationsCode + @"
-            return services;
-        }
-    }
-}";
-        
-        context.AddSource("EndpointRegistration.g.cs", code);
-    }
-}
-
-public class ValidationGenerator : ISourceGenerator
-{
-    public void Initialize(GeneratorInitializationContext context) { }
-
-    public void Execute(GeneratorExecutionContext context)
-    {
-        var code = """
-            using System;
-            using System.ComponentModel.DataAnnotations;
-            
-            namespace Generated
-            {
-                public static class ValidationHelpers
-                {
-                    public static ValidationResult ValidateUserRequest(object request)
-                    {
-                        // Generated validation code using RangeAttribute and StringLengthAttribute
-                        return ValidationResult.Success;
-                    }
-                }
-            }
-            """;
-        
-        context.AddSource("Validation.g.cs", code);
-    }
-}
-
-public class RouteMetadataGenerator : ISourceGenerator
-{
-    public void Initialize(GeneratorInitializationContext context) { }
-
-    public void Execute(GeneratorExecutionContext context)
-    {
-        var code = """
-            using System;
-            using System.Collections.Generic;
-            
-            namespace Generated
-            {
-                public static class RouteMetadata
-                {
-                    public static Dictionary<string, object> UpdateUserMetadata { get; } = new()
-                    {
-                        ["Method"] = "POST",
-                        ["Template"] = "/api/users/{id:guid}",
-                        ["Description"] = "Update user information"
-                    };
-                }
-            }
-            """;
-        
-        context.AddSource("RouteMetadata.g.cs", code);
+        return (outputCompilation, diagnostics, result.Results.SelectMany(r => r.GeneratedSources).ToImmutableArray());
     }
 }

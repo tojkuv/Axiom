@@ -21,6 +21,7 @@
     <PackageReference Include="Testcontainers.PostgreSql" Version="4.0.0" />
     <PackageReference Include="Testcontainers.Redis" Version="4.0.0" />
     <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
+    <PackageReference Include="NBomber" Version="6.0.0" />
     <PackageReference Include="Grpc.Net.Client" Version="2.67.0" />
     <PackageReference Include="Grpc.Tools" Version="2.67.0" PrivateAssets="All" />
     <PackageReference Include="Google.Protobuf" Version="3.28.2" />

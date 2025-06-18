@@ -1,6 +1,7 @@
 import XCTest
 import AxiomTesting
-@testable import AxiomApple
+@testable import AxiomCapabilities
+@testable import AxiomCore
 
 final class CapabilityProtocolTests: XCTestCase {
     // Test that capability mock can transition through all states in < 10ms

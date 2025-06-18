@@ -1,0 +1,54 @@
+[package]
+name = "axiom-applications-observability"
+version = "0.1.0"
+edition = "2021"
+description = "Axiom Applications Observability MCP for iOS development intelligence"
+license = "MIT"
+
+[dependencies]
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+anyhow = "1.0"
+thiserror = "1.0"
+futures-util = "0.3"
+async-trait = "0.1"
+reqwest = { version = "0.11", features = ["json"] }
+
+[dev-dependencies]
+tokio-test = "0.4"
+criterion = { version = "0.5", features = ["html_reports"] }
+mockall = "0.12"
+proptest = "1.4"
+serial_test = "3.0"
+wiremock = "0.6"
+test-log = "0.2"
+tempfile = "3.8"
+
+[[bench]]
+name = "performance_benchmarks"
+harness = false
+
+[[bench]]
+name = "code_generation_benchmarks"
+harness = false
+
+[features]
+default = ["hot-reload", "intelligence", "visual-analysis", "performance-monitoring"]
+hot-reload = []
+intelligence = []
+visual-analysis = []
+performance-monitoring = []
+
+[profile.release]
+opt-level = 3
+lto = true
+
+[profile.bench]
+opt-level = 3
+lto = true
+debug = true

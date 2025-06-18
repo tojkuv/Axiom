@@ -516,7 +516,7 @@ final class ContextLifecycleTests: XCTestCase {
     func testAutoObservingPerformance() async throws {
         try await TestHelpers.performance.assertPerformanceRequirements(
             operation: {
-                let context = AutoObservingContext()
+                let context = await MainActor.run { AutoObservingContext() }
                 await context.onAppear()
                 
                 let client = MockObservableClient()
@@ -540,12 +540,12 @@ final class ContextLifecycleTests: XCTestCase {
     
     func testLifecycleMemoryManagement() async throws {
         try await TestHelpers.performance.assertNoMemoryLeaks {
-            for iteration in 0..<15 {
-                let context = AsyncLifecycleContext()
+            for _ in 0..<15 {
+                let context = await MainActor.run { AsyncLifecycleContext() }
                 await context.onAppear()
                 await context.performAsyncInitialization()
                 
-                for i in 0..<30 {
+                for _ in 0..<30 {
                     await context.performAsyncOperation()
                 }
                 

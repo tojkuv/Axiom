@@ -227,12 +227,12 @@ impl SwiftValidator {
             }
 
             // Check for proper protocol conformance
-            if content.contains("actor ") && !content.contains(": AxiomClient") {
-                result.errors.push(format!("{}: Client actor should conform to AxiomClient protocol", file_path));
+            if content.contains("actor ") && !content.contains(": AxiomClient") && !content.contains(": AxiomObservableClient") {
+                result.errors.push(format!("{}: Client actor should conform to AxiomClient or AxiomObservableClient protocol", file_path));
             }
 
             // Check for required AxiomClient protocol methods
-            if content.contains(": AxiomClient") {
+            if content.contains(": AxiomClient") || content.contains(": AxiomObservableClient") {
                 if !content.contains("var stateStream: AsyncStream") {
                     result.errors.push(format!("{}: Missing stateStream property", file_path));
                 }

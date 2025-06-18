@@ -2,420 +2,207 @@ import Foundation
 
 public struct SwiftUIViewJSON: Codable {
     public let type: String
-    public let id: String
-    public let properties: [String: PropertyValue]
+    public let properties: [String: SwiftUIPropertyValue]?
     public let children: [SwiftUIViewJSON]?
     public let modifiers: [SwiftUIModifierJSON]?
-    public let state: [String: StateValue]?
     
     public init(
         type: String,
-        id: String = UUID().uuidString,
-        properties: [String: PropertyValue] = [:],
+        properties: [String: SwiftUIPropertyValue]? = nil,
         children: [SwiftUIViewJSON]? = nil,
-        modifiers: [SwiftUIModifierJSON]? = nil,
-        state: [String: StateValue]? = nil
+        modifiers: [SwiftUIModifierJSON]? = nil
     ) {
         self.type = type
-        self.id = id
         self.properties = properties
         self.children = children
         self.modifiers = modifiers
-        self.state = state
     }
+}
+
+public enum SwiftUIPropertyValue: Codable {
+    case string(String)
+    case int(Int)
+    case double(Double)
+    case bool(Bool)
+    case array([String])
+    case binding(String)
+    case action(String)
+    case color(String)
 }
 
 public struct SwiftUIModifierJSON: Codable {
     public let name: String
-    public let parameters: [String: PropertyValue]
+    public let parameters: [String: SwiftUIPropertyValue]
     
-    public init(name: String, parameters: [String: PropertyValue] = [:]) {
+    public init(name: String, parameters: [String: SwiftUIPropertyValue]) {
         self.name = name
         self.parameters = parameters
     }
 }
 
-public indirect enum PropertyValue: Codable {
-    case string(String)
-    case int(Int)
-    case double(Double)
-    case bool(Bool)
-    case color(ColorValue)
-    case font(FontValue)
-    case edge(EdgeValue)
-    case alignment(AlignmentValue)
-    case array([PropertyValue])
-    case binding(BindingValue)
-    case action(ActionValue)
-    case image(ImageValue)
-    case nullValue
+public struct ComposeComponentJSON: Codable {
+    public let type: String
+    public let parameters: [String: ComposeParameterValue]?
+    public let children: [ComposeComponentJSON]?
+    public let modifiers: [ComposeModifierJSON]?
     
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        
-        if container.decodeNil() {
-            self = .nullValue
-        } else if let value = try? container.decode(String.self) {
-            self = .string(value)
-        } else if let value = try? container.decode(Int.self) {
-            self = .int(value)
-        } else if let value = try? container.decode(Double.self) {
-            self = .double(value)
-        } else if let value = try? container.decode(Bool.self) {
-            self = .bool(value)
-        } else if let value = try? container.decode(ColorValue.self) {
-            self = .color(value)
-        } else if let value = try? container.decode(FontValue.self) {
-            self = .font(value)
-        } else if let value = try? container.decode(EdgeValue.self) {
-            self = .edge(value)
-        } else if let value = try? container.decode(AlignmentValue.self) {
-            self = .alignment(value)
-        } else if let value = try? container.decode([PropertyValue].self) {
-            self = .array(value)
-        } else if let value = try? container.decode(BindingValue.self) {
-            self = .binding(value)
-        } else if let value = try? container.decode(ActionValue.self) {
-            self = .action(value)
-        } else if let value = try? container.decode(ImageValue.self) {
-            self = .image(value)
-        } else {
-            throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Unable to decode PropertyValue"))
-        }
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        
-        switch self {
-        case .string(let value):
-            try container.encode(value)
-        case .int(let value):
-            try container.encode(value)
-        case .double(let value):
-            try container.encode(value)
-        case .bool(let value):
-            try container.encode(value)
-        case .color(let value):
-            try container.encode(value)
-        case .font(let value):
-            try container.encode(value)
-        case .edge(let value):
-            try container.encode(value)
-        case .alignment(let value):
-            try container.encode(value)
-        case .array(let value):
-            try container.encode(value)
-        case .binding(let value):
-            try container.encode(value)
-        case .action(let value):
-            try container.encode(value)
-        case .image(let value):
-            try container.encode(value)
-        case .nullValue:
-            try container.encodeNil()
-        }
-    }
-}
-
-public struct ColorValue: Codable {
-    public let type: ColorType
-    public let red: Double?
-    public let green: Double?
-    public let blue: Double?
-    public let alpha: Double?
-    public let systemColor: String?
-    
-    public init(type: ColorType, red: Double? = nil, green: Double? = nil, blue: Double? = nil, alpha: Double? = 1.0, systemColor: String? = nil) {
+    public init(
+        type: String,
+        parameters: [String: ComposeParameterValue]? = nil,
+        children: [ComposeComponentJSON]? = nil,
+        modifiers: [ComposeModifierJSON]? = nil
+    ) {
         self.type = type
-        self.red = red
-        self.green = green
-        self.blue = blue
-        self.alpha = alpha
-        self.systemColor = systemColor
+        self.parameters = parameters
+        self.children = children
+        self.modifiers = modifiers
     }
 }
 
-public enum ColorType: String, Codable {
-    case rgb = "rgb"
-    case system = "system"
-    case custom = "custom"
+public enum ComposeParameterValue: Codable {
+    case string(String)
+    case arrangement(ComposeArrangementValue)
+    case padding(ComposePaddingValue)
 }
 
-public struct FontValue: Codable {
-    public let name: String?
-    public let size: Double
-    public let weight: String?
-    public let design: String?
-    public let style: String?
+public struct ComposeArrangementValue: Codable {
+    public let type: String
+    public let spacing: ComposeDpValue?
     
-    public init(name: String? = nil, size: Double, weight: String? = nil, design: String? = nil, style: String? = nil) {
-        self.name = name
-        self.size = size
-        self.weight = weight
-        self.design = design
-        self.style = style
+    public init(type: String, spacing: ComposeDpValue? = nil) {
+        self.type = type
+        self.spacing = spacing
     }
 }
 
-public struct EdgeValue: Codable {
-    public let top: Double?
-    public let leading: Double?
-    public let bottom: Double?
-    public let trailing: Double?
-    public let all: Double?
+public struct ComposeDpValue: Codable {
+    public let value: Int
     
-    public init(top: Double? = nil, leading: Double? = nil, bottom: Double? = nil, trailing: Double? = nil, all: Double? = nil) {
-        self.top = top
-        self.leading = leading
-        self.bottom = bottom
-        self.trailing = trailing
+    public init(value: Int) {
+        self.value = value
+    }
+}
+
+public struct ComposePaddingValue: Codable {
+    public let all: ComposeDpValue?
+    
+    public init(all: ComposeDpValue? = nil) {
         self.all = all
     }
 }
 
-public struct AlignmentValue: Codable {
-    public let horizontal: String
-    public let vertical: String
+public struct ComposeModifierJSON: Codable {
+    public let name: String
+    public let parameters: [String: ComposeParameterValue]
     
-    public init(horizontal: String = "center", vertical: String = "center") {
-        self.horizontal = horizontal
-        self.vertical = vertical
-    }
-}
-
-public struct BindingValue: Codable {
-    public let stateKey: String
-    public let defaultValue: PropertyValue
-    public let type: String
-    
-    public init(stateKey: String, defaultValue: PropertyValue, type: String) {
-        self.stateKey = stateKey
-        self.defaultValue = defaultValue
-        self.type = type
-    }
-}
-
-public struct ActionValue: Codable {
-    public let type: ActionType
-    public let target: String?
-    public let parameters: [String: PropertyValue]?
-    
-    public init(type: ActionType, target: String? = nil, parameters: [String: PropertyValue]? = nil) {
-        self.type = type
-        self.target = target
+    public init(name: String, parameters: [String: ComposeParameterValue]) {
+        self.name = name
         self.parameters = parameters
     }
 }
 
-public enum ActionType: String, Codable {
-    case tap = "tap"
-    case longPress = "longPress"
-    case gesture = "gesture"
-    case navigation = "navigation"
-    case state = "state"
-    case custom = "custom"
-}
-
-public struct ImageValue: Codable {
-    public let type: ImageType
-    public let name: String?
-    public let systemName: String?
-    public let url: String?
-    public let data: String?
+public struct AnyCodable: Codable {
+    public let value: Any
     
-    public init(type: ImageType, name: String? = nil, systemName: String? = nil, url: String? = nil, data: String? = nil) {
-        self.type = type
-        self.name = name
-        self.systemName = systemName
-        self.url = url
-        self.data = data
+    public init(_ value: Any) {
+        self.value = value
     }
-}
-
-public enum ImageType: String, Codable {
-    case asset = "asset"
-    case system = "system"
-    case url = "url"
-    case data = "data"
-}
-
-public enum StateValue: Codable {
-    case string(String)
-    case int(Int)
-    case double(Double)
-    case bool(Bool)
-    case array([StateValue])
-    case dictionary([String: StateValue])
-    case nullValue
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        
-        if container.decodeNil() {
-            self = .nullValue
-        } else if let value = try? container.decode(String.self) {
-            self = .string(value)
-        } else if let value = try? container.decode(Int.self) {
-            self = .int(value)
-        } else if let value = try? container.decode(Double.self) {
-            self = .double(value)
-        } else if let value = try? container.decode(Bool.self) {
-            self = .bool(value)
-        } else if let value = try? container.decode([StateValue].self) {
-            self = .array(value)
-        } else if let value = try? container.decode([String: StateValue].self) {
-            self = .dictionary(value)
+        if let string = try? container.decode(String.self) {
+            value = string
+        } else if let int = try? container.decode(Int.self) {
+            value = int
+        } else if let double = try? container.decode(Double.self) {
+            value = double
         } else {
-            throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Unable to decode StateValue"))
+            value = "unknown"
         }
     }
     
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        
-        switch self {
-        case .string(let value):
-            try container.encode(value)
-        case .int(let value):
-            try container.encode(value)
-        case .double(let value):
-            try container.encode(value)
-        case .bool(let value):
-            try container.encode(value)
-        case .array(let value):
-            try container.encode(value)
-        case .dictionary(let value):
-            try container.encode(value)
-        case .nullValue:
-            try container.encodeNil()
+        if let string = value as? String {
+            try container.encode(string)
+        } else if let int = value as? Int {
+            try container.encode(int)
+        } else if let double = value as? Double {
+            try container.encode(double)
+        } else {
+            try container.encode("unknown")
         }
     }
 }
 
-public struct SwiftUIViewRegistry {
-    public static let supportedViews: [String] = [
-        "Text",
-        "VStack",
-        "HStack",
-        "ZStack",
-        "Button",
-        "Image",
-        "TextField",
-        "SecureField",
-        "Toggle",
-        "Slider",
-        "Stepper",
-        "Picker",
-        "DatePicker",
-        "ColorPicker",
-        "ProgressView",
-        "Link",
-        "Label",
-        "GroupBox",
-        "DisclosureGroup",
-        "List",
-        "ForEach",
-        "LazyVStack",
-        "LazyHStack",
-        "ScrollView",
-        "TabView",
-        "NavigationView",
-        "NavigationStack",
-        "Sheet",
-        "Alert",
-        "ActionSheet",
-        "Popover",
-        "ContextMenu",
-        "Rectangle",
-        "Circle",
-        "Ellipse",
-        "Capsule",
-        "RoundedRectangle",
-        "Path",
-        "Spacer",
-        "Divider",
-        "EmptyView",
-        "AnyView"
-    ]
-    
-    public static let supportedModifiers: [String] = [
-        "frame",
-        "padding",
-        "background",
-        "foregroundColor",
-        "font",
-        "bold",
-        "italic",
-        "underline",
-        "strikethrough",
-        "cornerRadius",
-        "clipShape",
-        "shadow",
-        "opacity",
-        "scaleEffect",
-        "rotationEffect",
-        "offset",
-        "overlay",
-        "border",
-        "aspectRatio",
-        "clipped",
-        "disabled",
-        "hidden",
-        "allowsHitTesting",
-        "contentShape",
-        "gesture",
-        "onTapGesture",
-        "onLongPressGesture",
-        "onAppear",
-        "onDisappear",
-        "onChange",
-        "animation",
-        "transition",
-        "zIndex",
-        "layoutPriority",
-        "accessibility"
-    ]
-}
-
-public struct SwiftUILayoutJSON: Codable {
-    public let views: [SwiftUIViewJSON]
-    public let metadata: LayoutMetadata
-    
-    public init(views: [SwiftUIViewJSON], metadata: LayoutMetadata) {
-        self.views = views
-        self.metadata = metadata
+public struct StateSynchronizationProtocol {
+    public struct StateContainer: Codable {
+        public let swiftUIState: [String: SwiftUIPropertyValue]?
+        public let composeState: [String: ComposeParameterValue]?
+        public let globalState: [String: AnyCodable]?
+        
+        public init(
+            swiftUIState: [String: SwiftUIPropertyValue]? = nil,
+            composeState: [String: ComposeParameterValue]? = nil,
+            globalState: [String: AnyCodable]? = nil
+        ) {
+            self.swiftUIState = swiftUIState
+            self.composeState = composeState
+            self.globalState = globalState
+        }
     }
-}
-
-public struct LayoutMetadata: Codable {
-    public let fileName: String
-    public let timestamp: String
-    public let version: String
-    public let checksum: String
-    public let previewTraits: PreviewTraits?
     
-    public init(fileName: String, timestamp: String = ISO8601DateFormatter().string(from: Date()), version: String = "1.0.0", checksum: String, previewTraits: PreviewTraits? = nil) {
-        self.fileName = fileName
-        self.timestamp = timestamp
-        self.version = version
-        self.checksum = checksum
-        self.previewTraits = previewTraits
+    public struct StateSnapshot: Codable {
+        public let fileName: String
+        public let platform: Platform
+        public let metadata: StateMetadata
+        public let stateData: StateContainer
+        
+        public init(fileName: String, platform: Platform, metadata: StateMetadata, stateData: StateContainer) {
+            self.fileName = fileName
+            self.platform = platform
+            self.metadata = metadata
+            self.stateData = stateData
+        }
     }
-}
-
-public struct PreviewTraits: Codable {
-    public let deviceName: String?
-    public let orientation: String?
-    public let colorScheme: String?
-    public let locale: String?
-    public let accessibilityEnabled: Bool?
     
-    public init(deviceName: String? = nil, orientation: String? = nil, colorScheme: String? = nil, locale: String? = nil, accessibilityEnabled: Bool? = nil) {
-        self.deviceName = deviceName
-        self.orientation = orientation
-        self.colorScheme = colorScheme
-        self.locale = locale
-        self.accessibilityEnabled = accessibilityEnabled
+    public struct StateMetadata: Codable {
+        public let preservationStrategy: PreservationStrategy
+        public let timestamp: Date
+        
+        public init(preservationStrategy: PreservationStrategy) {
+            self.preservationStrategy = preservationStrategy
+            self.timestamp = Date()
+        }
+    }
+    
+    public enum PreservationStrategy: String, Codable {
+        case fileScope = "file_scope"
+        case globalScope = "global_scope"
+    }
+    
+    public static func createSnapshot(
+        for fileName: String,
+        platform: Platform,
+        stateData: StateContainer
+    ) -> StateSnapshot {
+        return StateSnapshot(
+            fileName: fileName,
+            platform: platform,
+            metadata: StateMetadata(preservationStrategy: .fileScope),
+            stateData: stateData
+        )
+    }
+    
+    public static func mergeState(
+        existing: StateContainer,
+        incoming: StateContainer,
+        strategy: PreservationStrategy
+    ) -> StateContainer {
+        return StateContainer(
+            swiftUIState: incoming.swiftUIState ?? existing.swiftUIState,
+            composeState: incoming.composeState ?? existing.composeState,
+            globalState: incoming.globalState ?? existing.globalState
+        )
     }
 }

@@ -1,5 +1,6 @@
 import XCTest
-import Axiom
+import AxiomCore
+import AxiomCapabilities
 import AxiomTesting
 
 // Mock capability that simulates macro-generated code
@@ -42,6 +43,14 @@ actor MockNetworkCapability: ExtendedCapability {
     
     public func requestPermission() async throws {
         // Network doesn't require permission
+    }
+    
+    public var activationTimeout: Duration {
+        get async { .milliseconds(10) }
+    }
+    
+    public func setActivationTimeout(_ timeout: Duration) async {
+        // Store timeout if needed
     }
     
     private func transitionTo(_ newState: CapabilityState) async {
@@ -88,7 +97,7 @@ final class CapabilityAsyncTestingIntegrationTests: XCTestCase {
                 try await capability.activate()
             }
             .then { capability in
-                await capability.state == .available
+                await capability.state == AxiomCapabilityState.available
             }
         
         XCTAssertTrue(result)
@@ -109,11 +118,11 @@ final class CapabilityAsyncTestingIntegrationTests: XCTestCase {
         
         // Verify state stream emits correct sequence
         try await streamTester.expectValues([
-            .unknown,
-            .initializing,
-            .available,
-            .terminating,
-            .unavailable
+            AxiomCapabilityState.unknown,
+            AxiomCapabilityState.initializing,
+            AxiomCapabilityState.available,
+            AxiomCapabilityState.terminating,
+            AxiomCapabilityState.unavailable
         ])
     }
     

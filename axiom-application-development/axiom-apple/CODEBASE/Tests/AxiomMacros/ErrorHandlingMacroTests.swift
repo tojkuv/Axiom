@@ -2,7 +2,11 @@ import XCTest
 import AxiomTesting
 @testable import AxiomMacros
 @testable import AxiomCore
+import SwiftSyntax
+import SwiftSyntaxBuilder
+import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
+import SwiftDiagnostics
 
 /// Comprehensive tests for AxiomMacros error handling macro functionality
 final class ErrorHandlingMacroTests: XCTestCase {
@@ -304,12 +308,10 @@ final class ErrorHandlingMacroTests: XCTestCase {
                 of: AttributeSyntax(
                     attributeName: IdentifierTypeSyntax(name: .identifier("AxiomErrorHandling"))
                 ),
-                attachedTo: StructDeclSyntax(
+                providingPeersOf: StructDeclSyntax(
                     name: .identifier("TestStruct"),
                     memberBlock: MemberBlockSyntax(members: MemberBlockItemListSyntax([]))
                 ),
-                providingExtensionsOf: IdentifierTypeSyntax(name: .identifier("TestStruct")),
-                conformingTo: [],
                 in: TestMacroExpansionContext()
             )
         ) { error in
@@ -323,12 +325,10 @@ final class ErrorHandlingMacroTests: XCTestCase {
                 of: AttributeSyntax(
                     attributeName: IdentifierTypeSyntax(name: .identifier("AxiomErrorHandling"))
                 ),
-                attachedTo: EnumDeclSyntax(
+                providingPeersOf: EnumDeclSyntax(
                     name: .identifier("TestEnum"),
                     memberBlock: MemberBlockSyntax(members: MemberBlockItemListSyntax([]))
                 ),
-                providingExtensionsOf: IdentifierTypeSyntax(name: .identifier("TestEnum")),
-                conformingTo: [],
                 in: TestMacroExpansionContext()
             )
         ) { error in
@@ -426,7 +426,7 @@ final class ErrorHandlingMacroTests: XCTestCase {
         let iterations = 25
         let expectation = self.expectation(description: "Error handling macro expansion performance")
         
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.global(qos: .userInitiated).async(execute: {
             let startTime = CFAbsoluteTimeGetCurrent()
             
             for _ in 0..<iterations {
@@ -434,12 +434,10 @@ final class ErrorHandlingMacroTests: XCTestCase {
                     of: AttributeSyntax(
                         attributeName: IdentifierTypeSyntax(name: .identifier("AxiomErrorHandling"))
                     ),
-                    attachedTo: ClassDeclSyntax(
+                    providingPeersOf: ClassDeclSyntax(
                         name: .identifier("TestService"),
                         memberBlock: MemberBlockSyntax(members: MemberBlockItemListSyntax([]))
                     ),
-                    providingExtensionsOf: IdentifierTypeSyntax(name: .identifier("TestService")),
-                    conformingTo: [],
                     in: TestMacroExpansionContext()
                 )
             }
@@ -450,7 +448,7 @@ final class ErrorHandlingMacroTests: XCTestCase {
             XCTAssertLessThan(averageTime, 0.005, "Error handling macro expansion should be fast (< 5ms per expansion)")
             
             expectation.fulfill()
-        }
+        })
         
         wait(for: [expectation], timeout: 15.0)
     }
@@ -458,16 +456,7 @@ final class ErrorHandlingMacroTests: XCTestCase {
 
 // MARK: - Test Helper
 
-/// Test macro expansion context for error handling testing
-class TestMacroExpansionContext: MacroExpansionContext {
-    func makeUniqueName(_ name: String) -> TokenSyntax {
-        return TokenSyntax(.identifier("\\(name)_\\(UUID().uuidString.prefix(8))"), presence: .present)
-    }
-    
-    func diagnose(_ diagnostic: Diagnostic) {
-        // Handle diagnostics in tests
-    }
-}
+// Using TestMacroExpansionContext from MacroIntegrationTests.swift
 
 // MARK: - ErrorHandlingMacroError for Testing
 
